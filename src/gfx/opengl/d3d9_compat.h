@@ -176,6 +176,22 @@ struct KisakGLBuffer
     void Release() { delete this; }
 };
 
+struct _D3DVERTEXELEMENT9
+{
+    uint16_t Stream;
+    uint16_t Offset;
+    uint8_t Type;
+    uint8_t Method;
+    uint8_t Usage;
+    uint8_t UsageIndex;
+};
+
+struct KisakGLVertexDeclaration
+{
+    std::vector<_D3DVERTEXELEMENT9> elements;
+};
+
+using IDirect3DVertexDeclaration9 = KisakGLVertexDeclaration;
 using IDirect3DVertexBuffer9 = KisakGLBuffer;
 using IDirect3DIndexBuffer9 = KisakGLBuffer;
 
@@ -245,7 +261,18 @@ struct IDirect3D9 {};
 
 class IDirect3DDevice9
 {
+    struct StreamBinding
+    {
+        IDirect3DVertexBuffer9 *buffer = nullptr;
+        uint32_t offset = 0;
+        uint32_t stride = 0;
+    };
+
     GLuint m_fbo = 0;
+    GLuint m_vao = 0;
+    IDirect3DVertexDeclaration9 *m_decl = nullptr;
+    StreamBinding m_streams[16];
+    IDirect3DIndexBuffer9 *m_indices = nullptr;
     IDirect3DSurface9 *m_color = nullptr;
     IDirect3DSurface9 *m_depth = nullptr;
 
@@ -300,6 +327,67 @@ class IDirect3DDevice9
         }
     }
 
+    static bool VertexTypeInfo(uint8_t type, GLint &components, GLenum &glType, bool &normalized)
+    {
+        normalized = false;
+        switch (type)
+        {
+        case 1: components = 1; glType = GL_FLOAT; return true;
+        case 2: components = 2; glType = GL_FLOAT; return true;
+        case 3: components = 3; glType = GL_FLOAT; return true;
+        case 4: components = 4; glType = GL_FLOAT; return true;
+        case 5: components = 4; glType = GL_UNSIGNED_BYTE; return true;
+        case 6: components = 2; glType = GL_SHORT; return true;
+        case 7: components = 4; glType = GL_SHORT; return true;
+        case 8: components = 4; glType = GL_UNSIGNED_BYTE; normalized = true; return true;
+        case 9: components = 2; glType = GL_SHORT; normalized = true; return true;
+        case 10: components = 4; glType = GL_SHORT; normalized = true; return true;
+        case 11: components = 2; glType = GL_UNSIGNED_SHORT; normalized = true; return true;
+        case 12: components = 4; glType = GL_UNSIGNED_SHORT; normalized = true; return true;
+        default: return false;
+        }
+    }
+
+    void RebuildVertexLayout()
+    {
+        if (!m_vao)
+            glGenVertexArrays(1, &m_vao);
+        glBindVertexArray(m_vao);
+
+        for (GLuint attrib = 0; attrib < 16; ++attrib)
+            glDisableVertexAttribArray(attrib);
+
+        if (!m_decl)
+            return;
+
+        for (const auto &e : m_decl->elements)
+        {
+            if (e.Stream >= 16 || !m_streams[e.Stream].buffer)
+                continue;
+
+            GLint components;
+            GLenum glType;
+            bool normalized;
+            if (!VertexTypeInfo(e.Type, components, glType, normalized))
+                continue;
+
+            const GLuint attrib = e.Usage * 4u + e.UsageIndex;
+            if (attrib >= 16)
+                continue;
+
+            glBindBuffer(GL_ARRAY_BUFFER, m_streams[e.Stream].buffer->object);
+            glEnableVertexAttribArray(attrib);
+            glVertexAttribPointer(
+                attrib, components, glType, normalized ? GL_TRUE : GL_FALSE,
+                (GLsizei)m_streams[e.Stream].stride,
+                reinterpret_cast<const void*>(uintptr_t(
+                    m_streams[e.Stream].offset + e.Offset)));
+        }
+
+        if (m_indices)
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indices->object);
+    }
+
 public:
     ~IDirect3DDevice9()
     {
@@ -309,6 +397,8 @@ public:
             m_depth->Release();
         if (m_fbo)
             glDeleteFramebuffers(1, &m_fbo);
+        if (m_vao)
+            glDeleteVertexArrays(1, &m_vao);
     }
 
     HRESULT CreateDepthStencilSurface(
@@ -431,16 +521,37 @@ public:
         return S_OK;
     }
 
-    HRESULT SetIndices(IDirect3DIndexBuffer9* ib)
+    HRESULT CreateVertexDeclaration(const _D3DVERTEXELEMENT9 *elements, IDirect3DVertexDeclaration9 **out)
     {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib ? ib->object : 0);
+        if (!elements || !out)
+            return E_FAIL;
+        auto *decl = new IDirect3DVertexDeclaration9;
+        for (const auto *e = elements; e->Stream != 0xFF; ++e)
+            decl->elements.push_back(*e);
+        *out = decl;
         return S_OK;
     }
 
-    HRESULT SetStreamSource(uint32_t, IDirect3DVertexBuffer9* vb, uint32_t offset, uint32_t)
+    HRESULT SetVertexDeclaration(IDirect3DVertexDeclaration9 *decl)
     {
-        glBindBuffer(GL_ARRAY_BUFFER, vb ? vb->object : 0);
-        (void)offset;
+        m_decl = decl;
+        RebuildVertexLayout();
+        return S_OK;
+    }
+
+    HRESULT SetIndices(IDirect3DIndexBuffer9* ib)
+    {
+        m_indices = ib;
+        RebuildVertexLayout();
+        return S_OK;
+    }
+
+    HRESULT SetStreamSource(uint32_t stream, IDirect3DVertexBuffer9* vb, uint32_t offset, uint32_t stride)
+    {
+        if (stream >= 16)
+            return E_FAIL;
+        m_streams[stream] = { vb, offset, stride };
+        RebuildVertexLayout();
         return S_OK;
     }
 
@@ -510,6 +621,7 @@ public:
 
     HRESULT DrawIndexedPrimitive(uint32_t, uint32_t, uint32_t, uint32_t startIndex, uint32_t primitiveCount)
     {
+        RebuildVertexLayout();
         glDrawElements(GL_TRIANGLES, (GLsizei)(primitiveCount * 3), GL_UNSIGNED_SHORT,
                        reinterpret_cast<const void*>(uintptr_t(startIndex * sizeof(uint16_t))));
         return S_OK;
