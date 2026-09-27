@@ -1080,6 +1080,9 @@ struct StringTable // sizeof=0x10
 	int rowCount;
 	const char **values;
 };
+#ifndef __SWITCH__
+// Native ARM64 layout differs from the original 32-bit runtime; serialized layouts are handled by Switch loaders.
+
 static_assert(sizeof(StringTable) == 16);
 
 const char *__cdecl StringTable_GetColumnValueForRow(const StringTable *table, int row, int column);
@@ -1179,5 +1182,6 @@ static_assert(MASK_SHOT == 0x02806831, "MASK_SHOT must match the IW3 trace mask"
 static_assert(MASK_WEAPONCLIP == 0x00002080, "MASK_WEAPONCLIP must match the IW3 weapon clip mask");
 static_assert(MASK_PLAYER_VISIBILITY == 0x02803001, "MASK_PLAYER_VISIBILITY must match the IW3 player visibility mask");
 static_assert(CONTENTS_ANY_TRIGGER == 0x405C0008, "CONTENTS_ANY_TRIGGER must include every IW3 trigger type");
+#endif // !__SWITCH__
 
 extern unsigned __int64(__cdecl *LittleLong64)(unsigned __int64);
