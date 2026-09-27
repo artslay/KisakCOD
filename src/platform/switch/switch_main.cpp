@@ -25,11 +25,6 @@ int main()
 
     Com_Init((char*)"");
 
-    if (!FS_FileExists((char*)"common.ff"))
-    {
-        std::printf("ERROR: main/common.ff was not found\n");
-        Sys_Quit();
-    }
 
     while (appletMainLoop())
         Com_Frame();
