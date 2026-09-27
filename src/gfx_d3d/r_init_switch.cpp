@@ -49,6 +49,7 @@ void R_ShutdownMaterialUsage() {}
 
 void R_ShutdownDirect3D() {
     if (g_gfxBackend) g_gfxBackend->Shutdown();
+    delete dx.device;
     dx.device = nullptr;
     dx.d3d9 = nullptr;
 }
@@ -86,6 +87,7 @@ void R_InitGraphicsApi() {
         R_FatalInitError("CreateOpenGLBackend failed");
     if (!g_gfxBackend->Init(nullptr))
         R_FatalInitError(g_gfxBackend->GetLastError());
+    if (!dx.device) dx.device = new IDirect3DDevice9;
     vidConfig.sceneWidth = 1280;
     vidConfig.sceneHeight = 720;
     vidConfig.displayWidth = 1280;
