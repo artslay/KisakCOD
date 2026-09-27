@@ -75,6 +75,7 @@ uint8_t* __cdecl Hunk_AllocLowAlign(uint32_t size, int32_t alignment, const char
 // LWSS: Note that the Z_ prefix comes from the fact that it uses the "Zone" memory pool.
 // There are a few memory pools of fixed size that allocations come from.
 void* __cdecl Z_VirtualReserve(int size);
+char* __cdecl Z_VirtualAlloc(int size, const char* name, int type);
 void __cdecl Z_VirtualDecommitInternal(void* ptr, int size);
 void* __cdecl Z_VirtualFreeInternal(void* ptr);
 void* __cdecl Z_TryVirtualAllocInternal(int size);
