@@ -1,23 +1,49 @@
 # Nintendo Switch build for KisakCOD.
 # Requires devkitPro/libnx and Mesa Switch OpenGL/EGL libraries.
+#
+# The source set is generated from the engine tree instead of duplicating the
+# old CMake source lists. Windows/D3D9 sources are deliberately excluded.
 
 TARGET      := kisakcod
 BUILD       := build
-SOURCES     := src/platform/switch/switch_main.cpp \
-               src/gfx/gfx_backend.cpp \
-               src/gfx/opengl/gl_backend.cpp
-OBJECTS     := $(SOURCES:%.cpp=$(BUILD)/%.o)
 
 ARCH        := -march=armv8-a -mtune=cortex-a57 -mtp=soft
-CXXFLAGS    := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 \
-               -D__SWITCH__ -DKISAK_SWITCH -DKISAK_MP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE \
-               -I$(CURDIR)/src
+CPPFLAGS    := -D__SWITCH__ -DKISAK_SWITCH -DKISAK_MP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE \\
+               -I$(CURDIR)/src -I$(CURDIR)/deps -I$(CURDIR)/deps/msslib
+CXXFLAGS    := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP
+CFLAGS      := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -MMD -MP
 LDFLAGS     := $(ARCH) -specs=$(DEVKITPRO)/libnx/switch.specs -Wl,--gc-sections
-LIBS        := -lglad -lEGL -lglapi -ldrm_nouveau -lnx
+LIBS        := -lglad -lEGL -lglapi -ldrm_nouveau -lnx -lm
 
-include $(DEVKITPRO)/libnx/switch_rules
+# Keep engine/game code, but not platform-specific Windows/D3D9 code.
+CPP_SOURCES := $(shell find src -type f -name '*.cpp' \\
+    ! -path 'src/gfx_d3d/*' \\
+    ! -path 'src/win32/*' \\
+    ! -path 'src/linux/*' \\
+    ! -path 'src/platform/*' \\
+    ! -path 'src/groupvoice/*' \\
+    ! -name 'win_common.cpp' \\
+    ! -name 'win_shared.cpp' \\
+    ! -name 'snd_mss.cpp' \\
+    ! -name 'snd_driver.cpp')
 
-.PHONY: all clean
+C_SOURCES := $(shell find src -type f -name '*.c' \\
+    ! -path 'src/gfx_d3d/*' \\
+    ! -path 'src/win32/*' \\
+    ! -path 'src/linux/*' \\
+    ! -path 'src/platform/*' \\
+    ! -path 'src/groupvoice/*')
+
+# zlib is required by the engine's archive/zip loader.
+C_SOURCES += $(shell find deps/zlib -type f -name '*.c')
+
+CPP_SOURCES += src/platform/switch/switch_main.cpp src/gfx/gfx_backend.cpp src/gfx/opengl/gl_backend.cpp
+
+CPP_OBJECTS := $(CPP_SOURCES:%.cpp=$(BUILD)/%.o)
+C_OBJECTS   := $(C_SOURCES:%.c=$(BUILD)/%.o)
+OBJECTS     := $(CPP_OBJECTS) $(C_OBJECTS)
+
+.PHONY: all clean print-sources
 
 all: $(TARGET).nro
 
@@ -26,9 +52,16 @@ $(TARGET).elf: $(OBJECTS)
 
 $(BUILD)/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+
+$(BUILD)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 -include $(OBJECTS:.o=.d)
+
+print-sources:
+	@printf '%s\\n' $(CPP_SOURCES) $(C_SOURCES)
 
 clean:
 	rm -rf $(BUILD) $(TARGET).elf $(TARGET).nro $(TARGET).nacp
