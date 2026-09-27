@@ -196,7 +196,9 @@ struct pathnode_tree_nodes_t // sizeof=0x8
     int nodeCount;
     uint16_t *nodes;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(pathnode_tree_nodes_t) == 8);
+#endif
 
 struct pathnode_tree_t;
 union pathnode_tree_info_t // sizeof=0x8
