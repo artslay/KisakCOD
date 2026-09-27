@@ -2036,10 +2036,17 @@ static void __cdecl Scr_MouseEvent(int x, int y)
     UI_Component::MouseEvent(x, y);
 }
 
+#ifdef __SWITCH__
+void __cdecl CL_ShowSystemCursor(bool show)
+{
+    (void)show;
+}
+#else
 void __cdecl CL_ShowSystemCursor(bool show)
 {
     IN_ShowSystemCursor(show);
 }
+#endif
 
 int __cdecl CL_MouseEvent(int x, int y, int dx, int dy)
 {
