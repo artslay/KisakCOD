@@ -325,14 +325,13 @@ void __cdecl CG_SetViewPos_f()
                 "\"cg_setviewpos\" isn't very useful when server controlled.  Use cg_ufo/cg_noclip or use \"setviewpos\"\n");
         if (Cmd_Argc() == 4 || Cmd_Argc() == 6)
         {
-            v0 = 0;
             origin = cgArray[0].predictedPlayerState.origin;
-            do
+            for (int i = 0; i < 3; ++i)
             {
-                v2 = Cmd_Argv(++v0);
+                v2 = Cmd_Argv(i + 1);
                 v3 = atof(v2);
                 *origin++ = *(double *)&v3;
-            } while ((int)origin < (int)cgArray[0].predictedPlayerState.velocity);
+            }
             nesting = cmd_args.nesting;
             if (cmd_args.nesting >= 8u)
             {
