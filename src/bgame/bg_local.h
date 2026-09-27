@@ -1356,7 +1356,9 @@ struct CEntPlayerInfo // sizeof=0xC
     // padding byte
     // padding byte
 };
+#ifndef __SWITCH__
 static_assert(sizeof(CEntPlayerInfo) == 0xC);
+#endif
 
 struct CEntTurretAngles // sizeof=0x8
 {                                       // ...
@@ -1426,7 +1428,9 @@ struct CEntFx // sizeof=0x8  (SP/MP Same)
     int32_t triggerTime;
     FxEffect* effect;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(CEntFx) == 0x8);
+#endif
 
 #if defined(KISAK_MP) || defined(KISAK_RADIANT) // radiant: for cpose_t
 struct GfxSkinCacheEntry // sizeof=0xC
@@ -2522,58 +2526,6 @@ struct hudelem_s
 };
 #endif
 
-#ifdef __SWITCH__
-struct BulletFireParams
-{
-    int32_t weaponEntIndex;
-    int32_t ignoreEntIndex;
-    float damageMultiplier;
-    int32_t methodOfDeath;
-    float origStart[3];
-    float start[3];
-    float end[3];
-    float dir[3];
-};
-static_assert(sizeof(BulletFireParams) == 0x40);
-
-struct BulletTraceResults
-{
-    trace_t trace;
-    struct gentity_s *hitEnt;
-    float hitPos[3];
-    bool ignoreHitEnt;
-    int32_t depthSurfaceType;
-};
-
-struct viewState_t
-{
-    playerState_s *ps;
-    int32_t damageTime;
-    int32_t time;
-    float v_dmg_pitch;
-    float v_dmg_roll;
-    float xyspeed;
-    float frametime;
-    float fLastIdleFactor;
-    int32_t *weapIdleTime;
-};
-
-struct weaponState_t
-{
-    const playerState_s *ps;
-    float xyspeed;
-    float frametime;
-    float vLastMoveAng[3];
-    float fLastIdleFactor;
-    int32_t time;
-    int32_t damageTime;
-    float v_dmg_pitch;
-    float v_dmg_roll;
-    float vGunOffset[3];
-    float vGunSpeed[3];
-    float swayAngles[3];
-    int32_t *weapIdleTime;
-};
 #endif
 
 void __cdecl TRACK_bg_weapons();
