@@ -531,6 +531,12 @@ void __cdecl R_SetupPass(GfxCmdBufContext context, uint32_t passIndex)
     if ( context.source->viewMode == VIEW_MODE_2D )
         stateBits[1] = stateBits[1] & 0xFFFFFFC0 | 2;
 #endif
+#ifdef __SWITCH__
+    // The Switch bootstrap shader is deliberately a material-agnostic fallback.
+    // Only the UNLIT technique is treated as screen-space UI; world techniques keep
+    // clip-space vertex semantics until the real shader translation backend lands.
+    context.state->prim.device->SetSwitchUnlitMode(context.state->techType == TECHNIQUE_UNLIT);
+#endif
     R_SetState(context.state, stateBits);
     if (r_logFile->current.integer)
     {
