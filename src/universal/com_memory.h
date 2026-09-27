@@ -27,6 +27,8 @@ uint8_t* __cdecl Hunk_AllocPhysPresetPrecache(uint32_t size);
 void* __cdecl Hunk_AllocXAnimClient(int size);
 uint8_t* __cdecl Hunk_AllocXAnimServer(uint32_t size);
 
+uint8_t* __cdecl Hunk_AllocLowAlign(uint32_t size, int32_t alignment, const char* name, int32_t type);
+
 //void __cdecl TRACK_com_memory();
 
 // LWSS: Note that the Z_ prefix comes from the fact that it uses the "Zone" memory pool.
@@ -38,5 +40,3 @@ void* __cdecl Z_TryVirtualAllocInternal(int size);
 bool __cdecl Z_TryVirtualCommitInternal(void* ptr, int size);
 void __cdecl Z_VirtualCommitInternal(void* ptr, int size);
 void __cdecl Z_VirtualFree(void* ptr);
-void __cdecl Z_VirtualDecommit(void* ptr, int size);
-char* Z_TryVirtualAlloc(int size, const char* name, int type);
