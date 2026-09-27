@@ -1019,20 +1019,16 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     ProfLoad_End();
     SCR_UpdateLoadScreen();
     ProfLoad_Begin("Register known effects");
-    v6 = 1;
-    v7 = &cgsArray[0].fxs[1];
-    do
+    for (v6 = 1; v6 < (int)ARRAY_COUNT(cgsArray[0].fxs); ++v6)
     {
         v8 = CL_GetConfigString(localClientNum, v6 + CS_EFFECT_NAMES);
         if (!*v8)
             break;
         v9 = FX_Register(v8);
-        *v7 = v9;
+        cgsArray[0].fxs[v6] = v9;
         if (!v9)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp", 1026, 0, "%s", "cgs->fxs[i]");
-        ++v7;
-        ++v6;
-    } while ((int)v7 < (int)&cgsArray[0].holdBreathParams);
+    }
     ProfLoad_End();
     ProfLoad_Begin("Register shellshocks");
     for (j = 1; j < 16; ++j)
