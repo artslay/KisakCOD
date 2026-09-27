@@ -9,6 +9,11 @@
 #ifdef __SWITCH__
 using _BYTE = uint8_t;
 struct _OVERLAPPED { uint64_t opaque[4]; };
+struct FastCriticalSection
+{
+    volatile uint32_t readCount = 0;
+    volatile uint32_t writeCount = 0;
+};
 #else
 #include <win32/win_local.h>
 #endif
