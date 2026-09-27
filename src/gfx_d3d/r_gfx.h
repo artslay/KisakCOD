@@ -682,6 +682,57 @@ struct GfxPixelShaderLoadDef // sizeof=0x8
 static_assert(sizeof(GfxPixelShaderLoadDef) == 8);
 #endif // !__SWITCH__
 
+#ifdef __SWITCH__
+struct GfxVertexBufferState
+{
+    volatile uint32_t used;
+    int total;
+    IDirect3DVertexBuffer9* buffer;
+    uint8_t* verts;
+};
+struct GfxMeshData
+{
+    uint32_t indexCount;
+    uint32_t totalIndexCount;
+    uint16_t* indices;
+    GfxVertexBufferState vb;
+    uint32_t vertSize;
+};
+struct GfxLightDef
+{
+    const char* name;
+    struct GfxLightImage { GfxImage* image; uint8_t samplerState; uint8_t pad[3]; } attenuation;
+    int lmapLookupStart;
+};
+struct GfxLight
+{
+    uint8_t type;
+    uint8_t canUseShadowMap;
+    uint8_t unused[2];
+    float color[3];
+    float dir[3];
+    float origin[3];
+    float radius;
+    float cosHalfFovOuter;
+    float cosHalfFovInner;
+    int exponent;
+    uint32_t spotShadowIndex;
+    GfxLightDef* def;
+};
+struct GfxVertexShaderLoadDef
+{
+    void* program;
+    uint16_t programSize;
+    uint16_t loadForRenderer;
+};
+struct GfxPixelShaderLoadDef
+{
+    void* program;
+    uint16_t programSize;
+    uint16_t loadForRenderer;
+};
+#endif
+
 struct GfxDepthOfField // sizeof=0x20
 {                                       // ...
     float viewModelStart;
