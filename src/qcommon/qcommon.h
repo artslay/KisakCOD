@@ -1590,8 +1590,12 @@ inline T Buf_Read(unsigned char **pos)
     return value;
 }
 
+#if defined(__SWITCH__)
+#include <cmath>
+#else
 #include <xmmintrin.h>  // SSE
 #include <intrin.h>
+#endif
 
 // (https://github.com/SwagSoftware/KisakCOD/issues/52)
 // 
@@ -1613,7 +1617,13 @@ inline int SnapFloatToInt(float x)
     return i;
 #endif
 
-    int retval = _mm_cvtss_si32(_mm_set_ss(x));
+#if defined(__SWITCH__)
+    // ARM64 has no x86 SSE intrinsic; lrintf matches cvtss2si's
+    // default round-to-nearest-even behavior used by the original code.
+    const int retval = static_cast<int>(std::lrintf(x));
+#else
+    const int retval = _mm_cvtss_si32(_mm_set_ss(x));
+#endif
 
 #if defined(_DEBUG) && defined(_WIN32)
     const float input = x;
