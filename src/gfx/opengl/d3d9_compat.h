@@ -20,12 +20,13 @@
 
 struct HINSTANCE__ {};
 struct IDirect3DSwapChain9 { void Release() { delete this; } };
-struct _D3DDISPLAYMODE { uint32_t Width=0, Height=0; uint32_t RefreshRate=60; _D3DFORMAT Format=D3DFMT_X8R8G8B8; };
 using _D3DMULTISAMPLE_TYPE = uint32_t;
 #include <glad/glad.h>
 
 using HRESULT = int32_t;
 using _D3DFORMAT = uint32_t;
+constexpr _D3DFORMAT D3DFMT_X8R8G8B8 = 22;
+struct _D3DDISPLAYMODE { uint32_t Width=0, Height=0; uint32_t RefreshRate=60; _D3DFORMAT Format=D3DFMT_X8R8G8B8; };
 
 constexpr HRESULT S_OK = 0;
 constexpr HRESULT E_FAIL = -1;
