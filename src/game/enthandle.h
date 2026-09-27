@@ -9,10 +9,11 @@ struct EntHandleInfo // sizeof=0x8 // (SP/MP same)
     uint16_t next;              // ...
     uint16_t prev;              // ...
 };
-#ifndef __SWITCH__
-// Native ARM64 layout differs from the original 32-bit runtime; serialized layouts are handled by Switch loaders.
-
+#ifdef __SWITCH__
+static_assert(sizeof(EntHandleInfo) == 0x10);
+#else
 static_assert(sizeof(EntHandleInfo) == 0x8);
+#endif
 
 struct EntHandleList // sizeof=0x2 // (SP/MP same)
 {                                       // ...
