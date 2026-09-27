@@ -505,7 +505,7 @@ void __cdecl CL_Record_f()
                 v7 = v6;
                 while (*v7++)
                     ;
-                v10[0] = (_BYTE)v7 - (_BYTE)v6 - 1;
+                v10[0] = static_cast<uint8_t>(v7 - v6 - 1);
                 FS_Write((const char*)v10, 1, cls.demofile);
                 v9 = FS_Write(v6, v10[0], cls.demofile);
                 Hunk_CheckTempMemoryClear();
