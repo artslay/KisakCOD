@@ -18,6 +18,17 @@ uint32_t __cdecl Sys_Milliseconds()
         std::chrono::steady_clock::now() - g_sysStart).count();
 }
 
+void __cdecl Sys_LockWrite(FastCriticalSection *critSect)
+{
+    if (!critSect) return;
+    while (__atomic_exchange_n(&critSect->writeCount, 1u, __ATOMIC_ACQUIRE)) std::this_thread::yield();
+}
+
+void __cdecl Sys_UnlockWrite(FastCriticalSection *critSect)
+{
+    if (critSect) __atomic_store_n(&critSect->writeCount, 0u, __ATOMIC_RELEASE);
+}
+
 void __cdecl Sys_EnterCriticalSection(int section)
 {
     if (section >= 0 && section < 32) g_sysCritical[section].lock();
