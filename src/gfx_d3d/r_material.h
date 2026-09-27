@@ -795,9 +795,6 @@ struct Material // sizeof=0x50
 // 8-byte alignment. The pad is harmless — the fields are read/written by name.
 #else
 #endif // !__SWITCH__
-#endif
-
-#endif
 
 struct MaterialMemory // sizeof=0x8
 {                                       // ...
