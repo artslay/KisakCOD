@@ -163,6 +163,7 @@ struct KisakGLTexture
     GLenum uploadType = GL_UNSIGNED_BYTE;
     uint32_t width = 0, height = 0, depth = 1;
     uint32_t mipLevels = 1;
+    _D3DFORMAT sourceFormat = D3DFMT_UNKNOWN;
     void Release()
     {
         if (object)
