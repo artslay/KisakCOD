@@ -160,9 +160,12 @@ inline void __cdecl R_ReleaseAndSetNULL(
     const char *filename,
     int line)
 {
-    uint32_t useCount; // [esp+0h] [ebp-4h]
-
     iassert(var);
+#ifdef __SWITCH__
+    var->Release();
+#else
+    uint32_t useCount; // [esp+0h] [ebp-4h]
     useCount = var->Release();
     iassert(!useCount);
+#endif
 }
