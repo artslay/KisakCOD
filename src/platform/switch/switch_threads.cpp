@@ -8,6 +8,7 @@
 #include <thread>
 #include <vector>
 #include <atomic>
+#include <setjmp.h>
 
 static thread_local void *g_switchThreadValues[4] = {};
 void *g_threadValues[THREAD_CONTEXT_COUNT][4] = {};
@@ -42,6 +43,7 @@ volatile int g_timeout = 0;
 #endif
 
 static void *g_values[THREAD_CONTEXT_COUNT][4] = {};
+static thread_local jmp_buf g_switchJmpBuffer;
 
 static uint32_t ThreadId()
 {
@@ -63,6 +65,7 @@ void __cdecl Sys_InitMainThread()
     threadId[THREAD_CONTEXT_MAIN] = Sys_GetCurrentThreadId();
     threadHandle[THREAD_CONTEXT_MAIN] = nullptr;
     g_switchThreadValues[0] = nullptr;
+    g_switchThreadValues[2] = &g_switchJmpBuffer;
 }
 
 void __cdecl Sys_InitThread(ThreadContext_t context)
@@ -70,6 +73,7 @@ void __cdecl Sys_InitThread(ThreadContext_t context)
     g_threadContext = context;
     threadId[context] = Sys_GetCurrentThreadId();
     g_switchThreadValues[0] = g_values[context][0];
+    g_switchThreadValues[2] = &g_switchJmpBuffer;
 }
 
 void __cdecl SetThreadName(uint32_t, const char *) {}
