@@ -8,7 +8,7 @@ TARGET      := kisakcod
 BUILD       := build
 
 ARCH        := -march=armv8-a -mtune=cortex-a57 -mtp=soft
-CPPFLAGS    := -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE \\
+CPPFLAGS    := -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE \
                -I$(CURDIR)/src -I$(CURDIR)/deps -I$(CURDIR)/deps/msslib
 CXXFLAGS    := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP
 CFLAGS      := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -MMD -MP
@@ -18,26 +18,26 @@ LIBS        := -lglad -lEGL -lglapi -ldrm_nouveau -lnx -lm
 include $(DEVKITPRO)/libnx/switch_rules
 
 # Singleplayer Switch build. Keep shared engine/game code, but exclude MP, Windows and D3D9.
-CPP_SOURCES := $(shell find src -type f -name '*.cpp' \\
-    ! -path 'src/gfx_d3d/*' \\
-    ! -path 'src/win32/*' \\
-    ! -path 'src/linux/*' \\
-    ! -path 'src/platform/*' \\
-    ! -name 'com_files.cpp' \\
-    ! -path 'src/groupvoice/*' \\
-    ! -name 'win_common.cpp' \\
-    ! -name 'win_shared.cpp' \\
-    ! -name 'snd_mss.cpp' \\
-    ! -name 'snd_driver.cpp' \\
-    ! -name 'threads.cpp' \\
-    ! -name 'timing.cpp' \\
+CPP_SOURCES := $(shell find src -type f -name '*.cpp' \
+    ! -path 'src/gfx_d3d/*' \
+    ! -path 'src/win32/*' \
+    ! -path 'src/linux/*' \
+    ! -path 'src/platform/*' \
+    ! -name 'com_files.cpp' \
+    ! -path 'src/groupvoice/*' \
+    ! -name 'win_common.cpp' \
+    ! -name 'win_shared.cpp' \
+    ! -name 'snd_mss.cpp' \
+    ! -name 'snd_driver.cpp' \
+    ! -name 'threads.cpp' \
+    ! -name 'timing.cpp' \
     ! -name 'profile.cpp')
 
-C_SOURCES := $(shell find src -type f -name '*.c' \\
-    ! -path 'src/gfx_d3d/*' \\
-    ! -path 'src/win32/*' \\
-    ! -path 'src/linux/*' \\
-    ! -path 'src/platform/*' \\
+C_SOURCES := $(shell find src -type f -name '*.c' \
+    ! -path 'src/gfx_d3d/*' \
+    ! -path 'src/win32/*' \
+    ! -path 'src/linux/*' \
+    ! -path 'src/platform/*' \
     ! -path 'src/groupvoice/*')
 
 # zlib is required by the engine's archive/zip loader.
@@ -70,7 +70,7 @@ $(BUILD)/%.o: %.c
 -include $(OBJECTS:.o=.d)
 
 print-sources:
-	@printf '%s\\n' $(CPP_SOURCES) $(C_SOURCES)
+	@printf '%s\n' $(CPP_SOURCES) $(C_SOURCES)
 
 clean:
 	rm -rf $(BUILD) $(TARGET).elf $(TARGET).nro $(TARGET).nacp
