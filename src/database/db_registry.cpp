@@ -10,11 +10,15 @@ extern FILE *FS_SwitchOpenRootFile(const char *path);
 #include <qcommon/mem_track.h>
 
 #include <xanim/xmodel.h>
+#ifndef __SWITCH__
 #include <win32/win_net.h>
+#endif
 #include <qcommon/threads.h>
 #include <qcommon/com_bsp.h>
 #include <gfx_d3d/r_init.h>
+#ifndef __SWITCH__
 #include <win32/win_local.h>
+#endif
 #include <gfx_d3d/rb_uploadshaders.h>
 #include <gfx_d3d/r_image.h>
 #include <universal/com_files.h>
@@ -25,7 +29,9 @@ extern FILE *FS_SwitchOpenRootFile(const char *path);
 #include <universal/physicalmemory.h>
 #include <gfx_d3d/rb_shade.h>
 #include <gfx_d3d/r_staticmodelcache.h>
+#ifndef __SWITCH__
 #include <win32/win_localize.h>
+#endif
 #include <universal/profile.h>
 
 #include <algorithm>
