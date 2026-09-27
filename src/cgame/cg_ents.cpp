@@ -273,7 +273,7 @@ void __cdecl CG_mg42_PreControllers(int localClientNum, const DObj_s *obj, centi
     if (v5)
     {
         cent->pose.cullIn = 0;
-        cent->pose.actor.proneType = (int)cgArray[0].refdefViewAngles;
+        cent->pose.actor.proneType = static_cast<int>(cgArray[0].refdefViewAngles[0]);
     }
     else
     {
