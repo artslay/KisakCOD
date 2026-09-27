@@ -66,6 +66,12 @@ add_executable(${PROJECT_NAME}
 
 endif()
 
+if (KISAK_PLATFORM STREQUAL "switch" AND KISAK_SWITCH_BOOTSTRAP)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        glad EGL glapi drm_nouveau nx
+    )
+endif()
+
 target_compile_definitions(${PROJECT_NAME} PUBLIC KISAK_MP KISAK_DEDICATED DEDICATED)
 
 # We need all of the pre/post-build commands
