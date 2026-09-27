@@ -354,7 +354,11 @@ void __cdecl Sys_Listen_f();
 #endif
 
 void __cdecl Sys_Mkdir(const char *path);
+#ifdef __SWITCH__
+int __cdecl Sys_RemoveDirTree(const char *path);
+#else
 BOOL __cdecl Sys_RemoveDirTree(const char *path);
+#endif
 int __cdecl Sys_CountFileList(char **list);
 char **__cdecl Sys_ListFiles(
 	const char *directory,
