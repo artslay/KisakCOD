@@ -156,7 +156,7 @@ void* __cdecl Z_VirtualReserve(int32_t size)
     buf = VirtualAlloc(0, size, 0x2000u, 4u);
     if (!buf)
         MyAssertHandler(".\\universal\\com_memory.cpp", 208, 0, "%s", "buf");
-    return buf;
+    return (uint32_t*)buf;
 }
 
 void __cdecl Z_VirtualDecommitInternal(void* ptr, int32_t size)
@@ -443,11 +443,11 @@ void __cdecl Hunk_ClearToMarkLow(int32_t mark)
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\universal\\com_memory.cpp", 1849, 0, "%s", "Sys_IsMainThread()");
     Hunk_CheckTempMemoryClear();
-    endBuf = (uint8_t*)((uint32_t)&s_hunkData[hunk_low.temp + 4095] & 0xFFFFF000);
+    endBuf = (uint8_t*)((uintptr_t)&s_hunkData[hunk_low.temp + 4095] & ~uintptr_t(0xFFF));
     hunk_low.temp = mark;
     hunk_low.permanent = mark;
     Hunk_ClearData();
-    beginBuf = (uint8_t*)((uint32_t)&s_hunkData[hunk_low.temp + 4095] & 0xFFFFF000);
+    beginBuf = (uint8_t*)((uintptr_t)&s_hunkData[hunk_low.temp + 4095] & ~uintptr_t(0xFFF));
     if (endBuf != beginBuf)
         Z_VirtualDecommit(beginBuf, endBuf - beginBuf);
     track_hunk_ClearToMarkLow(mark);
@@ -502,7 +502,7 @@ uint8_t* __cdecl Hunk_AllocAlign(uint32_t size, int32_t alignment, const char* n
     alignmenta = alignment - 1;
     Hunk_CheckTempMemoryHighClear();
     old_permanent = hunk_high.permanent;
-    endBuf = (uint8_t*)((uint32_t)&s_hunkData[s_hunkTotal - hunk_high.permanent] & 0xFFFFF000);
+    endBuf = (uint8_t*)((uintptr_t)&s_hunkData[s_hunkTotal - hunk_high.permanent] & ~uintptr_t(0xFFF));
     hunk_high.permanent += size;
     hunk_high.permanent = ~alignmenta & (alignmenta + hunk_high.permanent);
     hunk_high.temp = hunk_high.permanent;
@@ -512,25 +512,25 @@ uint8_t* __cdecl Hunk_AllocAlign(uint32_t size, int32_t alignment, const char* n
         Com_Error(ERR_DROP, "Hunk_AllocAlign failed on %i bytes (total %i MB, low %i MB, high %i MB)", size, s_hunkTotal / 0x100000, hunk_low.temp / 0x100000, hunk_high.temp / 0x100000);
     }
     buf = &s_hunkData[s_hunkTotal - hunk_high.permanent];
-    if ((alignmenta & (uint32_t)buf) != 0)
+    if ((alignmenta & (uintptr_t)buf) != 0)
         MyAssertHandler(".\\universal\\com_memory.cpp", 2011, 0, "%s", "!(((psize_int)buf) & alignment)");
-    if (endBuf != (uint8_t*)((uint32_t)buf & 0xFFFFF000))
-        Z_VirtualCommit((void*)((uint32_t)buf & 0xFFFFF000), (int)&endBuf[-(int)((uint32_t)buf & 0xFFFFF000)]); // KISAKTODO: sus int32_t cast
+    if (endBuf != (uint8_t*)((uintptr_t)buf & 0xFFFFF000))
+        Z_VirtualCommit((void*)((uintptr_t)buf & 0xFFFFF000), (int)&endBuf[-(int)((uintptr_t)buf & 0xFFFFF000)]); // KISAKTODO: sus int32_t cast
     track_hunk_alloc(hunk_high.permanent - old_permanent, hunk_high.temp, name, type);
     memset(buf, 0, size);
     return buf;
 }
 
-uint32_t __cdecl Hunk_AllocateTempMemoryHigh(int32_t size, const char* name)
+uint32_t* __cdecl Hunk_AllocateTempMemoryHigh(int32_t size, const char* name)
 {
-    uint32_t buf; // [esp+0h] [ebp-10h]
+    uintptr_t buf; // [esp+0h] [ebp-10h]
     uint8_t* endBuf; // [esp+4h] [ebp-Ch]
 
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\universal\\com_memory.cpp", 2050, 0, "%s", "Sys_IsMainThread()");
     if (!s_hunkData)
         MyAssertHandler(".\\universal\\com_memory.cpp", 2051, 0, "%s", "s_hunkData");
-    endBuf = (uint8_t*)((uint32_t)&s_hunkData[s_hunkTotal - hunk_high.temp] & 0xFFFFF000);
+    endBuf = (uint8_t*)((uintptr_t)&s_hunkData[s_hunkTotal - hunk_high.temp] & ~uintptr_t(0xFFF));
     hunk_high.temp += size;
     hunk_high.temp = (hunk_high.temp + 15) & 0xFFFFFFF0;
     if (hunk_high.temp + hunk_low.temp > s_hunkTotal)
@@ -554,9 +554,9 @@ void Hunk_ClearTempMemoryHigh()
 
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\universal\\com_memory.cpp", 2106, 0, "%s", "Sys_IsMainThread()");
-    beginBuf = (uint8_t*)((uint32_t)&s_hunkData[s_hunkTotal - hunk_high.temp] & 0xFFFFF000);
+    beginBuf = (uint8_t*)((uintptr_t)&s_hunkData[s_hunkTotal - hunk_high.temp] & ~uintptr_t(0xFFF));
     hunk_high.temp = hunk_high.permanent;
-    commitSize = ((uint32_t)&s_hunkData[s_hunkTotal - hunk_high.permanent] & 0xFFFFF000) - (uint32_t)beginBuf;
+    commitSize = ((uintptr_t)&s_hunkData[s_hunkTotal - hunk_high.permanent] & 0xFFFFF000) - (uintptr_t)beginBuf;
     if (commitSize)
         Z_VirtualDecommit(beginBuf, commitSize);
     track_temp_high_clear(hunk_high.permanent);
@@ -590,10 +590,10 @@ uint8_t* __cdecl Hunk_AllocLowAlign(uint32_t size, int32_t alignment, const char
     alignmenta = alignment - 1;
     Hunk_CheckTempMemoryClear();
     old_permanent = hunk_low.permanent;
-    beginBuf = (uint8_t*)((uint32_t)&s_hunkData[hunk_low.permanent + 4095] & 0xFFFFF000);
+    beginBuf = (uint8_t*)((uintptr_t)&s_hunkData[hunk_low.permanent + 4095] & 0xFFFFF000);
     hunk_low.permanent = ~alignmenta & (alignmenta + hunk_low.permanent);
     buf = &s_hunkData[hunk_low.permanent];
-    if ((alignmenta & (uint32_t)&s_hunkData[hunk_low.permanent]) != 0)
+    if ((alignmenta & (uintptr_t)&s_hunkData[hunk_low.permanent]) != 0)
         MyAssertHandler(".\\universal\\com_memory.cpp", 2210, 0, "%s", "!(((psize_int)buf) & alignment)");
     hunk_low.permanent += size;
     hunk_low.temp = hunk_low.permanent;
@@ -602,7 +602,7 @@ uint8_t* __cdecl Hunk_AllocLowAlign(uint32_t size, int32_t alignment, const char
         track_PrintAllInfo();
         Com_Error(ERR_DROP, "Hunk_AllocLowAlign failed on %i bytes (total %i MB, low %i MB, high %i MB)", size, s_hunkTotal / 0x100000, hunk_low.temp / 0x100000, hunk_high.temp / 0x100000);
     }
-    commitSize = ((uint32_t)&s_hunkData[hunk_low.permanent + 4095] & 0xFFFFF000) - (uint32_t)beginBuf;
+    commitSize = ((uintptr_t)&s_hunkData[hunk_low.permanent + 4095] & 0xFFFFF000) - (uintptr_t)beginBuf;
     if (commitSize)
         Z_VirtualCommit(beginBuf, commitSize);
     track_hunk_allocLow(hunk_low.permanent - old_permanent, hunk_low.permanent, name, type);
@@ -628,7 +628,7 @@ uint32_t* __cdecl Hunk_AllocateTempMemory(int32_t size, const char* name)
         return (uint32_t*)Z_Malloc(size, name, 10);
     sizea = size + 16;
     prev_temp = hunk_low.temp;
-    beginBuf = (uint8_t*)((uint32_t)&s_hunkData[hunk_low.temp + 4095] & 0xFFFFF000);
+    beginBuf = (uint8_t*)((uintptr_t)&s_hunkData[hunk_low.temp + 4095] & ~uintptr_t(0xFFF));
     hunk_low.temp = (hunk_low.temp + 15) & 0xFFFFFFF0;
     buf = &s_hunkData[hunk_low.temp];
     hunk_low.temp += sizea;
@@ -648,7 +648,7 @@ uint32_t* __cdecl Hunk_AllocateTempMemory(int32_t size, const char* name)
     bufa = buf + 16;
     if (((uint8_t)bufa & 0xF) != 0)
         MyAssertHandler(".\\universal\\com_memory.cpp", 2303, 0, "%s", "!(((psize_int)buf) & 15)");
-    commitSize = ((uint32_t)&s_hunkData[hunk_low.temp + 4095] & 0xFFFFF000) - (uint32_t)beginBuf;
+    commitSize = ((uintptr_t)&s_hunkData[hunk_low.temp + 4095] & 0xFFFFF000) - (uintptr_t)beginBuf;
     if (commitSize)
         Z_VirtualCommit(beginBuf, commitSize);
     hdr->magic = -1991018350;
@@ -683,10 +683,10 @@ void __cdecl Hunk_FreeTempMemory(char* buf)
                 0,
                 "%s",
                 "hdr == (void *)( s_hunkData + ((hunk_low.temp - hdr->size + 15) & ~15) )");
-        endBuf = (uint8_t*)((uint32_t)&s_hunkData[hunk_low.temp + 4095] & 0xFFFFF000);
+        endBuf = (uint8_t*)((uintptr_t)&s_hunkData[hunk_low.temp + 4095] & ~uintptr_t(0xFFF));
         hunk_low.temp -= hdr->size;
         track_temp_free(hdr->size, hunk_low.permanent, hdr->name);
-        beginBuf = (uint8_t*)((uint32_t)&s_hunkData[hunk_low.temp + 4095] & 0xFFFFF000);
+        beginBuf = (uint8_t*)((uintptr_t)&s_hunkData[hunk_low.temp + 4095] & ~uintptr_t(0xFFF));
         if (endBuf != beginBuf)
             Z_VirtualDecommit(beginBuf, endBuf - beginBuf);
     }
@@ -705,9 +705,9 @@ void Hunk_ClearTempMemory()
         MyAssertHandler(".\\universal\\com_memory.cpp", 2398, 0, "%s", "Sys_IsMainThread()");
     if (!s_hunkData)
         MyAssertHandler(".\\universal\\com_memory.cpp", 2399, 0, "%s", "s_hunkData");
-    endBuf = (uint8_t*)((uint32_t)&s_hunkData[hunk_low.temp + 4095] & 0xFFFFF000);
+    endBuf = (uint8_t*)((uintptr_t)&s_hunkData[hunk_low.temp + 4095] & ~uintptr_t(0xFFF));
     hunk_low.temp = hunk_low.permanent;
-    beginBuf = (uint8_t*)((uint32_t)&s_hunkData[hunk_low.permanent + 4095] & 0xFFFFF000);
+    beginBuf = (uint8_t*)((uintptr_t)&s_hunkData[hunk_low.permanent + 4095] & 0xFFFFF000);
     if (endBuf != beginBuf)
         Z_VirtualDecommit(beginBuf, endBuf - beginBuf);
     //track_temp_clear(hunk_low.permanent);
