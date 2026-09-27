@@ -35,7 +35,9 @@ union XAnimIndices // sizeof=0x4
     uint16_t *_2;
     void *data;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XAnimIndices) == 4);
+#endif
 struct XAnimNotifyInfo // sizeof=0x8
 {
     uint16_t name;
@@ -179,8 +181,10 @@ struct XAnimParts // sizeof=0x58
     XAnimNotifyInfo *notify;
     XAnimDeltaPart *deltaPart;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XAnimParts) == 88);
 
+#endif
 struct XModelNameMap // sizeof=0x4
 {                                       // ...
     uint16_t name;              // ...
@@ -826,8 +830,10 @@ struct WeaponDef // sizeof=0x878
     float adsDofStart;
     float adsDofEnd;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(WeaponDef) == 2168);
 
+#endif
 struct SndDriverGlobals // sizeof=0x4
 {                                       // ...
     const char* name;
@@ -839,8 +845,10 @@ struct RawFile // sizeof=0xC
     int len;
     const char* buffer;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(RawFile) == 12);
 
+#endif
 struct PhysPreset // sizeof=0x2C
 {                                       // ...
     const char *name;                   // ...
@@ -999,8 +1007,10 @@ struct XAsset // sizeof=0x8
     XAssetType type;                    // ...
     XAssetHeader header;                // ...
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XAsset) == 8);
 
+#endif
 union XAssetSize // sizeof=0x878
 {                                       // ...
     XAssetSize()
@@ -1110,24 +1120,30 @@ struct ScriptStringList // sizeof=0x8
     int count;
     const char **strings;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(ScriptStringList) == 8);
 
+#endif
 struct XAssetList // sizeof=0x10
 {                                       // ...
     ScriptStringList stringList;
     int assetCount;
     XAsset *assets;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XAssetList) == 16);
 
+#endif
 struct XFile // sizeof=0x2C
 {                                       // ...
     uint32_t size;
     uint32_t externalSize;          // ...
     uint32_t blockSize[9];          // ...
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XFile) == 44);
 
+#endif
 struct XSurfaceCollisionAabb // sizeof=0xC
 {                                       // ...
     uint16_t mins[3];
@@ -1163,15 +1179,19 @@ struct XRigidVertList // sizeof=0xC
     uint16_t triCount;          // ...
     XSurfaceCollisionTree *collisionTree;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XRigidVertList) == 12);
 
+#endif
 struct XSurfaceVertexInfo // sizeof=0xC
 {                                       // ...
     __int16 vertCount[4];
     uint16_t *vertsBlend;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XSurfaceVertexInfo) == 12);
 
+#endif
 struct XSurface // sizeof=0x38
 {
     unsigned __int8 tileMode;
@@ -1189,8 +1209,10 @@ struct XSurface // sizeof=0x38
     XRigidVertList *vertList;
     int partBits[4];
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XSurface) == 56);
 
+#endif
 struct DObj_s;
 
 struct gentity_s;
