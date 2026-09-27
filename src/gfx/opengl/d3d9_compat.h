@@ -493,8 +493,7 @@ public:
     ~IDirect3DDevice9()
     {
         if (m_program) glDeleteProgram(m_program);
-        if (m_vertexShader) glDeleteShader(m_vertexShader->object);
-        if (m_pixelShader) glDeleteShader(m_pixelShader->object);
+        // Shader objects are owned by Material* resources; the device only references them.
         if (m_color)
             m_color->Release();
         if (m_depth)
