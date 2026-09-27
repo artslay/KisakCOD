@@ -22,6 +22,9 @@ typedef unsigned long ULONG_PTR, *PULONG_PTR;
 typedef ULONG_PTR DWORD_PTR, *PDWORD_PTR;
 #ifndef KISAK_SWITCH
 typedef unsigned long DWORD;
+typedef DWORD FOURCC;
+#else
+typedef uint32_t FOURCC;
 #endif
 typedef unsigned short WORD;
 typedef unsigned int UINT;
@@ -38,8 +41,6 @@ typedef struct waveformat_tag *LPWAVEFORMAT;
 typedef struct wavehdr_tag *LPWAVEHDR;
 typedef struct HMIDIOUT__ *HMIDIOUT;
 typedef HMIDIOUT *LPHMIDIOUT;
-typedef DWORD FOURCC;
-
 #ifndef WAVE_MAPPER
 #define WAVE_MAPPER ((UINT)-1)
 #endif
