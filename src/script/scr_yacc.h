@@ -2,6 +2,10 @@
 #include "scr_stringlist.h"
 #include <cstdio> // FILE
 
+#ifdef __SWITCH__
+using LPVOID = void*;
+#endif
+
 // LWSS: this enum name is kinda retarded
 enum Enum_t : __int32
 {
