@@ -20,9 +20,6 @@ include $(DEVKITPRO)/libnx/switch_rules
 # Singleplayer Switch build. Keep shared engine/game code, but exclude MP, Windows and D3D9.
 CPP_SOURCES := $(shell find src -type f -name '*.cpp' \\
     ! -path 'src/gfx_d3d/*' \\
-    ! -path 'src/mp/*' \\
-    ! -path 'src/game_mp/*' \\
-    ! -path 'src/cgame_mp/*' \\
     ! -path 'src/win32/*' \\
     ! -path 'src/linux/*' \\
     ! -path 'src/platform/*' \\
@@ -34,9 +31,6 @@ CPP_SOURCES := $(shell find src -type f -name '*.cpp' \\
 
 C_SOURCES := $(shell find src -type f -name '*.c' \\
     ! -path 'src/gfx_d3d/*' \\
-    ! -path 'src/mp/*' \\
-    ! -path 'src/game_mp/*' \\
-    ! -path 'src/cgame_mp/*' \\
     ! -path 'src/win32/*' \\
     ! -path 'src/linux/*' \\
     ! -path 'src/platform/*' \\
