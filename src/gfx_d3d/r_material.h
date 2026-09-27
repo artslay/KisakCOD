@@ -561,7 +561,7 @@ static_assert(sizeof(Material) == 96);
 #else
 static_assert(sizeof(Material) == 80);
 #endif // !__SWITCH__
-#ifdef __SWITCH__
+#else
 struct MaterialPixelShader // sizeof=0x10
 {                                       // ...
     const char *name;
@@ -997,7 +997,6 @@ Material *__cdecl Material_Load(char *assetName, int imageTrack);
 MaterialTechniqueSet *__cdecl Material_FindTechniqueSet_LoadObj(
     const char *name,
     MtlTechSetNotFoundBehavior notFoundBehavior);
-
 void __cdecl Material_GetInfo(Material *handle, MaterialInfo *matInfo);
 
 Material *__cdecl Material_Duplicate(Material *mtlCopy, char *name);
