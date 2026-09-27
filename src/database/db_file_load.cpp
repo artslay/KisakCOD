@@ -2,7 +2,9 @@
 #include "database.h"
 
 #include <qcommon/threads.h>
+#ifndef __SWITCH__
 #include <win32/win_local.h>
+#endif
 #include <universal/com_files.h>
 
 #include <gfx_d3d/r_image.h>
@@ -17,7 +19,12 @@ struct DB_LoadData // sizeof=0x68
     const char* filename;               // ...
     XZoneMemory* zoneMem;               // ...
     int32_t outstandingReads;               // ...
-    OVERLAPPED overlapped;             // ...
+#ifdef __SWITCH__
+    uint64_t switchFileOffset;
+    uint32_t switchLastRead;
+#else
+    OVERLAPPED overlapped;
+#endif
     z_stream_s stream;                  // ...
     uint8_t* compressBufferStart; // ...
     uint8_t* compressBufferEnd; // ...
@@ -57,7 +64,12 @@ void __cdecl DB_CancelLoadXFile()
         DB_AuthLoad_InflateEnd(&g_load.stream);
         if (!g_load.f)
             MyAssertHandler(".\\database\\db_file_load.cpp", 165, 0, "%s", "g_load.f");
+#ifdef __SWITCH__
+        fclose(static_cast<FILE *>(g_load.f));
+#else
         CloseHandle(g_load.f);
+#endif
+        g_load.f = nullptr;
     }
 }
 
@@ -70,10 +82,16 @@ int32_t DB_WaitXFileStage()
     if (g_load.outstandingReads <= 0)
         MyAssertHandler(".\\database\\db_file_load.cpp", 280, 0, "%s", "g_load.outstandingReads > 0");
     --g_load.outstandingReads;
+#ifdef __SWITCH__
+    g_load.stream.avail_in += g_load.switchLastRead;
+    g_loadedSize += 1;
+    return g_loadedSize;
+#else
     SleepEx(0xFFFFFFFF, 1);
     result = InterlockedIncrement(&g_loadedSize);
     g_load.stream.avail_in += 0x40000;
     return result;
+#endif
 }
 
 void __cdecl DB_LoadedExternalData(int32_t size)
@@ -156,8 +174,13 @@ void DB_ReadXFileStage()
     {
         if (g_load.outstandingReads)
             MyAssertHandler(".\\database\\db_file_load.cpp", 254, 0, "%s", "!g_load.outstandingReads");
+#ifdef __SWITCH__
+        if (!DB_ReadData() && !feof(static_cast<FILE *>(g_load.f)))
+            Com_Error(ERR_DROP, "Read error of file '%s'", g_load.filename);
+#else
         if (!DB_ReadData() && GetLastError() != 38)
             Com_Error(ERR_DROP, "Read error of file '%s'", g_load.filename);
+#endif
     }
 }
 
@@ -171,6 +194,18 @@ int32_t __cdecl DB_ReadData()
         MyAssertHandler(".\\database\\db_file_load.cpp", 189, 0, "%s", "g_load.f");
     if (g_load.interrupt)
         g_load.interrupt();
+#ifdef __SWITCH__
+    fileBuffer = &g_load.compressBufferStart[g_load.switchFileOffset % 0x80000];
+    FILE *file = static_cast<FILE *>(g_load.f);
+    if (std::fseek(file, static_cast<long>(g_load.switchFileOffset), SEEK_SET) != 0)
+        return 0;
+    g_load.switchLastRead = static_cast<uint32_t>(std::fread(fileBuffer, 1, 0x40000, file));
+    g_load.switchFileOffset += g_load.switchLastRead;
+    if (!g_load.switchLastRead)
+        return 0;
+    ++g_load.outstandingReads;
+    return 1;
+#else
     fileBuffer = &g_load.compressBufferStart[g_load.overlapped.Offset % 0x80000];
     Sys_WaitDatabaseThread();
     if (!ReadFileEx(g_load.f, fileBuffer, 0x40000u, &g_load.overlapped, (LPOVERLAPPED_COMPLETION_ROUTINE)DB_FileReadCompletion))
@@ -178,6 +213,7 @@ int32_t __cdecl DB_ReadData()
     ++g_load.outstandingReads;
     g_load.overlapped.Offset += 0x40000;
     return 1;
+#endif
 }
 
 void __stdcall DB_FileReadCompletion(
@@ -279,7 +315,15 @@ void __cdecl DB_LoadXFileInternal()
     DB_LoadXFileData((uint8_t *)&file, sizeof(XFile));
     if (g_trackLoadProgress)
     {
+#ifdef __SWITCH__
+        FILE *file = static_cast<FILE *>(g_load.f);
+        long saved = std::ftell(file);
+        std::fseek(file, 0, SEEK_END);
+        fileSize = static_cast<int32_t>(std::ftell(file));
+        std::fseek(file, saved, SEEK_SET);
+#else
         fileSize = GetFileSize(g_load.f, 0);
+#endif
         if (file.externalSize + fileSize >= 0x100000)
         {
             g_totalSize = (fileSize + 0x3FFFF) / 0x40000 - g_loadedSize;
