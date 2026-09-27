@@ -6,6 +6,21 @@
 #include <vector>
 #include <cstring>
 #include <algorithm>
+
+#ifndef __cdecl
+#define __cdecl
+#endif
+#ifndef __stdcall
+#define __stdcall
+#endif
+#ifndef __declspec
+#define __declspec(x)
+#endif
+
+struct HINSTANCE__ {};
+struct IDirect3DSwapChain9 { void Release() { delete this; } };
+struct _D3DDISPLAYMODE { uint32_t Width=0, Height=0; uint32_t RefreshRate=60; _D3DFORMAT Format=D3DFMT_X8R8G8B8; };
+using _D3DMULTISAMPLE_TYPE = uint32_t;
 #include <glad/glad.h>
 
 using HRESULT = int32_t;
@@ -184,6 +199,8 @@ struct IDirect3DSurface9
     void Release() { delete this; }
 };
 struct IDirect3DQuery9 { void Release() { delete this; } };
+struct IDirect3D9 {};
+
 
 class IDirect3DDevice9
 {
@@ -289,7 +306,7 @@ public:
         return S_OK;
     }
 
-    HRESULT Clear(uint32_t, uint32_t, uint32_t flags, uint32_t color, float depth, uint32_t stencil)
+    HRESULT TestCooperativeLevel() { return S_OK; }\n\n    HRESULT Clear(uint32_t, uint32_t, uint32_t flags, uint32_t color, float depth, uint32_t stencil)
     {
         GLbitfield mask = 0;
         if (flags & 1) mask |= GL_DEPTH_BUFFER_BIT;
