@@ -11,7 +11,7 @@
 #pragma warning( pop )
 #endif
 
-#ifndef _XBOX
+#if !defined(_XBOX) && !defined(__SWITCH__)
 #define DIRECTINPUT_VERSION 0x0800  //[ 0x0300 | 0x0500 | 0x0700 | 0x0800 ]
 #include <dinput.h>
 //#include <dsound.h>
@@ -100,7 +100,9 @@ void	IN_Init (void);
 void	IN_Shutdown (void);
 void	IN_JoystickCommands (void);
 
+#ifndef __SWITCH__
 void __cdecl IN_ShowSystemCursor(BOOL show);
+#endif
 
 // KISAKTODO void	IN_Move (usercmd_s *cmd); // usercmd_t -> usercmd_s
 // add additional non keyboard / non mouse movement on top of the keyboard move cmd
@@ -113,7 +115,7 @@ void	IN_Frame (void);
 bool IN_IsTalkKeyHeld();
 
 // window procedure
-#ifndef _XBOX
+#if !defined(_XBOX) && !defined(__SWITCH__)
 LRESULT WINAPI MainWndProc (
     HWND    hWnd,
     UINT    uMsg,
@@ -124,7 +126,7 @@ LRESULT WINAPI MainWndProc (
 void Conbuf_AppendText( const char *msg );
 void Conbuf_AppendTextInMainThread(const char* msg);
 
-#ifndef _XBOX
+#if !defined(_XBOX) && !defined(__SWITCH__)
 // LWSS: Accurate to cod4
 typedef struct
 {
@@ -177,7 +179,9 @@ extern std::mutex s_criticalSections[];
 #endif
 
 extern int client_state; // LWSS ADD. This looks similar to signonstate
+#ifndef __SWITCH__
 extern HWND g_splashWnd;
+#endif
 
 #if defined(KISAK_RADIANT)
 // Radiant tools build: use SP-compatible critical section layout
