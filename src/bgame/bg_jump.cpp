@@ -19,7 +19,7 @@ void __cdecl Jump_Start(pmove_t *pm, pml_t *pml, float height);
 void __cdecl Jump_PushOffLadder(playerState_s *ps, pml_t *pml);
 void __cdecl Jump_AddSurfaceEvent(playerState_s *ps, pml_t *pml);
 int32_t __cdecl PM_GetEffectiveStance(const playerState_s *ps);
-int32_t __cdecl PM_GroundSurfaceType(const pml_t *pml);
+uint32_t __cdecl PM_GroundSurfaceType(pml_t *pml);
 void __cdecl BG_AddPredictableEventToPlayerstate(int32_t event, uint32_t eventParm, playerState_s *ps);
 
 void __cdecl Jump_RegisterDvars()
