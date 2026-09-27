@@ -1608,6 +1608,27 @@ void __cdecl Com_StartupConfigs(int localClientNum)
 void Com_InitXAssets()
 {
     DB_InitThread();
+
+#ifdef __SWITCH__
+    // SP startup zones are loaded synchronously and in a fixed order.  Keep
+    // the existing DB/XAsset loader as the only fastfile implementation.
+    static XZoneInfo startupZones[] =
+    {
+        { "common", DB_ZONE_COMMON, DB_ZONE_COMMON | DB_ZONE_LOAD | DB_ZONE_DEV },
+        { "code_post_gfx", DB_ZONE_COMMON, DB_ZONE_COMMON | DB_ZONE_LOAD | DB_ZONE_DEV },
+        { "localized_common", DB_ZONE_COMMON_LOC, DB_ZONE_COMMON_LOC | DB_ZONE_LOAD | DB_ZONE_DEV },
+        { "localized_code_post_gfx", DB_ZONE_COMMON_LOC, DB_ZONE_COMMON_LOC | DB_ZONE_LOAD | DB_ZONE_DEV },
+    };
+
+    Com_Printf(CON_CHANNEL_SYSTEM,
+        "Switch SP: loading %u startup fastfiles\n",
+        static_cast<unsigned>(sizeof(startupZones) / sizeof(startupZones[0])));
+
+    DB_LoadXAssets(
+        startupZones,
+        static_cast<uint32_t>(sizeof(startupZones) / sizeof(startupZones[0])),
+        1);
+#endif
 }
 
 void __cdecl Com_WriteDefaultsToFile(char* filename)
