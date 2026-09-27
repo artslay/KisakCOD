@@ -2288,6 +2288,46 @@ static_assert(sizeof(weaponState_t) == 0x54);
 #endif // !__SWITCH__
 
 #ifdef __SWITCH__
+// Switch runtime definitions for declarations that were part of the original 32-bit block.
+struct pml_t
+{
+    float forward[3];
+    float right[3];
+    float up[3];
+    float frametime;
+    int32_t msec;
+    int32_t walking;
+    int32_t groundPlane;
+    int32_t almostGroundPlane;
+    trace_t groundTrace;
+    float impactSpeed;
+    float previous_origin[3];
+    float previous_velocity[3];
+};
+static_assert(sizeof(pml_t) == 0x80);
+
+enum he_type_t : __int32
+{
+    HE_TYPE_FREE = 0x0,
+    HE_TYPE_TEXT = 0x1,
+    HE_TYPE_VALUE = 0x2,
+    HE_TYPE_MATERIAL = 0x3,
+    HE_TYPE_TIMER_DOWN = 0x4,
+    HE_TYPE_TIMER_UP = 0x5,
+    HE_TYPE_TENTHS_TIMER_DOWN = 0x6,
+    HE_TYPE_TENTHS_TIMER_UP = 0x7,
+    HE_TYPE_CLOCK_DOWN = 0x8,
+    HE_TYPE_CLOCK_UP = 0x9,
+    HE_TYPE_WAYPOINT = 0xA,
+    HE_TYPE_COUNT = 0xB,
+};
+
+enum itemType_t : __int32
+{
+    IT_BAD = 0x0,
+    IT_WEAPON = 0x1,
+};
+
 // Switch runtime definitions. These are native ARM64 runtime types, not serialized 32-bit layouts.
 #ifdef KISAK_MP
 struct hudelem_s // sizeof=0xA0
