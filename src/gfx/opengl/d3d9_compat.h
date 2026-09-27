@@ -291,6 +291,10 @@ class IDirect3DDevice9
     GLint m_vsConstantsLocation = -1;
     GLint m_psConstantsLocation = -1;
     GLint m_screenSizeLocation = -1;
+    GLint m_screenSpaceLocation = -1;
+    GLint m_useTextureLocation = -1;
+    bool m_switchUnlit = false;
+    bool m_texture0Bound = false;
     float m_viewportWidth = 1280.0f;
     float m_viewportHeight = 720.0f;
     GLenum m_textureTargets[16]{};
@@ -345,12 +349,17 @@ class IDirect3DDevice9
         m_vsConstantsLocation = glGetUniformLocation(m_program, "u_vsConstants[0]");
         m_psConstantsLocation = glGetUniformLocation(m_program, "u_psConstants[0]");
         m_screenSizeLocation = glGetUniformLocation(m_program, "uScreenSize");
-
+        m_screenSpaceLocation = glGetUniformLocation(m_program, "uScreenSpace");
+        m_useTextureLocation = glGetUniformLocation(m_program, "uUseTexture");
 
         if (m_textureStageLocation >= 0)
             glUniform1i(m_textureStageLocation, 0);
         if (m_screenSizeLocation >= 0)
             glUniform2f(m_screenSizeLocation, m_viewportWidth, m_viewportHeight);
+        if (m_screenSpaceLocation >= 0)
+            glUniform1i(m_screenSpaceLocation, m_switchUnlit ? 1 : 0);
+        if (m_useTextureLocation >= 0)
+            glUniform1i(m_useTextureLocation, m_texture0Bound ? 1 : 0);
         if (m_vsConstantsLocation >= 0)
             glUniform4fv(m_vsConstantsLocation, 256, &m_vsConstants[0][0]);
         if (m_psConstantsLocation >= 0)
@@ -658,6 +667,8 @@ public:
         if (tex)
         {
             m_textureTargets[stage] = tex->target;
+            if (stage == 0)
+                m_texture0Bound = tex->object != 0;
             glBindTexture(tex->target, tex->object);
             if (stage != 0)
             {
@@ -669,6 +680,8 @@ public:
         else
         {
             m_textureTargets[stage] = GL_TEXTURE_2D;
+            if (stage == 0)
+                m_texture0Bound = false;
             glBindTexture(GL_TEXTURE_2D, 0);
             if (stage != 0)
             {
@@ -682,6 +695,8 @@ public:
             glUseProgram(m_program);
             if (m_textureStageLocation >= 0)
                 glUniform1i(m_textureStageLocation, 0);
+            if (m_useTextureLocation >= 0)
+                glUniform1i(m_useTextureLocation, m_texture0Bound ? 1 : 0);
         }
         return S_OK;
     }
@@ -698,11 +713,12 @@ out vec2 vTexCoord;
 out vec4 vColor;
 uniform vec4 u_vsConstants[256];
 uniform vec2 uScreenSize;
+uniform bool uScreenSpace;
 void main()
 {
     vec2 clip = vec2((aPosition.x / max(uScreenSize.x, 1.0)) * 2.0 - 1.0,
                      1.0 - (aPosition.y / max(uScreenSize.y, 1.0)) * 2.0);
-    gl_Position = vec4(clip, aPosition.z, aPosition.w);
+    gl_Position = uScreenSpace ? vec4(clip, aPosition.z, aPosition.w) : aPosition;
     vTexCoord = aTexCoord;
     vColor = aColor;
 }
@@ -724,9 +740,10 @@ in vec4 vColor;
 out vec4 FragColor;
 uniform sampler2D uTexture0;
 uniform vec4 u_psConstants[256];
+uniform bool uUseTexture;
 void main()
 {
-    FragColor = vColor * texture(uTexture0, vTexCoord);
+    FragColor = vColor * (uUseTexture ? texture(uTexture0, vTexCoord) : vec4(1.0));
 }
 )";
         const GLuint object = CompileShader(GL_FRAGMENT_SHADER, source);
@@ -783,10 +800,24 @@ void main()
         glDepthRangef(vp->MinZ, vp->MaxZ);
         m_viewportWidth = static_cast<float>(vp->Width);
         m_viewportHeight = static_cast<float>(vp->Height);
-        if (m_program && m_screenSizeLocation >= 0)
+        if (m_program)
         {
             glUseProgram(m_program);
-            glUniform2f(m_screenSizeLocation, static_cast<float>(vp->Width), static_cast<float>(vp->Height));
+            if (m_screenSizeLocation >= 0)
+                glUniform2f(m_screenSizeLocation, static_cast<float>(vp->Width), static_cast<float>(vp->Height));
+            if (m_screenSpaceLocation >= 0)
+                glUniform1i(m_screenSpaceLocation, m_switchUnlit ? 1 : 0);
+        }
+        return S_OK;
+    }
+
+    HRESULT SetSwitchUnlitMode(bool enabled)
+    {
+        m_switchUnlit = enabled;
+        if (m_program && m_screenSpaceLocation >= 0)
+        {
+            glUseProgram(m_program);
+            glUniform1i(m_screenSpaceLocation, enabled ? 1 : 0);
         }
         return S_OK;
     }
@@ -826,6 +857,8 @@ void main()
         {
         case 1: return GL_ZERO;
         case 2: return GL_ONE;
+        case 3: return GL_SRC_COLOR;
+        case 4: return GL_ONE_MINUS_SRC_COLOR;
         case 5: return GL_SRC_ALPHA;
         case 6: return GL_ONE_MINUS_SRC_ALPHA;
         case 7: return GL_DST_ALPHA;
@@ -911,11 +944,31 @@ void main()
         return S_OK;
     }
 
-    HRESULT DrawIndexedPrimitive(uint32_t, uint32_t, uint32_t, uint32_t startIndex, uint32_t primitiveCount)
+    HRESULT DrawIndexedPrimitive(
+        uint32_t primitiveType,
+        int32_t baseVertexIndex,
+        uint32_t minVertexIndex,
+        uint32_t numVertices,
+        uint32_t startIndex,
+        uint32_t primitiveCount)
     {
+        if (primitiveType != D3DPT_TRIANGLELIST || !m_indices || primitiveCount == 0)
+            return E_FAIL;
+
         RebuildVertexLayout();
-        glDrawElements(GL_TRIANGLES, (GLsizei)(primitiveCount * 3), GL_UNSIGNED_SHORT,
-                       reinterpret_cast<const void*>(uintptr_t(startIndex * sizeof(uint16_t))));
+
+        // R_SetStreamSource already points the VAO at the dynamic vertex allocation.
+        // The normal SP tess path therefore uses baseVertexIndex == 0.
+        if (baseVertexIndex != 0)
+            return E_FAIL;
+
+        (void)minVertexIndex;
+        (void)numVertices;
+        glDrawElements(
+            GL_TRIANGLES,
+            (GLsizei)(primitiveCount * 3),
+            GL_UNSIGNED_SHORT,
+            reinterpret_cast<const void*>(uintptr_t(startIndex * sizeof(uint16_t))));
         return S_OK;
     }
 
