@@ -497,8 +497,6 @@ template<typename ITEM_TYPE, size_t LIMIT>
 uint16 FX_PoolToHandle_Generic(FxPool<ITEM_TYPE>* poolArray, ITEM_TYPE* item)
 {
     static_assert((LIMIT * ITEM_TYPE::HANDLE_SCALE) <= 0xFFFF, "do not support huge pools at the moment");
-#endif // !__SWITCH__
-
     vassert(item && item >= &poolArray[0].item && item < &poolArray[LIMIT].item, "%p %p", poolArray, item);
     return ((char*)item - (char*)poolArray) / ITEM_TYPE::HANDLE_SCALE;
 }
