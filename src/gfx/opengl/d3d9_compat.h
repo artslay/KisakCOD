@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <vector>
 #include <cstring>
+#include <array>
 #include <algorithm>
 
 #ifndef __cdecl
@@ -195,6 +196,15 @@ using IDirect3DVertexDeclaration9 = KisakGLVertexDeclaration;
 using IDirect3DVertexBuffer9 = KisakGLBuffer;
 using IDirect3DIndexBuffer9 = KisakGLBuffer;
 
+struct KisakGLShader
+{
+    GLuint object = 0;
+    GLenum stage = 0;
+};
+
+using IDirect3DVertexShader9 = KisakGLShader;
+using IDirect3DPixelShader9 = KisakGLShader;
+
 struct KisakGLTexture
 {
     GLuint object = 0;
@@ -273,10 +283,75 @@ class IDirect3DDevice9
     IDirect3DVertexDeclaration9 *m_decl = nullptr;
     StreamBinding m_streams[16];
     IDirect3DIndexBuffer9 *m_indices = nullptr;
+    IDirect3DVertexShader9 *m_vertexShader = nullptr;
+    IDirect3DPixelShader9 *m_pixelShader = nullptr;
+    GLuint m_program = 0;
+    GLint m_textureStageLocation = -1;
+    GLint m_vsConstantsLocation = -1;
+    GLint m_psConstantsLocation = -1;
     std::array<std::array<float, 4>, 256> m_vsConstants{};
     std::array<std::array<float, 4>, 256> m_psConstants{};
     IDirect3DSurface9 *m_color = nullptr;
     IDirect3DSurface9 *m_depth = nullptr;
+
+    static GLuint CompileShader(GLenum stage, const char *source)
+    {
+        const GLuint shader = glCreateShader(stage);
+        glShaderSource(shader, 1, &source, nullptr);
+        glCompileShader(shader);
+        GLint ok = GL_FALSE;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &ok);
+        if (!ok)
+        {
+            glDeleteShader(shader);
+            return 0;
+        }
+        return shader;
+    }
+
+    void RebuildProgram()
+    {
+        if (!m_vertexShader || !m_pixelShader)
+            return;
+
+        const GLuint program = glCreateProgram();
+        glAttachShader(program, m_vertexShader->object);
+        glAttachShader(program, m_pixelShader->object);
+        glLinkProgram(program);
+
+        GLint ok = GL_FALSE;
+        glGetProgramiv(program, GL_LINK_STATUS, &ok);
+        if (!ok)
+        {
+            glDeleteProgram(program);
+            return;
+        }
+
+        if (m_program)
+            glDeleteProgram(m_program);
+        m_program = program;
+        glUseProgram(m_program);
+
+        m_textureStageLocation = glGetUniformLocation(m_program, "uTextureStage");
+        m_vsConstantsLocation = glGetUniformLocation(m_program, "u_vsConstants[0]");
+        m_psConstantsLocation = glGetUniformLocation(m_program, "u_psConstants[0]");
+
+        const GLint samplerBase = glGetUniformLocation(m_program, "uTextures[0]");
+        if (samplerBase >= 0)
+        {
+            GLint samplers[16];
+            for (int i = 0; i < 16; ++i)
+                samplers[i] = i;
+            glUniform1iv(samplerBase, 16, samplers);
+        }
+
+        if (m_textureStageLocation >= 0)
+            glUniform1i(m_textureStageLocation, 0);
+        if (m_vsConstantsLocation >= 0)
+            glUniform4fv(m_vsConstantsLocation, 256, &m_vsConstants[0][0]);
+        if (m_psConstantsLocation >= 0)
+            glUniform4fv(m_psConstantsLocation, 256, &m_psConstants[0][0]);
+    }
 
     void BindRenderTargets()
     {
@@ -404,6 +479,9 @@ class IDirect3DDevice9
 public:
     ~IDirect3DDevice9()
     {
+        if (m_program) glDeleteProgram(m_program);
+        if (m_vertexShader) glDeleteShader(m_vertexShader->object);
+        if (m_pixelShader) glDeleteShader(m_pixelShader->object);
         if (m_color)
             m_color->Release();
         if (m_depth)
@@ -570,12 +648,82 @@ public:
 
     HRESULT SetTexture(uint32_t stage, IDirect3DBaseTexture9* tex)
     {
+        if (stage >= 16)
+            return E_FAIL;
         glActiveTexture(GL_TEXTURE0 + stage);
         if (tex)
             glBindTexture(tex->target, tex->object);
         else
             glBindTexture(GL_TEXTURE_2D, 0);
+        if (m_program)
+        {
+            glUseProgram(m_program);
+            if (m_textureStageLocation >= 0)
+                glUniform1i(m_textureStageLocation, static_cast<GLint>(stage));
+        }
         return S_OK;
+    }
+
+    HRESULT CreateVertexShader(const uint32_t*, IDirect3DVertexShader9 **out)
+    {
+        if (!out)
+            return E_FAIL;
+        static const char source[] = R"(#version 430 core
+layout(location=0) in vec4 aPosition;
+layout(location=4) in vec2 aTexCoord;
+layout(location=12) in vec4 aColor;
+out vec2 vTexCoord;
+out vec4 vColor;
+uniform vec4 u_vsConstants[256];
+void main()
+{
+    gl_Position = aPosition;
+    vTexCoord = aTexCoord;
+    vColor = aColor;
+}
+)";
+        const GLuint object = CompileShader(GL_VERTEX_SHADER, source);
+        if (!object)
+            return E_FAIL;
+        *out = new IDirect3DVertexShader9{object, GL_VERTEX_SHADER};
+        return S_OK;
+    }
+
+    HRESULT CreatePixelShader(const uint32_t*, IDirect3DPixelShader9 **out)
+    {
+        if (!out)
+            return E_FAIL;
+        static const char source[] = R"(#version 430 core
+in vec2 vTexCoord;
+in vec4 vColor;
+out vec4 FragColor;
+uniform sampler2D uTextures[16];
+uniform int uTextureStage;
+uniform vec4 u_psConstants[256];
+void main()
+{
+    FragColor = vColor * texture(uTextures[uTextureStage], vTexCoord);
+}
+)";
+        const GLuint object = CompileShader(GL_FRAGMENT_SHADER, source);
+        if (!object)
+            return E_FAIL;
+        *out = new IDirect3DPixelShader9{object, GL_FRAGMENT_SHADER};
+        return S_OK;
+    }
+
+    HRESULT SetVertexShader(IDirect3DVertexShader9 *shader)
+    {
+        m_vertexShader = shader;
+        RebuildProgram();
+        return shader ? S_OK : E_FAIL;
+    }
+
+    HRESULT SetPixelShader(IDirect3DPixelShader9 *shader)
+    {
+        m_pixelShader = shader;
+        RebuildProgram();
+        return shader ? S_OK : E_FAIL;
     }
 
     HRESULT SetVertexShaderConstantF(uint32_t dest, const float *data, uint32_t rowCount)
@@ -583,6 +731,11 @@ public:
         if (!data || dest + rowCount > m_vsConstants.size())
             return E_FAIL;
         std::memcpy(&m_vsConstants[dest], data, rowCount * sizeof(m_vsConstants[0]));
+        if (m_program && m_vsConstantsLocation >= 0)
+        {
+            glUseProgram(m_program);
+            glUniform4fv(m_vsConstantsLocation, 256, &m_vsConstants[0][0]);
+        }
         return S_OK;
     }
 
@@ -591,6 +744,11 @@ public:
         if (!data || dest + rowCount > m_psConstants.size())
             return E_FAIL;
         std::memcpy(&m_psConstants[dest], data, rowCount * sizeof(m_psConstants[0]));
+        if (m_program && m_psConstantsLocation >= 0)
+        {
+            glUseProgram(m_program);
+            glUniform4fv(m_psConstantsLocation, 256, &m_psConstants[0][0]);
+        }
         return S_OK;
     }
 
