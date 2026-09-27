@@ -19,6 +19,14 @@ void __cdecl AssertUninitializedRenderTarget(const GfxRenderTarget *renderTarget
     iassert(renderTarget->height == 0);
 }
 
+#ifdef __SWITCH__
+bool __cdecl R_IsDepthStencilFormatOk(_D3DFORMAT, _D3DFORMAT depthStencilFormat)
+{
+    return depthStencilFormat == D3DFMT_D16 ||
+           depthStencilFormat == D3DFMT_D24X8 ||
+           depthStencilFormat == D3DFMT_D24S8;
+}
+#else
 bool __cdecl R_IsDepthStencilFormatOk(_D3DFORMAT renderTargetFormat, _D3DFORMAT depthStencilFormat)
 {
     return dx.d3d9->CheckDeviceFormat(
@@ -37,12 +45,18 @@ bool __cdecl R_IsDepthStencilFormatOk(_D3DFORMAT renderTargetFormat, _D3DFORMAT 
             depthStencilFormat) >= 0;
 }
 
+#endif
+
 int __cdecl R_GetDepthStencilFormat(_D3DFORMAT renderTargetFormat)
 {
+#ifdef __SWITCH__
+    (void)renderTargetFormat;
+    return D3DFMT_D24S8;
+#else
     if (R_IsDepthStencilFormatOk(renderTargetFormat, D3DFMT_D24FS8))
         return 83;
-    else
-        return 75;
+    return 75;
+#endif
 }
 
 void __cdecl R_InitRenderTargets()
@@ -469,6 +483,30 @@ const char *__cdecl R_DescribeFormat(_D3DFORMAT format)
 
 void __cdecl R_InitFrameBufferRenderTarget_Win32(GfxRenderTarget *renderTarget)
 {
+#ifdef __SWITCH__
+    iassert(renderTarget);
+    renderTarget->width = vidConfig.displayWidth;
+    renderTarget->height = vidConfig.displayHeight;
+
+    renderTarget->surface.color = new IDirect3DSurface9;
+    renderTarget->surface.color->texture = nullptr;
+    renderTarget->surface.color->level = 0;
+
+    if (!g_allocateMinimalResources)
+    {
+        int depthWidth, depthHeight;
+        R_GetFrameBufferDepthStencilRes(&depthWidth, &depthHeight);
+        if (dx.device->CreateDepthStencilSurface(
+                depthWidth, depthHeight, dx.depthStencilFormat,
+                D3DMULTISAMPLE_NONE, 0, 0,
+                &renderTarget->surface.depthStencil, nullptr) < 0)
+        {
+            Com_Error(ERR_FATAL, "Couldn't create a %i x %i depth-stencil surface",
+                      depthWidth, depthHeight);
+        }
+    }
+#else
+{
     const char *v1; // eax
     const char *v2; // eax
     const char *v3; // eax
@@ -540,8 +578,28 @@ void __cdecl R_InitFrameBufferRenderTarget_Win32(GfxRenderTarget *renderTarget)
     }
 }
 
+
+#endif
+}
+
 _D3DFORMAT __cdecl R_InitFrameBufferRenderTarget()
 {
+#ifdef __SWITCH__
+    R_InitFrameBufferRenderTarget_Win32(&gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER]);
+    R_ShareRenderTarget(R_RENDERTARGET_FRAME_BUFFER, R_RENDERTARGET_SCENE);
+    Com_Printf(CON_CHANNEL_GFX, "OpenGL frame buffer: %i x %i\n",
+               vidConfig.displayWidth, vidConfig.displayHeight);
+
+    if (!g_allocateMinimalResources)
+    {
+        R_InitFullscreenRenderTargetImage(
+            9, FULLSCREEN_SCENE, 0, D3DFMT_A8R8G8B8,
+            RENDERTARGET_USAGE_RENDER,
+            &gfxRenderTargets[R_RENDERTARGET_RESOLVED_SCENE]);
+    }
+    return D3DFMT_A8R8G8B8;
+#else
+
     const char *v0; // eax
     const char *v1; // eax
     _D3DSURFACE_DESC surfaceDesc; // [esp+0h] [ebp-20h] BYREF
@@ -563,6 +621,7 @@ _D3DFORMAT __cdecl R_InitFrameBufferRenderTarget()
             RENDERTARGET_USAGE_RENDER,
             &gfxRenderTargets[R_RENDERTARGET_RESOLVED_SCENE]);
     return surfaceDesc.Format;
+#endif
 }
 
 void __cdecl R_ShutdownRenderTargets()
