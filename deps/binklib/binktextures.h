@@ -69,12 +69,7 @@ Should drop in really quickly and it hides a ton of platform specific ugliness!
 #include "bink.h"
 
 #ifdef __SWITCH__
-#ifndef LPDIRECT3DTEXTURE9
-using LPDIRECT3DTEXTURE9 = IDirect3DTexture9*;
-#endif
-#ifndef LPDIRECT3DDEVICE9
-using LPDIRECT3DDEVICE9 = IDirect3DDevice9*;
-#endif
+#include <gfx/opengl/d3d9_compat.h>
 #endif
 
 #if defined(__RADPS3__) || defined(__RADWII__) || defined(__RADNGC__)
