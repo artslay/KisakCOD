@@ -1072,6 +1072,8 @@ struct playerState_s // sizeof=0x2F64
 static_assert(sizeof(playerState_s) == 0x2F64);
 #endif
 
+#endif // KISAK_MP playerState_s
+
 #if defined(KISAK_SP) && !defined(__SWITCH__)
 enum pmtype_t : __int32
 {
@@ -2509,8 +2511,6 @@ struct weaponState_t // sizeof=0x54
 #ifndef __SWITCH__
 static_assert(sizeof(weaponState_t) == 0x54);
 #endif
-#endif // !__SWITCH__
-
 void __cdecl TRACK_bg_weapons();
 void __cdecl BG_LoadPenetrationDepthTable();
 void __cdecl BG_ParsePenetrationDepthTable(const char *penetrateType, float *depthTable, char *buffer);
