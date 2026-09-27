@@ -7142,6 +7142,14 @@ void __cdecl Mark_FontHandle()
 
 void __cdecl Load_XAssetHeader(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    static uint32_t switchAssetLogCount = 0;
+    if (switchAssetLogCount < 64)
+    {
+        Com_Printf(CON_CHANNEL_FILES, "Switch DB: XAsset type %d\\n", static_cast<int>(varXAsset->type));
+        ++switchAssetLogCount;
+    }
+#endif
     switch (varXAsset->type)
     {
     case ASSET_TYPE_PHYSPRESET:
