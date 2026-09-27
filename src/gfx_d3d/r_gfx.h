@@ -56,10 +56,13 @@ struct GfxPackedVertex // sizeof=0x20
     PackedUnitVec normal;
     PackedUnitVec tangent;
 };
-#ifndef __SWITCH__
 // Native ARM64 layout differs from the original 32-bit runtime; serialized layouts are handled by Switch loaders.
 
+#ifndef __SWITCH__
+
 static_assert(sizeof(GfxPackedVertex) == 32);
+
+#endif
 
 struct GfxPackedVertexNormal // sizeof=0x8
 {                                       // ...
@@ -251,7 +254,9 @@ struct GfxImage // sizeof=0x24
     bool delayLoadPixels;
     const char* name;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(GfxImage) == 36);
+#endif
 
 struct GfxCodeMatrices // sizeof=0x800
 {                                       // ...
@@ -403,7 +408,9 @@ struct GfxWorldDpvsStatic // sizeof=0x68
     uint32_t* surfaceCastsSunShadow; // ...
     volatile int usageCount;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(GfxWorldDpvsStatic) == 0x68);
+#endif
 
 using EntVisData = byte *[3];
 
@@ -680,86 +687,11 @@ struct GfxPixelShaderLoadDef // sizeof=0x8
     uint16_t programSize;
     uint16_t loadForRenderer;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(GfxPixelShaderLoadDef) == 8);
-#endif // !__SWITCH__
-
-#ifdef __SWITCH__
-struct GfxVertexBufferState
-{
-    volatile uint32_t used;
-    int total;
-    IDirect3DVertexBuffer9* buffer;
-    uint8_t* verts;
-};
-struct GfxMeshData
-{
-    uint32_t indexCount;
-    uint32_t totalIndexCount;
-    uint16_t* indices;
-    GfxVertexBufferState vb;
-    uint32_t vertSize;
-};
-struct GfxLightDef
-{
-    const char* name;
-    struct GfxLightImage { GfxImage* image; uint8_t samplerState; uint8_t pad[3]; } attenuation;
-    int lmapLookupStart;
-};
-struct GfxLight
-{
-    uint8_t type;
-    uint8_t canUseShadowMap;
-    uint8_t unused[2];
-    float color[3];
-    float dir[3];
-    float origin[3];
-    float radius;
-    float cosHalfFovOuter;
-    float cosHalfFovInner;
-    int exponent;
-    uint32_t spotShadowIndex;
-    GfxLightDef* def;
-};
-struct GfxVertexShaderLoadDef
-{
-    void* program;
-    uint16_t programSize;
-    uint16_t loadForRenderer;
-};
-struct GfxPixelShaderLoadDef
-{
-    void* program;
-    uint16_t programSize;
-    uint16_t loadForRenderer;
-};
 #endif
 
-#ifdef __SWITCH__
-// Runtime versions of types whose original serialized layouts are 32-bit-only.
-struct GfxDrawSurfFields
-{
-    uint64_t objectId : 16;
-    uint64_t reflectionProbeIndex : 8;
-    uint64_t customIndex : 5;
-    uint64_t materialSortedIndex : 11;
-    uint64_t prepass : 2;
-    uint64_t primaryLightIndex : 8;
-    uint64_t surfType : 4;
-    uint64_t primarySortKey : 6;
-    uint64_t unused : 4;
-};
-union GfxDrawSurf
-{
-    GfxDrawSurfFields fields;
-    uint64_t packed;
-    uint32_t packed_low;
-};
 
-struct GfxStateBits
-{
-    uint32_t loadBits[2];
-};
-#endif
 
 struct GfxDepthOfField // sizeof=0x20
 {                                       // ...
