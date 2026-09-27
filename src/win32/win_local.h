@@ -313,11 +313,14 @@ struct sysEvent_t // sizeof=0x18
 	void *evPtr;                        // ...
 };
 
+#ifndef KISAK_FASTCRITSEC_DEFINED
+#define KISAK_FASTCRITSEC_DEFINED
 struct FastCriticalSection
 {
 	volatile uint32_t readCount;
 	volatile uint32_t writeCount;
 };
+#endif
 
 void Sys_InitializeCriticalSections();
 void Sys_EnterCriticalSection(int critSect);
