@@ -37,7 +37,7 @@ uint8_t* __cdecl Hunk_AllocAlign(uint32_t size, int32_t alignment, const char* n
 uint8_t* __cdecl Hunk_AllocLow(uint32_t size, const char* name, int32_t type);
 uint8_t* __cdecl Hunk_AllocLowAlign(uint32_t size, int32_t alignment, const char* name, int32_t type);
 uint32_t* __cdecl Hunk_AllocateTempMemory(int32_t size, const char* name);
-uint32_t __cdecl Hunk_AllocateTempMemoryHigh(int32_t size, const char* name);
+uint32_t* __cdecl Hunk_AllocateTempMemoryHigh(int32_t size, const char* name);
 void __cdecl Hunk_FreeTempMemory(char* buf);
 void __cdecl Hunk_ClearTempMemory();
 void Hunk_ClearTempMemoryHigh();
