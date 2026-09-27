@@ -179,8 +179,17 @@ struct KisakGLTexture
     uint32_t width = 0, height = 0, depth = 1;
     uint32_t mipLevels = 1;
     _D3DFORMAT sourceFormat = D3DFMT_UNKNOWN;
+    uint32_t refs = 1;
+
+    void AddRef() { ++refs; }
+
     void Release()
     {
+        if (refs > 1)
+        {
+            --refs;
+            return;
+        }
         if (object)
             glDeleteTextures(1, &object);
         delete this;
@@ -196,7 +205,28 @@ struct IDirect3DSurface9
 {
     KisakGLTexture *texture = nullptr;
     uint32_t level = 0;
-    void Release() { delete this; }
+    uint32_t refs = 1;
+
+    void AddRef()
+    {
+        ++refs;
+        if (texture)
+            texture->AddRef();
+    }
+
+    void Release()
+    {
+        if (refs > 1)
+        {
+            --refs;
+            if (texture)
+                texture->Release();
+            return;
+        }
+        if (texture)
+            texture->Release();
+        delete this;
+    }
 };
 struct IDirect3DQuery9 { void Release() { delete this; } };
 struct IDirect3D9 {};
@@ -204,7 +234,178 @@ struct IDirect3D9 {};
 
 class IDirect3DDevice9
 {
+    GLuint m_fbo = 0;
+    IDirect3DSurface9 *m_color = nullptr;
+    IDirect3DSurface9 *m_depth = nullptr;
+
+    void BindRenderTargets()
+    {
+        if (!m_color && !m_depth)
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            return;
+        }
+
+        if (!m_fbo)
+            glGenFramebuffers(1, &m_fbo);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+
+        if (m_color && m_color->texture)
+        {
+            glFramebufferTexture2D(
+                GL_FRAMEBUFFER,
+                GL_COLOR_ATTACHMENT0,
+                m_color->texture->target,
+                m_color->texture->object,
+                (GLint)m_color->level);
+            glDrawBuffer(GL_COLOR_ATTACHMENT0);
+            glReadBuffer(GL_COLOR_ATTACHMENT0);
+        }
+        else
+        {
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+        }
+
+        if (m_depth && m_depth->texture)
+        {
+            const bool stencil = m_depth->texture->sourceFormat == D3DFMT_D24S8;
+            glFramebufferTexture2D(
+                GL_FRAMEBUFFER,
+                stencil ? GL_DEPTH_STENCIL_ATTACHMENT : GL_DEPTH_ATTACHMENT,
+                m_depth->texture->target,
+                m_depth->texture->object,
+                (GLint)m_depth->level);
+
+            if (!stencil)
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
+        }
+        else
+        {
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
+        }
+    }
+
 public:
+    ~IDirect3DDevice9()
+    {
+        if (m_color)
+            m_color->Release();
+        if (m_depth)
+            m_depth->Release();
+        if (m_fbo)
+            glDeleteFramebuffers(1, &m_fbo);
+    }
+
+    HRESULT CreateDepthStencilSurface(
+        uint32_t width, uint32_t height, _D3DFORMAT format,
+        _D3DMULTISAMPLE_TYPE, uint32_t, uint32_t,
+        IDirect3DSurface9 **out, void*)
+    {
+        if (!out || !width || !height)
+            return E_FAIL;
+
+        GLenum internal = GL_DEPTH_COMPONENT24;
+        if (format == D3DFMT_D16)
+            internal = GL_DEPTH_COMPONENT16;
+        else if (format == D3DFMT_D24S8)
+            internal = GL_DEPTH24_STENCIL8;
+        else if (format == D3DFMT_D24X8)
+            internal = GL_DEPTH_COMPONENT24;
+        else
+            return E_FAIL;
+
+        auto *tex = new KisakGLTexture;
+        tex->target = GL_TEXTURE_2D;
+        tex->internalFormat = internal;
+        tex->uploadFormat = format == D3DFMT_D24S8 ? GL_DEPTH_STENCIL : GL_DEPTH_COMPONENT;
+        tex->uploadType = format == D3DFMT_D16 ? GL_UNSIGNED_SHORT :
+                          format == D3DFMT_D24S8 ? GL_UNSIGNED_INT_24_8 : GL_UNSIGNED_INT;
+        tex->width = width;
+        tex->height = height;
+        tex->sourceFormat = format;
+
+        glGenTextures(1, &tex->object);
+        glBindTexture(GL_TEXTURE_2D, tex->object);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, internal, (GLsizei)width, (GLsizei)height, 0,
+                     tex->uploadFormat, tex->uploadType, nullptr);
+
+        auto *surface = new IDirect3DSurface9;
+        surface->texture = tex;
+        surface->level = 0;
+        *out = surface;
+        return S_OK;
+    }
+
+    HRESULT CreateRenderTarget(
+        uint32_t width, uint32_t height, _D3DFORMAT format,
+        _D3DMULTISAMPLE_TYPE, uint32_t, uint32_t,
+        IDirect3DSurface9 **out, void*)
+    {
+        if (!out || !width || !height)
+            return E_FAIL;
+
+        GLenum internal = GL_RGBA8;
+        if (format == D3DFMT_R32F)
+            internal = GL_R32F;
+        else if (format != D3DFMT_A8R8G8B8 && format != D3DFMT_X8R8G8B8)
+            return E_FAIL;
+
+        auto *tex = new KisakGLTexture;
+        tex->target = GL_TEXTURE_2D;
+        tex->internalFormat = internal;
+        tex->uploadFormat = format == D3DFMT_R32F ? GL_RED : GL_RGBA;
+        tex->uploadType = format == D3DFMT_R32F ? GL_FLOAT : GL_UNSIGNED_BYTE;
+        tex->width = width;
+        tex->height = height;
+        tex->sourceFormat = format;
+
+        glGenTextures(1, &tex->object);
+        glBindTexture(GL_TEXTURE_2D, tex->object);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, internal, (GLsizei)width, (GLsizei)height, 0,
+                     tex->uploadFormat, tex->uploadType, nullptr);
+
+        auto *surface = new IDirect3DSurface9;
+        surface->texture = tex;
+        surface->level = 0;
+        *out = surface;
+        return S_OK;
+    }
+
+    HRESULT SetRenderTarget(uint32_t index, IDirect3DSurface9 *surface)
+    {
+        if (index != 0)
+            return E_FAIL;
+        if (m_color)
+            m_color->Release();
+        m_color = surface;
+        if (m_color)
+            m_color->AddRef();
+        BindRenderTargets();
+        return S_OK;
+    }
+
+    HRESULT SetDepthStencilSurface(IDirect3DSurface9 *surface)
+    {
+        if (m_depth)
+            m_depth->Release();
+        m_depth = surface;
+        if (m_depth)
+            m_depth->AddRef();
+        BindRenderTargets();
+        return S_OK;
+    }
     HRESULT CreateVertexBuffer(uint32_t size, uint32_t, uint32_t, uint32_t, IDirect3DVertexBuffer9** out, void*)
     {
         if (!out) return E_FAIL;
