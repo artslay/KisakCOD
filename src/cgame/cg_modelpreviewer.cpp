@@ -86,7 +86,7 @@ void __cdecl CG_ModPrvUpdateMru(const dvar_s **mruDvars, const char **stringTabl
         if (v6 && !*(_BYTE *)(*v3)->current.integer)
             break;
         ++v6;
-        *(const dvar_s **)((char *)v3 + (unsigned int)v7) = (const dvar_s *)(*v3)->current.integer;
+        *(const dvar_s **)((char *)v3 + (uintptr_t)v7) = (const dvar_s *)(uintptr_t)(*v3)->current.integer;
         ++v3;
     } while (v6 < 4);
     stringTable[v6] = 0;
