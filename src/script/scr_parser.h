@@ -13,6 +13,7 @@ struct OpcodeLookup // sizeof=0x18
 };
 #ifndef KISAK_SWITCH
 static_assert(sizeof(OpcodeLookup) == 0x18);
+#endif
 
 struct Scr_SourcePos_t // sizeof=0xC
 {                                       // ...
@@ -20,7 +21,9 @@ struct Scr_SourcePos_t // sizeof=0xC
     int lineNum;                        // ...
     uint32_t sourcePos;             // ...
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(Scr_SourcePos_t) == 0xC);
+#endif
 
 struct SourceBufferInfo // sizeof=0x2C
 {
@@ -39,21 +42,27 @@ struct SourceBufferInfo // sizeof=0x2C
     float totalTime;
     float totalBuiltIn;
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(SourceBufferInfo) == 44);
+#endif
 
 struct SourceLookup // sizeof=0x8
 {
     uint32_t sourcePos;
     int type;
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(SourceLookup) == 8);
+#endif
 
 struct SaveSourceBufferInfo // sizeof=0x8
 {
     char *sourceBuf;
     int len;
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(SaveSourceBufferInfo) == 0x8);
+#endif
 
 struct scrParserGlob_t // sizeof=0x34
 {                                       // ...
@@ -71,7 +80,9 @@ struct scrParserGlob_t // sizeof=0x34
     int delayedSourceIndex;             // ...
     int threadStartSourceIndex;         // ...
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(scrParserGlob_t) == 0x34);
+#endif
 
 struct scrParserPub_t // sizeof=0x10
 {                                       // ...
@@ -80,7 +91,9 @@ struct scrParserPub_t // sizeof=0x10
     const char *scriptfilename;         // ...
     const char *sourceBuf;              // ...
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(scrParserPub_t) == 0x10);
+#endif
 
 void __cdecl TRACK_scr_parser();
 void __cdecl Scr_InitOpcodeLookup();
@@ -157,4 +170,3 @@ extern scrParserGlob_t scrParserGlob;
 extern scrParserPub_t scrParserPub;
 extern char g_EndPos;
 extern bool g_loadedImpureScript;
-#endif // KISAK_SWITCH legacy 32-bit layout asserts
