@@ -1087,6 +1087,174 @@ static_assert(sizeof(playerState_s) == 0x2F64);
 #endif // KISAK_MP
 #endif // !__SWITCH__
 
+#if defined(KISAK_SP) && defined(__SWITCH__)
+// Switch SP runtime definitions that were historically inside the 32-bit layout block.
+struct shellshock_parms_t_screenblend
+{
+    int32_t blurredFadeTime;
+    int32_t blurredEffectTime;
+    int32_t flashWhiteFadeTime;
+    int32_t flashShotFadeTime;
+    ShockViewTypes type;
+};
+
+struct shellshock_parms_t_view
+{
+    int32_t fadeTime;
+    float kickRate;
+    float kickRadius;
+};
+
+struct shellshock_parms_t_sound
+{
+    bool affect;
+    char loop[64];
+    char loopSilent[64];
+    char end[64];
+    char endAbort[64];
+    int32_t fadeInTime;
+    int32_t fadeOutTime;
+    float drylevel;
+    float wetlevel;
+    char roomtype[16];
+    float channelvolume[64];
+    int32_t modEndDelay;
+    int32_t loopFadeTime;
+    int32_t loopEndDelay;
+};
+
+struct shellshock_parms_t_lookcontrol
+{
+    bool affect;
+    int32_t fadeTime;
+    float mouseSensitivity;
+    float maxPitchSpeed;
+    float maxYawSpeed;
+};
+
+struct shellshock_parms_t_movement
+{
+    bool affect;
+};
+
+struct shellshock_parms_t
+{
+    shellshock_parms_t_screenblend screenBlend;
+    shellshock_parms_t_view view;
+    shellshock_parms_t_sound sound;
+    shellshock_parms_t_lookcontrol lookControl;
+    shellshock_parms_t_movement movement;
+};
+
+struct shellshock_t
+{
+    const shellshock_parms_t *parms;
+    int32_t startTime;
+    int32_t duration;
+    int32_t loopEndTime;
+    float sensitivity;
+    float viewDelta[2];
+    int32_t hasSavedScreen;
+};
+
+struct clientControllers_t
+{
+    float angles[6][3];
+    float tag_origin_angles[3];
+    float tag_origin_offset[3];
+};
+
+struct MantleState
+{
+    float yaw;
+    int32_t timer;
+    int32_t transIndex;
+    int32_t flags;
+};
+
+enum MantleAnims : __int32
+{
+    MANTLE_ROOT = 0x0,
+    MANTLE_UP_57 = 0x1,
+    MANTLE_UP_51 = 0x2,
+    MANTLE_UP_45 = 0x3,
+    MANTLE_UP_39 = 0x4,
+    MANTLE_UP_33 = 0x5,
+    MANTLE_UP_27 = 0x6,
+    MANTLE_UP_21 = 0x7,
+    MANTLE_OVER_HIGH = 0x8,
+    MANTLE_OVER_MID = 0x9,
+    MANTLE_OVER_LOW = 0xA,
+    MANTLE_ANIM_COUNT = 0xB,
+    MANTLE_UP_FIRST = 0x1,
+    MANTLE_UP_LAST = 0x7,
+    MANTLE_UP_COUNT = 0x7,
+    MANTLE_OVER_FIRST = 0x8,
+    MANTLE_OVER_LAST = 0xA,
+    MANTLE_OVER_COUNT = 0x3,
+};
+
+enum PlayerSpreadOverrideState : __int32
+{
+    PSOS_DISABLED = 0x0,
+    PSOS_RESETTING = 0x1,
+    PSOS_ENABLED = 0x2,
+};
+
+struct playerState_s_hud
+{
+    hudelem_s elem[256];
+};
+
+enum ActionSlotType : __int32
+{
+    ACTIONSLOTTYPE_DONOTHING = 0x0,
+    ACTIONSLOTTYPE_SPECIFYWEAPON = 0x1,
+    ACTIONSLOTTYPE_ALTWEAPONTOGGLE = 0x2,
+    ACTIONSLOTTYPE_NIGHTVISION = 0x3,
+    ACTIONSLOTTYPECOUNT = 0x4,
+};
+
+struct ActionSlotParam_SpecifyWeapon
+{
+    uint32_t index;
+};
+
+struct ActionSlotParam
+{
+    ActionSlotParam_SpecifyWeapon specifyWeapon;
+};
+
+struct SprintState
+{
+    int32_t sprintButtonUpRequired;
+    int32_t sprintDelay;
+    int32_t lastSprintStart;
+    int32_t lastSprintEnd;
+    int32_t sprintStartMaxLength;
+};
+
+enum objectiveState_t : __int32
+{
+    OBJST_EMPTY = 0x0,
+    OBJST_ACTIVE = 0x1,
+    OBJST_INVISIBLE = 0x2,
+    OBJST_DONE = 0x3,
+    OBJST_CURRENT = 0x4,
+    OBJST_FAILED = 0x5,
+    OBJST_NUMSTATES = 0x6,
+};
+
+struct objective_t
+{
+    objectiveState_t state;
+    float origin[3];
+    int32_t entNum;
+    int32_t teamNum;
+    int32_t icon;
+};
+#endif
+
 #if defined(KISAK_SP) && !defined(__SWITCH__)
 enum pmtype_t : __int32
 {
@@ -1897,24 +2065,7 @@ static_assert(sizeof(viewLerpWaypoint_s) == 0xC);
 // bg_jump
 
 struct pmove_t;
-#ifdef __SWITCH__
-struct pml_t // Switch runtime movement state
-{
-    float forward[3];
-    float right[3];
-    float up[3];
-    float frametime;
-    int32_t msec;
-    int32_t walking;
-    int32_t groundPlane;
-    int32_t almostGroundPlane;
-    trace_t groundTrace;
-    float impactSpeed;
-    float previous_origin[3];
-    float previous_velocity[3];
-};
-static_assert(sizeof(pml_t) == 0x88);
-#else
+#ifndef __SWITCH__
 struct pml_t;
 #endif
 struct playerState_s;
@@ -2443,7 +2594,9 @@ struct BulletTraceResults // sizeof=0x44
     // padding byte
     int32_t depthSurfaceType;               // ...
 };
+#ifndef __SWITCH__
 static_assert(sizeof(BulletTraceResults) == 0x44);
+#endif
 
 struct viewState_t // sizeof=0x24
 {                                       // ...
@@ -2457,7 +2610,9 @@ struct viewState_t // sizeof=0x24
     float fLastIdleFactor;              // ...
     int32_t*weapIdleTime;                  // ...
 };
+#ifndef __SWITCH__
 static_assert(sizeof(viewState_t) == 0x24);
+#endif
 
 struct weaponState_t // sizeof=0x54
 {                                       // ...
@@ -2475,7 +2630,9 @@ struct weaponState_t // sizeof=0x54
     float swayAngles[3];                // ...
     int32_t*weapIdleTime;                  // ...
 };
+#ifndef __SWITCH__
 static_assert(sizeof(weaponState_t) == 0x54);
+#endif
 #if defined(KISAK_SP) && defined(__SWITCH__)
 // HUD element layout is needed by the Switch SP playerState HUD block.
 struct hudelem_s
@@ -2524,9 +2681,6 @@ struct hudelem_s
     int soundID;
     int flags;
 };
-#endif
-
-#endif
 
 void __cdecl TRACK_bg_weapons();
 void __cdecl BG_LoadPenetrationDepthTable();
@@ -2548,294 +2702,3 @@ uint32_t __cdecl BG_GetNumWeapons();
 int32_t __cdecl BG_GetSharedAmmoCapSize(uint32_t capIndex);
 uint32_t __cdecl BG_FindWeaponIndexForName(const char *name);
 uint32_t __cdecl BG_GetWeaponIndexForName(const char *name, void(__cdecl *regWeap)(uint32_t));
-uint32_t __cdecl BG_SetupWeaponDef(WeaponDef *weapDef, void(__cdecl *regWeap)(uint32_t));
-void __cdecl BG_SetupWeaponAlts(uint32_t weapIndex, void(__cdecl *regWeap)(uint32_t));
-uint32_t __cdecl BG_GetViewmodelWeaponIndex(const playerState_s *ps);
-int32_t __cdecl BG_GetFirstAvailableOffhand(const playerState_s *ps, int32_t offhandClass);
-int32_t __cdecl BG_GetFirstEquippedOffhand(const playerState_s *ps, int32_t offhandClass);
-int32_t __cdecl BG_IsAimDownSightWeapon(uint32_t weaponIndex);
-bool __cdecl BG_CanPlayerHaveWeapon(uint32_t weaponIndex);
-bool __cdecl BG_ValidateWeaponNumber(uint32_t weaponIndex);
-bool __cdecl BG_IsWeaponValid(const playerState_s *ps, uint32_t weaponIndex);
-bool __cdecl BG_WeaponBlocksProne(uint32_t weapIndex);
-int32_t __cdecl BG_TakePlayerWeapon(playerState_s *ps, uint32_t weaponIndex, int32_t takeAwayAmmo);
-int32_t __cdecl AmmoAfterWeaponRemoved(const playerState_s *ps, uint32_t weaponIndex);
-int32_t __cdecl BG_GetAmmoPlayerMax(const playerState_s *ps, uint32_t weaponIndex, uint32_t weaponIndexToSkip);
-int32_t __cdecl BG_GetMaxPickupableAmmo(const playerState_s *ps, uint32_t weaponIndex);
-int32_t __cdecl BG_GetTotalAmmoReserve(const playerState_s *ps, uint32_t weaponIndex);
-void __cdecl BG_GetSpreadForWeapon(
-    const playerState_s *ps,
-    const WeaponDef *weapDef,
-    float *minSpread,
-    float *maxSpread);
-void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml);
-bool __cdecl PM_IsAdsAllowed(playerState_s *ps, pml_t *pml);
-void __cdecl PM_ExitAimDownSight(playerState_s *ps);
-void __cdecl PM_UpdateAimDownSightLerp(pmove_t *pm, pml_t *pml);
-bool __cdecl BG_UsingSniperScope(playerState_s *ps);
-int32_t __cdecl PM_InteruptWeaponWithProneMove(playerState_s *ps);
-int32_t __cdecl BG_ClipForWeapon(uint32_t weapon);
-int32_t __cdecl BG_AmmoForWeapon(uint32_t weapon);
-int32_t __cdecl BG_WeaponIsClipOnly(uint32_t weapon);
-int32_t __cdecl BG_WeaponAmmo(const playerState_s *ps, uint32_t weapon);
-int32_t __cdecl PM_WeaponAmmoAvailable(playerState_s *ps);
-void __cdecl PM_AdjustAimSpreadScale(pmove_t *pm, pml_t *pml);
-bool __cdecl ShotLimitReached(playerState_s *ps, WeaponDef *weapDef);
-int32_t __cdecl PM_GetWeaponFireButton(uint32_t weapon);
-void __cdecl PM_Weapon_Idle(playerState_s *ps);
-void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml);
-void __cdecl PM_UpdateHoldBreath(pmove_t *pm, pml_t *pml);
-void __cdecl PM_StartHoldBreath(playerState_s *ps);
-void __cdecl PM_EndHoldBreath(playerState_s *ps);
-int32_t __cdecl PM_Weapon_CheckForRechamber(playerState_s *ps, int32_t delayedAction);
-void __cdecl PM_Weapon_FinishRechamber(playerState_s *ps);
-void __cdecl PM_ContinueWeaponAnim(playerState_s *ps, int32_t anim);
-void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick);
-bool __cdecl PM_WeaponClipEmpty(playerState_s *ps);
-void __cdecl PM_Weapon_BeginWeaponRaise(
-    playerState_s *ps,
-    uint32_t anim,
-    uint32_t time,
-    float aim,
-    int32_t altSwitch);
-void __cdecl BG_TakeClipOnlyWeaponIfEmpty(playerState_s *ps, int32_t weaponIndex);
-void __cdecl PM_Weapon_FinishWeaponRaise(playerState_s *ps);
-void __cdecl PM_Weapon_FinishReloadStart(pmove_t *pm, int32_t delayedAction);
-void __cdecl PM_SetReloadingState(playerState_s *ps);
-void __cdecl PM_SetWeaponReloadAddAmmoDelay(playerState_s *ps);
-int32_t __cdecl PM_Weapon_AllowReload(playerState_s *ps);
-void __cdecl PM_Weapon_ReloadDelayedAction(playerState_s *ps);
-void __cdecl PM_ReloadClip(playerState_s *ps);
-void __cdecl PM_Weapon_FinishReload(pmove_t *pm, int32_t delayedAction);
-void __cdecl PM_Weapon_FinishReloadEnd(playerState_s *ps);
-void __cdecl PM_Weapon_CheckForReload(pmove_t *pm);
-void __cdecl PM_BeginWeaponReload(playerState_s *ps);
-bool __cdecl BurstFirePending(playerState_s *ps);
-void __cdecl UpdatePendingTriggerPull(pmove_t *pm);
-int32_t __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml);
-bool __cdecl WeaponUsesBurstCooldown(uint32_t weaponIdx);
-void __cdecl PM_Weapon_CheckForChangeWeapon(pmove_t *pm);
-void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool quick);
-int32_t __cdecl PM_Weapon_ShouldBeFiring(pmove_t *pm, int32_t delayedAction);
-void __cdecl PM_Weapon_FireWeapon(playerState_s *ps, int32_t delayedAction);
-void __cdecl PM_HoldBreathFire(playerState_s *ps);
-void __cdecl PM_WeaponUseAmmo(playerState_s *ps, uint32_t wp, int32_t amount);
-void __cdecl BG_SwitchWeaponsIfEmpty(playerState_s *ps);
-void __cdecl PM_Weapon_StartFiring(playerState_s *ps, int32_t delayedAction);
-int32_t __cdecl PM_Weapon_CheckFiringAmmo(playerState_s *ps);
-void __cdecl PM_Weapon_SetFPSFireAnim(playerState_s *ps);
-void __cdecl PM_Weapon_AddFiringAimSpreadScale(playerState_s *ps);
-void __cdecl PM_Weapon_MeleeEnd(playerState_s *ps);
-void __cdecl PM_Weapon_MeleeFire(playerState_s *ps);
-void __cdecl PM_Weapon_CheckForMelee(pmove_t *pm, int32_t delayedAction);
-void __cdecl PM_Weapon_MeleeInit(playerState_s *ps);
-bool __cdecl PM_WeaponHasChargeMelee(playerState_s *ps);
-void __cdecl PM_Weapon_OffHandPrepare(playerState_s *ps);
-void __cdecl PM_Weapon_OffHandHold(playerState_s *ps);
-void __cdecl PM_Weapon_OffHandStart(pmove_t *pm);
-void __cdecl PM_Weapon_OffHand(pmove_t *pm);
-void __cdecl PM_Weapon_OffHandEnd(playerState_s *ps);
-void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm);
-void __cdecl PM_Weapon_OffHandInit(playerState_s *ps);
-void __cdecl PM_SendEmtpyOffhandEvent(playerState_s *ps, OffhandClass offhandClass);
-bool __cdecl PM_Weapon_IsHoldingGrenade(pmove_t *pm);
-char __cdecl PM_UpdateGrenadeThrow(playerState_s *ps, pml_t *pml);
-char __cdecl PM_Weapon_CheckGrenadeHold(pmove_t *pm, int32_t delayedAction);
-void __cdecl PM_Weapon_CheckForDetonation(pmove_t *pm);
-void __cdecl PM_Weapon_CheckForGrenadeThrowCancel(pmove_t *pm);
-void __cdecl PM_Detonate(playerState_s *ps, int32_t delayedAction);
-void __cdecl PM_Weapon_CheckForNightVision(pmove_t *pm);
-void __cdecl PM_Weapon_FinishNightVisionWear(playerState_s *ps);
-void __cdecl PM_Weapon_FinishNightVisionRemove(playerState_s *ps);
-
-#ifdef KISAK_SP
-bool __cdecl ViewModelOverride(playerState_s *ps, pml_t *pml);
-#endif
-
-void __cdecl Sprint_State_Loop(playerState_s *ps);
-void __cdecl PM_Weapon_CheckForSprint(pmove_t *pm);
-void __cdecl Sprint_State_Raise(playerState_s *ps);
-void __cdecl Sprint_State_Drop(playerState_s *ps);
-void __cdecl PM_ResetWeaponState(playerState_s *ps);
-void __cdecl BG_WeaponFireRecoil(const playerState_s *ps, float *vGunSpeed, float *kickAVel);
-float __cdecl BG_GetBobCycle(const playerState_s *ps);
-float __cdecl BG_GetVerticalBobFactor(const playerState_s *ps, float cycle, float speed, float maxAmp);
-float __cdecl BG_GetHorizontalBobFactor(const playerState_s *ps, float cycle, float speed, float maxAmp);
-void __cdecl BG_CalculateWeaponAngles(weaponState_t *ws, float *angles);
-void __cdecl BG_CalculateWeaponPosition_BaseAngles(weaponState_t *ws, float *angles);
-void __cdecl BG_CalculateWeaponPosition_BasePosition_angles(weaponState_t *ws, float *angles);
-void __cdecl BG_CalculateWeaponPosition_IdleAngles(weaponState_t *ws, float *angles);
-void __cdecl BG_CalculateWeaponPosition_BobOffset(weaponState_t *ws, float *angles);
-void __cdecl BG_CalculateWeaponPosition_DamageKick(weaponState_t *ws, float *angles);
-void __cdecl BG_CalculateWeaponPosition_GunRecoil(weaponState_t *ws, float *angles);
-int32_t __cdecl BG_CalculateWeaponPosition_GunRecoil_SingleAngle(
-    float *fOffset,
-    float *speed,
-    float fTimeStep,
-    float fOfsCap,
-    float fGunKickAccel,
-    float fGunKickSpeedMax,
-    float fGunKickSpeedDecay,
-    float fGunKickStaticDecay);
-void __cdecl BG_CalculateViewAngles(viewState_t *vs, float *angles);
-void __cdecl BG_CalculateView_DamageKick(viewState_t *vs, float *angles);
-void __cdecl BG_CalculateView_IdleAngles(viewState_t *vs, float *angles);
-void __cdecl BG_CalculateView_BobAngles(viewState_t *vs, float *angles);
-void __cdecl BG_CalculateView_Velocity(viewState_t *vs, float *angles);
-void __cdecl BG_CalculateWeaponPosition_Sway(
-    const playerState_s *ps,
-    float *swayViewAngles,
-    float *swayOffset,
-    float *swayAngles,
-    float ssSwayScale,
-    int32_t frametime);
-int32_t __cdecl BG_PlayerWeaponCountPrimaryTypes(const playerState_s *ps);
-bool __cdecl BG_PlayerWeaponsFull_Primaries(const playerState_s *ps);
-char __cdecl BG_PlayerHasCompatibleWeapon(const playerState_s *ps, uint32_t weaponIndex);
-bool __cdecl BG_ThrowingBackGrenade(const playerState_s *ps);
-WeaponDef *__cdecl BG_LoadWeaponDef(const char *name);
-WeaponDef *__cdecl BG_LoadWeaponDef_FastFile(const char *name);
-void __cdecl BG_AssertOffhandIndexOrNone(uint32_t offHandIndex);
-void __cdecl BG_StringCopy(uint8_t *member, const char *keyValue);
-int BG_ValidateWeaponNumberOffhand(uint32_t weaponIndex);
-
-
-#ifdef KISAK_MP
-// bg_vehicles_mp
-uint16 BG_VehiclesGetSlotTagName(int slotIndex);
-#endif
-
-
-// bg_slidemove
-void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity);
-int32_t __cdecl PM_VerifyPronePosition(pmove_t *pm, float *vFallbackOrg, float *vFallbackVel);
-bool __cdecl PM_SlideMove(pmove_t *pm, pml_t *pml, int32_t gravity);
-double __cdecl PM_PermuteRestrictiveClipPlanes(
-    const float *velocity,
-    int32_t planeCount,
-    const float (*planes)[3],
-    int32_t *permutation);
-
-
-// bg_weapons_load_obj
-char *__cdecl BG_GetPlayerAnimTypeName(int32_t index);
-void __cdecl TRACK_bg_weapons_load_obj();
-const char *__cdecl BG_GetWeaponTypeName(weapType_t type);
-const char *__cdecl BG_GetWeaponClassName(weapClass_t type);
-const char *__cdecl BG_GetWeaponInventoryTypeName(weapInventoryType_t type);
-void __cdecl BG_LoadWeaponStrings();
-void __cdecl BG_LoadPlayerAnimTypes();
-WeaponDef *__cdecl BG_LoadDefaultWeaponDef();
-WeaponDef *__cdecl BG_LoadDefaultWeaponDef_FastFile();
-
-
-
-// bg_misctables
-struct gitem_s;
-extern gitem_s bg_itemlist[2048];
-extern int itemRegistered[2048];
-
-const float playerMins[] = { -15.0, -15.0, 0.0 };
-const float playerMaxs[] = { 15.0, 15.0, 70.0 };
-
-const int serverOnlyEvents[4] = { 31, 20, 19, -1 }; // idb
-const int singleClientEvents[13] = { 6, 7, 8, 34, 13, 14, 32, 33, 34, 37, 42, 43, -1 }; // idb
-
-#ifdef __SWITCH__
-enum pmflags_t : __int32 // (MP/SP same)
-{
-    PMF_PRONE = 1 << 0,
-    PMF_DUCKED = 1 << 1,
-    PMF_MANTLE = 1 << 2,
-    PMF_LADDER = 1 << 3,
-    PMF_SIGHT_AIMING = 1 << 4,
-    PMF_BACKWARDS_RUN = 1 << 5,
-    PMF_WALKING = 1 << 6,
-    PMF_TIME_HARDLANDING = 1 << 7,
-    PMF_TIME_KNOCKBACK = 1 << 8,
-    PMF_PRONEMOVE_OVERRIDDEN = 1 << 9,
-    PMF_RESPAWNED = 1 << 10,
-    PMF_FROZEN = 1 << 11,
-    PMF_NO_PRONE = 1 << 12,
-    PMF_LADDER_FALL = 1 << 13,
-    PMF_JUMPING = 1 << 14,
-    PMF_SPRINTING = 1 << 15,
-    PMF_SHELLSHOCKED = 1 << 16,
-    PMF_MELEE_CHARGE = 1 << 17,
-    PMF_NO_SPRINT = 1 << 18,
-    PMF_NO_JUMP = 1 << 19,
-#ifdef KISAK_MP
-    PMF_VEHICLE_ATTACHED = 1 << 20
-#elif KISAK_SP
-    PMF_SCRIPT_NO_STAND = 1 << 20,
-    PMF_SCRIPT_NO_CROUCH = 1 << 21,
-    PMF_SCRIPT_NO_PRONE = 1 << 22,
-    PMF_SCRIPT_NO_LEAN = 1 << 23
-#endif
-};
-#endif // __SWITCH__
-
-#if defined(KISAK_SP) && defined(__SWITCH__)
-struct playerState_s_hud
-{
-    hudelem_s elem[256];
-};
-#endif
-
-enum ActionSlotType : __int32
-{                                       // XREF: playerState_s/r
-    ACTIONSLOTTYPE_DONOTHING = 0x0,
-    ACTIONSLOTTYPE_SPECIFYWEAPON = 0x1,
-    ACTIONSLOTTYPE_ALTWEAPONTOGGLE = 0x2,
-    ACTIONSLOTTYPE_NIGHTVISION = 0x3,
-    ACTIONSLOTTYPECOUNT = 0x4,
-};
-
-struct ActionSlotParam_SpecifyWeapon // sizeof=0x4
-{                                       // XREF: ActionSlotParam/r
-    uint32_t index;
-};
-
-struct ActionSlotParam // sizeof=0x4
-{                                       // XREF: playerState_s/r
-    ActionSlotParam_SpecifyWeapon specifyWeapon;
-};
-
-struct SprintState // sizeof=0x14
-{                                       // XREF: playerState_s/r cg_s/r
-    int32_t sprintButtonUpRequired;
-    int32_t sprintDelay;
-    int32_t lastSprintStart;
-    int32_t lastSprintEnd;
-    int32_t sprintStartMaxLength;
-};
-
-enum objectiveState_t : __int32
-{                                       // XREF: objective_t/r
-                                        // Scr_Objective_Add/r ...
-    OBJST_EMPTY = 0x0,
-    OBJST_ACTIVE = 0x1,
-    OBJST_INVISIBLE = 0x2,
-    OBJST_DONE = 0x3,
-    OBJST_CURRENT = 0x4,
-    OBJST_FAILED = 0x5,
-    OBJST_NUMSTATES = 0x6,
-};
-
-struct objective_t // sizeof=0x1C
-{                                       // XREF: playerState_s/r
-    objectiveState_t state;
-    float origin[3];                    // XREF: .data:00946428/o
-    int32_t entNum;
-    int32_t teamNum;                        // XREF: _memmove+2E8/o
-    // _memcpy+2E8/o
-    int32_t icon;
-};
-
-struct MantleState // sizeof=0x10
-{                                       // XREF: playerState_s/r
-    float yaw;
-    int32_t timer;
-    int32_t transIndex;
-    int32_t flags;
-};
