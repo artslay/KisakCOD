@@ -1000,8 +1000,8 @@ void __cdecl Load_XString(bool atStreamStart)
         }
         else
         {
-            DB_ConvertOffsetToPointer(&serialized);
-            *varXString = reinterpret_cast<const char *>(static_cast<uintptr_t>(serialized));
+            *varXString = reinterpret_cast<const char *>(
+                DB_ConvertOffsetToPointerValue(serialized));
         }
     }
 #else
