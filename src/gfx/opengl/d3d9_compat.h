@@ -332,18 +332,19 @@ class IDirect3DDevice9
         normalized = false;
         switch (type)
         {
-        case 1: components = 1; glType = GL_FLOAT; return true;
-        case 2: components = 2; glType = GL_FLOAT; return true;
-        case 3: components = 3; glType = GL_FLOAT; return true;
-        case 4: components = 4; glType = GL_FLOAT; return true;
-        case 5: components = 4; glType = GL_UNSIGNED_BYTE; return true;
-        case 6: components = 2; glType = GL_SHORT; return true;
-        case 7: components = 4; glType = GL_SHORT; return true;
-        case 8: components = 4; glType = GL_UNSIGNED_BYTE; normalized = true; return true;
-        case 9: components = 2; glType = GL_SHORT; normalized = true; return true;
-        case 10: components = 4; glType = GL_SHORT; normalized = true; return true;
-        case 11: components = 2; glType = GL_UNSIGNED_SHORT; normalized = true; return true;
-        case 12: components = 4; glType = GL_UNSIGNED_SHORT; normalized = true; return true;
+        case 1: components = 1; glType = GL_FLOAT; return true;       // FLOAT1
+        case 2: components = 2; glType = GL_FLOAT; return true;       // FLOAT2
+        case 3: components = 3; glType = GL_FLOAT; return true;       // FLOAT3
+        case 4: components = 4; glType = GL_FLOAT; return true;       // FLOAT4
+        case 5: components = 4; glType = GL_UNSIGNED_BYTE; normalized = true; return true; // D3DCOLOR
+        case 6: components = 4; glType = GL_UNSIGNED_BYTE; return true; // UBYTE4
+        case 7: components = 2; glType = GL_SHORT; return true;       // SHORT2
+        case 8: components = 4; glType = GL_SHORT; return true;       // SHORT4
+        case 9: components = 4; glType = GL_UNSIGNED_BYTE; normalized = true; return true; // UBYTE4N
+        case 10: components = 2; glType = GL_SHORT; normalized = true; return true; // SHORT2N
+        case 11: components = 4; glType = GL_SHORT; normalized = true; return true; // SHORT4N
+        case 12: components = 2; glType = GL_UNSIGNED_SHORT; normalized = true; return true; // USHORT2N
+        case 13: components = 4; glType = GL_UNSIGNED_SHORT; normalized = true; return true; // USHORT4N
         default: return false;
         }
     }
@@ -371,7 +372,17 @@ class IDirect3DDevice9
             if (!VertexTypeInfo(e.Type, components, glType, normalized))
                 continue;
 
-            const GLuint attrib = e.Usage * 4u + e.UsageIndex;
+            GLuint attrib = 0;
+            switch (e.Usage)
+            {
+            case 0: attrib = 0; break; // POSITION
+            case 1: attrib = 1; break; // BLENDWEIGHT
+            case 2: attrib = 2; break; // BLENDINDICES
+            case 3: attrib = 3; break; // NORMAL
+            case 5: attrib = 4 + e.UsageIndex; break; // TEXCOORD0..7
+            case 10: attrib = 12 + e.UsageIndex; break; // COLOR0..3
+            default: continue;
+            }
             if (attrib >= 16)
                 continue;
 
