@@ -21,7 +21,11 @@
 struct HINSTANCE__ {};
 struct IDirect3DSwapChain9 { void Release() { delete this; } };
 using _D3DMULTISAMPLE_TYPE = uint32_t;
+#ifndef GL_GLEXT_PROTOTYPES
+#define GL_GLEXT_PROTOTYPES 1
+#endif
 #include <GL/gl.h>
+#include <GL/glext.h>
 
 using HRESULT = int32_t;
 using _D3DFORMAT = uint32_t;
@@ -44,7 +48,6 @@ constexpr uint32_t D3DDEVTYPE_HAL = 1;
 constexpr uint32_t D3DRTYPE_SURFACE = 8;
 constexpr uint32_t D3DBACKBUFFER_TYPE_MONO = 1;
 constexpr uint32_t D3DFMT_A8R8G8B8 = 21;
-constexpr uint32_t D3DFMT_X8R8G8B8 = 22;
 constexpr uint32_t D3DFMT_A8L8 = 51;
 constexpr uint32_t D3DFMT_L8 = 50;
 constexpr uint32_t D3DFMT_D16 = 80;
