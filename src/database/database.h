@@ -9,11 +9,14 @@
 #ifdef __SWITCH__
 using _BYTE = uint8_t;
 struct _OVERLAPPED { uint64_t opaque[4]; };
+#ifndef KISAK_FASTCRITSEC_DEFINED
+#define KISAK_FASTCRITSEC_DEFINED
 struct FastCriticalSection
 {
     volatile uint32_t readCount = 0;
     volatile uint32_t writeCount = 0;
 };
+#endif
 #else
 #include <win32/win_local.h>
 #endif
