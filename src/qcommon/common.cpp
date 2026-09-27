@@ -1627,7 +1627,9 @@ void Com_InitXAssets()
     DB_LoadXAssets(
         startupZones,
         static_cast<uint32_t>(sizeof(startupZones) / sizeof(startupZones[0])),
-        1);
+        0);
+
+    Sys_SyncDatabase();
 #endif
 }
 
