@@ -96,8 +96,8 @@ void __cdecl CG_AddVisionSetMenuItem(XAssetHeader header)
         iassert(visionSetNameEnd - visionSetNameBegin < static_cast<int>( sizeof( visionSetName ) ));
         strncpy(visionSetName, visionSetNameBegin, visionSetNameEnd - visionSetNameBegin);
         visionSetName[visionSetNameEnd - visionSetNameBegin] = 0;
-        sprintf(devguiPath, "Renderer/Vision Sets/%s", visionSetName);
-        sprintf(command, "VisionSetNaked %s", visionSetName);
+        snprintf(devguiPath, 0x100u, "Renderer/Vision Sets/%s", visionSetName);
+        snprintf(command, 0x100u, "VisionSetNaked %s", visionSetName);
         DevGui_AddCommand(devguiPath, command);
     }
 }
