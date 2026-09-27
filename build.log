@@ -1,0 +1,2763 @@
+aarch64-none-elf-g++ -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE -I/home/artslay/KisakCOD/src -I/home/artslay/KisakCOD/deps -I/home/artslay/KisakCOD/mesa-sdk/opt/devkitpro/portlibs/switch/include -march=armv8-a -mtune=cortex-a57 -mtp=soft -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP -c src/aim_assist/aim_assist.cpp -o build/src/aim_assist/aim_assist.o
+aarch64-none-elf-g++ -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE -I/home/artslay/KisakCOD/src -I/home/artslay/KisakCOD/deps -I/home/artslay/KisakCOD/mesa-sdk/opt/devkitpro/portlibs/switch/include -march=armv8-a -mtune=cortex-a57 -mtp=soft -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP -c src/aim_assist/aim_target.cpp -o build/src/aim_assist/aim_target.o
+aarch64-none-elf-g++ -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE -I/home/artslay/KisakCOD/src -I/home/artslay/KisakCOD/deps -I/home/artslay/KisakCOD/mesa-sdk/opt/devkitpro/portlibs/switch/include -march=armv8-a -mtune=cortex-a57 -mtp=soft -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP -c src/bgame/bg_jump.cpp -o build/src/bgame/bg_jump.o
+aarch64-none-elf-g++ -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE -I/home/artslay/KisakCOD/src -I/home/artslay/KisakCOD/deps -I/home/artslay/KisakCOD/mesa-sdk/opt/devkitpro/portlibs/switch/include -march=armv8-a -mtune=cortex-a57 -mtp=soft -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP -c src/bgame/bg_actor_prone.cpp -o build/src/bgame/bg_actor_prone.o
+aarch64-none-elf-g++ -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE -I/home/artslay/KisakCOD/src -I/home/artslay/KisakCOD/deps -I/home/artslay/KisakCOD/mesa-sdk/opt/devkitpro/portlibs/switch/include -march=armv8-a -mtune=cortex-a57 -mtp=soft -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP -c src/bgame/bg_mantle.cpp -o build/src/bgame/bg_mantle.o
+aarch64-none-elf-g++ -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE -I/home/artslay/KisakCOD/src -I/home/artslay/KisakCOD/deps -I/home/artslay/KisakCOD/mesa-sdk/opt/devkitpro/portlibs/switch/include -march=armv8-a -mtune=cortex-a57 -mtp=soft -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP -c src/bgame/bg_misctables.cpp -o build/src/bgame/bg_misctables.o
+aarch64-none-elf-g++ -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE -I/home/artslay/KisakCOD/src -I/home/artslay/KisakCOD/deps -I/home/artslay/KisakCOD/mesa-sdk/opt/devkitpro/portlibs/switch/include -march=armv8-a -mtune=cortex-a57 -mtp=soft -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP -c src/bgame/bg_misc.cpp -o build/src/bgame/bg_misc.o
+aarch64-none-elf-g++ -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE -I/home/artslay/KisakCOD/src -I/home/artslay/KisakCOD/deps -I/home/artslay/KisakCOD/mesa-sdk/opt/devkitpro/portlibs/switch/include -march=armv8-a -mtune=cortex-a57 -mtp=soft -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP -c src/bgame/bg_pmove.cpp -o build/src/bgame/bg_pmove.o
+aarch64-none-elf-g++ -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE -I/home/artslay/KisakCOD/src -I/home/artslay/KisakCOD/deps -I/home/artslay/KisakCOD/mesa-sdk/opt/devkitpro/portlibs/switch/include -march=armv8-a -mtune=cortex-a57 -mtp=soft -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP -c src/bgame/bg_slidemove.cpp -o build/src/bgame/bg_slidemove.o
+aarch64-none-elf-g++ -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE -I/home/artslay/KisakCOD/src -I/home/artslay/KisakCOD/deps -I/home/artslay/KisakCOD/mesa-sdk/opt/devkitpro/portlibs/switch/include -march=armv8-a -mtune=cortex-a57 -mtp=soft -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP -c src/bgame/bg_weapons.cpp -o build/src/bgame/bg_weapons.o
+aarch64-none-elf-g++ -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE -I/home/artslay/KisakCOD/src -I/home/artslay/KisakCOD/deps -I/home/artslay/KisakCOD/mesa-sdk/opt/devkitpro/portlibs/switch/include -march=armv8-a -mtune=cortex-a57 -mtp=soft -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP -c src/buildnumber.cpp -o build/src/buildnumber.o
+aarch64-none-elf-g++ -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE -I/home/artslay/KisakCOD/src -I/home/artslay/KisakCOD/deps -I/home/artslay/KisakCOD/mesa-sdk/opt/devkitpro/portlibs/switch/include -march=armv8-a -mtune=cortex-a57 -mtp=soft -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP -c src/bgame/bg_weapons_load_obj.cpp -o build/src/bgame/bg_weapons_load_obj.o
+In file included from src/bgame/bg_misc.cpp:5:
+C:/Users/artslay/KisakCOD/src/qcommon/threads.h:3:18: warning: extra tokens at end of '#ifdef' directive
+    3 | #ifdef __SWITCH__\n#include <cstdint>\nusing DWORD = uint32_t;\nusing HANDLE = void*;\n#else\n#include <Windows.h> // literally just for some of the extern types at the bottom\n#endif
+      |                  ^
+In file included from C:/Users/artslay/KisakCOD/src/qcommon/threads.h:4:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/rb_backend.h:3:10: fatal error: d3d9.h: No such file or directory
+    3 | #include <d3d9.h>
+      |          ^~~~~~~~
+compilation terminated.
+make: *** [Makefile:71: build/src/bgame/bg_misc.o] Error 1
+make: *** Waiting for unfinished jobs....
+In file included from src/bgame/bg_jump.cpp:1:
+C:/Users/artslay/KisakCOD/src/universal/q_shared.h:1074:35: error: static assertion failed
+ 1074 | static_assert(sizeof(StringTable) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+In file included from src/bgame/bg_actor_prone.cpp:1:
+C:/Users/artslay/KisakCOD/src/universal/q_shared.h:1074:35: error: static assertion failed
+ 1074 | static_assert(sizeof(StringTable) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+src/buildnumber.cpp:2:10: fatal error: buildnumber.h: No such file or directory
+    2 | #include "buildnumber.h"
+      |          ^~~~~~~~~~~~~~~
+compilation terminated.
+make: *** [Makefile:71: build/src/buildnumber.o] Error 1
+In file included from src/aim_assist/aim_target.cpp:1:
+C:/Users/artslay/KisakCOD/src/universal/q_shared.h:1074:35: error: static assertion failed
+ 1074 | static_assert(sizeof(StringTable) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+In file included from src/aim_assist/aim_assist.cpp:1:
+C:/Users/artslay/KisakCOD/src/universal/q_shared.h:1074:35: error: static assertion failed
+ 1074 | static_assert(sizeof(StringTable) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+In file included from src/bgame/bg_misctables.cpp:1:
+C:/Users/artslay/KisakCOD/src/universal/q_shared.h:1074:35: error: static assertion failed
+ 1074 | static_assert(sizeof(StringTable) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+In file included from src/bgame/bg_mantle.cpp:1:
+C:/Users/artslay/KisakCOD/src/universal/q_shared.h:1074:35: error: static assertion failed
+ 1074 | static_assert(sizeof(StringTable) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+In file included from src/bgame/bg_slidemove.cpp:1:
+C:/Users/artslay/KisakCOD/src/universal/q_shared.h:1074:35: error: static assertion failed
+ 1074 | static_assert(sizeof(StringTable) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+In file included from src/bgame/bg_pmove.cpp:1:
+C:/Users/artslay/KisakCOD/src/universal/q_shared.h:1074:35: error: static assertion failed
+ 1074 | static_assert(sizeof(StringTable) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+In file included from src/bgame/bg_weapons.cpp:1:
+C:/Users/artslay/KisakCOD/src/universal/q_shared.h:1074:35: error: static assertion failed
+ 1074 | static_assert(sizeof(StringTable) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+In file included from src/bgame/bg_weapons_load_obj.cpp:1:
+C:/Users/artslay/KisakCOD/src/universal/q_shared.h:1074:35: error: static assertion failed
+ 1074 | static_assert(sizeof(StringTable) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+In file included from src/bgame/bg_jump.cpp:2:
+C:/Users/artslay/KisakCOD/src/qcommon/qcommon.h:1167:32: error: static assertion failed
+ 1167 | static_assert(sizeof(SpawnVar) == 0xA0C);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(3088 == 2572)'
+In file included from src/bgame/bg_public.h:10,
+                 from src/bgame/bg_jump.cpp:4:
+C:/Users/artslay/KisakCOD/src/game/enthandle.h:12:37: error: static assertion failed
+   12 | static_assert(sizeof(EntHandleInfo) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+In file included from C:/Users/artslay/KisakCOD/src/server/sv_world.h:3,
+                 from src/bgame/bg_public.h:2,
+                 from src/bgame/bg_actor_prone.h:2,
+                 from src/bgame/bg_actor_prone.cpp:2:
+C:/Users/artslay/KisakCOD/src/qcommon/qcommon.h:1167:32: error: static assertion failed
+ 1167 | static_assert(sizeof(SpawnVar) == 0xA0C);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(3088 == 2572)'
+src/bgame/bg_public.h:590:6: error: use of enum 'team_t' without previous declaration
+  590 | enum team_t;
+      |      ^~~~~~
+src/bgame/bg_public.h:783:5: error: 'team_t' does not name a type
+  783 |     team_t team;
+      |     ^~~~~~
+src/bgame/bg_public.h:790:37: error: static assertion failed
+  790 | static_assert(sizeof(missile_ent_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 84)'
+In file included from src/bgame/bg_public.h:10:
+C:/Users/artslay/KisakCOD/src/game/enthandle.h:12:37: error: static assertion failed
+   12 | static_assert(sizeof(EntHandleInfo) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_public.h:830:5: error: 'team_t' does not name a type
+  830 |     team_t eTeam;
+      |     ^~~~~~
+src/bgame/bg_public.h:590:6: error: use of enum 'team_t' without previous declaration
+  590 | enum team_t;
+      |      ^~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/script/scr_stringlist.h:3,
+                 from C:/Users/artslay/KisakCOD/src/universal/com_memory.h:3,
+                 from src/bgame/bg_weapons.h:2,
+                 from src/bgame/bg_local.h:16,
+                 from src/bgame/bg_jump.cpp:5:
+C:/Users/artslay/KisakCOD/src/script/scr_memorytree.h:65:40: error: static assertion failed
+   65 | static_assert(sizeof(scrMemTreeGlob_t) == 0xC0380);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(787244 == 787328)'
+src/bgame/bg_public.h:783:5: error: 'team_t' does not name a type
+  783 |     team_t team;
+      |     ^~~~~~
+src/bgame/bg_public.h:790:37: error: static assertion failed
+  790 | static_assert(sizeof(missile_ent_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 84)'
+src/bgame/bg_public.h:830:5: error: 'team_t' does not name a type
+  830 |     team_t eTeam;
+      |     ^~~~~~
+src/bgame/bg_local.h: In constructor 'scr_anim_s::scr_anim_s(int)':
+src/bgame/bg_local.h:227:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  227 |         linkPointer = (const char *)i; // KISAKHACK
+      |                       ^~~~~~~~~~~~~~~
+src/bgame/bg_local.h: At global scope:
+src/bgame/bg_local.h:241:41: error: static assertion failed
+  241 | static_assert(sizeof(struct scr_anim_s) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+src/bgame/bg_local.h:249:49: error: static assertion failed
+  249 | static_assert((sizeof(struct loadAnim_t) * 512) == 36864);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(40960 == 36864)'
+src/bgame/bg_local.h:266:29: error: static assertion failed
+  266 | static_assert(sizeof(pml_t) == 0x80);
+      |               ~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(136 == 128)'
+src/bgame/bg_local.h:273:40: error: static assertion failed
+  273 | static_assert(sizeof(animStringItem_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:288:44: error: static assertion failed
+  288 | static_assert(sizeof(animConditionTable_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:357:1: error: 'const' can only be specified for objects and functions
+  357 | const struct shellshock_parms_t // sizeof=0x268
+      | ^~~~~
+src/bgame/bg_local.h:380:36: error: static assertion failed
+  380 | static_assert(sizeof(shellshock_t) == 0x20);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(40 == 32)'
+src/bgame/bg_local.h:418:43: error: static assertion failed
+  418 | static_assert(sizeof(animScriptCommand_t) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+src/bgame/bg_local.h:437:40: error: static assertion failed
+  437 | static_assert(sizeof(animScriptItem_t) == 0x100);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(320 == 256)'
+src/bgame/bg_local.h:444:36: error: static assertion failed
+  444 | static_assert(sizeof(animScript_t) == 0x204);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1032 == 516)'
+src/bgame/bg_local.h:454:38: error: static assertion failed
+  454 | static_assert(sizeof(scr_animtree_t) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+src/bgame/bg_local.h:479:40: error: static assertion failed
+  479 | static_assert(sizeof(animScriptData_t) == 0x9A9D0);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(820112 == 633296)'
+src/bgame/bg_local.h:494:35: error: static assertion failed
+  494 | static_assert(sizeof(lerpFrame_t) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+src/bgame/bg_local.h:1157:38: error: static assertion failed
+ 1157 | static_assert(sizeof(CEntPlayerInfo) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+src/bgame/bg_local.h:1227:30: error: static assertion failed
+ 1227 | static_assert(sizeof(CEntFx) == 0x8);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:2218:42: error: static assertion failed
+ 2218 | static_assert(sizeof(BulletTraceResults) == 0x44);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 68)'
+src/bgame/bg_local.h:2232:35: error: static assertion failed
+ 2232 | static_assert(sizeof(viewState_t) == 0x24);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 36)'
+src/bgame/bg_local.h:2250:37: error: static assertion failed
+ 2250 | static_assert(sizeof(weaponState_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(96 == 84)'
+In file included from src/bgame/bg_jump.cpp:6:
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:167:15: error: ambiguating new declaration of 'float random()'
+  167 | float __cdecl random();
+      |               ^~~~~~
+In file included from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/bits/std_abs.h:44,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/cmath:59,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/math.h:36,
+                 from C:/Users/artslay/KisakCOD/src/universal/q_shared.h:32:
+C:/devkitPro/devkitA64/aarch64-none-elf/include/stdlib.h:260:9: note: old declaration 'long int random()'
+  260 | long    random (void);
+      |         ^~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:459:1: error: '__forceinline' does not name a type
+  459 | __forceinline static float COERCE_FLOAT(unsigned val) {
+      | ^~~~~~~~~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/server/sv_world.h:3,
+                 from C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:2,
+                 from C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:3,
+                 from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:3,
+                 from src/aim_assist/aim_assist.h:2,
+                 from src/aim_assist/aim_target.h:7,
+                 from src/aim_assist/aim_target.cpp:2:
+C:/Users/artslay/KisakCOD/src/qcommon/qcommon.h:1167:32: error: static assertion failed
+ 1167 | static_assert(sizeof(SpawnVar) == 0xA0C);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(3088 == 2572)'
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:467:1: error: '__forceinline' does not name a type
+  467 | __forceinline static uint32_t COERCE_UNSIGNED_INT(float val) {
+      | ^~~~~~~~~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/server/sv_world.h:3,
+                 from C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:2,
+                 from C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:3,
+                 from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:3,
+                 from src/aim_assist/aim_assist.h:2,
+                 from src/aim_assist/aim_assist.cpp:2:
+C:/Users/artslay/KisakCOD/src/qcommon/qcommon.h:1167:32: error: static assertion failed
+ 1167 | static_assert(sizeof(SpawnVar) == 0xA0C);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(3088 == 2572)'
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:475:1: error: '__forceinline' does not name a type
+  475 | __forceinline static int COERCE_INT(float val) {
+      | ^~~~~~~~~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:10:
+C:/Users/artslay/KisakCOD/src/game/enthandle.h:12:37: error: static assertion failed
+   12 | static_assert(sizeof(EntHandleInfo) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:590:6: error: use of enum 'team_t' without previous declaration
+  590 | enum team_t;
+      |      ^~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:10:
+C:/Users/artslay/KisakCOD/src/game/enthandle.h:12:37: error: static assertion failed
+   12 | static_assert(sizeof(EntHandleInfo) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:590:6: error: use of enum 'team_t' without previous declaration
+  590 | enum team_t;
+      |      ^~~~~~
+C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:783:5: error: 'team_t' does not name a type
+  783 |     team_t team;
+      |     ^~~~~~
+C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:790:37: error: static assertion failed
+  790 | static_assert(sizeof(missile_ent_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 84)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:783:5: error: 'team_t' does not name a type
+  783 |     team_t team;
+      |     ^~~~~~
+C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:790:37: error: static assertion failed
+  790 | static_assert(sizeof(missile_ent_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 84)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:830:5: error: 'team_t' does not name a type
+  830 |     team_t eTeam;
+      |     ^~~~~~
+C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:830:5: error: 'team_t' does not name a type
+  830 |     team_t eTeam;
+      |     ^~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/script/scr_stringlist.h:3,
+                 from C:/Users/artslay/KisakCOD/src/universal/com_memory.h:3,
+                 from C:/Users/artslay/KisakCOD/src/bgame/bg_weapons.h:2,
+                 from C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:16:
+C:/Users/artslay/KisakCOD/src/script/scr_memorytree.h:65:40: error: static assertion failed
+   65 | static_assert(sizeof(scrMemTreeGlob_t) == 0xC0380);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(787244 == 787328)'
+In file included from C:/Users/artslay/KisakCOD/src/script/scr_stringlist.h:3,
+                 from C:/Users/artslay/KisakCOD/src/universal/com_memory.h:3,
+                 from C:/Users/artslay/KisakCOD/src/bgame/bg_weapons.h:2,
+                 from C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:16:
+C:/Users/artslay/KisakCOD/src/script/scr_memorytree.h:65:40: error: static assertion failed
+   65 | static_assert(sizeof(scrMemTreeGlob_t) == 0xC0380);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(787244 == 787328)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h: In constructor 'scr_anim_s::scr_anim_s(int)':
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:227:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  227 |         linkPointer = (const char *)i; // KISAKHACK
+      |                       ^~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h: At global scope:
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:241:41: error: static assertion failed
+  241 | static_assert(sizeof(struct scr_anim_s) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:249:49: error: static assertion failed
+  249 | static_assert((sizeof(struct loadAnim_t) * 512) == 36864);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(40960 == 36864)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:266:29: error: static assertion failed
+  266 | static_assert(sizeof(pml_t) == 0x80);
+      |               ~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(136 == 128)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:273:40: error: static assertion failed
+  273 | static_assert(sizeof(animStringItem_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:288:44: error: static assertion failed
+  288 | static_assert(sizeof(animConditionTable_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:357:1: error: 'const' can only be specified for objects and functions
+  357 | const struct shellshock_parms_t // sizeof=0x268
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h: In constructor 'scr_anim_s::scr_anim_s(int)':
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:227:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  227 |         linkPointer = (const char *)i; // KISAKHACK
+      |                       ^~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:380:36: error: static assertion failed
+  380 | static_assert(sizeof(shellshock_t) == 0x20);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(40 == 32)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h: At global scope:
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:241:41: error: static assertion failed
+  241 | static_assert(sizeof(struct scr_anim_s) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:249:49: error: static assertion failed
+  249 | static_assert((sizeof(struct loadAnim_t) * 512) == 36864);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(40960 == 36864)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:418:43: error: static assertion failed
+  418 | static_assert(sizeof(animScriptCommand_t) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:266:29: error: static assertion failed
+  266 | static_assert(sizeof(pml_t) == 0x80);
+      |               ~~~~~~~~~~~~~~^~~~~~~
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:437:40: error: static assertion failed
+  437 | static_assert(sizeof(animScriptItem_t) == 0x100);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(136 == 128)'
+  • the comparison reduces to '(320 == 256)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:273:40: error: static assertion failed
+  273 | static_assert(sizeof(animStringItem_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:444:36: error: static assertion failed
+  444 | static_assert(sizeof(animScript_t) == 0x204);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(16 == 8)'
+  • the comparison reduces to '(1032 == 516)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:288:44: error: static assertion failed
+  288 | static_assert(sizeof(animConditionTable_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:454:38: error: static assertion failed
+  454 | static_assert(sizeof(scr_animtree_t) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:479:40: error: static assertion failed
+  479 | static_assert(sizeof(animScriptData_t) == 0x9A9D0);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(820112 == 633296)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:494:35: error: static assertion failed
+  494 | static_assert(sizeof(lerpFrame_t) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:357:1: error: 'const' can only be specified for objects and functions
+  357 | const struct shellshock_parms_t // sizeof=0x268
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:380:36: error: static assertion failed
+  380 | static_assert(sizeof(shellshock_t) == 0x20);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(40 == 32)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:418:43: error: static assertion failed
+  418 | static_assert(sizeof(animScriptCommand_t) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:437:40: error: static assertion failed
+  437 | static_assert(sizeof(animScriptItem_t) == 0x100);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(320 == 256)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:444:36: error: static assertion failed
+  444 | static_assert(sizeof(animScript_t) == 0x204);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1032 == 516)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:454:38: error: static assertion failed
+  454 | static_assert(sizeof(scr_animtree_t) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:479:40: error: static assertion failed
+  479 | static_assert(sizeof(animScriptData_t) == 0x9A9D0);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(820112 == 633296)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:494:35: error: static assertion failed
+  494 | static_assert(sizeof(lerpFrame_t) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:1157:38: error: static assertion failed
+ 1157 | static_assert(sizeof(CEntPlayerInfo) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:1227:30: error: static assertion failed
+ 1227 | static_assert(sizeof(CEntFx) == 0x8);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:1157:38: error: static assertion failed
+ 1157 | static_assert(sizeof(CEntPlayerInfo) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:1227:30: error: static assertion failed
+ 1227 | static_assert(sizeof(CEntFx) == 0x8);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:2218:42: error: static assertion failed
+ 2218 | static_assert(sizeof(BulletTraceResults) == 0x44);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 68)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:2232:35: error: static assertion failed
+ 2232 | static_assert(sizeof(viewState_t) == 0x24);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 36)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:2250:37: error: static assertion failed
+ 2250 | static_assert(sizeof(weaponState_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(96 == 84)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:2218:42: error: static assertion failed
+ 2218 | static_assert(sizeof(BulletTraceResults) == 0x44);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 68)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:2232:35: error: static assertion failed
+ 2232 | static_assert(sizeof(viewState_t) == 0x24);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 36)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:2250:37: error: static assertion failed
+ 2250 | static_assert(sizeof(weaponState_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(96 == 84)'
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:3,
+                 from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:5:
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:167:15: error: ambiguating new declaration of 'float random()'
+  167 | float __cdecl random();
+      |               ^~~~~~
+In file included from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/bits/std_abs.h:44,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/cmath:59,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/math.h:36,
+                 from C:/Users/artslay/KisakCOD/src/universal/q_shared.h:32:
+C:/devkitPro/devkitA64/aarch64-none-elf/include/stdlib.h:260:9: note: old declaration 'long int random()'
+  260 | long    random (void);
+      |         ^~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:3,
+                 from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:5:
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:167:15: error: ambiguating new declaration of 'float random()'
+  167 | float __cdecl random();
+      |               ^~~~~~
+In file included from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/bits/std_abs.h:44,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/cmath:59,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/math.h:36,
+                 from C:/Users/artslay/KisakCOD/src/universal/q_shared.h:32:
+C:/devkitPro/devkitA64/aarch64-none-elf/include/stdlib.h:260:9: note: old declaration 'long int random()'
+  260 | long    random (void);
+      |         ^~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:459:1: error: '__forceinline' does not name a type
+  459 | __forceinline static float COERCE_FLOAT(unsigned val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:459:1: error: '__forceinline' does not name a type
+  459 | __forceinline static float COERCE_FLOAT(unsigned val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:467:1: error: '__forceinline' does not name a type
+  467 | __forceinline static uint32_t COERCE_UNSIGNED_INT(float val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:467:1: error: '__forceinline' does not name a type
+  467 | __forceinline static uint32_t COERCE_UNSIGNED_INT(float val) {
+      | ^~~~~~~~~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/server/sv_world.h:3,
+                 from src/bgame/bg_public.h:2,
+                 from src/bgame/bg_local.h:3,
+                 from src/bgame/bg_misctables.cpp:2:
+C:/Users/artslay/KisakCOD/src/qcommon/qcommon.h:1167:32: error: static assertion failed
+ 1167 | static_assert(sizeof(SpawnVar) == 0xA0C);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(3088 == 2572)'
+In file included from src/bgame/bg_public.h:10:
+C:/Users/artslay/KisakCOD/src/game/enthandle.h:12:37: error: static assertion failed
+   12 | static_assert(sizeof(EntHandleInfo) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:475:1: error: '__forceinline' does not name a type
+  475 | __forceinline static int COERCE_INT(float val) {
+      | ^~~~~~~~~~~~~
+src/bgame/bg_public.h:590:6: error: use of enum 'team_t' without previous declaration
+  590 | enum team_t;
+      |      ^~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:475:1: error: '__forceinline' does not name a type
+  475 | __forceinline static int COERCE_INT(float val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:78:35: error: static assertion failed
+   78 | static_assert(sizeof(FxEffectDef) == 32);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(40 == 32)'
+src/bgame/bg_public.h:783:5: error: 'team_t' does not name a type
+  783 |     team_t team;
+      |     ^~~~~~
+src/bgame/bg_public.h:790:37: error: static assertion failed
+  790 | static_assert(sizeof(missile_ent_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 84)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:78:35: error: static assertion failed
+   78 | static_assert(sizeof(FxEffectDef) == 32);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(40 == 32)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:361:1: error: 'const' can only be specified for objects and functions
+  361 | const struct FxElemVisStateSample // sizeof=0x30
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:381:1: error: 'const' can only be specified for objects and functions
+  381 | const struct FxElemVelStateSample // sizeof=0x60
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:361:1: error: 'const' can only be specified for objects and functions
+  361 | const struct FxElemVisStateSample // sizeof=0x30
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:429:1: error: 'const' can only be specified for objects and functions
+  429 | const struct FxElemDef // sizeof=0xFC
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:381:1: error: 'const' can only be specified for objects and functions
+  381 | const struct FxElemVelStateSample // sizeof=0x60
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:480:37: error: static assertion failed
+  480 | static_assert(sizeof(FxImpactTable) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_public.h:830:5: error: 'team_t' does not name a type
+  830 |     team_t eTeam;
+      |     ^~~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:429:1: error: 'const' can only be specified for objects and functions
+  429 | const struct FxElemDef // sizeof=0xFC
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:480:37: error: static assertion failed
+  480 | static_assert(sizeof(FxImpactTable) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+In file included from C:/Users/artslay/KisakCOD/src/script/scr_stringlist.h:3,
+                 from C:/Users/artslay/KisakCOD/src/universal/com_memory.h:3,
+                 from src/bgame/bg_weapons.h:2,
+                 from src/bgame/bg_local.h:16:
+C:/Users/artslay/KisakCOD/src/script/scr_memorytree.h:65:40: error: static assertion failed
+   65 | static_assert(sizeof(scrMemTreeGlob_t) == 0xC0380);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(787244 == 787328)'
+src/bgame/bg_local.h: In constructor 'scr_anim_s::scr_anim_s(int)':
+src/bgame/bg_local.h:227:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  227 |         linkPointer = (const char *)i; // KISAKHACK
+      |                       ^~~~~~~~~~~~~~~
+src/bgame/bg_local.h: At global scope:
+src/bgame/bg_local.h:241:41: error: static assertion failed
+  241 | static_assert(sizeof(struct scr_anim_s) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+src/bgame/bg_local.h:249:49: error: static assertion failed
+  249 | static_assert((sizeof(struct loadAnim_t) * 512) == 36864);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(40960 == 36864)'
+src/bgame/bg_local.h:266:29: error: static assertion failed
+  266 | static_assert(sizeof(pml_t) == 0x80);
+      |               ~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(136 == 128)'
+src/bgame/bg_local.h:273:40: error: static assertion failed
+  273 | static_assert(sizeof(animStringItem_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:288:44: error: static assertion failed
+  288 | static_assert(sizeof(animConditionTable_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:357:1: error: 'const' can only be specified for objects and functions
+  357 | const struct shellshock_parms_t // sizeof=0x268
+      | ^~~~~
+src/bgame/bg_local.h:380:36: error: static assertion failed
+  380 | static_assert(sizeof(shellshock_t) == 0x20);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(40 == 32)'
+src/bgame/bg_local.h:418:43: error: static assertion failed
+  418 | static_assert(sizeof(animScriptCommand_t) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+src/bgame/bg_local.h:437:40: error: static assertion failed
+  437 | static_assert(sizeof(animScriptItem_t) == 0x100);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(320 == 256)'
+src/bgame/bg_local.h:444:36: error: static assertion failed
+  444 | static_assert(sizeof(animScript_t) == 0x204);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1032 == 516)'
+src/bgame/bg_local.h:454:38: error: static assertion failed
+  454 | static_assert(sizeof(scr_animtree_t) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+src/bgame/bg_local.h:479:40: error: static assertion failed
+  479 | static_assert(sizeof(animScriptData_t) == 0x9A9D0);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(820112 == 633296)'
+src/bgame/bg_local.h:494:35: error: static assertion failed
+  494 | static_assert(sizeof(lerpFrame_t) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+src/bgame/bg_local.h:1157:38: error: static assertion failed
+ 1157 | static_assert(sizeof(CEntPlayerInfo) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+src/bgame/bg_local.h:1227:30: error: static assertion failed
+ 1227 | static_assert(sizeof(CEntFx) == 0x8);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:2218:42: error: static assertion failed
+ 2218 | static_assert(sizeof(BulletTraceResults) == 0x44);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 68)'
+src/bgame/bg_local.h:2232:35: error: static assertion failed
+ 2232 | static_assert(sizeof(viewState_t) == 0x24);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 36)'
+src/bgame/bg_local.h:2250:37: error: static assertion failed
+ 2250 | static_assert(sizeof(weaponState_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(96 == 84)'
+In file included from C:/Users/artslay/KisakCOD/src/server/sv_world.h:3,
+                 from src/bgame/bg_public.h:2,
+                 from src/bgame/bg_mantle.cpp:3:
+C:/Users/artslay/KisakCOD/src/qcommon/qcommon.h:1167:32: error: static assertion failed
+ 1167 | static_assert(sizeof(SpawnVar) == 0xA0C);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(3088 == 2572)'
+In file included from src/bgame/bg_public.h:10:
+C:/Users/artslay/KisakCOD/src/game/enthandle.h:12:37: error: static assertion failed
+   12 | static_assert(sizeof(EntHandleInfo) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_public.h:590:6: error: use of enum 'team_t' without previous declaration
+  590 | enum team_t;
+      |      ^~~~~~
+src/bgame/bg_public.h:783:5: error: 'team_t' does not name a type
+  783 |     team_t team;
+      |     ^~~~~~
+src/bgame/bg_public.h:790:37: error: static assertion failed
+  790 | static_assert(sizeof(missile_ent_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 84)'
+src/bgame/bg_public.h:830:5: error: 'team_t' does not name a type
+  830 |     team_t eTeam;
+      |     ^~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/script/scr_stringlist.h:3,
+                 from C:/Users/artslay/KisakCOD/src/universal/com_memory.h:3,
+                 from src/bgame/bg_weapons.h:2,
+                 from src/bgame/bg_local.h:16,
+                 from src/bgame/bg_mantle.cpp:4:
+C:/Users/artslay/KisakCOD/src/script/scr_memorytree.h:65:40: error: static assertion failed
+   65 | static_assert(sizeof(scrMemTreeGlob_t) == 0xC0380);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(787244 == 787328)'
+src/bgame/bg_local.h: In constructor 'scr_anim_s::scr_anim_s(int)':
+src/bgame/bg_local.h:227:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  227 |         linkPointer = (const char *)i; // KISAKHACK
+      |                       ^~~~~~~~~~~~~~~
+src/bgame/bg_local.h: At global scope:
+src/bgame/bg_local.h:241:41: error: static assertion failed
+  241 | static_assert(sizeof(struct scr_anim_s) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+src/bgame/bg_local.h:249:49: error: static assertion failed
+  249 | static_assert((sizeof(struct loadAnim_t) * 512) == 36864);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(40960 == 36864)'
+src/bgame/bg_local.h:266:29: error: static assertion failed
+  266 | static_assert(sizeof(pml_t) == 0x80);
+      |               ~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(136 == 128)'
+src/bgame/bg_local.h:273:40: error: static assertion failed
+  273 | static_assert(sizeof(animStringItem_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:288:44: error: static assertion failed
+  288 | static_assert(sizeof(animConditionTable_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:357:1: error: 'const' can only be specified for objects and functions
+  357 | const struct shellshock_parms_t // sizeof=0x268
+      | ^~~~~
+src/bgame/bg_local.h:380:36: error: static assertion failed
+  380 | static_assert(sizeof(shellshock_t) == 0x20);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(40 == 32)'
+src/bgame/bg_local.h:418:43: error: static assertion failed
+  418 | static_assert(sizeof(animScriptCommand_t) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+src/bgame/bg_local.h:437:40: error: static assertion failed
+  437 | static_assert(sizeof(animScriptItem_t) == 0x100);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(320 == 256)'
+src/bgame/bg_local.h:444:36: error: static assertion failed
+  444 | static_assert(sizeof(animScript_t) == 0x204);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1032 == 516)'
+src/bgame/bg_local.h:454:38: error: static assertion failed
+  454 | static_assert(sizeof(scr_animtree_t) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+src/bgame/bg_local.h:479:40: error: static assertion failed
+  479 | static_assert(sizeof(animScriptData_t) == 0x9A9D0);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(820112 == 633296)'
+src/bgame/bg_local.h:494:35: error: static assertion failed
+  494 | static_assert(sizeof(lerpFrame_t) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+src/bgame/bg_local.h:1157:38: error: static assertion failed
+ 1157 | static_assert(sizeof(CEntPlayerInfo) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+src/bgame/bg_local.h:1227:30: error: static assertion failed
+ 1227 | static_assert(sizeof(CEntFx) == 0x8);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:2218:42: error: static assertion failed
+ 2218 | static_assert(sizeof(BulletTraceResults) == 0x44);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 68)'
+src/bgame/bg_local.h:2232:35: error: static assertion failed
+ 2232 | static_assert(sizeof(viewState_t) == 0x24);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 36)'
+src/bgame/bg_local.h:2250:37: error: static assertion failed
+ 2250 | static_assert(sizeof(weaponState_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(96 == 84)'
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:3,
+                 from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:5,
+                 from C:/Users/artslay/KisakCOD/src/aim_assist/aim_assist.h:2,
+                 from src/bgame/bg_mantle.cpp:5:
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:167:15: error: ambiguating new declaration of 'float random()'
+  167 | float __cdecl random();
+      |               ^~~~~~
+In file included from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/bits/std_abs.h:44,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/cmath:59,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/math.h:36,
+                 from C:/Users/artslay/KisakCOD/src/universal/q_shared.h:32:
+C:/devkitPro/devkitA64/aarch64-none-elf/include/stdlib.h:260:9: note: old declaration 'long int random()'
+  260 | long    random (void);
+      |         ^~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:459:1: error: '__forceinline' does not name a type
+  459 | __forceinline static float COERCE_FLOAT(unsigned val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:467:1: error: '__forceinline' does not name a type
+  467 | __forceinline static uint32_t COERCE_UNSIGNED_INT(float val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:475:1: error: '__forceinline' does not name a type
+  475 | __forceinline static int COERCE_INT(float val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:78:35: error: static assertion failed
+   78 | static_assert(sizeof(FxEffectDef) == 32);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(40 == 32)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:361:1: error: 'const' can only be specified for objects and functions
+  361 | const struct FxElemVisStateSample // sizeof=0x30
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:381:1: error: 'const' can only be specified for objects and functions
+  381 | const struct FxElemVelStateSample // sizeof=0x60
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:429:1: error: 'const' can only be specified for objects and functions
+  429 | const struct FxElemDef // sizeof=0xFC
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:480:37: error: static assertion failed
+  480 | static_assert(sizeof(FxImpactTable) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+In file included from C:/Users/artslay/KisakCOD/src/server/sv_world.h:3,
+                 from src/bgame/bg_public.h:2,
+                 from src/bgame/bg_slidemove.cpp:2:
+C:/Users/artslay/KisakCOD/src/qcommon/qcommon.h:1167:32: error: static assertion failed
+ 1167 | static_assert(sizeof(SpawnVar) == 0xA0C);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(3088 == 2572)'
+In file included from src/bgame/bg_public.h:10:
+C:/Users/artslay/KisakCOD/src/game/enthandle.h:12:37: error: static assertion failed
+   12 | static_assert(sizeof(EntHandleInfo) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_public.h:590:6: error: use of enum 'team_t' without previous declaration
+  590 | enum team_t;
+      |      ^~~~~~
+src/bgame/bg_public.h:783:5: error: 'team_t' does not name a type
+  783 |     team_t team;
+      |     ^~~~~~
+src/bgame/bg_public.h:790:37: error: static assertion failed
+  790 | static_assert(sizeof(missile_ent_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 84)'
+src/bgame/bg_public.h:830:5: error: 'team_t' does not name a type
+  830 |     team_t eTeam;
+      |     ^~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/server/sv_world.h:3,
+                 from src/bgame/bg_public.h:2,
+                 from src/bgame/bg_pmove.cpp:3:
+C:/Users/artslay/KisakCOD/src/qcommon/qcommon.h:1167:32: error: static assertion failed
+ 1167 | static_assert(sizeof(SpawnVar) == 0xA0C);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(3088 == 2572)'
+In file included from C:/Users/artslay/KisakCOD/src/script/scr_stringlist.h:3,
+                 from C:/Users/artslay/KisakCOD/src/universal/com_memory.h:3,
+                 from src/bgame/bg_weapons.h:2,
+                 from src/bgame/bg_local.h:16,
+                 from src/bgame/bg_slidemove.cpp:3:
+C:/Users/artslay/KisakCOD/src/script/scr_memorytree.h:65:40: error: static assertion failed
+   65 | static_assert(sizeof(scrMemTreeGlob_t) == 0xC0380);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(787244 == 787328)'
+In file included from src/bgame/bg_public.h:10:
+C:/Users/artslay/KisakCOD/src/game/enthandle.h:12:37: error: static assertion failed
+   12 | static_assert(sizeof(EntHandleInfo) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h: In constructor 'scr_anim_s::scr_anim_s(int)':
+src/bgame/bg_local.h:227:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  227 |         linkPointer = (const char *)i; // KISAKHACK
+      |                       ^~~~~~~~~~~~~~~
+src/bgame/bg_local.h: At global scope:
+src/bgame/bg_local.h:241:41: error: static assertion failed
+  241 | static_assert(sizeof(struct scr_anim_s) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+src/bgame/bg_public.h:590:6: error: use of enum 'team_t' without previous declaration
+  590 | enum team_t;
+      |      ^~~~~~
+src/bgame/bg_local.h:249:49: error: static assertion failed
+  249 | static_assert((sizeof(struct loadAnim_t) * 512) == 36864);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(40960 == 36864)'
+src/bgame/bg_local.h:266:29: error: static assertion failed
+  266 | static_assert(sizeof(pml_t) == 0x80);
+      |               ~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(136 == 128)'
+src/bgame/bg_local.h:273:40: error: static assertion failed
+  273 | static_assert(sizeof(animStringItem_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:288:44: error: static assertion failed
+  288 | static_assert(sizeof(animConditionTable_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:357:1: error: 'const' can only be specified for objects and functions
+  357 | const struct shellshock_parms_t // sizeof=0x268
+      | ^~~~~
+src/bgame/bg_local.h:380:36: error: static assertion failed
+  380 | static_assert(sizeof(shellshock_t) == 0x20);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(40 == 32)'
+src/bgame/bg_local.h:418:43: error: static assertion failed
+  418 | static_assert(sizeof(animScriptCommand_t) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+src/bgame/bg_local.h:437:40: error: static assertion failed
+  437 | static_assert(sizeof(animScriptItem_t) == 0x100);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(320 == 256)'
+src/bgame/bg_local.h:444:36: error: static assertion failed
+  444 | static_assert(sizeof(animScript_t) == 0x204);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1032 == 516)'
+src/bgame/bg_local.h:454:38: error: static assertion failed
+  454 | static_assert(sizeof(scr_animtree_t) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+src/bgame/bg_local.h:479:40: error: static assertion failed
+  479 | static_assert(sizeof(animScriptData_t) == 0x9A9D0);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(820112 == 633296)'
+src/bgame/bg_local.h:494:35: error: static assertion failed
+  494 | static_assert(sizeof(lerpFrame_t) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+src/bgame/bg_public.h:783:5: error: 'team_t' does not name a type
+  783 |     team_t team;
+      |     ^~~~~~
+src/bgame/bg_public.h:790:37: error: static assertion failed
+  790 | static_assert(sizeof(missile_ent_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 84)'
+src/bgame/bg_local.h:1157:38: error: static assertion failed
+ 1157 | static_assert(sizeof(CEntPlayerInfo) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+src/bgame/bg_local.h:1227:30: error: static assertion failed
+ 1227 | static_assert(sizeof(CEntFx) == 0x8);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_public.h:830:5: error: 'team_t' does not name a type
+  830 |     team_t eTeam;
+      |     ^~~~~~
+src/bgame/bg_local.h:2218:42: error: static assertion failed
+ 2218 | static_assert(sizeof(BulletTraceResults) == 0x44);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 68)'
+src/bgame/bg_local.h:2232:35: error: static assertion failed
+ 2232 | static_assert(sizeof(viewState_t) == 0x24);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 36)'
+src/bgame/bg_local.h:2250:37: error: static assertion failed
+ 2250 | static_assert(sizeof(weaponState_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(96 == 84)'
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:3,
+                 from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:5,
+                 from C:/Users/artslay/KisakCOD/src/aim_assist/aim_assist.h:2,
+                 from src/bgame/bg_slidemove.cpp:4:
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:167:15: error: ambiguating new declaration of 'float random()'
+  167 | float __cdecl random();
+      |               ^~~~~~
+In file included from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/bits/std_abs.h:44,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/cmath:59,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/math.h:36,
+                 from C:/Users/artslay/KisakCOD/src/universal/q_shared.h:32:
+C:/devkitPro/devkitA64/aarch64-none-elf/include/stdlib.h:260:9: note: old declaration 'long int random()'
+  260 | long    random (void);
+      |         ^~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/script/scr_stringlist.h:3,
+                 from C:/Users/artslay/KisakCOD/src/universal/com_memory.h:3,
+                 from src/bgame/bg_weapons.h:2,
+                 from src/bgame/bg_local.h:16,
+                 from src/bgame/bg_pmove.cpp:4:
+C:/Users/artslay/KisakCOD/src/script/scr_memorytree.h:65:40: error: static assertion failed
+   65 | static_assert(sizeof(scrMemTreeGlob_t) == 0xC0380);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(787244 == 787328)'
+src/bgame/bg_local.h: In constructor 'scr_anim_s::scr_anim_s(int)':
+src/bgame/bg_local.h:227:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  227 |         linkPointer = (const char *)i; // KISAKHACK
+      |                       ^~~~~~~~~~~~~~~
+src/bgame/bg_local.h: At global scope:
+src/bgame/bg_local.h:241:41: error: static assertion failed
+  241 | static_assert(sizeof(struct scr_anim_s) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+src/bgame/bg_local.h:249:49: error: static assertion failed
+  249 | static_assert((sizeof(struct loadAnim_t) * 512) == 36864);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(40960 == 36864)'
+src/bgame/bg_local.h:266:29: error: static assertion failed
+  266 | static_assert(sizeof(pml_t) == 0x80);
+      |               ~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(136 == 128)'
+src/bgame/bg_local.h:273:40: error: static assertion failed
+  273 | static_assert(sizeof(animStringItem_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:288:44: error: static assertion failed
+  288 | static_assert(sizeof(animConditionTable_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:357:1: error: 'const' can only be specified for objects and functions
+  357 | const struct shellshock_parms_t // sizeof=0x268
+      | ^~~~~
+src/bgame/bg_local.h:380:36: error: static assertion failed
+  380 | static_assert(sizeof(shellshock_t) == 0x20);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(40 == 32)'
+src/bgame/bg_local.h:418:43: error: static assertion failed
+  418 | static_assert(sizeof(animScriptCommand_t) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+src/bgame/bg_local.h:437:40: error: static assertion failed
+  437 | static_assert(sizeof(animScriptItem_t) == 0x100);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(320 == 256)'
+src/bgame/bg_local.h:444:36: error: static assertion failed
+  444 | static_assert(sizeof(animScript_t) == 0x204);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1032 == 516)'
+src/bgame/bg_local.h:454:38: error: static assertion failed
+  454 | static_assert(sizeof(scr_animtree_t) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+src/bgame/bg_local.h:479:40: error: static assertion failed
+  479 | static_assert(sizeof(animScriptData_t) == 0x9A9D0);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(820112 == 633296)'
+src/bgame/bg_local.h:494:35: error: static assertion failed
+  494 | static_assert(sizeof(lerpFrame_t) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+src/bgame/bg_local.h:1157:38: error: static assertion failed
+ 1157 | static_assert(sizeof(CEntPlayerInfo) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+src/bgame/bg_local.h:1227:30: error: static assertion failed
+ 1227 | static_assert(sizeof(CEntFx) == 0x8);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:459:1: error: '__forceinline' does not name a type
+  459 | __forceinline static float COERCE_FLOAT(unsigned val) {
+      | ^~~~~~~~~~~~~
+src/bgame/bg_local.h:2218:42: error: static assertion failed
+ 2218 | static_assert(sizeof(BulletTraceResults) == 0x44);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 68)'
+src/bgame/bg_local.h:2232:35: error: static assertion failed
+ 2232 | static_assert(sizeof(viewState_t) == 0x24);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 36)'
+src/bgame/bg_local.h:2250:37: error: static assertion failed
+ 2250 | static_assert(sizeof(weaponState_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(96 == 84)'
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:467:1: error: '__forceinline' does not name a type
+  467 | __forceinline static uint32_t COERCE_UNSIGNED_INT(float val) {
+      | ^~~~~~~~~~~~~
+In file included from src/bgame/bg_pmove.cpp:5:
+C:/Users/artslay/KisakCOD/src/universal/profile.h:889:1: error: 'volatile' can only be specified for objects and functions
+  889 | volatile struct ProfileReadable // sizeof=0xC
+      | ^~~~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:475:1: error: '__forceinline' does not name a type
+  475 | __forceinline static int COERCE_INT(float val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:78:35: error: static assertion failed
+   78 | static_assert(sizeof(FxEffectDef) == 32);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(40 == 32)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:361:1: error: 'const' can only be specified for objects and functions
+  361 | const struct FxElemVisStateSample // sizeof=0x30
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:381:1: error: 'const' can only be specified for objects and functions
+  381 | const struct FxElemVelStateSample // sizeof=0x60
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:429:1: error: 'const' can only be specified for objects and functions
+  429 | const struct FxElemDef // sizeof=0xFC
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:480:37: error: static assertion failed
+  480 | static_assert(sizeof(FxImpactTable) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+make: *** [Makefile:71: build/src/bgame/bg_actor_prone.o] Error 1
+In file included from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:6,
+                 from C:/Users/artslay/KisakCOD/src/xanim/dobj_utils.h:3,
+                 from src/bgame/bg_pmove.cpp:6:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_font.h:29:30: error: static assertion failed
+   29 | static_assert(sizeof(Font_s) == 24);
+      |               ~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(40 == 24)'
+In file included from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:6:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:250:32: error: static assertion failed
+  250 | static_assert(sizeof(GfxImage) == 36);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+In file included from C:/Users/artslay/KisakCOD/src/server/sv_world.h:3,
+                 from src/bgame/bg_public.h:2,
+                 from src/bgame/bg_weapons.cpp:2:
+C:/Users/artslay/KisakCOD/src/qcommon/qcommon.h:1167:32: error: static assertion failed
+ 1167 | static_assert(sizeof(SpawnVar) == 0xA0C);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(48 == 36)'
+  • the comparison reduces to '(3088 == 2572)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:402:42: error: static assertion failed
+  402 | static_assert(sizeof(GfxWorldDpvsStatic) == 0x68);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(168 == 104)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:679:45: error: static assertion failed
+  679 | static_assert(sizeof(GfxPixelShaderLoadDef) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+In file included from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:6:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:250:32: error: static assertion failed
+  250 | static_assert(sizeof(GfxImage) == 36);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(48 == 36)'
+In file included from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:7:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:323:50: error: static assertion failed
+  323 | static_assert(sizeof(MaterialPixelShaderProgram) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:402:42: error: static assertion failed
+  402 | static_assert(sizeof(GfxWorldDpvsStatic) == 0x68);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(168 == 104)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:514:44: error: static assertion failed
+  514 | static_assert(sizeof(MaterialTechniqueSet) == 148);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(296 == 148)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:559:32: error: static assertion failed
+  559 | static_assert(sizeof(Material) == 80);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(104 == 80)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:679:45: error: static assertion failed
+  679 | static_assert(sizeof(GfxPixelShaderLoadDef) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+In file included from src/bgame/bg_public.h:10:
+C:/Users/artslay/KisakCOD/src/game/enthandle.h:12:37: error: static assertion failed
+   12 | static_assert(sizeof(EntHandleInfo) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+In file included from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:7:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:323:50: error: static assertion failed
+  323 | static_assert(sizeof(MaterialPixelShaderProgram) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:514:44: error: static assertion failed
+  514 | static_assert(sizeof(MaterialTechniqueSet) == 148);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(296 == 148)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:559:32: error: static assertion failed
+  559 | static_assert(sizeof(Material) == 80);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(104 == 80)'
+src/bgame/bg_public.h:590:6: error: use of enum 'team_t' without previous declaration
+  590 | enum team_t;
+      |      ^~~~~~
+src/aim_assist/aim_assist.h:111:32: error: static assertion failed
+  111 | static_assert(sizeof(AimInput) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+src/bgame/bg_public.h:783:5: error: 'team_t' does not name a type
+  783 |     team_t team;
+      |     ^~~~~~
+src/bgame/bg_public.h:790:37: error: static assertion failed
+  790 | static_assert(sizeof(missile_ent_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 84)'
+In file included from C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:5,
+                 from C:/Users/artslay/KisakCOD/src/client/client.h:4,
+                 from src/aim_assist/aim_target.h:8:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_font.h:29:30: error: static assertion failed
+   29 | static_assert(sizeof(Font_s) == 24);
+      |               ~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(40 == 24)'
+src/bgame/bg_public.h:830:5: error: 'team_t' does not name a type
+  830 |     team_t eTeam;
+      |     ^~~~~~
+src/aim_assist/aim_assist.h:111:32: error: static assertion failed
+  111 | static_assert(sizeof(AimInput) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+In file included from C:/Users/artslay/KisakCOD/src/script/scr_stringlist.h:3,
+                 from C:/Users/artslay/KisakCOD/src/universal/com_memory.h:3,
+                 from src/bgame/bg_weapons.h:2,
+                 from src/bgame/bg_local.h:16,
+                 from src/bgame/bg_weapons.cpp:3:
+C:/Users/artslay/KisakCOD/src/script/scr_memorytree.h:65:40: error: static assertion failed
+   65 | static_assert(sizeof(scrMemTreeGlob_t) == 0xC0380);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(787244 == 787328)'
+In file included from C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:5,
+                 from C:/Users/artslay/KisakCOD/src/client/client.h:4,
+                 from src/aim_assist/aim_assist.cpp:6:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_font.h:29:30: error: static assertion failed
+   29 | static_assert(sizeof(Font_s) == 24);
+      |               ~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(40 == 24)'
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h: In member function 'bool KeywordHashEntry<T, useless, HASH_SEED>::KeywordHash_IsValidSeed(int, int)':
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1409:5: warning: no return statement in function returning non-void [-Wreturn-type]
+ 1409 |     }
+      |     ^
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h: In member function 'int KeywordHashEntry<T, useless, HASH_SEED>::KeywordHash_PickSeed(int)':
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1412:29: error: there are no arguments to 'IsValidSeed' that depend on a template parameter, so a declaration of 'IsValidSeed' must be available [-Wtemplate-body]
+ 1412 |         for (int seed = 0; !IsValidSeed(count, HASH_SEED); seed++)
+      |                             ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1412:29: note: (if you use '-fpermissive', G++ will accept your code, but allowing the use of an undeclared name is deprecated)
+make: *** [Makefile:71: build/src/bgame/bg_jump.o] Error 1
+src/bgame/bg_local.h: In constructor 'scr_anim_s::scr_anim_s(int)':
+src/bgame/bg_local.h:227:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  227 |         linkPointer = (const char *)i; // KISAKHACK
+      |                       ^~~~~~~~~~~~~~~
+src/bgame/bg_local.h: At global scope:
+src/bgame/bg_local.h:241:41: error: static assertion failed
+  241 | static_assert(sizeof(struct scr_anim_s) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+src/bgame/bg_local.h:249:49: error: static assertion failed
+  249 | static_assert((sizeof(struct loadAnim_t) * 512) == 36864);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(40960 == 36864)'
+src/bgame/bg_local.h:266:29: error: static assertion failed
+  266 | static_assert(sizeof(pml_t) == 0x80);
+      |               ~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(136 == 128)'
+src/bgame/bg_local.h:273:40: error: static assertion failed
+  273 | static_assert(sizeof(animStringItem_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:288:44: error: static assertion failed
+  288 | static_assert(sizeof(animConditionTable_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:357:1: error: 'const' can only be specified for objects and functions
+  357 | const struct shellshock_parms_t // sizeof=0x268
+      | ^~~~~
+src/bgame/bg_local.h:380:36: error: static assertion failed
+  380 | static_assert(sizeof(shellshock_t) == 0x20);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(40 == 32)'
+src/bgame/bg_local.h:418:43: error: static assertion failed
+  418 | static_assert(sizeof(animScriptCommand_t) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+src/bgame/bg_local.h:437:40: error: static assertion failed
+  437 | static_assert(sizeof(animScriptItem_t) == 0x100);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(320 == 256)'
+src/bgame/bg_local.h:444:36: error: static assertion failed
+  444 | static_assert(sizeof(animScript_t) == 0x204);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1032 == 516)'
+src/bgame/bg_local.h:454:38: error: static assertion failed
+  454 | static_assert(sizeof(scr_animtree_t) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+src/bgame/bg_local.h:479:40: error: static assertion failed
+  479 | static_assert(sizeof(animScriptData_t) == 0x9A9D0);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(820112 == 633296)'
+src/bgame/bg_local.h:494:35: error: static assertion failed
+  494 | static_assert(sizeof(lerpFrame_t) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+src/bgame/bg_local.h:1157:38: error: static assertion failed
+ 1157 | static_assert(sizeof(CEntPlayerInfo) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+src/bgame/bg_local.h:1227:30: error: static assertion failed
+ 1227 | static_assert(sizeof(CEntFx) == 0x8);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h: In member function 'bool KeywordHashEntry<T, useless, HASH_SEED>::KeywordHash_IsValidSeed(int, int)':
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1409:5: warning: no return statement in function returning non-void [-Wreturn-type]
+ 1409 |     }
+      |     ^
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h: In member function 'int KeywordHashEntry<T, useless, HASH_SEED>::KeywordHash_PickSeed(int)':
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1412:29: error: there are no arguments to 'IsValidSeed' that depend on a template parameter, so a declaration of 'IsValidSeed' must be available [-Wtemplate-body]
+ 1412 |         for (int seed = 0; !IsValidSeed(count, HASH_SEED); seed++)
+      |                             ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1412:29: note: (if you use '-fpermissive', G++ will accept your code, but allowing the use of an undeclared name is deprecated)
+src/bgame/bg_local.h:2218:42: error: static assertion failed
+ 2218 | static_assert(sizeof(BulletTraceResults) == 0x44);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 68)'
+src/bgame/bg_local.h:2232:35: error: static assertion failed
+ 2232 | static_assert(sizeof(viewState_t) == 0x24);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 36)'
+src/bgame/bg_local.h:2250:37: error: static assertion failed
+ 2250 | static_assert(sizeof(weaponState_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(96 == 84)'
+In file included from C:/Users/artslay/KisakCOD/src/game/g_local.h:9,
+                 from src/aim_assist/aim_target.cpp:8:
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h: At global scope:
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:97:43: error: static assertion failed
+   97 | static_assert(sizeof(VariableStackBuffer) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:131:37: error: static assertion failed
+  131 | static_assert(sizeof(VariableUnion) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:139:37: error: static assertion failed
+  139 | static_assert(sizeof(VariableValue) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:190:47: error: static assertion failed
+  190 | static_assert(sizeof(VariableValueInternal_u) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:219:45: error: static assertion failed
+  219 | static_assert(sizeof(VariableValueInternal) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:232:40: error: static assertion failed
+  232 | static_assert(sizeof(scrVarDebugPub_t) == 0xE0004);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(1310728 == 917508)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:238:36: error: static assertion failed
+  238 | static_assert(sizeof(scrVarGlob_t) == 0x180000);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:6,
+                 from C:/Users/artslay/KisakCOD/src/database/database.h:7,
+                 from src/bgame/bg_weapons.cpp:4:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_font.h:29:30: error: static assertion failed
+   29 | static_assert(sizeof(Font_s) == 24);
+      |               ~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(2359296 == 1572864)'
+  • the comparison reduces to '(40 == 24)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:274:41: error: static assertion failed
+  274 | static_assert(sizeof(scr_classStruct_t) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:283:41: error: static assertion failed
+  283 | static_assert(sizeof(VariableDebugInfo) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(32 == 16)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:439:39: error: static assertion failed
+  439 | static_assert(sizeof(ThreadDebugInfo) == 0x8C);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(272 == 140)'
+In file included from C:/Users/artslay/KisakCOD/src/game/game_public.h:9,
+                 from C:/Users/artslay/KisakCOD/src/game/g_local.h:10:
+C:/Users/artslay/KisakCOD/src/server/server.h:219:65: error: '_iobuf' has not been declared; did you mean '__sbuf'?
+  219 | bool __cdecl SV_DemoWrite(const void *buffer, unsigned int len, _iobuf *file);
+      |                                                                 ^~~~~~
+      |                                                                 __sbuf
+In file included from src/aim_assist/aim_assist.cpp:8:
+C:/Users/artslay/KisakCOD/src/universal/profile.h: At global scope:
+C:/Users/artslay/KisakCOD/src/universal/profile.h:889:1: error: 'volatile' can only be specified for objects and functions
+  889 | volatile struct ProfileReadable // sizeof=0xC
+      | ^~~~~~~~
+C:/Users/artslay/KisakCOD/src/server/server.h:228:1: error: '_iobuf' does not name a type; did you mean '__sbuf'?
+  228 | _iobuf *SV_ClearHistoryCache();
+      | ^~~~~~
+      | __sbuf
+C:/Users/artslay/KisakCOD/src/server/server.h:236:1: error: '_iobuf' does not name a type; did you mean '__sbuf'?
+  236 | _iobuf *__cdecl SV_DemoOpenFile(const char *fileName);
+      | ^~~~~~
+      | __sbuf
+C:/Users/artslay/KisakCOD/src/server/server.h:264:30: error: '_iobuf' was not declared in this scope; did you mean '__sbuf'?
+  264 | bool __cdecl SV_WriteHistory(_iobuf *fileHistory, const server_demo_history_t *history);
+      |                              ^~~~~~
+      |                              __sbuf
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_primarylights.h:2,
+                 from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:4,
+                 from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:7,
+                 from src/aim_assist/aim_assist.cpp:16:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_rendercmds.h:446:1: error: 'const' can only be specified for objects and functions
+  446 | const struct GfxViewInfo // sizeof=0x67B0
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_rendercmds.h:514:1: error: 'const' can only be specified for objects and functions
+  514 | const struct __declspec(align(16)) GfxBackEndData // sizeof=0x11E780
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:205:32: error: static assertion failed
+  205 | static_assert(sizeof(GfxWorld) == 0x2DC);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1032 == 732)'
+In file included from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:11:
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:185:35: error: static assertion failed
+  185 | static_assert(sizeof(LoadedSound) == 44);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(64 == 44)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:224:32: error: static assertion failed
+  224 | static_assert(sizeof(SndCurve) == 72);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(80 == 72)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:277:35: error: static assertion failed
+  277 | static_assert(sizeof(snd_alias_t) == 92);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(128 == 92)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:285:40: error: static assertion failed
+  285 | static_assert(sizeof(snd_alias_list_t) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+In file included from C:/Users/artslay/KisakCOD/src/server/sv_world.h:3,
+                 from src/bgame/bg_public.h:2,
+                 from src/bgame/bg_local.h:3,
+                 from src/bgame/bg_weapons_load_obj.cpp:2:
+C:/Users/artslay/KisakCOD/src/qcommon/qcommon.h:1167:32: error: static assertion failed
+ 1167 | static_assert(sizeof(SpawnVar) == 0xA0C);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(3088 == 2572)'
+In file included from src/bgame/bg_public.h:10:
+C:/Users/artslay/KisakCOD/src/game/enthandle.h:12:37: error: static assertion failed
+   12 | static_assert(sizeof(EntHandleInfo) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_public.h:590:6: error: use of enum 'team_t' without previous declaration
+  590 | enum team_t;
+      |      ^~~~~~
+C:/Users/artslay/KisakCOD/src/server/server.h:264:38: error: 'fileHistory' was not declared in this scope
+  264 | bool __cdecl SV_WriteHistory(_iobuf *fileHistory, const server_demo_history_t *history);
+      |                                      ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/server/server.h:264:51: error: expected primary-expression before 'const'
+  264 | bool __cdecl SV_WriteHistory(_iobuf *fileHistory, const server_demo_history_t *history);
+      |                                                   ^~~~~
+C:/Users/artslay/KisakCOD/src/server/server.h:264:87: error: expression list treated as compound expression in initializer [-fpermissive]
+  264 | bool __cdecl SV_WriteHistory(_iobuf *fileHistory, const server_demo_history_t *history);
+      |                                                                                       ^
+src/bgame/bg_public.h:783:5: error: 'team_t' does not name a type
+  783 |     team_t team;
+      |     ^~~~~~
+src/bgame/bg_public.h:790:37: error: static assertion failed
+  790 | static_assert(sizeof(missile_ent_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 84)'
+C:/Users/artslay/KisakCOD/src/server/server.h:278:58: error: '_iobuf' has not been declared; did you mean '__sbuf'?
+  278 | bool __cdecl SV_DemoRead(void *buffer, unsigned int len, _iobuf *file);
+      |                                                          ^~~~~~
+      |                                                          __sbuf
+src/bgame/bg_public.h:830:5: error: 'team_t' does not name a type
+  830 |     team_t eTeam;
+      |     ^~~~~~
+C:/Users/artslay/KisakCOD/src/server/server.h:283:5: error: '_iobuf' has not been declared; did you mean '__sbuf'?
+  283 |     _iobuf *file);
+      |     ^~~~~~
+      |     __sbuf
+In file included from C:/Users/artslay/KisakCOD/src/script/scr_stringlist.h:3,
+                 from C:/Users/artslay/KisakCOD/src/universal/com_memory.h:3,
+                 from src/bgame/bg_weapons.h:2,
+                 from src/bgame/bg_local.h:16:
+C:/Users/artslay/KisakCOD/src/script/scr_memorytree.h:65:40: error: static assertion failed
+   65 | static_assert(sizeof(scrMemTreeGlob_t) == 0xC0380);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(787244 == 787328)'
+src/bgame/bg_local.h: In constructor 'scr_anim_s::scr_anim_s(int)':
+src/bgame/bg_local.h:227:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  227 |         linkPointer = (const char *)i; // KISAKHACK
+      |                       ^~~~~~~~~~~~~~~
+src/bgame/bg_local.h: At global scope:
+src/bgame/bg_local.h:241:41: error: static assertion failed
+  241 | static_assert(sizeof(struct scr_anim_s) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+src/bgame/bg_local.h:249:49: error: static assertion failed
+  249 | static_assert((sizeof(struct loadAnim_t) * 512) == 36864);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(40960 == 36864)'
+src/bgame/bg_local.h:266:29: error: static assertion failed
+  266 | static_assert(sizeof(pml_t) == 0x80);
+      |               ~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(136 == 128)'
+src/bgame/bg_local.h:273:40: error: static assertion failed
+  273 | static_assert(sizeof(animStringItem_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:288:44: error: static assertion failed
+  288 | static_assert(sizeof(animConditionTable_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:357:1: error: 'const' can only be specified for objects and functions
+  357 | const struct shellshock_parms_t // sizeof=0x268
+      | ^~~~~
+src/bgame/bg_local.h:380:36: error: static assertion failed
+  380 | static_assert(sizeof(shellshock_t) == 0x20);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(40 == 32)'
+src/bgame/bg_local.h:418:43: error: static assertion failed
+  418 | static_assert(sizeof(animScriptCommand_t) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+src/bgame/bg_local.h:437:40: error: static assertion failed
+  437 | static_assert(sizeof(animScriptItem_t) == 0x100);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(320 == 256)'
+src/bgame/bg_local.h:444:36: error: static assertion failed
+  444 | static_assert(sizeof(animScript_t) == 0x204);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1032 == 516)'
+src/bgame/bg_local.h:454:38: error: static assertion failed
+  454 | static_assert(sizeof(scr_animtree_t) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+src/bgame/bg_local.h:479:40: error: static assertion failed
+  479 | static_assert(sizeof(animScriptData_t) == 0x9A9D0);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(820112 == 633296)'
+src/bgame/bg_local.h:494:35: error: static assertion failed
+  494 | static_assert(sizeof(lerpFrame_t) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+src/bgame/bg_local.h:1157:38: error: static assertion failed
+ 1157 | static_assert(sizeof(CEntPlayerInfo) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+src/bgame/bg_local.h:1227:30: error: static assertion failed
+ 1227 | static_assert(sizeof(CEntFx) == 0x8);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+src/bgame/bg_local.h:2218:42: error: static assertion failed
+ 2218 | static_assert(sizeof(BulletTraceResults) == 0x44);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 68)'
+src/bgame/bg_local.h:2232:35: error: static assertion failed
+ 2232 | static_assert(sizeof(viewState_t) == 0x24);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 36)'
+src/bgame/bg_local.h:2250:37: error: static assertion failed
+ 2250 | static_assert(sizeof(weaponState_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(96 == 84)'
+In file included from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:13:
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:95:30: error: static assertion failed
+   95 | static_assert(sizeof(XModel) == 220);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(280 == 220)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:102:35: error: static assertion failed
+  102 | static_assert(sizeof(XModelPiece) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:110:36: error: static assertion failed
+  110 | static_assert(sizeof(XModelPieces) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:146:35: error: static assertion failed
+  146 | static_assert(sizeof(XModelSurfs) == 20);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 20)'
+C:/Users/artslay/KisakCOD/src/server/server.h:284:29: error: '_iobuf' was not declared in this scope; did you mean '__sbuf'?
+  284 | bool __cdecl SV_ReadHistory(_iobuf *fileHistory, server_demo_history_t *history);
+      |                             ^~~~~~
+      |                             __sbuf
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:178:39: error: static assertion failed
+  178 | static_assert(sizeof(XModelPartsLoad) == 28);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(56 == 28)'
+In file included from C:/Users/artslay/KisakCOD/src/game/pathnode.h:2,
+                 from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:18:
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:97:43: error: static assertion failed
+   97 | static_assert(sizeof(VariableStackBuffer) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+In file included from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:6,
+                 from C:/Users/artslay/KisakCOD/src/database/database.h:7,
+                 from src/bgame/bg_weapons_load_obj.cpp:5:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_font.h:29:30: error: static assertion failed
+   29 | static_assert(sizeof(Font_s) == 24);
+      |               ~~~~~~~~~~~~~~~^~~~~
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:131:37: error: static assertion failed
+  131 | static_assert(sizeof(VariableUnion) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+  • the comparison reduces to '(40 == 24)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:139:37: error: static assertion failed
+  139 | static_assert(sizeof(VariableValue) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:190:47: error: static assertion failed
+  190 | static_assert(sizeof(VariableValueInternal_u) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:219:45: error: static assertion failed
+  219 | static_assert(sizeof(VariableValueInternal) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:232:40: error: static assertion failed
+  232 | static_assert(sizeof(scrVarDebugPub_t) == 0xE0004);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(1310728 == 917508)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:238:36: error: static assertion failed
+  238 | static_assert(sizeof(scrVarGlob_t) == 0x180000);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+  • the comparison reduces to '(2359296 == 1572864)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:274:41: error: static assertion failed
+  274 | static_assert(sizeof(scr_classStruct_t) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:283:41: error: static assertion failed
+  283 | static_assert(sizeof(VariableDebugInfo) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(32 == 16)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:439:39: error: static assertion failed
+  439 | static_assert(sizeof(ThreadDebugInfo) == 0x8C);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(272 == 140)'
+C:/Users/artslay/KisakCOD/src/game/pathnode.h:199:45: error: static assertion failed
+  199 | static_assert(sizeof(pathnode_tree_nodes_t) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+make: *** [Makefile:71: build/src/bgame/bg_misctables.o] Error 1
+In file included from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:6:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:250:32: error: static assertion failed
+  250 | static_assert(sizeof(GfxImage) == 36);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(48 == 36)'
+In file included from C:/Users/artslay/KisakCOD/src/game/actor_badplace.h:2,
+                 from C:/Users/artslay/KisakCOD/src/game/pathnode.h:235:
+C:/Users/artslay/KisakCOD/src/game/actor.h:416:31: error: static assertion failed: actor_s size drift vs CoD3SP IDA
+  416 | static_assert(sizeof(actor_s) == 0x1e90, "actor_s size drift vs CoD3SP IDA");
+      |               ~~~~~~~~~~~~~~~~^~~~~~~~~
+  • the comparison reduces to '(12256 == 7824)'
+C:/Users/artslay/KisakCOD/src/game/actor.h:417:47: error: static assertion failed: actor_s.sentientInfo offset drift vs CoD3SP IDA
+  417 | static_assert(offsetof(actor_s, sentientInfo) == 0x834, "actor_s.sentientInfo offset drift vs CoD3SP IDA");
+      |                                               ^
+  • the comparison reduces to '(2216 == 2100)'
+C:/Users/artslay/KisakCOD/src/game/actor.h:418:39: error: static assertion failed: sentient_info_t size drift vs CoD3SP IDA
+  418 | static_assert(sizeof(sentient_info_t) == 0x28, "sentient_info_t size drift vs CoD3SP IDA");
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 40)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:402:42: error: static assertion failed
+  402 | static_assert(sizeof(GfxWorldDpvsStatic) == 0x68);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(168 == 104)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:679:45: error: static assertion failed
+  679 | static_assert(sizeof(GfxPixelShaderLoadDef) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:38:36: error: static assertion failed
+   38 | static_assert(sizeof(XAnimIndices) == 4);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:182:34: error: static assertion failed
+  182 | static_assert(sizeof(XAnimParts) == 88);
+      |               ~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(136 == 88)'
+In file included from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:7:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:323:50: error: static assertion failed
+  323 | static_assert(sizeof(MaterialPixelShaderProgram) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:514:44: error: static assertion failed
+  514 | static_assert(sizeof(MaterialTechniqueSet) == 148);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(296 == 148)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:559:32: error: static assertion failed
+  559 | static_assert(sizeof(Material) == 80);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(104 == 80)'
+C:/Users/artslay/KisakCOD/src/server/server.h:284:37: error: 'fileHistory' was not declared in this scope
+  284 | bool __cdecl SV_ReadHistory(_iobuf *fileHistory, server_demo_history_t *history);
+      |                                     ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/server/server.h:284:72: error: expected primary-expression before '*' token
+  284 | bool __cdecl SV_ReadHistory(_iobuf *fileHistory, server_demo_history_t *history);
+      |                                                                        ^
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:829:33: error: static assertion failed
+  829 | static_assert(sizeof(WeaponDef) == 2168);
+      |               ~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(2832 == 2168)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:842:31: error: static assertion failed
+  842 | static_assert(sizeof(RawFile) == 12);
+      |               ~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1002:30: error: static assertion failed
+ 1002 | static_assert(sizeof(XAsset) == 8);
+      |               ~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1113:40: error: static assertion failed
+ 1113 | static_assert(sizeof(ScriptStringList) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1121:34: error: static assertion failed
+ 1121 | static_assert(sizeof(XAssetList) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(32 == 16)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1166:38: error: static assertion failed
+ 1166 | static_assert(sizeof(XRigidVertList) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1173:42: error: static assertion failed
+ 1173 | static_assert(sizeof(XSurfaceVertexInfo) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1192:32: error: static assertion failed
+ 1192 | static_assert(sizeof(XSurface) == 56);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(80 == 56)'
+C:/Users/artslay/KisakCOD/src/aim_assist/aim_assist.h:111:32: error: static assertion failed
+  111 | static_assert(sizeof(AimInput) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+In file included from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:6,
+                 from src/bgame/bg_mantle.cpp:6:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_font.h:29:30: error: static assertion failed
+   29 | static_assert(sizeof(Font_s) == 24);
+      |               ~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(40 == 24)'
+C:/Users/artslay/KisakCOD/src/server/server.h:284:73: error: 'history' was not declared in this scope
+  284 | bool __cdecl SV_ReadHistory(_iobuf *fileHistory, server_demo_history_t *history);
+      |                                                                         ^~~~~~~
+C:/Users/artslay/KisakCOD/src/server/server.h:284:80: error: expression list treated as compound expression in initializer [-fpermissive]
+  284 | bool __cdecl SV_ReadHistory(_iobuf *fileHistory, server_demo_history_t *history);
+      |                                                                                ^
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_primarylights.h:2,
+                 from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:4,
+                 from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:7:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_rendercmds.h:446:1: error: 'const' can only be specified for objects and functions
+  446 | const struct GfxViewInfo // sizeof=0x67B0
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_rendercmds.h:514:1: error: 'const' can only be specified for objects and functions
+  514 | const struct __declspec(align(16)) GfxBackEndData // sizeof=0x11E780
+      | ^~~~~
+src/aim_assist/aim_assist.cpp: In function 'void AimAssist_DrawTargets(int64_t, const float*)':
+src/aim_assist/aim_assist.cpp:1183:66: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1183 |     int32_t weapIndex = AimAssist_GetWeaponIndex(localClientNum, (const playerState_s *)HIDWORD(localClientNum)); // [esp+78h] [ebp-1Ch]
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:205:32: error: static assertion failed
+  205 | static_assert(sizeof(GfxWorld) == 0x2DC);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1032 == 732)'
+In file included from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:11:
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:185:35: error: static assertion failed
+  185 | static_assert(sizeof(LoadedSound) == 44);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(64 == 44)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:224:32: error: static assertion failed
+  224 | static_assert(sizeof(SndCurve) == 72);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(80 == 72)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:277:35: error: static assertion failed
+  277 | static_assert(sizeof(snd_alias_t) == 92);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(128 == 92)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:285:40: error: static assertion failed
+  285 | static_assert(sizeof(snd_alias_list_t) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/server/server.h:285:33: error: '_iobuf' was not declared in this scope; did you mean '__sbuf'?
+  285 | bool __cdecl SV_DemoLoadHistory(_iobuf *fileHistory, int fileOffset);
+      |                                 ^~~~~~
+      |                                 __sbuf
+C:/Users/artslay/KisakCOD/src/server/server.h:285:41: error: 'fileHistory' was not declared in this scope
+  285 | bool __cdecl SV_DemoLoadHistory(_iobuf *fileHistory, int fileOffset);
+      |                                         ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/server/server.h:285:54: error: expected primary-expression before 'int'
+  285 | bool __cdecl SV_DemoLoadHistory(_iobuf *fileHistory, int fileOffset);
+      |                                                      ^~~
+C:/Users/artslay/KisakCOD/src/server/server.h:285:68: error: expression list treated as compound expression in initializer [-fpermissive]
+  285 | bool __cdecl SV_DemoLoadHistory(_iobuf *fileHistory, int fileOffset);
+      |                                                                    ^
+C:/Users/artslay/KisakCOD/src/game/game_public.h:141:39: error: static assertion failed
+  141 | static_assert(sizeof(client_fields_s) == 0x14);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(32 == 20)'
+C:/Users/artslay/KisakCOD/src/game/game_public.h:149:43: error: static assertion failed
+  149 | static_assert(sizeof(VehicleLocalPhysics) == 0x34);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 52)'
+C:/Users/artslay/KisakCOD/src/game/game_public.h:229:44: error: static assertion failed
+  229 | static_assert(sizeof(game_hudelem_field_t) == 0x1C);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(40 == 28)'
+C:/Users/artslay/KisakCOD/src/game/g_local.h:413:59: warning: 'volatile'-qualified parameter is deprecated [-Wvolatile]
+  413 | void __cdecl G_AddCommandNotify(volatile unsigned __int16 notify);
+      |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:13:
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:95:30: error: static assertion failed
+   95 | static_assert(sizeof(XModel) == 220);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(280 == 220)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:102:35: error: static assertion failed
+  102 | static_assert(sizeof(XModelPiece) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:110:36: error: static assertion failed
+  110 | static_assert(sizeof(XModelPieces) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:146:35: error: static assertion failed
+  146 | static_assert(sizeof(XModelSurfs) == 20);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 20)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:178:39: error: static assertion failed
+  178 | static_assert(sizeof(XModelPartsLoad) == 28);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(56 == 28)'
+In file included from C:/Users/artslay/KisakCOD/src/game/pathnode.h:2,
+                 from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:18:
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:97:43: error: static assertion failed
+   97 | static_assert(sizeof(VariableStackBuffer) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:131:37: error: static assertion failed
+  131 | static_assert(sizeof(VariableUnion) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:139:37: error: static assertion failed
+  139 | static_assert(sizeof(VariableValue) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:190:47: error: static assertion failed
+  190 | static_assert(sizeof(VariableValueInternal_u) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:219:45: error: static assertion failed
+  219 | static_assert(sizeof(VariableValueInternal) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:232:40: error: static assertion failed
+  232 | static_assert(sizeof(scrVarDebugPub_t) == 0xE0004);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(1310728 == 917508)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:238:36: error: static assertion failed
+  238 | static_assert(sizeof(scrVarGlob_t) == 0x180000);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+  • the comparison reduces to '(2359296 == 1572864)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:274:41: error: static assertion failed
+  274 | static_assert(sizeof(scr_classStruct_t) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:283:41: error: static assertion failed
+  283 | static_assert(sizeof(VariableDebugInfo) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(32 == 16)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:439:39: error: static assertion failed
+  439 | static_assert(sizeof(ThreadDebugInfo) == 0x8C);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(272 == 140)'
+C:/Users/artslay/KisakCOD/src/game/pathnode.h:199:45: error: static assertion failed
+  199 | static_assert(sizeof(pathnode_tree_nodes_t) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+In file included from C:/Users/artslay/KisakCOD/src/game/actor.h:12,
+                 from src/aim_assist/aim_target.cpp:12:
+C:/Users/artslay/KisakCOD/src/game/pathnode.h:199:45: error: static assertion failed
+  199 | static_assert(sizeof(pathnode_tree_nodes_t) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+In file included from C:/Users/artslay/KisakCOD/src/game/actor_badplace.h:2,
+                 from C:/Users/artslay/KisakCOD/src/game/pathnode.h:235:
+C:/Users/artslay/KisakCOD/src/game/actor.h:416:31: error: static assertion failed: actor_s size drift vs CoD3SP IDA
+  416 | static_assert(sizeof(actor_s) == 0x1e90, "actor_s size drift vs CoD3SP IDA");
+      |               ~~~~~~~~~~~~~~~~^~~~~~~~~
+  • the comparison reduces to '(12256 == 7824)'
+C:/Users/artslay/KisakCOD/src/game/actor.h:417:47: error: static assertion failed: actor_s.sentientInfo offset drift vs CoD3SP IDA
+  417 | static_assert(offsetof(actor_s, sentientInfo) == 0x834, "actor_s.sentientInfo offset drift vs CoD3SP IDA");
+      |                                               ^
+  • the comparison reduces to '(2216 == 2100)'
+C:/Users/artslay/KisakCOD/src/game/actor.h:418:39: error: static assertion failed: sentient_info_t size drift vs CoD3SP IDA
+  418 | static_assert(sizeof(sentient_info_t) == 0x28, "sentient_info_t size drift vs CoD3SP IDA");
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 40)'
+C:/Users/artslay/KisakCOD/src/game/actor.h:416:31: error: static assertion failed: actor_s size drift vs CoD3SP IDA
+  416 | static_assert(sizeof(actor_s) == 0x1e90, "actor_s size drift vs CoD3SP IDA");
+      |               ~~~~~~~~~~~~~~~~^~~~~~~~~
+  • the comparison reduces to '(12256 == 7824)'
+C:/Users/artslay/KisakCOD/src/game/actor.h:417:47: error: static assertion failed: actor_s.sentientInfo offset drift vs CoD3SP IDA
+  417 | static_assert(offsetof(actor_s, sentientInfo) == 0x834, "actor_s.sentientInfo offset drift vs CoD3SP IDA");
+      |                                               ^
+  • the comparison reduces to '(2216 == 2100)'
+C:/Users/artslay/KisakCOD/src/game/actor.h:418:39: error: static assertion failed: sentient_info_t size drift vs CoD3SP IDA
+  418 | static_assert(sizeof(sentient_info_t) == 0x28, "sentient_info_t size drift vs CoD3SP IDA");
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 40)'
+In file included from C:/Users/artslay/KisakCOD/src/game/g_main.h:6,
+                 from src/aim_assist/aim_target.cpp:13:
+C:/Users/artslay/KisakCOD/src/universal/q_parse.h:22:42: error: static assertion failed
+   22 | static_assert(sizeof(struct parseInfo_t) == 0x420);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1080 == 1056)'
+C:/Users/artslay/KisakCOD/src/universal/q_parse.h:32:46: error: static assertion failed
+   32 | static_assert(sizeof(struct ParseThreadInfo) == 0x460C);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~
+  • the comparison reduces to '(18328 == 17932)'
+C:/Users/artslay/KisakCOD/src/universal/q_parse.h:42:47: error: static assertion failed
+   42 | static_assert(sizeof(struct com_parse_mark_t) == 0x14);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(32 == 20)'
+In file included from src/aim_assist/aim_target.cpp:14:
+C:/Users/artslay/KisakCOD/src/universal/profile.h:889:1: error: 'volatile' can only be specified for objects and functions
+  889 | volatile struct ProfileReadable // sizeof=0xC
+      | ^~~~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/client/client.h:4,
+                 from C:/Users/artslay/KisakCOD/src/game/pathnode.h:236:
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h: In member function 'bool KeywordHashEntry<T, useless, HASH_SEED>::KeywordHash_IsValidSeed(int, int)':
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1409:5: warning: no return statement in function returning non-void [-Wreturn-type]
+ 1409 |     }
+      |     ^
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h: In member function 'int KeywordHashEntry<T, useless, HASH_SEED>::KeywordHash_PickSeed(int)':
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1412:29: error: there are no arguments to 'IsValidSeed' that depend on a template parameter, so a declaration of 'IsValidSeed' must be available [-Wtemplate-body]
+ 1412 |         for (int seed = 0; !IsValidSeed(count, HASH_SEED); seed++)
+      |                             ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1412:29: note: (if you use '-fpermissive', G++ will accept your code, but allowing the use of an undeclared name is deprecated)
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h: At global scope:
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:38:36: error: static assertion failed
+   38 | static_assert(sizeof(XAnimIndices) == 4);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:182:34: error: static assertion failed
+  182 | static_assert(sizeof(XAnimParts) == 88);
+      |               ~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(136 == 88)'
+In file included from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:6:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:250:32: error: static assertion failed
+  250 | static_assert(sizeof(GfxImage) == 36);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(48 == 36)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:402:42: error: static assertion failed
+  402 | static_assert(sizeof(GfxWorldDpvsStatic) == 0x68);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(168 == 104)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:829:33: error: static assertion failed
+  829 | static_assert(sizeof(WeaponDef) == 2168);
+      |               ~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(2832 == 2168)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:842:31: error: static assertion failed
+  842 | static_assert(sizeof(RawFile) == 12);
+      |               ~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:679:45: error: static assertion failed
+  679 | static_assert(sizeof(GfxPixelShaderLoadDef) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1002:30: error: static assertion failed
+ 1002 | static_assert(sizeof(XAsset) == 8);
+      |               ~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1113:40: error: static assertion failed
+ 1113 | static_assert(sizeof(ScriptStringList) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1121:34: error: static assertion failed
+ 1121 | static_assert(sizeof(XAssetList) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(32 == 16)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1166:38: error: static assertion failed
+ 1166 | static_assert(sizeof(XRigidVertList) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1173:42: error: static assertion failed
+ 1173 | static_assert(sizeof(XSurfaceVertexInfo) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(16 == 12)'
+In file included from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:7:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:323:50: error: static assertion failed
+  323 | static_assert(sizeof(MaterialPixelShaderProgram) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1192:32: error: static assertion failed
+ 1192 | static_assert(sizeof(XSurface) == 56);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(80 == 56)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:514:44: error: static assertion failed
+  514 | static_assert(sizeof(MaterialTechniqueSet) == 148);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(296 == 148)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:559:32: error: static assertion failed
+  559 | static_assert(sizeof(Material) == 80);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(104 == 80)'
+C:/Users/artslay/KisakCOD/src/aim_assist/aim_assist.h:111:32: error: static assertion failed
+  111 | static_assert(sizeof(AimInput) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:9,
+                 from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:2,
+                 from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:7:
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:167:15: error: ambiguating new declaration of 'float random()'
+  167 | float __cdecl random();
+      |               ^~~~~~
+In file included from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/bits/std_abs.h:44,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/cmath:59,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/math.h:36,
+                 from C:/Users/artslay/KisakCOD/src/universal/q_shared.h:32:
+C:/devkitPro/devkitA64/aarch64-none-elf/include/stdlib.h:260:9: note: old declaration 'long int random()'
+  260 | long    random (void);
+      |         ^~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:459:1: error: '__forceinline' does not name a type
+  459 | __forceinline static float COERCE_FLOAT(unsigned val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:467:1: error: '__forceinline' does not name a type
+  467 | __forceinline static uint32_t COERCE_UNSIGNED_INT(float val) {
+      | ^~~~~~~~~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:9,
+                 from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:2,
+                 from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:7:
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:167:15: error: ambiguating new declaration of 'float random()'
+  167 | float __cdecl random();
+      |               ^~~~~~
+In file included from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/bits/std_abs.h:44,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/cmath:59,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/math.h:36,
+                 from C:/Users/artslay/KisakCOD/src/universal/q_shared.h:32:
+C:/devkitPro/devkitA64/aarch64-none-elf/include/stdlib.h:260:9: note: old declaration 'long int random()'
+  260 | long    random (void);
+      |         ^~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:475:1: error: '__forceinline' does not name a type
+  475 | __forceinline static int COERCE_INT(float val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:250:32: error: static assertion failed
+  250 | static_assert(sizeof(GfxImage) == 36);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(48 == 36)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:402:42: error: static assertion failed
+  402 | static_assert(sizeof(GfxWorldDpvsStatic) == 0x68);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(168 == 104)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:679:45: error: static assertion failed
+  679 | static_assert(sizeof(GfxPixelShaderLoadDef) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_sky.h:4,
+                 from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:3:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:323:50: error: static assertion failed
+  323 | static_assert(sizeof(MaterialPixelShaderProgram) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:514:44: error: static assertion failed
+  514 | static_assert(sizeof(MaterialTechniqueSet) == 148);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(296 == 148)'
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:459:1: error: '__forceinline' does not name a type
+  459 | __forceinline static float COERCE_FLOAT(unsigned val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:559:32: error: static assertion failed
+  559 | static_assert(sizeof(Material) == 80);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(104 == 80)'
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_primarylights.h:2,
+                 from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:4:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_rendercmds.h:446:1: error: 'const' can only be specified for objects and functions
+  446 | const struct GfxViewInfo // sizeof=0x67B0
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_rendercmds.h:514:1: error: 'const' can only be specified for objects and functions
+  514 | const struct __declspec(align(16)) GfxBackEndData // sizeof=0x11E780
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:205:32: error: static assertion failed
+  205 | static_assert(sizeof(GfxWorld) == 0x2DC);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1032 == 732)'
+In file included from C:/Users/artslay/KisakCOD/src/sound/snd_public.h:54,
+                 from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:11:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:78:35: error: static assertion failed
+   78 | static_assert(sizeof(FxEffectDef) == 32);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(40 == 32)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:361:1: error: 'const' can only be specified for objects and functions
+  361 | const struct FxElemVisStateSample // sizeof=0x30
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:381:1: error: 'const' can only be specified for objects and functions
+  381 | const struct FxElemVelStateSample // sizeof=0x60
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:467:1: error: '__forceinline' does not name a type
+  467 | __forceinline static uint32_t COERCE_UNSIGNED_INT(float val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:429:1: error: 'const' can only be specified for objects and functions
+  429 | const struct FxElemDef // sizeof=0xFC
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:480:37: error: static assertion failed
+  480 | static_assert(sizeof(FxImpactTable) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:185:35: error: static assertion failed
+  185 | static_assert(sizeof(LoadedSound) == 44);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(64 == 44)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:224:32: error: static assertion failed
+  224 | static_assert(sizeof(SndCurve) == 72);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(80 == 72)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:277:35: error: static assertion failed
+  277 | static_assert(sizeof(snd_alias_t) == 92);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(128 == 92)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:285:40: error: static assertion failed
+  285 | static_assert(sizeof(snd_alias_list_t) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+In file included from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:13:
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:95:30: error: static assertion failed
+   95 | static_assert(sizeof(XModel) == 220);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(280 == 220)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:102:35: error: static assertion failed
+  102 | static_assert(sizeof(XModelPiece) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:110:36: error: static assertion failed
+  110 | static_assert(sizeof(XModelPieces) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:146:35: error: static assertion failed
+  146 | static_assert(sizeof(XModelSurfs) == 20);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 20)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:178:39: error: static assertion failed
+  178 | static_assert(sizeof(XModelPartsLoad) == 28);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(56 == 28)'
+In file included from C:/Users/artslay/KisakCOD/src/game/pathnode.h:2,
+                 from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:18:
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:97:43: error: static assertion failed
+   97 | static_assert(sizeof(VariableStackBuffer) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:131:37: error: static assertion failed
+  131 | static_assert(sizeof(VariableUnion) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:139:37: error: static assertion failed
+  139 | static_assert(sizeof(VariableValue) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:190:47: error: static assertion failed
+  190 | static_assert(sizeof(VariableValueInternal_u) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:219:45: error: static assertion failed
+  219 | static_assert(sizeof(VariableValueInternal) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:232:40: error: static assertion failed
+  232 | static_assert(sizeof(scrVarDebugPub_t) == 0xE0004);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(1310728 == 917508)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:238:36: error: static assertion failed
+  238 | static_assert(sizeof(scrVarGlob_t) == 0x180000);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+  • the comparison reduces to '(2359296 == 1572864)'
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:475:1: error: '__forceinline' does not name a type
+  475 | __forceinline static int COERCE_INT(float val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:274:41: error: static assertion failed
+  274 | static_assert(sizeof(scr_classStruct_t) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:283:41: error: static assertion failed
+  283 | static_assert(sizeof(VariableDebugInfo) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(32 == 16)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:439:39: error: static assertion failed
+  439 | static_assert(sizeof(ThreadDebugInfo) == 0x8C);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(272 == 140)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:250:32: error: static assertion failed
+  250 | static_assert(sizeof(GfxImage) == 36);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(48 == 36)'
+C:/Users/artslay/KisakCOD/src/game/pathnode.h:199:45: error: static assertion failed
+  199 | static_assert(sizeof(pathnode_tree_nodes_t) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:402:42: error: static assertion failed
+  402 | static_assert(sizeof(GfxWorldDpvsStatic) == 0x68);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(168 == 104)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:679:45: error: static assertion failed
+  679 | static_assert(sizeof(GfxPixelShaderLoadDef) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_sky.h:4,
+                 from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:3:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:323:50: error: static assertion failed
+  323 | static_assert(sizeof(MaterialPixelShaderProgram) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:514:44: error: static assertion failed
+  514 | static_assert(sizeof(MaterialTechniqueSet) == 148);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(296 == 148)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:559:32: error: static assertion failed
+  559 | static_assert(sizeof(Material) == 80);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(104 == 80)'
+In file included from C:/Users/artslay/KisakCOD/src/game/actor_badplace.h:2,
+                 from C:/Users/artslay/KisakCOD/src/game/pathnode.h:235:
+C:/Users/artslay/KisakCOD/src/game/actor.h:416:31: error: static assertion failed: actor_s size drift vs CoD3SP IDA
+  416 | static_assert(sizeof(actor_s) == 0x1e90, "actor_s size drift vs CoD3SP IDA");
+      |               ~~~~~~~~~~~~~~~~^~~~~~~~~
+  • the comparison reduces to '(12256 == 7824)'
+C:/Users/artslay/KisakCOD/src/game/actor.h:417:47: error: static assertion failed: actor_s.sentientInfo offset drift vs CoD3SP IDA
+  417 | static_assert(offsetof(actor_s, sentientInfo) == 0x834, "actor_s.sentientInfo offset drift vs CoD3SP IDA");
+      |                                               ^
+  • the comparison reduces to '(2216 == 2100)'
+C:/Users/artslay/KisakCOD/src/game/actor.h:418:39: error: static assertion failed: sentient_info_t size drift vs CoD3SP IDA
+  418 | static_assert(sizeof(sentient_info_t) == 0x28, "sentient_info_t size drift vs CoD3SP IDA");
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 40)'
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_primarylights.h:2,
+                 from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:4:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_rendercmds.h:446:1: error: 'const' can only be specified for objects and functions
+  446 | const struct GfxViewInfo // sizeof=0x67B0
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_rendercmds.h:514:1: error: 'const' can only be specified for objects and functions
+  514 | const struct __declspec(align(16)) GfxBackEndData // sizeof=0x11E780
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:205:32: error: static assertion failed
+  205 | static_assert(sizeof(GfxWorld) == 0x2DC);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1032 == 732)'
+In file included from C:/Users/artslay/KisakCOD/src/client/client.h:4,
+                 from C:/Users/artslay/KisakCOD/src/game/pathnode.h:236:
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h: In member function 'bool KeywordHashEntry<T, useless, HASH_SEED>::KeywordHash_IsValidSeed(int, int)':
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1409:5: warning: no return statement in function returning non-void [-Wreturn-type]
+ 1409 |     }
+      |     ^
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h: In member function 'int KeywordHashEntry<T, useless, HASH_SEED>::KeywordHash_PickSeed(int)':
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1412:29: error: there are no arguments to 'IsValidSeed' that depend on a template parameter, so a declaration of 'IsValidSeed' must be available [-Wtemplate-body]
+ 1412 |         for (int seed = 0; !IsValidSeed(count, HASH_SEED); seed++)
+      |                             ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1412:29: note: (if you use '-fpermissive', G++ will accept your code, but allowing the use of an undeclared name is deprecated)
+In file included from C:/Users/artslay/KisakCOD/src/sound/snd_public.h:54,
+                 from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:11:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:78:35: error: static assertion failed
+   78 | static_assert(sizeof(FxEffectDef) == 32);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(40 == 32)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:361:1: error: 'const' can only be specified for objects and functions
+  361 | const struct FxElemVisStateSample // sizeof=0x30
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:381:1: error: 'const' can only be specified for objects and functions
+  381 | const struct FxElemVelStateSample // sizeof=0x60
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:429:1: error: 'const' can only be specified for objects and functions
+  429 | const struct FxElemDef // sizeof=0xFC
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:480:37: error: static assertion failed
+  480 | static_assert(sizeof(FxImpactTable) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:185:35: error: static assertion failed
+  185 | static_assert(sizeof(LoadedSound) == 44);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(64 == 44)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:224:32: error: static assertion failed
+  224 | static_assert(sizeof(SndCurve) == 72);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(80 == 72)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:277:35: error: static assertion failed
+  277 | static_assert(sizeof(snd_alias_t) == 92);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(128 == 92)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:285:40: error: static assertion failed
+  285 | static_assert(sizeof(snd_alias_list_t) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h: At global scope:
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:38:36: error: static assertion failed
+   38 | static_assert(sizeof(XAnimIndices) == 4);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:182:34: error: static assertion failed
+  182 | static_assert(sizeof(XAnimParts) == 88);
+      |               ~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(136 == 88)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:829:33: error: static assertion failed
+  829 | static_assert(sizeof(WeaponDef) == 2168);
+      |               ~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(2832 == 2168)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:842:31: error: static assertion failed
+  842 | static_assert(sizeof(RawFile) == 12);
+      |               ~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1002:30: error: static assertion failed
+ 1002 | static_assert(sizeof(XAsset) == 8);
+      |               ~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1113:40: error: static assertion failed
+ 1113 | static_assert(sizeof(ScriptStringList) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1121:34: error: static assertion failed
+ 1121 | static_assert(sizeof(XAssetList) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(32 == 16)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1166:38: error: static assertion failed
+ 1166 | static_assert(sizeof(XRigidVertList) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1173:42: error: static assertion failed
+ 1173 | static_assert(sizeof(XSurfaceVertexInfo) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1192:32: error: static assertion failed
+ 1192 | static_assert(sizeof(XSurface) == 56);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(80 == 56)'
+In file included from C:/Users/artslay/KisakCOD/src/game/g_main.h:6,
+                 from src/bgame/bg_pmove.cpp:11:
+C:/Users/artslay/KisakCOD/src/universal/q_parse.h:22:42: error: static assertion failed
+   22 | static_assert(sizeof(struct parseInfo_t) == 0x420);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1080 == 1056)'
+C:/Users/artslay/KisakCOD/src/universal/q_parse.h:32:46: error: static assertion failed
+   32 | static_assert(sizeof(struct ParseThreadInfo) == 0x460C);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~
+  • the comparison reduces to '(18328 == 17932)'
+C:/Users/artslay/KisakCOD/src/universal/q_parse.h:42:47: error: static assertion failed
+   42 | static_assert(sizeof(struct com_parse_mark_t) == 0x14);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(32 == 20)'
+In file included from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:13:
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:95:30: error: static assertion failed
+   95 | static_assert(sizeof(XModel) == 220);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(280 == 220)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:102:35: error: static assertion failed
+  102 | static_assert(sizeof(XModelPiece) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:110:36: error: static assertion failed
+  110 | static_assert(sizeof(XModelPieces) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:146:35: error: static assertion failed
+  146 | static_assert(sizeof(XModelSurfs) == 20);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 20)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:178:39: error: static assertion failed
+  178 | static_assert(sizeof(XModelPartsLoad) == 28);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(56 == 28)'
+In file included from C:/Users/artslay/KisakCOD/src/game/pathnode.h:2,
+                 from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:18:
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:97:43: error: static assertion failed
+   97 | static_assert(sizeof(VariableStackBuffer) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:131:37: error: static assertion failed
+  131 | static_assert(sizeof(VariableUnion) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:139:37: error: static assertion failed
+  139 | static_assert(sizeof(VariableValue) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:190:47: error: static assertion failed
+  190 | static_assert(sizeof(VariableValueInternal_u) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:219:45: error: static assertion failed
+  219 | static_assert(sizeof(VariableValueInternal) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:232:40: error: static assertion failed
+  232 | static_assert(sizeof(scrVarDebugPub_t) == 0xE0004);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(1310728 == 917508)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:238:36: error: static assertion failed
+  238 | static_assert(sizeof(scrVarGlob_t) == 0x180000);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+  • the comparison reduces to '(2359296 == 1572864)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:274:41: error: static assertion failed
+  274 | static_assert(sizeof(scr_classStruct_t) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:283:41: error: static assertion failed
+  283 | static_assert(sizeof(VariableDebugInfo) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(32 == 16)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:439:39: error: static assertion failed
+  439 | static_assert(sizeof(ThreadDebugInfo) == 0x8C);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(272 == 140)'
+C:/Users/artslay/KisakCOD/src/game/pathnode.h:199:45: error: static assertion failed
+  199 | static_assert(sizeof(pathnode_tree_nodes_t) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+In file included from C:/Users/artslay/KisakCOD/src/game/actor_badplace.h:2,
+                 from C:/Users/artslay/KisakCOD/src/game/pathnode.h:235:
+C:/Users/artslay/KisakCOD/src/game/actor.h:416:31: error: static assertion failed: actor_s size drift vs CoD3SP IDA
+  416 | static_assert(sizeof(actor_s) == 0x1e90, "actor_s size drift vs CoD3SP IDA");
+      |               ~~~~~~~~~~~~~~~~^~~~~~~~~
+  • the comparison reduces to '(12256 == 7824)'
+C:/Users/artslay/KisakCOD/src/game/actor.h:417:47: error: static assertion failed: actor_s.sentientInfo offset drift vs CoD3SP IDA
+  417 | static_assert(offsetof(actor_s, sentientInfo) == 0x834, "actor_s.sentientInfo offset drift vs CoD3SP IDA");
+      |                                               ^
+  • the comparison reduces to '(2216 == 2100)'
+C:/Users/artslay/KisakCOD/src/game/actor.h:418:39: error: static assertion failed: sentient_info_t size drift vs CoD3SP IDA
+  418 | static_assert(sizeof(sentient_info_t) == 0x28, "sentient_info_t size drift vs CoD3SP IDA");
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 40)'
+In file included from C:/Users/artslay/KisakCOD/src/client/client.h:4,
+                 from C:/Users/artslay/KisakCOD/src/game/pathnode.h:236:
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h: In member function 'bool KeywordHashEntry<T, useless, HASH_SEED>::KeywordHash_IsValidSeed(int, int)':
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1409:5: warning: no return statement in function returning non-void [-Wreturn-type]
+ 1409 |     }
+      |     ^
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h: In member function 'int KeywordHashEntry<T, useless, HASH_SEED>::KeywordHash_PickSeed(int)':
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1412:29: error: there are no arguments to 'IsValidSeed' that depend on a template parameter, so a declaration of 'IsValidSeed' must be available [-Wtemplate-body]
+ 1412 |         for (int seed = 0; !IsValidSeed(count, HASH_SEED); seed++)
+      |                             ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1412:29: note: (if you use '-fpermissive', G++ will accept your code, but allowing the use of an undeclared name is deprecated)
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h: At global scope:
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:38:36: error: static assertion failed
+   38 | static_assert(sizeof(XAnimIndices) == 4);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(8 == 4)'
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:9,
+                 from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:2,
+                 from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:7:
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:167:15: error: ambiguating new declaration of 'float random()'
+  167 | float __cdecl random();
+      |               ^~~~~~
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:182:34: error: static assertion failed
+  182 | static_assert(sizeof(XAnimParts) == 88);
+      |               ~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(136 == 88)'
+In file included from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/bits/std_abs.h:44,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/cmath:59,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/math.h:36,
+                 from C:/Users/artslay/KisakCOD/src/universal/q_shared.h:32:
+C:/devkitPro/devkitA64/aarch64-none-elf/include/stdlib.h:260:9: note: old declaration 'long int random()'
+  260 | long    random (void);
+      |         ^~~~~~
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:829:33: error: static assertion failed
+  829 | static_assert(sizeof(WeaponDef) == 2168);
+      |               ~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(2832 == 2168)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:842:31: error: static assertion failed
+  842 | static_assert(sizeof(RawFile) == 12);
+      |               ~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1002:30: error: static assertion failed
+ 1002 | static_assert(sizeof(XAsset) == 8);
+      |               ~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1113:40: error: static assertion failed
+ 1113 | static_assert(sizeof(ScriptStringList) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1121:34: error: static assertion failed
+ 1121 | static_assert(sizeof(XAssetList) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(32 == 16)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1166:38: error: static assertion failed
+ 1166 | static_assert(sizeof(XRigidVertList) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1173:42: error: static assertion failed
+ 1173 | static_assert(sizeof(XSurfaceVertexInfo) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1192:32: error: static assertion failed
+ 1192 | static_assert(sizeof(XSurface) == 56);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(80 == 56)'
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:459:1: error: '__forceinline' does not name a type
+  459 | __forceinline static float COERCE_FLOAT(unsigned val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:467:1: error: '__forceinline' does not name a type
+  467 | __forceinline static uint32_t COERCE_UNSIGNED_INT(float val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/database/database.h:262:8: error: 'FastCriticalSection' does not name a type
+  262 | extern FastCriticalSection db_hashCritSect;
+      |        ^~~~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:475:1: error: '__forceinline' does not name a type
+  475 | __forceinline static int COERCE_INT(float val) {
+      | ^~~~~~~~~~~~~
+In file included from src/bgame/bg_weapons.cpp:7:
+C:/Users/artslay/KisakCOD/src/aim_assist/aim_assist.h:111:32: error: static assertion failed
+  111 | static_assert(sizeof(AimInput) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:250:32: error: static assertion failed
+  250 | static_assert(sizeof(GfxImage) == 36);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(48 == 36)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:402:42: error: static assertion failed
+  402 | static_assert(sizeof(GfxWorldDpvsStatic) == 0x68);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(168 == 104)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:679:45: error: static assertion failed
+  679 | static_assert(sizeof(GfxPixelShaderLoadDef) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_sky.h:4,
+                 from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:3:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:323:50: error: static assertion failed
+  323 | static_assert(sizeof(MaterialPixelShaderProgram) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:514:44: error: static assertion failed
+  514 | static_assert(sizeof(MaterialTechniqueSet) == 148);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(296 == 148)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:559:32: error: static assertion failed
+  559 | static_assert(sizeof(Material) == 80);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(104 == 80)'
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_primarylights.h:2,
+                 from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:4:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_rendercmds.h:446:1: error: 'const' can only be specified for objects and functions
+  446 | const struct GfxViewInfo // sizeof=0x67B0
+      | ^~~~~
+In file included from C:/Users/artslay/KisakCOD/src/game/game_public.h:9,
+                 from C:/Users/artslay/KisakCOD/src/game/g_local.h:10,
+                 from src/bgame/bg_weapons.cpp:15:
+C:/Users/artslay/KisakCOD/src/server/server.h:219:65: error: '_iobuf' has not been declared; did you mean 'iobuf'?
+  219 | bool __cdecl SV_DemoWrite(const void *buffer, unsigned int len, _iobuf *file);
+      |                                                                 ^~~~~~
+      |                                                                 iobuf
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_rendercmds.h:514:1: error: 'const' can only be specified for objects and functions
+  514 | const struct __declspec(align(16)) GfxBackEndData // sizeof=0x11E780
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:205:32: error: static assertion failed
+  205 | static_assert(sizeof(GfxWorld) == 0x2DC);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1032 == 732)'
+In file included from C:/Users/artslay/KisakCOD/src/sound/snd_public.h:54,
+                 from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:11:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:78:35: error: static assertion failed
+   78 | static_assert(sizeof(FxEffectDef) == 32);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(40 == 32)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:361:1: error: 'const' can only be specified for objects and functions
+  361 | const struct FxElemVisStateSample // sizeof=0x30
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:381:1: error: 'const' can only be specified for objects and functions
+  381 | const struct FxElemVelStateSample // sizeof=0x60
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:429:1: error: 'const' can only be specified for objects and functions
+  429 | const struct FxElemDef // sizeof=0xFC
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:480:37: error: static assertion failed
+  480 | static_assert(sizeof(FxImpactTable) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/server/server.h:228:1: error: '_iobuf' does not name a type; did you mean 'iobuf'?
+  228 | _iobuf *SV_ClearHistoryCache();
+      | ^~~~~~
+      | iobuf
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:185:35: error: static assertion failed
+  185 | static_assert(sizeof(LoadedSound) == 44);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(64 == 44)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:224:32: error: static assertion failed
+  224 | static_assert(sizeof(SndCurve) == 72);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(80 == 72)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:277:35: error: static assertion failed
+  277 | static_assert(sizeof(snd_alias_t) == 92);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(128 == 92)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:285:40: error: static assertion failed
+  285 | static_assert(sizeof(snd_alias_list_t) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/server/server.h:236:1: error: '_iobuf' does not name a type; did you mean 'iobuf'?
+  236 | _iobuf *__cdecl SV_DemoOpenFile(const char *fileName);
+      | ^~~~~~
+      | iobuf
+C:/Users/artslay/KisakCOD/src/server/server.h:264:30: error: '_iobuf' was not declared in this scope; did you mean 'iobuf'?
+  264 | bool __cdecl SV_WriteHistory(_iobuf *fileHistory, const server_demo_history_t *history);
+      |                              ^~~~~~
+      |                              iobuf
+In file included from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:13:
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:95:30: error: static assertion failed
+   95 | static_assert(sizeof(XModel) == 220);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(280 == 220)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:102:35: error: static assertion failed
+  102 | static_assert(sizeof(XModelPiece) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:110:36: error: static assertion failed
+  110 | static_assert(sizeof(XModelPieces) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:146:35: error: static assertion failed
+  146 | static_assert(sizeof(XModelSurfs) == 20);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 20)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:178:39: error: static assertion failed
+  178 | static_assert(sizeof(XModelPartsLoad) == 28);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(56 == 28)'
+In file included from C:/Users/artslay/KisakCOD/src/game/pathnode.h:2,
+                 from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:18:
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:97:43: error: static assertion failed
+   97 | static_assert(sizeof(VariableStackBuffer) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:131:37: error: static assertion failed
+  131 | static_assert(sizeof(VariableUnion) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:139:37: error: static assertion failed
+  139 | static_assert(sizeof(VariableValue) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:190:47: error: static assertion failed
+  190 | static_assert(sizeof(VariableValueInternal_u) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:219:45: error: static assertion failed
+  219 | static_assert(sizeof(VariableValueInternal) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:232:40: error: static assertion failed
+  232 | static_assert(sizeof(scrVarDebugPub_t) == 0xE0004);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(1310728 == 917508)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:238:36: error: static assertion failed
+  238 | static_assert(sizeof(scrVarGlob_t) == 0x180000);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+  • the comparison reduces to '(2359296 == 1572864)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:274:41: error: static assertion failed
+  274 | static_assert(sizeof(scr_classStruct_t) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:283:41: error: static assertion failed
+  283 | static_assert(sizeof(VariableDebugInfo) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(32 == 16)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:439:39: error: static assertion failed
+  439 | static_assert(sizeof(ThreadDebugInfo) == 0x8C);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(272 == 140)'
+C:/Users/artslay/KisakCOD/src/game/pathnode.h:199:45: error: static assertion failed
+  199 | static_assert(sizeof(pathnode_tree_nodes_t) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/server/server.h:264:38: error: 'fileHistory' was not declared in this scope
+  264 | bool __cdecl SV_WriteHistory(_iobuf *fileHistory, const server_demo_history_t *history);
+      |                                      ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/server/server.h:264:51: error: expected primary-expression before 'const'
+  264 | bool __cdecl SV_WriteHistory(_iobuf *fileHistory, const server_demo_history_t *history);
+      |                                                   ^~~~~
+C:/Users/artslay/KisakCOD/src/server/server.h:264:87: error: expression list treated as compound expression in initializer [-fpermissive]
+  264 | bool __cdecl SV_WriteHistory(_iobuf *fileHistory, const server_demo_history_t *history);
+      |                                                                                       ^
+In file included from C:/Users/artslay/KisakCOD/src/game/actor_badplace.h:2,
+                 from C:/Users/artslay/KisakCOD/src/game/pathnode.h:235:
+C:/Users/artslay/KisakCOD/src/game/actor.h:416:31: error: static assertion failed: actor_s size drift vs CoD3SP IDA
+  416 | static_assert(sizeof(actor_s) == 0x1e90, "actor_s size drift vs CoD3SP IDA");
+      |               ~~~~~~~~~~~~~~~~^~~~~~~~~
+  • the comparison reduces to '(12256 == 7824)'
+C:/Users/artslay/KisakCOD/src/game/actor.h:417:47: error: static assertion failed: actor_s.sentientInfo offset drift vs CoD3SP IDA
+  417 | static_assert(offsetof(actor_s, sentientInfo) == 0x834, "actor_s.sentientInfo offset drift vs CoD3SP IDA");
+      |                                               ^
+  • the comparison reduces to '(2216 == 2100)'
+C:/Users/artslay/KisakCOD/src/game/actor.h:418:39: error: static assertion failed: sentient_info_t size drift vs CoD3SP IDA
+  418 | static_assert(sizeof(sentient_info_t) == 0x28, "sentient_info_t size drift vs CoD3SP IDA");
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 40)'
+C:/Users/artslay/KisakCOD/src/server/server.h:278:58: error: '_iobuf' has not been declared; did you mean 'iobuf'?
+  278 | bool __cdecl SV_DemoRead(void *buffer, unsigned int len, _iobuf *file);
+      |                                                          ^~~~~~
+      |                                                          iobuf
+C:/Users/artslay/KisakCOD/src/server/server.h:283:5: error: '_iobuf' has not been declared; did you mean 'iobuf'?
+  283 |     _iobuf *file);
+      |     ^~~~~~
+      |     iobuf
+In file included from C:/Users/artslay/KisakCOD/src/client/client.h:4,
+                 from C:/Users/artslay/KisakCOD/src/game/pathnode.h:236:
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h: In member function 'bool KeywordHashEntry<T, useless, HASH_SEED>::KeywordHash_IsValidSeed(int, int)':
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1409:5: warning: no return statement in function returning non-void [-Wreturn-type]
+ 1409 |     }
+      |     ^
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h: In member function 'int KeywordHashEntry<T, useless, HASH_SEED>::KeywordHash_PickSeed(int)':
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1412:29: error: there are no arguments to 'IsValidSeed' that depend on a template parameter, so a declaration of 'IsValidSeed' must be available [-Wtemplate-body]
+ 1412 |         for (int seed = 0; !IsValidSeed(count, HASH_SEED); seed++)
+      |                             ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1412:29: note: (if you use '-fpermissive', G++ will accept your code, but allowing the use of an undeclared name is deprecated)
+C:/Users/artslay/KisakCOD/src/server/server.h:284:29: error: '_iobuf' was not declared in this scope; did you mean 'iobuf'?
+  284 | bool __cdecl SV_ReadHistory(_iobuf *fileHistory, server_demo_history_t *history);
+      |                             ^~~~~~
+      |                             iobuf
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h: At global scope:
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:38:36: error: static assertion failed
+   38 | static_assert(sizeof(XAnimIndices) == 4);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:182:34: error: static assertion failed
+  182 | static_assert(sizeof(XAnimParts) == 88);
+      |               ~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(136 == 88)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:829:33: error: static assertion failed
+  829 | static_assert(sizeof(WeaponDef) == 2168);
+      |               ~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(2832 == 2168)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:842:31: error: static assertion failed
+  842 | static_assert(sizeof(RawFile) == 12);
+      |               ~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1002:30: error: static assertion failed
+ 1002 | static_assert(sizeof(XAsset) == 8);
+      |               ~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1113:40: error: static assertion failed
+ 1113 | static_assert(sizeof(ScriptStringList) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1121:34: error: static assertion failed
+ 1121 | static_assert(sizeof(XAssetList) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(32 == 16)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1166:38: error: static assertion failed
+ 1166 | static_assert(sizeof(XRigidVertList) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1173:42: error: static assertion failed
+ 1173 | static_assert(sizeof(XSurfaceVertexInfo) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1192:32: error: static assertion failed
+ 1192 | static_assert(sizeof(XSurface) == 56);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(80 == 56)'
+C:/Users/artslay/KisakCOD/src/server/server.h:284:37: error: 'fileHistory' was not declared in this scope
+  284 | bool __cdecl SV_ReadHistory(_iobuf *fileHistory, server_demo_history_t *history);
+      |                                     ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/server/server.h:284:72: error: expected primary-expression before '*' token
+  284 | bool __cdecl SV_ReadHistory(_iobuf *fileHistory, server_demo_history_t *history);
+      |                                                                        ^
+C:/Users/artslay/KisakCOD/src/database/database.h:262:8: error: 'FastCriticalSection' does not name a type
+  262 | extern FastCriticalSection db_hashCritSect;
+      |        ^~~~~~~~~~~~~~~~~~~
+In file included from src/bgame/bg_weapons_load_obj.cpp:6:
+C:/Users/artslay/KisakCOD/src/universal/q_parse.h:22:42: error: static assertion failed
+   22 | static_assert(sizeof(struct parseInfo_t) == 0x420);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1080 == 1056)'
+C:/Users/artslay/KisakCOD/src/universal/q_parse.h:32:46: error: static assertion failed
+   32 | static_assert(sizeof(struct ParseThreadInfo) == 0x460C);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~
+  • the comparison reduces to '(18328 == 17932)'
+C:/Users/artslay/KisakCOD/src/universal/q_parse.h:42:47: error: static assertion failed
+   42 | static_assert(sizeof(struct com_parse_mark_t) == 0x14);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(32 == 20)'
+make: *** [Makefile:71: build/src/aim_assist/aim_assist.o] Error 1
+make: *** [Makefile:71: build/src/aim_assist/aim_target.o] Error 1
+C:/Users/artslay/KisakCOD/src/server/server.h:284:73: error: 'history' was not declared in this scope
+  284 | bool __cdecl SV_ReadHistory(_iobuf *fileHistory, server_demo_history_t *history);
+      |                                                                         ^~~~~~~
+C:/Users/artslay/KisakCOD/src/server/server.h:284:80: error: expression list treated as compound expression in initializer [-fpermissive]
+  284 | bool __cdecl SV_ReadHistory(_iobuf *fileHistory, server_demo_history_t *history);
+      |                                                                                ^
+C:/Users/artslay/KisakCOD/src/server/server.h:285:33: error: '_iobuf' was not declared in this scope; did you mean 'iobuf'?
+  285 | bool __cdecl SV_DemoLoadHistory(_iobuf *fileHistory, int fileOffset);
+      |                                 ^~~~~~
+      |                                 iobuf
+src/bgame/bg_weapons_load_obj.cpp: In function 'char G_ParseWeaponAccurayGraphInternal(WeaponDef*, const char*, const char*, float (*)[2], int*)':
+src/bgame/bg_weapons_load_obj.cpp:799:22: error: 'ARRAYSIZE' was not declared in this scope; did you mean 'GL_ARRAY_SIZE'?
+  799 |     snprintf(string, ARRAYSIZE(string), "accuracy/%s/%s", dirName, graphName);
+      |                      ^~~~~~~~~
+      |                      GL_ARRAY_SIZE
+C:/Users/artslay/KisakCOD/src/server/server.h:285:41: error: 'fileHistory' was not declared in this scope
+  285 | bool __cdecl SV_DemoLoadHistory(_iobuf *fileHistory, int fileOffset);
+      |                                         ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/server/server.h:285:54: error: expected primary-expression before 'int'
+  285 | bool __cdecl SV_DemoLoadHistory(_iobuf *fileHistory, int fileOffset);
+      |                                                      ^~~
+C:/Users/artslay/KisakCOD/src/server/server.h:285:68: error: expression list treated as compound expression in initializer [-fpermissive]
+  285 | bool __cdecl SV_DemoLoadHistory(_iobuf *fileHistory, int fileOffset);
+      |                                                                    ^
+C:/Users/artslay/KisakCOD/src/game/game_public.h:141:39: error: static assertion failed
+  141 | static_assert(sizeof(client_fields_s) == 0x14);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(32 == 20)'
+C:/Users/artslay/KisakCOD/src/game/game_public.h:149:43: error: static assertion failed
+  149 | static_assert(sizeof(VehicleLocalPhysics) == 0x34);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 52)'
+C:/Users/artslay/KisakCOD/src/game/game_public.h:229:44: error: static assertion failed
+  229 | static_assert(sizeof(game_hudelem_field_t) == 0x1C);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(40 == 28)'
+C:/Users/artslay/KisakCOD/src/game/g_local.h:413:59: warning: 'volatile'-qualified parameter is deprecated [-Wvolatile]
+  413 | void __cdecl G_AddCommandNotify(volatile unsigned __int16 notify);
+      |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+src/bgame/bg_weapons.cpp: In function 'void BG_ShutdownWeaponDefFiles()':
+src/bgame/bg_weapons.cpp:181:10: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  181 |     if (*(_BYTE *)fs_gameDirVar->current.integer)
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+make: *** [Makefile:71: build/src/bgame/bg_mantle.o] Error 1
+make: *** [Makefile:71: build/src/bgame/bg_slidemove.o] Error 1
+src/bgame/bg_weapons.cpp: In function 'WeaponDef* BG_LoadWeaponDef(const char*)':
+src/bgame/bg_weapons.cpp:4538:10: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 4538 |     if (*(_BYTE *)fs_gameDirVar->current.integer || !IsFastFileLoad())
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+make: *** [Makefile:71: build/src/bgame/bg_pmove.o] Error 1
+make: *** [Makefile:71: build/src/bgame/bg_weapons_load_obj.o] Error 1
+make: *** [Makefile:71: build/src/bgame/bg_weapons.o] Error 1
