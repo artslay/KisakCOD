@@ -2735,6 +2735,7 @@ enum pmflags_t : __int32 // (MP/SP same)
     PMF_SCRIPT_NO_LEAN = 1 << 23
 #endif
 };
+#endif // __SWITCH__
 
 enum ActionSlotType : __int32
 {                                       // XREF: playerState_s/r
