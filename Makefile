@@ -41,8 +41,8 @@ C_SOURCES += $(shell find deps/zlib -type f -name '*.c')
 
 CPP_SOURCES += src/platform/switch/switch_main.cpp
 CPP_SOURCES += src/gfx_d3d/r_init_switch.cpp src/gfx_d3d/r_buffers.cpp src/gfx_d3d/r_state.cpp
+CPP_SOURCES += src/gfx_d3d/r_shade.cpp src/gfx_d3d/rb_shade.cpp src/gfx_d3d/r_material.cpp
 CPP_SOURCES += src/gfx_d3d/r_image.cpp src/gfx_d3d/r_image_load_common.cpp src/gfx_d3d/r_image_load_obj.cpp src/gfx_d3d/r_image_utils.cpp src/gfx_d3d/r_image_wavelet.cpp src/gfx_d3d/r_imagedecode.cpp src/gfx_d3d/r_rendertarget.cpp
-CPP_SOURCES += src/gfx_d3d/r_buffers.cpp src/gfx_d3d/r_state.cpp
 
 CPP_OBJECTS := $(CPP_SOURCES:%.cpp=$(BUILD)/%.o)
 C_OBJECTS   := $(C_SOURCES:%.c=$(BUILD)/%.o)
