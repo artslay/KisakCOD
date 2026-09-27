@@ -1814,6 +1814,7 @@ struct gitem_s // sizeof=0x4
 {
     itemType_t giType;
 };
+extern gitem_s bg_itemlist[2048];
 static_assert(sizeof(gitem_s) == 0x4);
 
 enum PmStanceFrontBack : __int32
@@ -2177,6 +2178,8 @@ struct pmove_t;
 struct trace_t;
 struct usercmd_s;
 
+bool __cdecl PM_SlideMove(pmove_t *pm, pml_t *pml, int32_t gravity);
+int __cdecl PM_VerifyPronePosition(pmove_t *pm, float *vFallbackOrg, float *vFallbackVel);
 void __cdecl PM_trace(
     pmove_t *pm,
     trace_t *results,
@@ -2407,6 +2410,8 @@ struct weaponState_t // sizeof=0x54
 #ifndef __SWITCH__
 static_assert(sizeof(weaponState_t) == 0x54);
 #endif
+uint32_t __cdecl BG_GetViewmodelWeaponIndex(const playerState_s *ps);
+char __cdecl BG_PlayerHasCompatibleWeapon(const playerState_s *ps, uint32_t weaponIndex);
 void __cdecl TRACK_bg_weapons();
 void __cdecl BG_LoadPenetrationDepthTable();
 void __cdecl BG_ParsePenetrationDepthTable(const char *penetrateType, float *depthTable, char *buffer);
