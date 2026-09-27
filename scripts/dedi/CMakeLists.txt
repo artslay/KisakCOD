@@ -75,4 +75,6 @@ include(${SCRIPTS_DIR}/post_build.cmake)
 endif()
 
 # Tracey
-include(${SCRIPTS_DIR}/extern/tracy.cmake)
+if (NOT KISAK_PLATFORM STREQUAL "switch")
+    include(${SCRIPTS_DIR}/extern/tracy.cmake)
+endif()
