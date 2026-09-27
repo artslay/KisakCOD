@@ -91,6 +91,8 @@ private:
     void* m_window = nullptr;
     uint32_t m_vertexArrayObject = 0;
     uint32_t m_currentProgram = 0;
+    uint32_t m_vertexShader = 0;
+    uint32_t m_pixelShader = 0;
     bool m_deviceLost = false;
     std::string m_lastError;
 
