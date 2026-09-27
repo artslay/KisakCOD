@@ -10,6 +10,66 @@
 #ifdef __SWITCH__
 namespace
 {
+struct KisakGLShader
+{
+    GLuint object = 0;
+    GLenum stage = 0;
+};
+
+static const char *kFallbackVertexShader = R"(#version 430 core
+layout(location=0) in vec4 aPosition;
+layout(location=4) in vec2 aTexCoord;
+layout(location=12) in vec4 aColor;
+out vec2 vTexCoord;
+out vec4 vColor;
+void main() { gl_Position = aPosition; vTexCoord = aTexCoord; vColor = aColor; }
+)";
+
+static const char *kFallbackPixelShader = R"(#version 430 core
+in vec2 vTexCoord;
+in vec4 vColor;
+out vec4 FragColor;
+uniform sampler2D uTexture0;
+void main() { FragColor = vColor; }
+)";
+
+static GLuint CompileGLShader(GLenum stage, const char *source, std::string &error)
+{
+    GLuint shader = glCreateShader(stage);
+    glShaderSource(shader, 1, &source, nullptr);
+    glCompileShader(shader);
+    GLint ok = GL_FALSE;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &ok);
+    if (!ok)
+    {
+        char log[2048] = {};
+        glGetShaderInfoLog(shader, sizeof(log), nullptr, log);
+        error = log;
+        glDeleteShader(shader);
+        return 0;
+    }
+    return shader;
+}
+
+static GLuint LinkGLProgram(GLuint vs, GLuint ps, std::string &error)
+{
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vs);
+    glAttachShader(program, ps);
+    glLinkProgram(program);
+    GLint ok = GL_FALSE;
+    glGetProgramiv(program, GL_LINK_STATUS, &ok);
+    if (!ok)
+    {
+        char log[2048] = {};
+        glGetProgramInfoLog(program, sizeof(log), nullptr, log);
+        error = log;
+        glDeleteProgram(program);
+        return 0;
+    }
+    return program;
+}
+
 EGLDisplay s_display = EGL_NO_DISPLAY;
 EGLContext s_context = EGL_NO_CONTEXT;
 EGLSurface s_surface = EGL_NO_SURFACE;
@@ -64,8 +124,15 @@ void OpenGLBackend::Shutdown()
 #endif
 
     m_window = nullptr;
+#ifdef __SWITCH__
+    if (m_currentProgram) glDeleteProgram(m_currentProgram);
+    if (m_vertexShader) glDeleteShader(m_vertexShader);
+    if (m_pixelShader) glDeleteShader(m_pixelShader);
+#endif
     m_vertexArrayObject = 0;
     m_currentProgram = 0;
+    m_vertexShader = 0;
+    m_pixelShader = 0;
     m_deviceLost = false;
 }
 
@@ -180,19 +247,101 @@ void* OpenGLBackend::GetRenderTarget(uint32_t rtIndex) { (void)rtIndex; return n
 
 void* OpenGLBackend::CreateVertexShader(const void* bytecode, uint32_t size)
 {
+#ifdef __SWITCH__
+    (void)bytecode;
+    (void)size;
+    std::string error;
+    const GLuint object = CompileGLShader(GL_VERTEX_SHADER, kFallbackVertexShader, error);
+    if (!object)
+    {
+        m_lastError = "OpenGL vertex shader: " + error;
+        return nullptr;
+    }
+    return new KisakGLShader{object, GL_VERTEX_SHADER};
+#else
     (void)bytecode; (void)size;
     return nullptr;
+#endif
 }
 
 void* OpenGLBackend::CreatePixelShader(const void* bytecode, uint32_t size)
 {
+#ifdef __SWITCH__
+    (void)bytecode;
+    (void)size;
+    std::string error;
+    const GLuint object = CompileGLShader(GL_FRAGMENT_SHADER, kFallbackPixelShader, error);
+    if (!object)
+    {
+        m_lastError = "OpenGL pixel shader: " + error;
+        return nullptr;
+    }
+    return new KisakGLShader{object, GL_FRAGMENT_SHADER};
+#else
     (void)bytecode; (void)size;
     return nullptr;
+#endif
 }
 
-void OpenGLBackend::ReleaseShader(void* shader) { (void)shader; }
-void OpenGLBackend::SetVertexShader(void* shader) { (void)shader; }
-void OpenGLBackend::SetPixelShader(void* shader) { (void)shader; }
+void OpenGLBackend::ReleaseShader(void* shader)
+{
+#ifdef __SWITCH__
+    auto *s = static_cast<KisakGLShader *>(shader);
+    if (s)
+    {
+        if (s->object) glDeleteShader(s->object);
+        delete s;
+    }
+#else
+    (void)shader;
+#endif
+}
+
+void OpenGLBackend::SetVertexShader(void* shader)
+{
+#ifdef __SWITCH__
+    auto *s = static_cast<KisakGLShader *>(shader);
+    m_vertexShader = s ? s->object : 0;
+    if (m_vertexShader && m_pixelShader)
+    {
+        std::string error;
+        const GLuint program = LinkGLProgram(m_vertexShader, m_pixelShader, error);
+        if (!program)
+        {
+            m_lastError = "OpenGL shader link: " + error;
+            return;
+        }
+        if (m_currentProgram) glDeleteProgram(m_currentProgram);
+        m_currentProgram = program;
+        glUseProgram(m_currentProgram);
+    }
+#else
+    (void)shader;
+#endif
+}
+
+void OpenGLBackend::SetPixelShader(void* shader)
+{
+#ifdef __SWITCH__
+    auto *s = static_cast<KisakGLShader *>(shader);
+    m_pixelShader = s ? s->object : 0;
+    if (m_vertexShader && m_pixelShader)
+    {
+        std::string error;
+        const GLuint program = LinkGLProgram(m_vertexShader, m_pixelShader, error);
+        if (!program)
+        {
+            m_lastError = "OpenGL shader link: " + error;
+            return;
+        }
+        if (m_currentProgram) glDeleteProgram(m_currentProgram);
+        m_currentProgram = program;
+        glUseProgram(m_currentProgram);
+    }
+#else
+    (void)shader;
+#endif
+}
 
 void OpenGLBackend::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
