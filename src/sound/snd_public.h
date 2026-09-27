@@ -16,7 +16,9 @@
 typedef char CHAR;
 typedef short SHORT;
 typedef int BOOL;
+#ifndef KISAK_SWITCH
 typedef long LONG;
+#endif
 typedef CHAR *LPSTR, *PSTR;
 typedef unsigned long ULONG_PTR, *PULONG_PTR;
 typedef ULONG_PTR DWORD_PTR, *PDWORD_PTR;
