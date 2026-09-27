@@ -369,3 +369,4 @@ extern int g_breakonHit;
 
 #ifdef KISAK_SP
 inline bool g_kisakScriptDebuggerHack = false;
+#endif // KISAK_SP
