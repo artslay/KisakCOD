@@ -43,7 +43,7 @@ static uint32_t R_GLFullMipCount(uint32_t w,uint32_t h,uint32_t d){uint32_t n=1;
 static void R_GLAllocTexture(KisakGLTexture *x,GLenum target,uint32_t w,uint32_t h,uint32_t d,uint32_t levels,_D3DFORMAT f)
 {
     GLenum i,u,t; bool c; if(!R_GLImageFormat(f,i,u,t,c)) return;
-    x->target=target;x->internalFormat=i;x->uploadFormat=u;x->uploadType=t;x->width=w;x->height=h;x->depth=d;x->mipLevels=levels;
+    x->target=target;x->sourceFormat=f;x->internalFormat=i;x->uploadFormat=u;x->uploadType=t;x->width=w;x->height=h;x->depth=d;x->mipLevels=levels;
     glGenTextures(1,&x->object); glBindTexture(target,x->object);
     glTexParameteri(target,GL_TEXTURE_MIN_FILTER,levels>1?GL_LINEAR_MIPMAP_LINEAR:GL_LINEAR);
     glTexParameteri(target,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
@@ -1159,7 +1159,7 @@ _D3DFORMAT __cdecl R_ImagePixelFormat(const GfxImage *image)
 {
     iassert(image&&image->texture.basemap);
 #ifdef __SWITCH__
-    return image->texture.basemap->internalFormat;
+    return image->texture.basemap->sourceFormat;
 #else
     _D3DSURFACE_DESC s{};_D3DVOLUME_DESC v{};if(image->mapType==MAPTYPE_2D||image->mapType==MAPTYPE_CUBE){image->texture.map->GetLevelDesc(0,&s);return s.Format;}image->texture.volmap->GetLevelDesc(0,&v);return v.Format;
 #endif
