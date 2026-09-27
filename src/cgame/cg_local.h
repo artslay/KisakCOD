@@ -13,6 +13,8 @@ struct cg_s;
 struct Font_s;
 struct Material;
 struct ScreenPlacement;
+struct centity_s;
+struct GfxScaledPlacement;
 
 #define MAX_EFFECT_NAMES 100
 
