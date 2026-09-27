@@ -289,6 +289,7 @@ class IDirect3DDevice9
     GLint m_textureStageLocation = -1;
     GLint m_vsConstantsLocation = -1;
     GLint m_psConstantsLocation = -1;
+    GLint m_screenSizeLocation = -1;
     std::array<std::array<float, 4>, 256> m_vsConstants{};
     std::array<std::array<float, 4>, 256> m_psConstants{};
     IDirect3DSurface9 *m_color = nullptr;
@@ -335,6 +336,7 @@ class IDirect3DDevice9
         m_textureStageLocation = glGetUniformLocation(m_program, "uTextureStage");
         m_vsConstantsLocation = glGetUniformLocation(m_program, "u_vsConstants[0]");
         m_psConstantsLocation = glGetUniformLocation(m_program, "u_psConstants[0]");
+        m_screenSizeLocation = glGetUniformLocation(m_program, "uScreenSize");
 
         const GLint samplerBase = glGetUniformLocation(m_program, "uTextures[0]");
         if (samplerBase >= 0)
@@ -757,6 +759,11 @@ void main()
         if (!vp) return E_FAIL;
         glViewport((GLint)vp->X, (GLint)vp->Y, (GLsizei)vp->Width, (GLsizei)vp->Height);
         glDepthRangef(vp->MinZ, vp->MaxZ);
+        if (m_program && m_screenSizeLocation >= 0)
+        {
+            glUseProgram(m_program);
+            glUniform2f(m_screenSizeLocation, static_cast<float>(vp->Width), static_cast<float>(vp->Height));
+        }
         return S_OK;
     }
 
