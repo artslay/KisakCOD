@@ -2436,6 +2436,56 @@ struct weaponState_t // sizeof=0x54
 static_assert(sizeof(weaponState_t) == 0x54);
 #endif // !__SWITCH__
 
+#if defined(KISAK_SP) && defined(__SWITCH__)
+// HUD element layout is needed by the Switch SP playerState HUD block.
+struct hudelem_s
+{
+    he_type_t type;
+    float x;
+    float y;
+    float z;
+    int targetEntNum;
+    float fontScale;
+    float fromFontScale;
+    int fontScaleStartTime;
+    int fontScaleTime;
+    int font;
+    int alignOrg;
+    int alignScreen;
+    hudelem_color_t color;
+    hudelem_color_t fromColor;
+    int fadeStartTime;
+    int fadeTime;
+    int label;
+    int width;
+    int height;
+    int materialIndex;
+    int offscreenMaterialIdx;
+    int fromWidth;
+    int fromHeight;
+    int scaleStartTime;
+    int scaleTime;
+    float fromX;
+    float fromY;
+    int fromAlignOrg;
+    int fromAlignScreen;
+    int moveStartTime;
+    int moveTime;
+    int time;
+    int duration;
+    float value;
+    int text;
+    float sort;
+    hudelem_color_t glowColor;
+    int fxBirthTime;
+    int fxLetterTime;
+    int fxDecayStartTime;
+    int fxDecayDuration;
+    int soundID;
+    int flags;
+};
+#endif
+
 #ifdef __SWITCH__
 struct BulletFireParams
 {
