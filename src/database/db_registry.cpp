@@ -2,6 +2,10 @@
 #include "database.h"
 
 #include <qcommon/files.h>
+#ifdef __SWITCH__
+#include <cstdio>
+extern FILE *FS_SwitchOpenFile(const char *path);
+#endif
 #include <qcommon/mem_track.h>
 
 #include <xanim/xmodel.h>
@@ -644,6 +648,7 @@ void __cdecl DB_GetVertexBufferAndOffset(uint8_t zoneHandle, _BYTE *verts, void 
     *vb = g_zones[zoneHandle].mem.vertexBuffer;
 }
 
+#endif
 void __cdecl DB_BuildOSPath_Mod(const char *zoneName, uint32_t size, char *filename)
 {
     char *v3; // eax
