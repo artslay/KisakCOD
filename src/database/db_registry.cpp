@@ -5,6 +5,7 @@
 #ifdef __SWITCH__
 #include <cstdio>
 extern FILE *FS_SwitchOpenFile(const char *path);
+extern FILE *FS_SwitchOpenRootFile(const char *path);
 #endif
 #include <qcommon/mem_track.h>
 
