@@ -2702,3 +2702,326 @@ const float playerMaxs[] = { 15.0, 15.0, 70.0 };
 
 const int serverOnlyEvents[4] = { 31, 20, 19, -1 }; // idb
 const int singleClientEvents[13] = { 6, 7, 8, 34, 13, 14, 32, 33, 34, 37, 42, 43, -1 }; // idb
+
+#ifdef __SWITCH__
+enum pmflags_t : __int32 // (MP/SP same)
+{
+    PMF_PRONE = 1 << 0,
+    PMF_DUCKED = 1 << 1,
+    PMF_MANTLE = 1 << 2,
+    PMF_LADDER = 1 << 3,
+    PMF_SIGHT_AIMING = 1 << 4,
+    PMF_BACKWARDS_RUN = 1 << 5,
+    PMF_WALKING = 1 << 6,
+    PMF_TIME_HARDLANDING = 1 << 7,
+    PMF_TIME_KNOCKBACK = 1 << 8,
+    PMF_PRONEMOVE_OVERRIDDEN = 1 << 9,
+    PMF_RESPAWNED = 1 << 10,
+    PMF_FROZEN = 1 << 11,
+    PMF_NO_PRONE = 1 << 12,
+    PMF_LADDER_FALL = 1 << 13,
+    PMF_JUMPING = 1 << 14,
+    PMF_SPRINTING = 1 << 15,
+    PMF_SHELLSHOCKED = 1 << 16,
+    PMF_MELEE_CHARGE = 1 << 17,
+    PMF_NO_SPRINT = 1 << 18,
+    PMF_NO_JUMP = 1 << 19,
+#ifdef KISAK_MP
+    PMF_VEHICLE_ATTACHED = 1 << 20
+#elif KISAK_SP
+    PMF_SCRIPT_NO_STAND = 1 << 20,
+    PMF_SCRIPT_NO_CROUCH = 1 << 21,
+    PMF_SCRIPT_NO_PRONE = 1 << 22,
+    PMF_SCRIPT_NO_LEAN = 1 << 23
+#endif
+};
+
+enum pmtype_t : __int32
+{
+    PM_NORMAL = 0x0,
+    PM_NORMAL_LINKED = 0x1,
+    PM_NOCLIP = 0x2,
+    PM_UFO = 0x3,
+    PM_SPECTATOR = 0x4,
+    PM_INTERMISSION = 0x5,
+    PM_LASTSTAND = 0x6,
+    PM_DEAD = 0x7,
+    PM_DEAD_LINKED = 0x8,
+};
+
+enum he_type_t : __int32
+{                                       // XREF: hudelem_s/r
+    HE_TYPE_FREE = 0x0,
+    HE_TYPE_TEXT = 0x1,
+    HE_TYPE_VALUE = 0x2,
+    HE_TYPE_PLAYERNAME = 0x3,
+    HE_TYPE_MAPNAME = 0x4,
+    HE_TYPE_GAMETYPE = 0x5,
+    HE_TYPE_MATERIAL = 0x6,
+    HE_TYPE_TIMER_DOWN = 0x7,
+    HE_TYPE_TIMER_UP = 0x8,
+    HE_TYPE_TENTHS_TIMER_DOWN = 0x9,
+    HE_TYPE_TENTHS_TIMER_UP = 0xA,
+    HE_TYPE_CLOCK_DOWN = 0xB,
+    HE_TYPE_CLOCK_UP = 0xC,
+    HE_TYPE_WAYPOINT = 0xD,
+    HE_TYPE_COUNT = 0xE,
+};
+
+#elif KISAK_SP
+struct hudelem_s
+{
+    he_type_t type;
+    float x;
+    float y;
+    float z;
+    int targetEntNum;
+    float fontScale;
+    float fromFontScale;
+    int fontScaleStartTime;
+    int fontScaleTime;
+    int font;
+    int alignOrg;
+    int alignScreen;
+    hudelem_color_t color;
+    hudelem_color_t fromColor;
+    int fadeStartTime;
+    int fadeTime;
+    int label;
+    int width;
+    int height;
+    int materialIndex;
+    int offscreenMaterialIdx;
+    int fromWidth;
+    int fromHeight;
+    int scaleStartTime;
+    int scaleTime;
+    float fromX;
+    float fromY;
+    int fromAlignOrg;
+    int fromAlignScreen;
+    int moveStartTime;
+    int moveTime;
+    int time;
+    int duration;
+    float value;
+    int text;
+    float sort;
+    hudelem_color_t glowColor;
+    int fxBirthTime;
+    int fxLetterTime;
+    int fxDecayStartTime;
+    int fxDecayDuration;
+    int soundID;
+    int flags;
+};
+#endif
+
+#elif KISAK_SP
+struct playerState_s_hud
+{
+    hudelem_s elem[256];
+};
+#endif
+
+enum ActionSlotType : __int32
+{                                       // XREF: playerState_s/r
+    ACTIONSLOTTYPE_DONOTHING = 0x0,
+    ACTIONSLOTTYPE_SPECIFYWEAPON = 0x1,
+    ACTIONSLOTTYPE_ALTWEAPONTOGGLE = 0x2,
+    ACTIONSLOTTYPE_NIGHTVISION = 0x3,
+    ACTIONSLOTTYPECOUNT = 0x4,
+};
+
+struct ActionSlotParam_SpecifyWeapon // sizeof=0x4
+{                                       // XREF: ActionSlotParam/r
+    uint32_t index;
+};
+
+struct ActionSlotParam // sizeof=0x4
+{                                       // XREF: playerState_s/r
+    ActionSlotParam_SpecifyWeapon specifyWeapon;
+};
+
+struct SprintState // sizeof=0x14
+{                                       // XREF: playerState_s/r cg_s/r
+    int32_t sprintButtonUpRequired;
+    int32_t sprintDelay;
+    int32_t lastSprintStart;
+    int32_t lastSprintEnd;
+    int32_t sprintStartMaxLength;
+};
+
+enum objectiveState_t : __int32
+{                                       // XREF: objective_t/r
+                                        // Scr_Objective_Add/r ...
+    OBJST_EMPTY = 0x0,
+    OBJST_ACTIVE = 0x1,
+    OBJST_INVISIBLE = 0x2,
+    OBJST_DONE = 0x3,
+    OBJST_CURRENT = 0x4,
+    OBJST_FAILED = 0x5,
+    OBJST_NUMSTATES = 0x6,
+};
+
+struct objective_t // sizeof=0x1C
+{                                       // XREF: playerState_s/r
+    objectiveState_t state;
+    float origin[3];                    // XREF: .data:00946428/o
+    int32_t entNum;
+    int32_t teamNum;                        // XREF: _memmove+2E8/o
+    // _memcpy+2E8/o
+    int32_t icon;
+};
+
+struct MantleState // sizeof=0x10
+{                                       // XREF: playerState_s/r
+    float yaw;
+    int32_t timer;
+    int32_t transIndex;
+    int32_t flags;
+};
+
+enum itemType_t : __int32
+{                                       // ...
+    IT_BAD = 0x0,
+    IT_WEAPON = 0x1,
+};
+
+struct gitem_s // sizeof=0x4
+{
+    itemType_t giType;
+};
+static_assert(sizeof(gitem_s) == 0x4);
+
+#if defined(KISAK_SP) && defined(__SWITCH__)
+enum pmtype_t : __int32
+{
+    PM_NORMAL = 0x0,
+    PM_NORMAL_LINKED = 0x1,
+    PM_NOCLIP = 0x2,
+    PM_UFO = 0x3,
+    PM_MPVIEWER = 0x4,
+    PM_DEAD = 0x5,
+    PM_DEAD_LINKED = 0x6,
+};
+inline pmtype_t &operator--(pmtype_t &e) {
+    e = static_cast<pmtype_t>(static_cast<int>(e) - 1);
+    return e;
+}
+inline pmtype_t &operator--(pmtype_t &e, int i)
+{
+    --e;
+    return e;
+}
+struct playerState_s
+{
+    int commandTime;
+    pmtype_t pm_type;
+    int bobCycle;
+    int pm_flags;
+    int weapFlags;
+    int otherFlags;
+    int pm_time;
+    float origin[3];
+    float velocity[3];
+    float oldVelocity[2];
+    int weaponTime;
+    int weaponDelay;
+    int grenadeTimeLeft;
+    int throwBackGrenadeOwner;
+    int throwBackGrenadeTimeLeft;
+    int weaponRestrictKickTime;
+    int foliageSoundTime;
+    int gravity;
+    float leanf;
+    int speed;
+    float delta_angles[3];
+    int groundEntityNum;
+    float vLadderVec[3];
+    int jumpTime;
+    float jumpOriginZ;
+    int movementDir;
+    int eFlags; // 0x20000 = USING_VEHICLE
+    int eventSequence;
+    int events[4];
+    uint32_t eventParms[4];
+    int oldEventSequence;
+    int clientNum;
+    int offHandIndex;
+    OffhandSecondaryClass offhandSecondary;
+    uint32_t weapon;
+    weaponstate_t weaponstate;
+    uint32_t weaponShotCount;
+    float fWeaponPosFrac;
+    int adsDelayTime;
+    int spreadOverride;
+    int spreadOverrideState;
+    int viewmodelIndex;
+    float viewangles[3];
+    int viewHeightTarget;
+    float viewHeightCurrent;
+    int viewHeightLerpTime;
+    int viewHeightLerpTarget;
+    int viewHeightLerpDown;
+    float viewAngleClampBase[2];
+    float viewAngleClampRange[2];
+    int damageEvent;
+    int damageYaw;
+    int damagePitch;
+    int damageCount;
+    int stats[4];
+    int ammo[128];
+    int ammoclip[128];
+    uint32_t weapons[4];
+    uint32_t weaponold[4];
+    uint32_t weaponrechamber[4];
+    float proneDirection;
+    float proneDirectionPitch;
+    float proneTorsoPitch;
+    ViewLockTypes viewlocked;
+    int viewlocked_entNum;
+    int vehicleType;
+    float linkAngles[3];
+    float groundTiltAngles[3];
+    int cursorHint;
+    int cursorHintString;
+    int cursorHintEntIndex;
+    int locationSelectionInfo;
+    SprintState sprintState;
+    float fTorsoPitch;
+    float fWaistPitch;
+    float holdBreathScale;
+    int holdBreathTimer;
+    float moveSpeedScaleMultiplier;
+    MantleState mantleState;
+    float meleeChargeYaw;
+    int meleeChargeDist;
+    int meleeChargeTime;
+    int weapLockFlags;
+    int weapLockedEntnum;
+    uint32_t forcedViewAnimWeaponIdx;
+    int forcedViewAnimWeaponState;
+    uint32_t forcedViewAnimOriginalWeaponIdx;
+    ActionSlotType actionSlotType[4];
+    ActionSlotParam actionSlotParam[4];
+    int entityEventSequence;
+    int weapAnim;
+    float aimSpreadScale;
+    int shellshockIndex;
+    int shellshockTime;
+    int shellshockDuration;
+    float dofNearStart;
+    float dofNearEnd;
+    float dofFarStart;
+    float dofFarEnd;
+    float dofNearBlur;
+    float dofFarBlur;
+    float dofViewmodelStart;
+    float dofViewmodelEnd;
+    int hudElemLastAssignedSoundID;
+    uint8_t weaponmodels[128];
+    playerState_s_hud hud;
+};
+#endif // KISAK_SP
+#endif // __SWITCH__
