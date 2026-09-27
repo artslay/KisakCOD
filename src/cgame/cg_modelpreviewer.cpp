@@ -3437,7 +3437,6 @@ void CG_ModPrvEnumerateModels_FastFile()
         g_mdlprv.system.modelNames = (const char **)Hunk_UserAlloc(v0, 4 * (g_mdlprv.system.modelCount + 2), 4);
         *g_mdlprv.system.modelNames = (const char *)v0;
         ++g_mdlprv.system.modelNames;
-        v1[2] = (int)"CG_ModPrvEnumerateModels";
         v1[1] = 3;
         v1[0] = 0;
         DB_EnumXAssets(
@@ -3475,7 +3474,6 @@ void CG_ModPrvEnumerateAnimations_FastFile()
         v0 = Hunk_UserCreate(0x20000, "CG_ModPrvEnumerateAnimations", 0, 0, 0);
         g_mdlprv.system.animNames = (const char **)Hunk_UserAlloc(v0, 4 * (g_mdlprv.system.animCount + 2), 4);
         *g_mdlprv.system.animNames = (const char *)v0;
-        v1[2] = (int)"CG_ModPrvEnumerateAnimations";
         ++g_mdlprv.system.animNames;
         v1[1] = 2;
         v1[0] = 0;
