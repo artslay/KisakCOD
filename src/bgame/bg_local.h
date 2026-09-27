@@ -185,6 +185,16 @@ enum ShockViewTypes : __int32
     SHELLSHOCK_VIEWTYPE_NONE = 0x2,
 };
 
+#ifdef __SWITCH__
+enum ViewLockTypes : __int32
+{
+    PLAYERVIEWLOCK_NONE = 0x0,
+    PLAYERVIEWLOCK_FULL = 0x1,
+    PLAYERVIEWLOCK_WEAPONJITTER = 0x2,
+    PLAYERVIEWLOCKCOUNT = 0x3,
+};
+#endif
+
 union hudelem_color_t // sizeof=0x4
 {                                       // XREF: DrawSingleHudElem2d+114/r
     struct
@@ -1019,7 +1029,9 @@ struct playerState_s // sizeof=0x2F64
 };
 static_assert(sizeof(playerState_s) == 0x2F64);
 
-#elif KISAK_SP
+#endif // !__SWITCH__
+
+#ifdef KISAK_SP
 enum pmtype_t : __int32
 {
     PM_NORMAL = 0x0,
@@ -1148,7 +1160,7 @@ struct playerState_s
     uint8_t weaponmodels[128];
     playerState_s_hud hud;
 };
-#endif
+#endif // KISAK_SP
 
 struct CEntPlayerInfo // sizeof=0xC
 {                                       // ...
@@ -1694,7 +1706,26 @@ static_assert(sizeof(viewLerpWaypoint_s) == 0xC);
 // bg_jump
 
 struct pmove_t;
+#ifdef __SWITCH__
+struct pml_t // Switch runtime movement state
+{
+    float forward[3];
+    float right[3];
+    float up[3];
+    float frametime;
+    int32_t msec;
+    int32_t walking;
+    int32_t groundPlane;
+    int32_t almostGroundPlane;
+    trace_t groundTrace;
+    float impactSpeed;
+    float previous_origin[3];
+    float previous_velocity[3];
+};
+static_assert(sizeof(pml_t) == 0x80);
+#else
 struct pml_t;
+#endif
 struct playerState_s;
 
 void __cdecl Jump_RegisterDvars();
@@ -2194,6 +2225,9 @@ void __cdecl Mantle_ClearHint(playerState_s *ps);
 bool __cdecl Mantle_IsWeaponInactive(playerState_s *ps);
 
 // bg_weapons
+struct BulletFireParams;
+struct BulletTraceResults;
+
 struct BulletFireParams // sizeof=0x40
 {                                       // ...
     int32_t weaponEntIndex;                 // ...
