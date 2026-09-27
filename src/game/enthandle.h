@@ -35,7 +35,6 @@ struct EntHandle // sizeof=0x4 // (SP/MP same)
     static void Shutdown();
 };
 static_assert(sizeof(EntHandle) == 0x4);
-#endif // !__SWITCH__
 
 void __cdecl EntHandleDissociate(gentity_s *ent);
 void __cdecl EntHandleDissociateInternal(EntHandleList *entHandleList);
