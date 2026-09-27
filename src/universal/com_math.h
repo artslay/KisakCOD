@@ -164,6 +164,9 @@ void __cdecl TRACK_com_math();
 // == RANDOM == 
 void __cdecl Rand_Init(int seed);
 
+#ifdef __SWITCH__
+#define random kisak_random
+#endif
 float __cdecl random();
 float __cdecl crandom();
 
