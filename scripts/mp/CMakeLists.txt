@@ -67,6 +67,16 @@ add_executable(${PROJECT_NAME}
 
 endif()
 
+if (KISAK_PLATFORM STREQUAL "switch" AND KISAK_SWITCH_BOOTSTRAP)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        glad
+        EGL
+        glapi
+        drm_nouveau
+        nx
+    )
+endif()
+
 # Add multiplayer flag
 target_compile_definitions(${PROJECT_NAME} PUBLIC KISAK_MP CINEMA USE_SEPARATE_BLIT_TEXTURE)
 
