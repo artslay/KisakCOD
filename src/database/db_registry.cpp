@@ -727,3 +727,141 @@ void DB_Init()
     g_assetEntryPool[0x7FFF].next = NULL;
 }
 
+
+void __cdecl DB_InitThread()
+{
+    if (!Sys_SpawnDatabaseThread((void(__cdecl *)(uint32_t))DB_Thread))
+        Sys_Error("Failed to create database thread");
+}
+
+void __cdecl  DB_Thread(uint32_t threadContext)
+{
+    jmp_buf *Value; // eax
+
+    iassert(threadContext == THREAD_CONTEXT_DATABASE);
+    Value = (jmp_buf *)Sys_GetValue(2);
+    
+    if (setjmp(*Value))
+    {
+        Profile_Recover(1);
+#ifdef __llvm__ 
+        __builtin_debugtrap();
+#else
+        __debugbreak();
+#endif
+        Com_ErrorAbort();
+    }
+    Profile_Guard(1);
+    while (1)
+    {
+        Sys_WaitStartDatabase();
+        DB_TryLoadXFile();
+    }
+}
+
+void DB_TryLoadXFile()
+{
+    uint32_t j; // [esp+0h] [ebp-8h]
+    uint32_t zoneInfoCount; // [esp+4h] [ebp-4h]
+
+    if (g_zoneInfoCount)
+    {
+        zoneInfoCount = g_zoneInfoCount;
+        g_zoneInfoCount = 0;
+        if (g_loadingZone)
+            MyAssertHandler(".\\database\\db_registry.cpp", 3764, 0, "%s", "!g_loadingZone");
+        for (j = 0; j < zoneInfoCount; ++j)
+        {
+            if (!DB_TryLoadXFileInternal(g_zoneInfo[j].name, g_zoneInfo[j].flags))
+                --g_loadingAssets;
+        }
+        if (g_loadingZone)
+            MyAssertHandler(".\\database\\db_registry.cpp", 3772, 0, "%s", "!g_loadingZone");
+        if (g_loadingAssets)
+            MyAssertHandler(".\\database\\db_registry.cpp", 3773, 0, "%s", "!g_loadingAssets");
+#ifdef __SWITCH__
+        Sys_DatabaseCompleted();
+#else
+        Sys_LockWrite(&s_dbReorder.critSect);
+        DB_EndReorderZone();
+        Sys_UnlockWrite(&s_dbReorder.critSect);
+        Sys_DatabaseCompleted();
+#endif
+    }
+    else if (g_loadingAssets)
+    {
+        MyAssertHandler(".\\database\\db_registry.cpp", 3759, 0, "%s", "!g_loadingAssets");
+    }
+}
+
+int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags)
+{
+    char filename[256];
+    XZone *zone;
+    uint32_t i;
+    FILE *zoneFile;
+
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "Trying to load file %s with flags %x\n", zoneName, zoneFlags);
+    iassert(!g_zoneInfoCount);
+
+    DB_BuildOSPath(zoneName, sizeof(filename), filename);
+    zoneFile = FS_SwitchOpenRootFile(filename);
+    if (!zoneFile)
+    {
+        Com_PrintWarning(CON_CHANNEL_FILES, "WARNING: Could not find zone '%s'\n", filename);
+        return 0;
+    }
+
+    g_zoneIndex = 0;
+    for (i = 1; i < 0x21; ++i)
+    {
+        if (!g_zones[i].name[0])
+        {
+            g_zoneIndex = i;
+            break;
+        }
+    }
+    if (!g_zoneIndex)
+    {
+        fclose(zoneFile);
+        Com_Error(ERR_DROP, "ERROR: Max zone count exceeded");
+        return 0;
+    }
+    if (!*zoneName)
+    {
+        fclose(zoneFile);
+        Com_Error(ERR_DROP, "ERROR: Empty fastfile name");
+        return 0;
+    }
+
+    zone = &g_zones[g_zoneIndex];
+    memset(zone, 0, sizeof(XZone));
+    g_zoneHandles[g_zoneCount] = g_zoneIndex;
+    I_strncpyz(zone->name, zoneName, sizeof(zone->name));
+    zone->flags = zoneFlags;
+    long saved = ftell(zoneFile);
+    fseek(zoneFile, 0, SEEK_END);
+    zone->fileSize = static_cast<uint32_t>(ftell(zoneFile));
+    fseek(zoneFile, saved, SEEK_SET);
+    zone->modZone = false;
+
+    ++g_zoneCount;
+    g_loadingZone = 1;
+    g_mayRecoverLostAssets = 0;
+    g_zoneAllocType = DB_GetZoneAllocType(zoneFlags);
+
+    PMem_BeginAlloc(zone->name, g_zoneAllocType);
+    zone->allocType = g_zoneAllocType;
+    DB_ResetZoneSize((zoneFlags & DB_ZONE_GAME) != 0);
+    DB_LoadXFile(filename, zoneFile, zone->name, &zone->mem, 0, g_fileBuf, g_zoneAllocType);
+    DB_LoadXFileInternal();
+    PMem_EndAlloc(zone->name, g_zoneAllocType);
+
+    fclose(zoneFile);
+    g_loadingZone = 0;
+    g_mayRecoverLostAssets = 1;
+    Com_Printf(CON_CHANNEL_SYSTEM, "Loaded fastfile %s (%u bytes)\n", zone->name, zone->fileSize);
+    return 1;
+}
+
+#endif
