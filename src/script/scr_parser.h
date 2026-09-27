@@ -11,6 +11,7 @@ struct OpcodeLookup // sizeof=0x18
     int profileBuiltInTime;
     int profileUsage;
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(OpcodeLookup) == 0x18);
 
 struct Scr_SourcePos_t // sizeof=0xC
@@ -156,3 +157,4 @@ extern scrParserGlob_t scrParserGlob;
 extern scrParserPub_t scrParserPub;
 extern char g_EndPos;
 extern bool g_loadedImpureScript;
+#endif // KISAK_SWITCH legacy 32-bit layout asserts
