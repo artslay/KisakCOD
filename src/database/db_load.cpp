@@ -7534,9 +7534,8 @@ void Load_XAssetListCustom()
             }
             else
             {
-                DB_ConvertOffsetToPointer(&stringOffset);
                 *dst = reinterpret_cast<const char *>(
-                    static_cast<uintptr_t>(stringOffset));
+                    DB_ConvertOffsetToPointerValue(stringOffset));
             }
         }
     }
