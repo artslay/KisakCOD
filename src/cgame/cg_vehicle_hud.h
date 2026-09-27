@@ -17,7 +17,7 @@ enum Clip_t : __int32
 };
 
 bool __cdecl ClampScreenPosToEdges(
-    const float *localClientNum,
+    int localClientNum,
     Material *point,
     double padLeft,
     double padRight,
