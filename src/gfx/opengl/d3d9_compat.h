@@ -31,6 +31,16 @@ constexpr HRESULT E_FAIL = -1;
 
 // D3D9 format values are kept for asset compatibility; Switch maps them to GL.
 constexpr uint32_t D3DFMT_A8 = 1;
+constexpr uint32_t D3DFMT_A1R5G5B5 = 25;
+constexpr uint32_t D3DFMT_R5G6B5 = 23;
+constexpr uint32_t D3DFMT_A8B8G8R8 = 32;
+constexpr uint32_t D3DFMT_D15S1 = 73;
+constexpr uint32_t D3DFMT_D16_LOCKABLE = 70;
+constexpr uint32_t D3DFMT_D24FS8 = 83;
+constexpr uint32_t D3DMULTISAMPLE_NONE = 0;
+constexpr uint32_t D3DDEVTYPE_HAL = 1;
+constexpr uint32_t D3DRTYPE_SURFACE = 8;
+constexpr uint32_t D3DBACKBUFFER_TYPE_MONO = 1;
 constexpr uint32_t D3DFMT_A8R8G8B8 = 21;
 constexpr uint32_t D3DFMT_X8R8G8B8 = 22;
 constexpr uint32_t D3DFMT_A8L8 = 51;
