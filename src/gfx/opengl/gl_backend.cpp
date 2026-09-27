@@ -289,7 +289,12 @@ void OpenGLBackend::ReleaseShader(void* shader)
     auto *s = static_cast<KisakGLShader *>(shader);
     if (s)
     {
-        if (s->object) glDeleteShader(s->object);
+        if (s->object)
+        {
+            if (m_vertexShader == s->object) m_vertexShader = 0;
+            if (m_pixelShader == s->object) m_pixelShader = 0;
+            glDeleteShader(s->object);
+        }
         delete s;
     }
 #else
