@@ -136,7 +136,15 @@ int __cdecl FileWrapper_GetFileSize(FILE *h)
     return fileSize;
 }
 
-#ifdef KISAK_SP
+#ifdef __SWITCH__
+uint32_t FS_FileTell(FILE *file)
+{
+    ProfLoad_BeginTrackedValue(MAP_PROFILE_FILE_SEEK);
+    long pos = ftell(file);
+    ProfLoad_EndTrackedValue(MAP_PROFILE_FILE_SEEK);
+    return pos < 0 ? 0u : (uint32_t)pos;
+}
+#elif defined(KISAK_SP)
 #include <Windows.h>
 #include <fileapi.h>
 uint32_t FS_FileTell(FILE *file)
