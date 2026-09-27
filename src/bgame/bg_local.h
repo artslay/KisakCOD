@@ -2736,91 +2736,6 @@ enum pmflags_t : __int32 // (MP/SP same)
 #endif
 };
 
-enum pmtype_t : __int32
-{
-    PM_NORMAL = 0x0,
-    PM_NORMAL_LINKED = 0x1,
-    PM_NOCLIP = 0x2,
-    PM_UFO = 0x3,
-    PM_SPECTATOR = 0x4,
-    PM_INTERMISSION = 0x5,
-    PM_LASTSTAND = 0x6,
-    PM_DEAD = 0x7,
-    PM_DEAD_LINKED = 0x8,
-};
-
-enum he_type_t : __int32
-{
-    HE_TYPE_FREE = 0x0,
-    HE_TYPE_TEXT = 0x1,
-    HE_TYPE_VALUE = 0x2,
-    HE_TYPE_MATERIAL = 0x3,
-    HE_TYPE_TIMER_DOWN = 0x4,
-    HE_TYPE_TIMER_UP = 0x5,
-    HE_TYPE_TENTHS_TIMER_DOWN = 0x6,
-    HE_TYPE_TENTHS_TIMER_UP = 0x7,
-    HE_TYPE_CLOCK_DOWN = 0x8,
-    HE_TYPE_CLOCK_UP = 0x9,
-    HE_TYPE_WAYPOINT = 0xA,
-    HE_TYPE_COUNT = 0xB,
-};
-
-#elif KISAK_SP
-struct hudelem_s
-{
-    he_type_t type;
-    float x;
-    float y;
-    float z;
-    int targetEntNum;
-    float fontScale;
-    float fromFontScale;
-    int fontScaleStartTime;
-    int fontScaleTime;
-    int font;
-    int alignOrg;
-    int alignScreen;
-    hudelem_color_t color;
-    hudelem_color_t fromColor;
-    int fadeStartTime;
-    int fadeTime;
-    int label;
-    int width;
-    int height;
-    int materialIndex;
-    int offscreenMaterialIdx;
-    int fromWidth;
-    int fromHeight;
-    int scaleStartTime;
-    int scaleTime;
-    float fromX;
-    float fromY;
-    int fromAlignOrg;
-    int fromAlignScreen;
-    int moveStartTime;
-    int moveTime;
-    int time;
-    int duration;
-    float value;
-    int text;
-    float sort;
-    hudelem_color_t glowColor;
-    int fxBirthTime;
-    int fxLetterTime;
-    int fxDecayStartTime;
-    int fxDecayDuration;
-    int soundID;
-    int flags;
-};
-#endif
-
-#elif KISAK_SP
-struct playerState_s_hud
-{
-    hudelem_s elem[256];
-};
-#endif
-
 enum ActionSlotType : __int32
 {                                       // XREF: playerState_s/r
     ACTIONSLOTTYPE_DONOTHING = 0x0,
@@ -3021,4 +2936,3 @@ struct playerState_s
     playerState_s_hud hud;
 };
 #endif // KISAK_SP
-#endif // __SWITCH__
