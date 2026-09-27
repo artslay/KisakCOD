@@ -1,16 +1,15 @@
 # Nintendo Switch platform bootstrap.
 #
 # The full game still contains Win32/D3D9 dependencies. The bootstrap target
-# deliberately does not link against any desktop graphics/system libraries.
+# deliberately does not link against desktop graphics/system libraries.
 # Switch-specific dependencies will be added here as their platform layers land.
+
+if (NOT KISAK_PLATFORM STREQUAL "switch")
+    message(FATAL_ERROR "KISAK_PLATFORM is incorrect for building switch.")
+endif()
 
 message(STATUS "Configuring Nintendo Switch platform")
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE __SWITCH__ KISAK_SWITCH)
-
-target_include_directories(${PROJECT_NAME} PRIVATE
-    "${SRC_DIR}"
-)
-
-# devkitPro's toolchain supplies the platform compiler/runtime. Do not add
-# desktop Win32 flags or libraries here.
+# This file is included before add_executable() by the existing target files,
+# so keep it target-independent.
+add_compile_definitions(__SWITCH__ KISAK_SWITCH)
