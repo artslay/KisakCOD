@@ -1491,7 +1491,7 @@ uint32_t __cdecl CL_AddDeathMessageIcon(
     deathMsg[deathMsgLen++] = (char)(horzFlipIcon + 1);
     deathMsg[deathMsgLen++] = encodedWidth;
     deathMsg[deathMsgLen++] = encodedHeight;
-    *(uint32_t*)&deathMsg[deathMsgLen] = (uint32_t)iconShader;
+    *(uint32_t*)&deathMsg[deathMsgLen] = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(iconShader));
     deathMsgLen += 4;
 
     iassert(deathMsgLen - startLen == CONTXTCMD_LEN_HUDICON + 1);
@@ -3092,10 +3092,17 @@ void __cdecl Con_DrawOutputVersion(float x, float y, float width, float height)
     SCR_DrawSmallStringExt((int)x, (int)ya, VersionString, con_versionColor);
 }
 
+#ifdef KISAK_SWITCH
+char *__cdecl Con_GetVersionString()
+{
+	return va("Build Switch ARM64");
+}
+#else
 char *__cdecl Con_GetVersionString()
 {
 	return va("Build %s %s", getBuildNumber(), CPUSTRING);
 }
+#endif
 
 void __cdecl Con_PageUp()
 {
