@@ -38,6 +38,9 @@ struct MemoryNode // sizeof=0xC
     uint16_t next;              // XREF: MT_Init(void)+4E/w
     uint32_t padding[2];            // XREF: MT_RemoveHeadMemoryNode+61/w
 };
+#ifndef __SWITCH__
+// Native ARM64 layout differs from the original 32-bit runtime; serialized layouts are handled by Switch loaders.
+
 static_assert(sizeof(MemoryNode) == 12);
 
 #define MEMORY_NODE_BITS 16
@@ -63,6 +66,7 @@ struct __declspec(align(128)) scrMemTreeGlob_t // sizeof=0xC0380
     int totalAllocBuckets;              // XREF: MT_DumpTree(void):loc_59E7AE/r
 };
 static_assert(sizeof(scrMemTreeGlob_t) == 0xC0380);
+#endif // !__SWITCH__
 
 static const char* mt_type_names[22] =
 {
