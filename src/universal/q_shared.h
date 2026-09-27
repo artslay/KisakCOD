@@ -536,6 +536,7 @@ inline T InterlockedCompareExchange(volatile T *destination, T exchange, T compa
     return comparand;
 }
 #endif
+#endif
 
 #ifdef __SWITCH__
 #ifndef KISAK_SWITCH_BITSCAN_DEFINED
