@@ -36,7 +36,9 @@ struct DevGuiInput // sizeof=0x70
     float sliderScrollTime;             // ...
     float sliderScrollMaxTimeStep;      // ...
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(DevGuiInput) == 0x70);
+#endif
 
 union DevMenuChild // sizeof=0x4
 {                                       // ...
@@ -45,7 +47,9 @@ union DevMenuChild // sizeof=0x4
     DevGraph *graph;
     uint16_t menu;
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(DevMenuChild) == 0x4);
+#endif
 
 struct DevMenuItem // sizeof=0x28
 {                                       // ...
@@ -58,7 +62,9 @@ struct DevMenuItem // sizeof=0x28
     uint16_t parent;            // ...
     DevMenuChild child;                 // ...
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(DevMenuItem) == 0x28);
+#endif
 
 struct devguiGlob_t // sizeof=0x5E10
 {                                       // ...
@@ -83,7 +89,9 @@ struct devguiGlob_t // sizeof=0x5E10
     int32_t right;                          // ...
     int32_t sliderWidth;                    // ...
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(devguiGlob_t) == 0x5E10);
+#endif
 
 // devgui
 void __cdecl TRACK_devgui();
