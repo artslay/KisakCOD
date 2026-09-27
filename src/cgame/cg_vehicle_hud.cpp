@@ -898,7 +898,7 @@ int __cdecl CG_GetTargetPos(int localClientNum, int targetEntNum, float *outPos)
     {
         ++targets;
         ++v6;
-        if ((int)targets >= (int)&cgArray[0].shellshock)
+        if (reinterpret_cast<uintptr_t>(targets) >= reinterpret_cast<uintptr_t>(&cgArray[0].shellshock))
             return 0;
     }
     Entity = CG_GetEntity(localClientNum, targetEntNum);
