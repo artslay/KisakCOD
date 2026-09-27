@@ -215,6 +215,7 @@ struct IDirect3DSurface9
 {
     KisakGLTexture *texture = nullptr;
     uint32_t level = 0;
+    bool defaultFramebuffer = false;
     uint32_t refs = 1;
 
     void AddRef()
@@ -250,7 +251,7 @@ class IDirect3DDevice9
 
     void BindRenderTargets()
     {
-        if (!m_color && !m_depth)
+        if ((m_color && m_color->defaultFramebuffer) || (!m_color && !m_depth))
         {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             return;
