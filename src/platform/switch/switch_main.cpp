@@ -3,7 +3,7 @@
 
 #include <switch.h>
 
-#include <gfx/gfx_backend.h>
+#include <gfx/gfx_backend.h>\n#include <universal/com_files.h>\n\nextern void __cdecl FS_Startup(char *gameName);
 
 int main()
 {
@@ -23,7 +23,7 @@ int main()
         return 1;
     }
 
-    padConfigureInput(1, HidNpadStyleSet_NpadStandard);
+    // Mount the original game data from the SD card. The executable stays in the NRO;\n    // only original game assets are read from sdmc:/switch/KisakCOD/game.\n    FS_Startup((char*)"main");\n    const int commonFfSize = FS_ReadFile("common.ff", nullptr);\n    std::printf("common.ff: %d bytes\\n", commonFfSize);\n    if (commonFfSize < 0)\n        std::printf("Game data not found under sdmc:/switch/KisakCOD/game/main\\n");\n\n    padConfigureInput(1, HidNpadStyleSet_NpadStandard);
 
     PadState pad;
     padInitializeDefault(&pad);
