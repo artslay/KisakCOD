@@ -7445,4 +7445,146 @@ void __cdecl DB_LoadDObjs()
 
 
 
+void __cdecl Load_XAssetArrayCustom(int32_t count)
+{
+#ifdef __SWITCH__
+    struct SerializedXAsset
+    {
+        uint32_t type;
+        uint32_t header;
+    };
+
+    XAsset *var = varXAsset;
+    for (int32_t i = 0; i < count; ++i)
+    {
+        SerializedXAsset serialized{};
+        DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+
+        varXAsset = var;
+        memset(varXAsset, 0, sizeof(*varXAsset));
+        varXAsset->type = static_cast<XAssetType>(serialized.type);
+        memcpy(&varXAsset->header, &serialized.header, sizeof(serialized.header));
+        varXAssetHeader = &varXAsset->header;
+
+        Load_XAssetHeader(0);
+        ++var;
+    }
+#else
+    XAsset *var;
+    int32_t i;
+
+    Load_Stream(1, (uint8_t *)varXAsset, 8 * count);
+    var = varXAsset;
+    for (i = 0; i < count; ++i)
+    {
+        varXAsset = var;
+        Load_XAsset(0);
+        ++var;
+    }
+#endif
+}
+
+void Load_XAssetListCustom()
+{
+#ifdef __SWITCH__
+    struct SerializedScriptStringList
+    {
+        uint32_t count;
+        uint32_t strings;
+    };
+    struct SerializedXAssetList
+    {
+        SerializedScriptStringList stringList;
+        uint32_t assetCount;
+        uint32_t assets;
+    };
+
+    SerializedXAssetList serialized{};
+    DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+
+    varXAssetList = &g_varXAssetList;
+    memset(varXAssetList, 0, sizeof(*varXAssetList));
+    varXAssetList->stringList.count = static_cast<int>(serialized.stringList.count);
+    varXAssetList->assetCount = static_cast<int>(serialized.assetCount);
+
+    DB_PushStreamPos(4);
+    if (serialized.stringList.strings)
+    {
+        varXAssetList->stringList.strings =
+            reinterpret_cast<const char **>(DB_AllocStreamPos(3));
+
+        for (uint32_t i = 0; i < serialized.stringList.count; ++i)
+        {
+            uint32_t stringOffset = 0;
+            DB_LoadXFileData(reinterpret_cast<uint8_t *>(&stringOffset), sizeof(stringOffset));
+
+            const char **dst = &varXAssetList->stringList.strings[i];
+            if (!stringOffset)
+            {
+                *dst = nullptr;
+            }
+            else if (stringOffset == UINT32_MAX)
+            {
+                *dst = reinterpret_cast<const char *>(AllocLoad_raw_byte());
+                varConstChar = *dst;
+                Load_XStringCustom((char **)dst);
+            }
+            else
+            {
+                DB_ConvertOffsetToPointer(&stringOffset);
+                *dst = reinterpret_cast<const char *>(
+                    static_cast<uintptr_t>(stringOffset));
+            }
+        }
+    }
+    DB_PopStreamPos();
+#else
+    varXAssetList = &g_varXAssetList;
+    DB_LoadXFileData((uint8_t *)&g_varXAssetList, sizeof(XAssetList));
+    DB_PushStreamPos(4);
+    varScriptStringList = &varXAssetList->stringList;
+    Load_ScriptStringList(0);
+    DB_PopStreamPos();
+#endif
+}
+
+void __cdecl Load_XAssetArrayCustom(int32_t count)
+{
+#ifdef __SWITCH__
+    struct SerializedXAsset
+    {
+        uint32_t type;
+        uint32_t header;
+    };
+
+    XAsset *var = varXAsset;
+    for (int32_t i = 0; i < count; ++i)
+    {
+        SerializedXAsset serialized{};
+        DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+
+        varXAsset = var;
+        memset(varXAsset, 0, sizeof(*varXAsset));
+        varXAsset->type = static_cast<XAssetType>(serialized.type);
+        memcpy(&varXAsset->header, &serialized.header, sizeof(serialized.header));
+        varXAssetHeader = &varXAsset->header;
+
+        Load_XAssetHeader(0);
+        ++var;
+    }
+#else
+    XAsset *var;
+    int32_t i;
+
+    Load_Stream(1, (uint8_t *)varXAsset, 8 * count);
+    var = varXAsset;
+    for (i = 0; i < count; ++i)
+    {
+        varXAsset = var;
+        Load_XAsset(0);
+        ++var;
+    }
+#endif
+}
+
 
