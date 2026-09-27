@@ -8,7 +8,9 @@
 #include <gfx_d3d/r_rendercmds.h>
 #include <qcommon/threads.h>
 #include <universal/com_files.h>
+#ifndef KISAK_SWITCH
 #include <buildnumber.h>
+#endif
 
 #ifdef KISAK_MP
 #include <cgame_mp/cg_local_mp.h>
