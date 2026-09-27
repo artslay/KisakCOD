@@ -810,10 +810,14 @@ void DB_TryLoadXFile()
             MyAssertHandler(".\\database\\db_registry.cpp", 3772, 0, "%s", "!g_loadingZone");
         if (g_loadingAssets)
             MyAssertHandler(".\\database\\db_registry.cpp", 3773, 0, "%s", "!g_loadingAssets");
+#ifdef __SWITCH__
+        Sys_DatabaseCompleted();
+#else
         Sys_LockWrite(&s_dbReorder.critSect);
         DB_EndReorderZone();
         Sys_UnlockWrite(&s_dbReorder.critSect);
         Sys_DatabaseCompleted();
+#endif
     }
     else if (g_loadingAssets)
     {
