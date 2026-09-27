@@ -506,8 +506,7 @@ void __cdecl R_InitFrameBufferRenderTarget_Win32(GfxRenderTarget *renderTarget)
         }
     }
 #else
-{
-    const char *v1; // eax
+const char *v1; // eax
     const char *v2; // eax
     const char *v3; // eax
     int depthStencilWidth; // [esp+0h] [ebp-10h] BYREF
@@ -576,12 +575,8 @@ void __cdecl R_InitFrameBufferRenderTarget_Win32(GfxRenderTarget *renderTarget)
                 v3);
         }
     }
-}
-
-
 #endif
 }
-
 _D3DFORMAT __cdecl R_InitFrameBufferRenderTarget()
 {
 #ifdef __SWITCH__
