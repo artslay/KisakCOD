@@ -1722,7 +1722,7 @@ struct pml_t // Switch runtime movement state
     float previous_origin[3];
     float previous_velocity[3];
 };
-static_assert(sizeof(pml_t) == 0x80);
+static_assert(sizeof(pml_t) == 0x88);
 #else
 struct pml_t;
 #endif
