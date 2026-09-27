@@ -536,6 +536,18 @@ inline T InterlockedCompareExchange(volatile T *destination, T exchange, T compa
     return comparand;
 }
 #endif
+
+#ifdef __SWITCH__
+#ifndef KISAK_SWITCH_BITSCAN_DEFINED
+#define KISAK_SWITCH_BITSCAN_DEFINED
+inline unsigned char _BitScanReverse(unsigned int *index, unsigned int mask)
+{
+    if (!mask)
+        return 0;
+    *index = 31u - static_cast<unsigned int>(__builtin_clz(mask));
+    return 1;
+}
+#endif
 #endif
 
 // Partially defined types. They are used when the decompiler does not know
