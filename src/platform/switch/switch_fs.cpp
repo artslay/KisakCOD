@@ -61,6 +61,13 @@ static int AllocHandle()
     return 0;
 }
 
+FILE *FS_SwitchOpenFile(const char *path)
+{
+    char resolved[256];
+    SwitchPath(resolved, sizeof(resolved), fs_basepath ? fs_basepath->current.string : kSwitchRoot, fs_gamedir, path);
+    return FS_FileOpenReadBinary(resolved);
+}
+
 bool __cdecl FS_Initialized() { return fs_searchpaths != nullptr; }
 
 void __cdecl FS_CheckFileSystemStarted()
