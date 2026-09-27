@@ -27,6 +27,7 @@ enum : uint32_t
     D3DFILL_WIREFRAME = 2,
     D3DFMT_UNKNOWN = 0,
     D3DFMT_INDEX16 = 101,
+    D3DPOOL_DEFAULT = 0,
     D3DZB_FALSE = 0,
     D3DZB_TRUE = 1,
     D3DTEXF_NONE = 0,
@@ -144,6 +145,7 @@ using IDirect3DBaseTexture9 = KisakGLTexture;
 using IDirect3DTexture9 = KisakGLTexture;
 using IDirect3DVolumeTexture9 = KisakGLTexture;
 using IDirect3DCubeTexture9 = KisakGLTexture;
+struct IDirect3DQuery9 { void Release() { delete this; } };
 
 class IDirect3DDevice9
 {
@@ -171,7 +173,6 @@ public:
     HRESULT SetStreamSource(uint32_t, IDirect3DVertexBuffer9* vb, uint32_t offset, uint32_t)
     {
         glBindBuffer(GL_ARRAY_BUFFER, vb ? vb->object : 0);
-        glVertexArrayElementBuffer(0, 0);
         (void)offset;
         return S_OK;
     }
