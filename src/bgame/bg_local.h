@@ -197,9 +197,7 @@ union hudelem_color_t // sizeof=0x4
     uint32_t rgba;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(union hudelem_color_t) == 0x4);
-#endif
 #endif
 
 enum ViewLockTypes : __int32
@@ -243,9 +241,7 @@ struct scr_anim_s // sizeof=0x4
     };
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(struct scr_anim_s) == 0x4);
-#endif
 #endif
 
 struct loadAnim_t // sizeof=0x48
@@ -255,9 +251,7 @@ struct loadAnim_t // sizeof=0x48
     char szAnimName[64];
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert((sizeof(struct loadAnim_t) * 512) == 36864);
-#endif
 #endif
 
 struct animStringItem_t // sizeof=0x8
@@ -266,9 +260,7 @@ struct animStringItem_t // sizeof=0x8
     int32_t hash;                           // ...
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(animStringItem_t) == 0x8);
-#endif
 #endif
 
 struct controller_info_t // sizeof=0x60
@@ -278,9 +270,7 @@ struct controller_info_t // sizeof=0x60
     float tag_origin_offset[3];         // ...
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(controller_info_t) == 0x60);
-#endif
 #endif
 
 struct animConditionTable_t // sizeof=0x8
@@ -289,9 +279,7 @@ struct animConditionTable_t // sizeof=0x8
     animStringItem_t *values;           // ...
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(animConditionTable_t) == 0x8);
-#endif
 #endif
 
 struct viewDamage_t // sizeof=0xC
@@ -301,9 +289,7 @@ struct viewDamage_t // sizeof=0xC
     float yaw;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(viewDamage_t) == 0xC);
-#endif
 #endif
 
 struct shellshock_parms_t_screenblend // sizeof=0x14
@@ -315,9 +301,7 @@ struct shellshock_parms_t_screenblend // sizeof=0x14
     ShockViewTypes type;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(shellshock_parms_t_screenblend) == 0x14);
-#endif
 #endif
 
 struct shellshock_parms_t_view // sizeof=0xC
@@ -327,9 +311,7 @@ struct shellshock_parms_t_view // sizeof=0xC
     float kickRadius;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(shellshock_parms_t_view) == 0xC);
-#endif
 #endif
 
 struct shellshock_parms_t_sound // sizeof=0x230
@@ -353,9 +335,7 @@ struct shellshock_parms_t_sound // sizeof=0x230
     int32_t loopEndDelay;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(shellshock_parms_t_sound) == 0x230);
-#endif
 #endif
 
 struct shellshock_parms_t_lookcontrol // sizeof=0x14
@@ -370,9 +350,7 @@ struct shellshock_parms_t_lookcontrol // sizeof=0x14
     float maxYawSpeed;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(shellshock_parms_t_lookcontrol) == 0x14);
-#endif
 #endif
 
 struct shellshock_parms_t_movement // sizeof=0x1
@@ -380,9 +358,7 @@ struct shellshock_parms_t_movement // sizeof=0x1
     bool affect;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(shellshock_parms_t_movement) == 0x1);
-#endif
 #endif
 
 struct shellshock_parms_t // sizeof=0x268
@@ -397,9 +373,7 @@ struct shellshock_parms_t // sizeof=0x268
     // padding byte
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(shellshock_parms_t) == 0x268);
-#endif
 #endif
 
 struct shellshock_t // sizeof=0x20
@@ -413,9 +387,7 @@ struct shellshock_t // sizeof=0x20
     int32_t hasSavedScreen;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(shellshock_t) == 0x20);
-#endif
 #endif
 
 struct __declspec(align(8)) animation_s // sizeof=0x68
@@ -438,9 +410,7 @@ struct __declspec(align(8)) animation_s // sizeof=0x68
     // padding byte
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(animation_s) == 0x68);
-#endif
 #endif
 
 struct animScriptCondition_t // sizeof=0xC
@@ -449,9 +419,7 @@ struct animScriptCondition_t // sizeof=0xC
     uint32_t value[2];
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(animScriptCondition_t) == 0xC);
-#endif
 #endif
 
 
@@ -463,9 +431,7 @@ struct animScriptCommand_t // sizeof=0x10
     snd_alias_list_t* soundAlias;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(animScriptCommand_t) == 0x10);
-#endif
 #endif
 
 enum animScriptParseMode_t : __int32
@@ -486,9 +452,7 @@ struct animScriptItem_t // sizeof=0x100
     animScriptCommand_t commands[8];
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(animScriptItem_t) == 0x100);
-#endif
 #endif
 
 struct animScript_t // sizeof=0x204
@@ -497,9 +461,7 @@ struct animScript_t // sizeof=0x204
     animScriptItem_t* items[128];
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(animScript_t) == 0x204);
-#endif
 #endif
 
 struct scr_animtree_t // sizeof=0x4
@@ -511,9 +473,7 @@ struct scr_animtree_t // sizeof=0x4
     XAnim_s* anims;                     // ...
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(scr_animtree_t) == 0x4);
-#endif
 #endif
 
 struct __declspec(align(8)) animScriptData_t // sizeof=0x9A9D0
@@ -540,9 +500,7 @@ struct __declspec(align(8)) animScriptData_t // sizeof=0x9A9D0
     // padding byte
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(animScriptData_t) == 0x9A9D0);
-#endif
 #endif
 
 struct lerpFrame_t // sizeof=0x30
@@ -559,9 +517,7 @@ struct lerpFrame_t // sizeof=0x30
     int32_t oldFrameSnapshotTime;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(lerpFrame_t) == 0x30);
-#endif
 #endif
 
 struct clientControllers_t // sizeof=0x60
@@ -571,9 +527,7 @@ struct clientControllers_t // sizeof=0x60
     float tag_origin_offset[3];
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(clientControllers_t) == 0x60);
-#endif
 #endif
 
 #ifdef KISAK_MP
@@ -623,9 +577,7 @@ struct clientInfo_t // sizeof=0x4CC
     // padding byte
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(clientInfo_t) == 0x4CC);
-#endif
 #endif
 
 struct bgs_t_human // sizeof=0x10
@@ -636,9 +588,7 @@ struct bgs_t_human // sizeof=0x10
     scr_anim_s turning;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(bgs_t_human) == 0x10);
-#endif
 #endif
 
 struct bgs_t // sizeof=0xADD08
@@ -658,9 +608,7 @@ struct bgs_t // sizeof=0xADD08
     clientInfo_t clientinfo[64];        // ...
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(bgs_t) == 0xADD08);
-#endif
 #endif
 #endif
 
@@ -669,9 +617,7 @@ struct hudElemSoundInfo_t // sizeof=0x4
     int32_t lastPlayedTime;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(hudElemSoundInfo_t) == 0x4);
-#endif
 #endif
 
 #ifdef KISAK_MP
@@ -770,9 +716,7 @@ struct hudelem_s // sizeof=0xA0
     int32_t flags;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(hudelem_s) == 0xA0);
-#endif
 #endif
 #elif KISAK_SP
 #if defined(KISAK_SP) && defined(__SWITCH__)
@@ -834,9 +778,7 @@ struct MantleState // sizeof=0x10
     int32_t flags;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(MantleState) == 0x10);
-#endif
 #endif
 
 enum MantleAnims : __int32
@@ -875,9 +817,7 @@ struct playerState_s_hud // sizeof=0x26C0
     hudelem_s archival[31];             // XREF: SV_Shutdown(char const *):loc_5D1039/o
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(playerState_s_hud) == 0x26C0);
-#endif
 #endif
 #elif KISAK_SP
 struct playerState_s_hud
@@ -900,9 +840,7 @@ struct ActionSlotParam_SpecifyWeapon // sizeof=0x4
     uint32_t index;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(ActionSlotParam_SpecifyWeapon) == 0x4);
-#endif
 #endif
 
 struct ActionSlotParam // sizeof=0x4
@@ -910,9 +848,7 @@ struct ActionSlotParam // sizeof=0x4
     ActionSlotParam_SpecifyWeapon specifyWeapon;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(ActionSlotParam) == 0x4);
-#endif
 #endif
 
 struct SprintState // sizeof=0x14
@@ -924,9 +860,7 @@ struct SprintState // sizeof=0x14
     int32_t sprintStartMaxLength;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(SprintState) == 0x14);
-#endif
 #endif
 
 enum objectiveState_t : __int32
@@ -951,9 +885,7 @@ struct objective_t // sizeof=0x1C
     int32_t icon;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(objective_t) == 0x1C);
-#endif
 #endif
 
 enum pmflags_t : __int32 // (MP/SP same)
@@ -1137,9 +1069,7 @@ struct playerState_s // sizeof=0x2F64
     // TRACK_sv_main(void)+A/o ...
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(playerState_s) == 0x2F64);
-#endif
 #endif
 
 #if defined(KISAK_SP) && !defined(__SWITCH__)
@@ -1412,9 +1342,7 @@ struct CEntPlayerInfo // sizeof=0xC
     // padding byte
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(CEntPlayerInfo) == 0xC);
-#endif
 #endif
 
 struct CEntTurretAngles // sizeof=0x8
@@ -1423,9 +1351,7 @@ struct CEntTurretAngles // sizeof=0x8
     float yaw;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(CEntTurretAngles) == 0x8);
-#endif
 #endif
 
 struct CEntTurretInfo // sizeof=0x10
@@ -1442,9 +1368,7 @@ struct CEntTurretInfo // sizeof=0x10
     uint8_t tag_flash;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(CEntTurretInfo) == 0x10);
-#endif
 #endif
 
 #if defined(KISAK_MP) || defined(KISAK_RADIANT)
@@ -1467,9 +1391,7 @@ struct CEntVehicleInfo // sizeof=0x24
     // padding byte
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(CEntVehicleInfo) == 0x24);
-#endif
 #endif
 #endif
 #ifdef KISAK_SP
@@ -1490,9 +1412,7 @@ struct CEntVehicleInfo // sizeof=0x28
     // pad[3]               // 0x25
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(CEntVehicleInfo) == 0x28);
-#endif
 #endif
 #endif
 
@@ -1502,9 +1422,7 @@ struct CEntFx // sizeof=0x8  (SP/MP Same)
     FxEffect* effect;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(CEntFx) == 0x8);
-#endif
 #endif
 
 #if defined(KISAK_MP) || defined(KISAK_RADIANT) // radiant: for cpose_t
@@ -1516,9 +1434,7 @@ struct GfxSkinCacheEntry // sizeof=0xC
     uint16_t ageCount;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(GfxSkinCacheEntry) == 0xC);
-#endif
 #endif
 struct cpose_t // sizeof=0x64
 {                                       // ...
@@ -1543,9 +1459,7 @@ struct cpose_t // sizeof=0x64
     };
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(cpose_t) == 0x64);
-#endif
 #endif
 #elif KISAK_SP
 struct CEntActorInfo
@@ -1620,9 +1534,7 @@ struct turretInfo_s // sizeof=0x48
     uint8_t stopSndPlayer;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(turretInfo_s) == 0x48);
-#endif
 #endif
 
 #ifdef KISAK_MP
@@ -1641,9 +1553,7 @@ struct VehicleRideSlot_t // sizeof=0xC
     int32_t entNum;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(VehicleRideSlot_t) == 0xC);
-#endif
 #endif
 #endif
 
@@ -1667,9 +1577,7 @@ struct vehicle_node_t // sizeof=0x44 // (SP/MP Same)
     int16_t prevIdx;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(vehicle_node_t) == 0x44);
-#endif
 #endif
 
 struct vehicle_pathpos_t // sizeof=0xC0 // (SP/MP Same)
@@ -1686,9 +1594,7 @@ struct vehicle_pathpos_t // sizeof=0xC0 // (SP/MP Same)
     vehicle_node_t switchNode[2];
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(vehicle_pathpos_t) == 0xC0);
-#endif
 #endif
 
 #ifdef KISAK_MP
@@ -1724,9 +1630,7 @@ struct vehicle_physic_t // sizeof=0xF8
     float worldTiltVel[3];
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(vehicle_physic_t) == 0xF8);
-#endif
 #endif
 #elif KISAK_SP
 struct vehicle_physic_t
@@ -1768,9 +1672,7 @@ struct VehicleTags // sizeof=0x60
     int32_t wheel[4];
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(VehicleTags) == 0x60);
-#endif
 #endif
 #elif KISAK_SP
 struct VehicleTags
@@ -1817,9 +1719,7 @@ struct VehicleTurret // sizeof=0x14 // (SP/MP Same)
     VehicleTurretState turretState;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(VehicleTurret) == 0x14);
-#endif
 #endif
 
 struct VehicleJitter // sizeof=0x3C // (SP/MP Same)
@@ -1833,9 +1733,7 @@ struct VehicleJitter // sizeof=0x3C // (SP/MP Same)
     float jitterPos[3];
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(VehicleJitter) == 0x3C);
-#endif
 #endif
 
 struct VehicleHover // sizeof=0x1C // (SP/MP same)
@@ -1847,9 +1745,7 @@ struct VehicleHover // sizeof=0x1C // (SP/MP same)
     int32_t useHoverAccelForAngles;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(VehicleHover) == 0x1C);
-#endif
 #endif
 
 #ifdef KISAK_MP
@@ -1913,9 +1809,7 @@ struct scr_vehicle_s // sizeof=0x354
     float forcedMaterialSpeed;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(scr_vehicle_s) == 0x354);
-#endif
 #endif
 #elif KISAK_SP
 struct scr_vehicle_s // sizeof=0x338
@@ -1996,9 +1890,7 @@ struct gitem_s // sizeof=0x4
     itemType_t giType;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(gitem_s) == 0x4);
-#endif
 #endif
 
 enum PmStanceFrontBack : __int32
@@ -2020,16 +1912,14 @@ struct viewLerpWaypoint_s // sizeof=0xC
     int32_t iOffset;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(viewLerpWaypoint_s) == 0xC);
-#endif
 #endif
 
 // bg_jump
 
 struct pmove_t;
 #ifdef __SWITCH__
-struct pml_t
+struct pml_t // Switch runtime movement state
 {
     float forward[3];
     float right[3];
@@ -2044,10 +1934,11 @@ struct pml_t
     float previous_origin[3];
     float previous_velocity[3];
 };
+static_assert(sizeof(pml_t) == 0x88);
 #else
 struct pml_t;
 #endif
-
+struct playerState_s;
 
 void __cdecl Jump_RegisterDvars();
 void __cdecl Jump_ClearState(playerState_s *ps);
@@ -2517,9 +2408,7 @@ struct MantleResults // sizeof=0x38
     int32_t duration;
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(MantleResults) == 0x38);
-#endif
 #endif
 
 struct MantleAnimTransition // sizeof=0xC
@@ -2529,9 +2418,7 @@ struct MantleAnimTransition // sizeof=0xC
     float height;                       // ...
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(MantleAnimTransition) == 0xC);
-#endif
 #endif
 
 void __cdecl Mantle_RegisterDvars();
@@ -2569,9 +2456,7 @@ struct BulletFireParams // sizeof=0x40
     float dir[3];                       // ...
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(BulletFireParams) == 0x40);
-#endif
 #endif
 
 struct BulletTraceResults // sizeof=0x44
@@ -2586,9 +2471,7 @@ struct BulletTraceResults // sizeof=0x44
     int32_t depthSurfaceType;               // ...
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(BulletTraceResults) == 0x44);
-#endif
 #endif
 
 struct viewState_t // sizeof=0x24
@@ -2604,9 +2487,7 @@ struct viewState_t // sizeof=0x24
     int32_t*weapIdleTime;                  // ...
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(viewState_t) == 0x24);
-#endif
 #endif
 
 struct weaponState_t // sizeof=0x54
@@ -2626,9 +2507,7 @@ struct weaponState_t // sizeof=0x54
     int32_t*weapIdleTime;                  // ...
 };
 #ifndef __SWITCH__
-#ifndef __SWITCH__
 static_assert(sizeof(weaponState_t) == 0x54);
-#endif
 #endif
 #endif // !__SWITCH__
 
