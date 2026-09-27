@@ -82,3 +82,8 @@ void* __cdecl Z_TryVirtualAllocInternal(int size);
 bool __cdecl Z_TryVirtualCommitInternal(void* ptr, int size);
 void __cdecl Z_VirtualCommitInternal(void* ptr, int size);
 void __cdecl Z_VirtualFree(void* ptr);
+
+const char* CopyString(const char* in);
+const char* CopyString(char* in);
+void __cdecl ReplaceString(const char** str, const char* in);
+void FreeString(const char* str);
