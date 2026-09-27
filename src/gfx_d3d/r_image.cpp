@@ -20,6 +20,56 @@
 
 #include <algorithm>
 
+#ifdef __SWITCH__
+static bool R_GLImageFormat(_D3DFORMAT f, GLenum &i, GLenum &u, GLenum &t, bool &compressed)
+{
+    compressed = false;
+    switch (f) {
+    case D3DFMT_A8R8G8B8: case D3DFMT_X8R8G8B8: i=GL_RGBA8; u=GL_BGRA; t=GL_UNSIGNED_BYTE; return true;
+    case D3DFMT_A8: case D3DFMT_L8: i=GL_R8; u=GL_RED; t=GL_UNSIGNED_BYTE; return true;
+    case D3DFMT_A8L8: i=GL_RG8; u=GL_RG; t=GL_UNSIGNED_BYTE; return true;
+    case D3DFMT_R32F: i=GL_R32F; u=GL_RED; t=GL_FLOAT; return true;
+    case D3DFMT_G16R16F: i=GL_RG16F; u=GL_RG; t=GL_HALF_FLOAT; return true;
+    case D3DFMT_D16: i=GL_DEPTH_COMPONENT16; u=GL_DEPTH_COMPONENT; t=GL_UNSIGNED_SHORT; return true;
+    case D3DFMT_D24S8: i=GL_DEPTH24_STENCIL8; u=GL_DEPTH_STENCIL; t=GL_UNSIGNED_INT_24_8; return true;
+    case D3DFMT_D24X8: i=GL_DEPTH_COMPONENT24; u=GL_DEPTH_COMPONENT; t=GL_UNSIGNED_INT; return true;
+    case D3DFMT_DXT1: i=GL_COMPRESSED_RGBA_S3TC_DXT1_EXT; compressed=true; return true;
+    case D3DFMT_DXT3: i=GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; compressed=true; return true;
+    case D3DFMT_DXT5: i=GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; compressed=true; return true;
+    default: return false;
+    }
+}
+static uint32_t R_GLFullMipCount(uint32_t w,uint32_t h,uint32_t d){uint32_t n=1;while(w>1||h>1||d>1){w=std::max(1u,w>>1);h=std::max(1u,h>>1);d=std::max(1u,d>>1);++n;}return n;}
+static void R_GLAllocTexture(KisakGLTexture *x,GLenum target,uint32_t w,uint32_t h,uint32_t d,uint32_t levels,_D3DFORMAT f)
+{
+    GLenum i,u,t; bool c; if(!R_GLImageFormat(f,i,u,t,c)) return;
+    x->target=target;x->internalFormat=i;x->uploadFormat=u;x->uploadType=t;x->width=w;x->height=h;x->depth=d;x->mipLevels=levels;
+    glGenTextures(1,&x->object); glBindTexture(target,x->object);
+    glTexParameteri(target,GL_TEXTURE_MIN_FILTER,levels>1?GL_LINEAR_MIPMAP_LINEAR:GL_LINEAR);
+    glTexParameteri(target,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameteri(target,GL_TEXTURE_WRAP_S,GL_REPEAT); glTexParameteri(target,GL_TEXTURE_WRAP_T,GL_REPEAT);
+    if(target==GL_TEXTURE_3D||target==GL_TEXTURE_CUBE_MAP) glTexParameteri(target,GL_TEXTURE_WRAP_R,GL_REPEAT);
+    for(uint32_t l=0;l<levels;++l){uint32_t lw=std::max(1u,w>>l),lh=std::max(1u,h>>l),ld=std::max(1u,d>>l);
+        if(target==GL_TEXTURE_3D) glTexImage3D(target,l,(GLint)i,lw,lh,ld,0,u,t,nullptr);
+        else if(target==GL_TEXTURE_CUBE_MAP) for(uint32_t fce=0;fce<6;++fce) glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+fce,l,(GLint)i,lw,lh,0,u,t,nullptr);
+        else glTexImage2D(target,l,(GLint)i,lw,lh,0,u,t,nullptr);
+    }
+}
+static void R_GLUploadTexture(const GfxImage *image,_D3DFORMAT f,_D3DCUBEMAP_FACES face,uint32_t l,const uint8_t *src)
+{
+    auto *x=image->texture.basemap;if(!x||!src)return;GLenum i,u,t;bool c;if(!R_GLImageFormat(f,i,u,t,c))return;glBindTexture(x->target,x->object);
+    uint32_t w=std::max(1u,(uint32_t)image->width>>l),h=std::max(1u,(uint32_t)image->height>>l),d=std::max(1u,(uint32_t)image->depth>>l);
+    if(c){uint32_t b=f==D3DFMT_DXT1?8:16,s=((w+3)/4)*((h+3)/4)*b*d;
+        if(x->target==GL_TEXTURE_CUBE_MAP)glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+face,l,0,0,w,h,i,s,src);
+        else if(x->target==GL_TEXTURE_3D)glCompressedTexSubImage3D(GL_TEXTURE_3D,l,0,0,0,w,h,d,i,s,src);
+        else glCompressedTexSubImage2D(GL_TEXTURE_2D,l,0,0,w,h,i,s,src);
+    } else if(x->target==GL_TEXTURE_3D)glTexSubImage3D(GL_TEXTURE_3D,l,0,0,0,w,h,d,u,t,src);
+    else if(x->target==GL_TEXTURE_CUBE_MAP)glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+face,l,0,0,w,h,u,t,src);
+    else glTexSubImage2D(GL_TEXTURE_2D,l,0,0,w,h,u,t,src);
+}
+#endif
+
+
 static const char *g_imageProgNames[14] =
 {
   "$shadow_cookie",
@@ -477,20 +527,13 @@ uint32_t __cdecl Image_CountMipmapsForFile(const GfxImageFileHeader *fileHeader)
         fileHeader->dimensions[2]);
 }
 
-void __cdecl Image_UploadData(
-    const GfxImage *image,
-    _D3DFORMAT format,
-    _D3DCUBEMAP_FACES face,
-    uint32_t mipLevel,
-    uint8_t *src)
+void __cdecl Image_UploadData(const GfxImage *image,_D3DFORMAT format,_D3DCUBEMAP_FACES face,uint32_t mipLevel,uint8_t *src)
 {
-    if (image->mapType != MAPTYPE_CUBE || !mipLevel || gfxMetrics.canMipCubemaps)
-    {
-        if (image->mapType == MAPTYPE_3D)
-            Image_Upload3D_CopyData_PC(image, format, mipLevel, src);
-        else
-            Image_Upload2D_CopyData_PC(image, format, face, mipLevel, src);
-    }
+#ifdef __SWITCH__
+    if(image->mapType!=MAPTYPE_CUBE||!mipLevel||gfxMetrics.canMipCubemaps) R_GLUploadTexture(image,format,face,mipLevel,src);
+#else
+    if(image->mapType!=MAPTYPE_CUBE||!mipLevel||gfxMetrics.canMipCubemaps){if(image->mapType==MAPTYPE_3D)Image_Upload3D_CopyData_PC(image,format,mipLevel,src);else Image_Upload2D_CopyData_PC(image,format,face,mipLevel,src);}
+#endif
 }
 
 void __cdecl Image_LoadWhite(GfxImage *image)
@@ -640,37 +683,12 @@ void __cdecl Image_Free(GfxImage *image)
 
 IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image)
 {
-    const char *v1; // eax
-    int hr; // [esp+0h] [ebp-8h]
-    IDirect3DSurface9 *surface; // [esp+4h] [ebp-4h] BYREF
-
-    iassert( image );
-    iassert( image->mapType == MAPTYPE_2D );
-    iassert( image->texture.map );
-    do
-    {
-        if (r_logFile && r_logFile->current.integer)
-            RB_LogPrint("image->texture.map->GetSurfaceLevel( 0, &surface )\n");
-        //hr = ((int(__stdcall *)(uint32_t, uint32_t, uint32_t))image->texture.basemap->__vftable[1].AddRef)(
-        //    (GfxTexture)image->texture.basemap,
-        //    0,
-        //    &surface);
-        hr = image->texture.map->GetSurfaceLevel(0, &surface);
-        if (hr < 0)
-        {
-            do
-            {
-                ++g_disableRendering;
-                v1 = R_ErrorDescription(hr);
-                Com_Error(
-                    ERR_FATAL,
-                    ".\\r_image.cpp (%i) image->texture.map->GetSurfaceLevel( 0, &surface ) failed: %s\n",
-                    1132,
-                    v1);
-            } while (alwaysfails);
-        }
-    } while (alwaysfails);
-    return surface;
+    iassert(image&&image->mapType==MAPTYPE_2D&&image->texture.map);
+#ifdef __SWITCH__
+    auto *s=new IDirect3DSurface9;s->texture=image->texture.map;return s;
+#else
+    IDirect3DSurface9 *s=nullptr;HRESULT hr=image->texture.map->GetSurfaceLevel(0,&s);if(hr<0)Com_Error(ERR_FATAL,"GetSurfaceLevel failed: %s",R_ErrorDescription(hr));return s;
+#endif
 }
 
 void __cdecl R_SetPicmip()
@@ -1139,152 +1157,34 @@ void __cdecl R_ReleaseLostImages()
 
 _D3DFORMAT __cdecl R_ImagePixelFormat(const GfxImage *image)
 {
-    MapType mapType; // [esp+0h] [ebp-40h]
-    _D3DSURFACE_DESC surfaceDesc; // [esp+4h] [ebp-3Ch] BYREF
-    _D3DVOLUME_DESC volumeDesc; // [esp+24h] [ebp-1Ch] BYREF
-
-    mapType = image->mapType;
-
-    if (image->mapType == MAPTYPE_2D)
-    {
-        iassert( image->texture.map );
-
-        image->texture.map->GetLevelDesc(0, &surfaceDesc);
-        return surfaceDesc.Format;
-    }
-
-    if (mapType == MAPTYPE_3D)
-    {
-        iassert( image->texture.volmap );
-        image->texture.volmap->GetLevelDesc(0, &volumeDesc);
-        return volumeDesc.Format;
-    }
-    if (mapType == MAPTYPE_CUBE)
-    {
-        iassert( image->texture.cubemap );
-        image->texture.cubemap->GetLevelDesc(0, &surfaceDesc);
-        return surfaceDesc.Format;
-    }
-
-    if (!alwaysfails)
-    {
-        MyAssertHandler(".\\r_image.cpp", 1403, 1, va("unhandled case %i for %s", image->mapType, image->name));
-    }
-
-    return (_D3DFORMAT)0;
+    iassert(image&&image->texture.basemap);
+#ifdef __SWITCH__
+    return image->texture.basemap->internalFormat;
+#else
+    _D3DSURFACE_DESC s{};_D3DVOLUME_DESC v{};if(image->mapType==MAPTYPE_2D||image->mapType==MAPTYPE_CUBE){image->texture.map->GetLevelDesc(0,&s);return s.Format;}image->texture.volmap->GetLevelDesc(0,&v);return v.Format;
+#endif
 }
 
 
-void __cdecl Image_CreateCubeTexture_PC(
-    GfxImage *image,
-    uint16_t edgeLen,
-    uint32_t mipmapCount,
-    _D3DFORMAT imageFormat)
+void __cdecl Image_CreateCubeTexture_PC(GfxImage *image,uint16_t edgeLen,uint32_t mipmapCount,_D3DFORMAT imageFormat)
 {
-    const char *v4; // eax
-    const char *v5; // eax
-    const char *v6; // eax
-    int hr; // [esp+0h] [ebp-4h]
-
-    iassert( image );
-    iassert( !image->texture.basemap );
-    image->width = edgeLen;
-    image->height = edgeLen;
-    image->depth = 1;
-    image->mapType = MAPTYPE_CUBE;
-    if (!gfxMetrics.canMipCubemaps)
-        mipmapCount = 1;
-    hr = dx.device->CreateCubeTexture(edgeLen, mipmapCount, 0, imageFormat, D3DPOOL_MANAGED, (IDirect3DCubeTexture9 **)&image->texture, 0);
-    if (hr < 0)
-    {
-        v4 = R_ErrorDescription(hr);
-        Com_Error(
-            ERR_DROP,
-            "CreateCubeTexture ( %s, %i, %i, %i ) failed: %08x = %s",
-            image->name,
-            image->width,
-            mipmapCount,
-            imageFormat,
-            hr,
-            v4);
-    }
-    if (hr != -2005530520 && !image->texture.basemap)
-    {
-        v5 = R_ErrorDescription(hr);
-        v6 = va(
-            "DirectX succeeded without creating cube texture for %s: size %ix%i, type %08x, hr %08x = %s",
-            image->name,
-            image->width,
-            image->height,
-            imageFormat,
-            hr,
-            v5);
-        MyAssertHandler(".\\r_image.cpp", 621, 0, "%s\n\t%s", "hr == D3DERR_DEVICELOST || image->texture.map", v6);
-    }
+    iassert(image&&!image->texture.basemap);image->width=edgeLen;image->height=edgeLen;image->depth=1;image->mapType=MAPTYPE_CUBE;
+#ifdef __SWITCH__
+    if(!gfxMetrics.canMipCubemaps)mipmapCount=1;if(!mipmapCount)mipmapCount=R_GLFullMipCount(edgeLen,edgeLen,1);auto *x=new KisakGLTexture;R_GLAllocTexture(x,GL_TEXTURE_CUBE_MAP,edgeLen,edgeLen,1,mipmapCount,imageFormat);image->texture.cubemap=x;
+#else
+    HRESULT hr=dx.device->CreateCubeTexture(edgeLen,mipmapCount,0,imageFormat,D3DPOOL_MANAGED,(IDirect3DCubeTexture9**)&image->texture,0);if(hr<0)Com_Error(ERR_DROP,"CreateCubeTexture failed: %s",R_ErrorDescription(hr));
+#endif
 }
 
 
-void __cdecl Image_Create3DTexture_PC(
-    GfxImage *image,
-    uint16_t width,
-    uint16_t height,
-    uint16_t depth,
-    uint32_t mipmapCount,
-    int imageFlags,
-    _D3DFORMAT imageFormat)
+void __cdecl Image_Create3DTexture_PC(GfxImage *image,uint16_t width,uint16_t height,uint16_t depth,uint32_t mipmapCount,int imageFlags,_D3DFORMAT imageFormat)
 {
-    HRESULT v7; // eax
-    const char *v8; // eax
-    const char *v9; // eax
-    const char *v10; // eax
-    HRESULT hr; // [esp+0h] [ebp-Ch]
-    uint32_t usage; // [esp+4h] [ebp-8h]
-
-    iassert( image );
-    iassert( !image->texture.basemap );
-    image->width = width;
-    image->height = height;
-    image->depth = depth;
-    image->mapType = MAPTYPE_3D;
-    usage = Image_GetUsage(imageFlags, imageFormat);
-    if ((imageFlags & IMG_FLAG_SYSTEMMEM) != 0)
-    {
-        v7 = dx.device->CreateVolumeTexture(width, height, depth, mipmapCount, 0, imageFormat, D3DPOOL_SYSTEMMEM, (IDirect3DVolumeTexture9 **)&image->texture, 0);
-    }
-    else
-    {
-        v7 = dx.device->CreateVolumeTexture(width, height, depth, mipmapCount, 0, imageFormat, (_D3DPOOL)(usage == 0), (IDirect3DVolumeTexture9 **)&image->texture, 0);
-    }
-    hr = v7;
-    if (v7 < 0)
-    {
-        v8 = R_ErrorDescription(v7);
-        Com_Error(
-            ERR_DROP,
-            "Create3DTexture( %s, %i, %i, %i, %i, %i ) failed: %08x = %s",
-            image->name,
-            image->width,
-            image->height,
-            image->depth,
-            0,
-            imageFormat,
-            hr,
-            v8);
-    }
-    if (hr != -2005530520 && !image->texture.basemap)
-    {
-        v9 = R_ErrorDescription(hr);
-        v10 = va(
-            "DirectX succeeded without creating 3D texture for %s: size %ix%ix%i, type %08x, hr %08x = %s",
-            image->name,
-            image->width,
-            image->height,
-            image->depth,
-            imageFormat,
-            hr,
-            v9);
-        MyAssertHandler(".\\r_image.cpp", 594, 0, "%s\n\t%s", "hr == D3DERR_DEVICELOST || image->texture.map", v10);
-    }
+    iassert(image&&!image->texture.basemap);image->width=width;image->height=height;image->depth=depth;image->mapType=MAPTYPE_3D;
+#ifdef __SWITCH__
+    if(!mipmapCount)mipmapCount=R_GLFullMipCount(width,height,depth);auto *x=new KisakGLTexture;R_GLAllocTexture(x,GL_TEXTURE_3D,width,height,depth,mipmapCount,imageFormat);image->texture.volmap=x;
+#else
+    uint32_t usage=Image_GetUsage(imageFlags,imageFormat);HRESULT hr=dx.device->CreateVolumeTexture(width,height,depth,mipmapCount,0,imageFormat,(_D3DPOOL)(usage==0),(IDirect3DVolumeTexture9**)&image->texture,0);if(hr<0)Com_Error(ERR_DROP,"Create3DTexture failed: %s",R_ErrorDescription(hr));
+#endif
 }
 
 void __cdecl RB_UnbindAllImages()
@@ -1319,76 +1219,14 @@ void __cdecl Image_UpdatePicmip(GfxImage *image)
     }
 }
 
-void __cdecl Image_Create2DTexture_PC(
-    GfxImage *image,
-    uint16_t width,
-    uint16_t height,
-    uint32_t mipmapCount,
-    int imageFlags,
-    _D3DFORMAT imageFormat)
+void __cdecl Image_Create2DTexture_PC(GfxImage *image,uint16_t width,uint16_t height,uint32_t mipmapCount,int imageFlags,_D3DFORMAT imageFormat)
 {
-    HRESULT v6; // eax
-    const char *v7; // eax
-    const char *v8; // eax
-    const char *v9; // eax
-    HRESULT hr; // [esp+0h] [ebp-Ch]
-    uint32_t usage; // [esp+4h] [ebp-8h]
-
-    iassert( image );
-    iassert( !image->texture.basemap );
-    image->width = width;
-    image->height = height;
-    image->depth = 1;
-    image->mapType = MAPTYPE_2D;
-    usage = Image_GetUsage(imageFlags, imageFormat);
-    if ((imageFlags & IMG_FLAG_SYSTEMMEM) != 0)
-        v6 = dx.device->CreateTexture(
-            width,
-            height,
-            mipmapCount,
-            usage,
-            imageFormat,
-            D3DPOOL_SYSTEMMEM,
-            (IDirect3DTexture9 **)&image->texture,
-            0);
-    else
-        v6 = dx.device->CreateTexture(
-            width,
-            height,
-            mipmapCount,
-            usage,
-            imageFormat,
-            (_D3DPOOL)(usage == 0),
-            (IDirect3DTexture9 **)&image->texture,
-            0);
-    hr = v6;
-    if (v6 < 0)
-    {
-        v7 = R_ErrorDescription(v6);
-        Com_Error(
-            ERR_DROP,
-            "Create2DTexture( %s, %i, %i, %i, %i ) failed: %08x = %s",
-            image->name,
-            image->width,
-            image->height,
-            0,
-            imageFormat,
-            hr,
-            v7);
-    }
-    if (hr != -2005530520 && !image->texture.basemap)
-    {
-        v8 = R_ErrorDescription(hr);
-        v9 = va(
-            "DirectX succeeded without creating texture for %s: size %ix%i, type %08x, hr %08x = %s",
-            image->name,
-            image->width,
-            image->height,
-            imageFormat,
-            hr,
-            v8);
-        MyAssertHandler(".\\r_image.cpp", 562, 0, "%s\n\t%s", "hr == D3DERR_DEVICELOST || image->texture.map", v9);
-    }
+    iassert(image&&!image->texture.basemap);image->width=width;image->height=height;image->depth=1;image->mapType=MAPTYPE_2D;
+#ifdef __SWITCH__
+    if(!mipmapCount)mipmapCount=R_GLFullMipCount(width,height,1);auto *x=new KisakGLTexture;R_GLAllocTexture(x,GL_TEXTURE_2D,width,height,1,mipmapCount,imageFormat);image->texture.map=x;
+#else
+    uint32_t usage=Image_GetUsage(imageFlags,imageFormat);HRESULT hr=dx.device->CreateTexture(width,height,mipmapCount,usage,imageFormat,(_D3DPOOL)(usage==0),(IDirect3DTexture9**)&image->texture,0);if(hr<0)Com_Error(ERR_DROP,"Create2DTexture failed: %s",R_ErrorDescription(hr));
+#endif
 }
 
 void __cdecl Image_Setup(GfxImage *image, int width, int height, int depth, int imageFlags, _D3DFORMAT imageFormat)
