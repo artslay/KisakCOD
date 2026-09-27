@@ -293,6 +293,7 @@ class IDirect3DDevice9
     GLint m_screenSizeLocation = -1;
     float m_viewportWidth = 1280.0f;
     float m_viewportHeight = 720.0f;
+    GLenum m_textureTargets[16]{};
     std::array<std::array<float, 4>, 256> m_vsConstants{};
     std::array<std::array<float, 4>, 256> m_psConstants{};
     IDirect3DSurface9 *m_color = nullptr;
@@ -659,9 +660,15 @@ public:
             return E_FAIL;
         glActiveTexture(GL_TEXTURE0 + stage);
         if (tex)
+        {
+            m_textureTargets[stage] = tex->target;
             glBindTexture(tex->target, tex->object);
+        }
         else
+        {
+            m_textureTargets[stage] = GL_TEXTURE_2D;
             glBindTexture(GL_TEXTURE_2D, 0);
+        }
         if (m_program)
         {
             glUseProgram(m_program);
@@ -779,19 +786,59 @@ void main()
 
     HRESULT SetSamplerState(uint32_t stage, uint32_t state, uint32_t value)
     {
+        if (stage >= 16)
+            return E_FAIL;
         glActiveTexture(GL_TEXTURE0 + stage);
+        const GLenum target = m_textureTargets[stage] ? m_textureTargets[stage] : GL_TEXTURE_2D;
         switch (state)
         {
         case D3DSAMP_MINFILTER:
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, value == D3DTEXF_POINT ? GL_NEAREST : GL_LINEAR);
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, value == D3DTEXF_POINT ? GL_NEAREST : GL_LINEAR);
             break;
         case D3DSAMP_MAGFILTER:
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, value == D3DTEXF_POINT ? GL_NEAREST : GL_LINEAR);
+            glTexParameteri(target, GL_TEXTURE_MAG_FILTER, value == D3DTEXF_POINT ? GL_NEAREST : GL_LINEAR);
+            break;
+        case D3DSAMP_ADDRESSU:
+            glTexParameteri(target, GL_TEXTURE_WRAP_S, value == 1 ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+            break;
+        case D3DSAMP_ADDRESSV:
+            glTexParameteri(target, GL_TEXTURE_WRAP_T, value == 1 ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+            break;
+        case D3DSAMP_ADDRESSW:
+            glTexParameteri(target, GL_TEXTURE_WRAP_R, value == 1 ? GL_CLAMP_TO_EDGE : GL_REPEAT);
             break;
         default:
             break;
         }
         return S_OK;
+    }
+
+    static GLenum BlendFactor(uint32_t value)
+    {
+        switch (value)
+        {
+        case 1: return GL_ZERO;
+        case 2: return GL_ONE;
+        case 5: return GL_SRC_ALPHA;
+        case 6: return GL_ONE_MINUS_SRC_ALPHA;
+        case 7: return GL_DST_ALPHA;
+        case 8: return GL_ONE_MINUS_DST_ALPHA;
+        case 9: return GL_DST_COLOR;
+        case 10: return GL_ONE_MINUS_DST_COLOR;
+        default: return GL_ONE;
+        }
+    }
+
+    static GLenum BlendOperation(uint32_t value)
+    {
+        switch (value)
+        {
+        case 2: return GL_FUNC_SUBTRACT;
+        case 3: return GL_FUNC_REVERSE_SUBTRACT;
+        case 5: return GL_MIN;
+        case 6: return GL_MAX;
+        default: return GL_FUNC_ADD;
+        }
     }
 
     HRESULT SetRenderState(uint32_t state, uint32_t value)
@@ -806,6 +853,21 @@ void main()
             break;
         case D3DRS_ALPHABLENDENABLE:
             if (value) glEnable(GL_BLEND); else glDisable(GL_BLEND);
+            break;
+        case D3DRS_SRCBLEND:
+            glBlendFuncSeparate(BlendFactor(value), GL_DST_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case D3DRS_DESTBLEND:
+            glBlendFuncSeparate(GL_SRC_ALPHA, BlendFactor(value), GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case D3DRS_BLENDOP:
+            glBlendEquation(BlendOperation(value));
+            break;
+        case D3DRS_SRCBLENDALPHA:
+        case D3DRS_DESTBLENDALPHA:
+            break;
+        case D3DRS_BLENDOPALPHA:
+            glBlendEquationSeparate(GL_FUNC_ADD, BlendOperation(value));
             break;
         case D3DRS_ALPHATESTENABLE:
             break;
