@@ -685,7 +685,11 @@ IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image)
 {
     iassert(image&&image->mapType==MAPTYPE_2D&&image->texture.map);
 #ifdef __SWITCH__
-    auto *s=new IDirect3DSurface9;s->texture=image->texture.map;return s;
+    auto *s = new IDirect3DSurface9;
+    s->texture = image->texture.map;
+    s->texture->AddRef();
+    s->level = 0;
+    return s;
 #else
     IDirect3DSurface9 *s=nullptr;HRESULT hr=image->texture.map->GetSurfaceLevel(0,&s);if(hr<0)Com_Error(ERR_FATAL,"GetSurfaceLevel failed: %s",R_ErrorDescription(hr));return s;
 #endif
