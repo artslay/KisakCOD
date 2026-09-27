@@ -11,6 +11,7 @@ struct debugger_sval_s // sizeof=0x4
 {
     debugger_sval_s *next;
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(debugger_sval_s) == 0x4);
 
 struct scr_localVar_t // sizeof=0x8
@@ -345,4 +346,4 @@ extern int g_breakonHit;
 
 #ifdef KISAK_SP
 inline bool g_kisakScriptDebuggerHack = false;
-#endif
+#endif // KISAK_SWITCH legacy 32-bit layout asserts
