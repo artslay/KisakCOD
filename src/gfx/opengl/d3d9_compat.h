@@ -273,6 +273,8 @@ class IDirect3DDevice9
     IDirect3DVertexDeclaration9 *m_decl = nullptr;
     StreamBinding m_streams[16];
     IDirect3DIndexBuffer9 *m_indices = nullptr;
+    std::array<std::array<float, 4>, 256> m_vsConstants{};
+    std::array<std::array<float, 4>, 256> m_psConstants{};
     IDirect3DSurface9 *m_color = nullptr;
     IDirect3DSurface9 *m_depth = nullptr;
 
@@ -569,7 +571,26 @@ public:
     HRESULT SetTexture(uint32_t stage, IDirect3DBaseTexture9* tex)
     {
         glActiveTexture(GL_TEXTURE0 + stage);
-        glBindTexture(GL_TEXTURE_2D, tex ? tex->object : 0);
+        if (tex)
+            glBindTexture(tex->target, tex->object);
+        else
+            glBindTexture(GL_TEXTURE_2D, 0);
+        return S_OK;
+    }
+
+    HRESULT SetVertexShaderConstantF(uint32_t dest, const float *data, uint32_t rowCount)
+    {
+        if (!data || dest + rowCount > m_vsConstants.size())
+            return E_FAIL;
+        std::memcpy(&m_vsConstants[dest], data, rowCount * sizeof(m_vsConstants[0]));
+        return S_OK;
+    }
+
+    HRESULT SetPixelShaderConstantF(uint32_t dest, const float *data, uint32_t rowCount)
+    {
+        if (!data || dest + rowCount > m_psConstants.size())
+            return E_FAIL;
+        std::memcpy(&m_psConstants[dest], data, rowCount * sizeof(m_psConstants[0]));
         return S_OK;
     }
 
