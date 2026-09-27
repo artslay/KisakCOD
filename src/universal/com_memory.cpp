@@ -982,6 +982,7 @@ void __cdecl Hunk_UserReset(HunkUser* user)
         Z_VirtualDecommit(pos, user->pos - (uint32_t)pos);
     }
     user->pos = (int)user->buf;
+#endif
     memset(user->buf, 0, 0xFE0u);
 }
 
