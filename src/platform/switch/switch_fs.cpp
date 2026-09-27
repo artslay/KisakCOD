@@ -71,7 +71,7 @@ void __cdecl FS_CheckFileSystemStarted()
 
 void __cdecl FS_RegisterDvars()
 {
-    fs_debug = Dvar_RegisterInt("fs_debug", 0, (DvarLimits)0x200000000LL, DVAR_NOFLAG, "Filesystem debug");
+    fs_debug = Dvar_RegisterInt("fs_debug", 0, 0, 2, DVAR_NOFLAG, "Filesystem debug");
     fs_copyfiles = Dvar_RegisterBool("fs_copyfiles", 0, DVAR_INIT, "Copy files");
     fs_cdpath = Dvar_RegisterString("fs_cdpath", (char*)kSwitchRoot, DVAR_INIT, "Switch game root");
     fs_basepath = Dvar_RegisterString("fs_basepath", (char*)kSwitchRoot, DVAR_INIT | DVAR_AUTOEXEC, "Switch game root");
