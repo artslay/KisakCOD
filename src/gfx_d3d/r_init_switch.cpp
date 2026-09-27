@@ -152,6 +152,7 @@ void R_Register() {}
 void R_InitGlobalStructs() {
     vidConfig = {};
     gfxMetrics = {};
+    gfxMetrics.canMipCubemaps = true;
     g_disableRendering = 0;
 }
 void R_EndRegistration() {}
