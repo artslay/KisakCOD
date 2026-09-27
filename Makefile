@@ -8,12 +8,14 @@ TARGET      := kisakcod
 BUILD       := build
 
 ARCH        := -march=armv8-a -mtune=cortex-a57 -mtp=soft
+MESA_SDK    := $(CURDIR)/mesa-sdk/opt/devkitpro/portlibs/switch
 CPPFLAGS    := -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE \
-               -I$(CURDIR)/src -I$(CURDIR)/deps -I$(CURDIR)/deps/msslib
+               -I$(CURDIR)/src -I$(CURDIR)/deps -I$(CURDIR)/deps/msslib \
+               -I$(MESA_SDK)/include
 CXXFLAGS    := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP
 CFLAGS      := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -MMD -MP
-LDFLAGS     := $(ARCH) -specs=$(DEVKITPRO)/libnx/switch.specs -Wl,--gc-sections
-LIBS        := -lglad -lEGL -lglapi -ldrm_nouveau -lnx -lm
+LDFLAGS     := $(ARCH) -L$(MESA_SDK)/lib -specs=$(DEVKITPRO)/libnx/switch.specs -Wl,--gc-sections
+LIBS        := -lGL -lEGL -lglapi -lnx -lm
 
 include $(DEVKITPRO)/libnx/switch_rules
 
