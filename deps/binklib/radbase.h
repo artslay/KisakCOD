@@ -56,6 +56,17 @@
       #define RADINLINE __inline
       #define RADRESTRICT __restrict
 
+    #elif defined(__SWITCH__)
+
+      #define __RADSWITCH__
+      // Switch uses the same 64-bit pointer model and little-endian layout as the
+      // desktop 64-bit targets, but does not use x86-specific code paths.
+      #define __RAD32__
+      #define __RAD64__
+      #define __RADLITTLEENDIAN__
+      #define RADINLINE inline
+      #define RADRESTRICT __restrict
+
     #elif defined(HOLLYWOOD_REV) || defined(REVOLUTION) 
 
       #define __RADWII__
@@ -308,7 +319,7 @@
     #if (!defined(__RADDOS__) && !defined(__RADWIN__) && !defined(__RADMAC__) &&      \
          !defined(__RADNGC__) && !defined(__RADNDS__) && !defined(__RADXBOX__) &&     \
          !defined(__RADXENON__) && !defined(__RADLINUX__) && !defined(__RADPS2__) &&  \
-         !defined(__RADPSP__) && !defined(__RADPS3__)  && !defined(__RADSPU__) && !defined(__RADWII__))
+         !defined(__RADPSP__) && !defined(__RADPS3__)  && !defined(__RADSPU__) && !defined(__RADWII__) && !defined(__RADSWITCH__))
       #error "RAD.H did not detect your platform.  Define DOS, WINDOWS, WIN32, macintosh, powerpc, or appropriate console."
     #endif
 
@@ -327,7 +338,7 @@
       #define RADASMLINK
       #define PTR4
 
-    #elif defined(__RADLINUX__)
+    #elif defined(__RADLINUX__) || defined(__RADSWITCH__)
 
       #define RADLINK __attribute__((cdecl))
       #define RADEXPLINK __attribute__((cdecl))
@@ -486,8 +497,8 @@
     #if defined(__RAD64__)
       // Remember that __RAD32__ will also be defined!
       // This can be either an X64, or maybe a Cell/PS3
-      #if defined(__RADX64__)
-        // x64 still has 32-bit ints!
+      #if defined(__RADX64__) || defined(__RADSWITCH__)
+        // 64-bit targets still use 32-bit integer storage.
         #define U32 unsigned int
         #define S32 signed int
         // But pointers are 64 bits.
