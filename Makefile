@@ -37,7 +37,7 @@ C_SOURCES := $(shell find src -type f -name '*.c' \\
 # zlib is required by the engine's archive/zip loader.
 C_SOURCES += $(shell find deps/zlib -type f -name '*.c')
 
-CPP_SOURCES += src/platform/switch/switch_main.cpp src/gfx/gfx_backend.cpp src/gfx/opengl/gl_backend.cpp
+CPP_SOURCES += src/platform/switch/switch_main.cpp
 
 CPP_OBJECTS := $(CPP_SOURCES:%.cpp=$(BUILD)/%.o)
 C_OBJECTS   := $(C_SOURCES:%.c=$(BUILD)/%.o)
