@@ -20,7 +20,9 @@ typedef long LONG;
 typedef CHAR *LPSTR, *PSTR;
 typedef unsigned long ULONG_PTR, *PULONG_PTR;
 typedef ULONG_PTR DWORD_PTR, *PDWORD_PTR;
+#ifndef KISAK_SWITCH
 typedef unsigned long DWORD;
+#endif
 typedef unsigned short WORD;
 typedef unsigned int UINT;
 typedef void *LPVOID;
@@ -182,8 +184,10 @@ struct LoadedSound // sizeof=0x2C
     const char *name;
     MssSoundCOD4 sound;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(LoadedSound) == 44);
 
+#endif
 struct StreamFileNameRaw // sizeof=0x8
 {                                       // ...
     const char *dir;
@@ -221,8 +225,10 @@ struct SndCurve // sizeof=0x48
     int knotCount;                      // ...
     float knots[8][2];                  // ...
 };
+#ifndef __SWITCH__
 static_assert(sizeof(SndCurve) == 72);
 
+#endif
 struct MSSSpeakerLevels // sizeof=0x10
 {                                       // ...
     int speaker;
@@ -274,16 +280,20 @@ struct snd_alias_t // sizeof=0x5C
     float envelopPercentage;
     SpeakerMap *speakerMap;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(snd_alias_t) == 92);
 
+#endif
 struct snd_alias_list_t // sizeof=0xC
 {                                       // ...
     const char *aliasName;              // ...
     snd_alias_t *head;                  // ...
     int count;                          // ...
 };
+#ifndef __SWITCH__
 static_assert(sizeof(snd_alias_list_t) == 12);
 
+#endif
 struct snd_entchannel_info_t // sizeof=0x50
 {                                       // ...
     char name[64];
