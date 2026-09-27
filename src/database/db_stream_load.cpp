@@ -36,33 +36,38 @@ void __cdecl Load_DelayStream()
         DB_LoadXFileData((unsigned char*)g_streamDelayArray[index].ptr, g_streamDelayArray[index].size);
 }
 
-void __cdecl DB_ConvertOffsetToAlias(uint32_t *data)
+uintptr_t __cdecl DB_ConvertOffsetToPointerValue(uint32_t offset)
 {
-    const uint32_t offset = *data;
     iassert(offset && offset != UINT32_MAX && offset != UINT32_MAX - 1);
     const uint32_t block = (offset - 1) >> 28;
     const uint32_t blockOffset = (offset - 1) & 0xFFFFFFF;
-    const uint32_t alias32 = *reinterpret_cast<const uint32_t *>(
+    return reinterpret_cast<uintptr_t>(
         &g_streamZoneMem->blocks[block].data[blockOffset]);
-#ifdef __SWITCH__
-    *reinterpret_cast<uintptr_t *>(data) = static_cast<uintptr_t>(alias32);
-#else
-    *data = alias32;
-#endif
 }
 
-void __cdecl DB_ConvertOffsetToPointer(uint32_t *data)
+void __cdecl DB_ConvertOffsetToAlias(void *data)
 {
-    const uint32_t offset = *data;
+    const uint32_t offset = *reinterpret_cast<const uint32_t *>(data);
     iassert(offset && offset != UINT32_MAX && offset != UINT32_MAX - 1);
     const uint32_t block = (offset - 1) >> 28;
     const uint32_t blockOffset = (offset - 1) & 0xFFFFFFF;
-    const uintptr_t ptr = reinterpret_cast<uintptr_t>(
-        &g_streamZoneMem->blocks[block].data[blockOffset]);
+    const uintptr_t ptr = DB_ConvertOffsetToPointerValue(offset);
 #ifdef __SWITCH__
     *reinterpret_cast<uintptr_t *>(data) = ptr;
 #else
-    *data = static_cast<uint32_t>(ptr);
+    *reinterpret_cast<uint32_t *>(data) =
+        static_cast<uint32_t>(ptr);
+#endif
+}
+
+void __cdecl DB_ConvertOffsetToPointer(void *data)
+{
+    const uint32_t offset = *reinterpret_cast<const uint32_t *>(data);
+#ifdef __SWITCH__
+    *reinterpret_cast<uintptr_t *>(data) = DB_ConvertOffsetToPointerValue(offset);
+#else
+    *reinterpret_cast<uint32_t *>(data) =
+        static_cast<uint32_t>(DB_ConvertOffsetToPointerValue(offset));
 #endif
 }
 
