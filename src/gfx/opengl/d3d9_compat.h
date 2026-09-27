@@ -14,6 +14,30 @@ using _D3DFORMAT = uint32_t;
 constexpr HRESULT S_OK = 0;
 constexpr HRESULT E_FAIL = -1;
 
+// D3D9 format values are kept for asset compatibility; Switch maps them to GL.
+constexpr uint32_t D3DFMT_A8 = 1;
+constexpr uint32_t D3DFMT_A8R8G8B8 = 21;
+constexpr uint32_t D3DFMT_X8R8G8B8 = 22;
+constexpr uint32_t D3DFMT_A8L8 = 51;
+constexpr uint32_t D3DFMT_L8 = 50;
+constexpr uint32_t D3DFMT_D16 = 80;
+constexpr uint32_t D3DFMT_D24S8 = 75;
+constexpr uint32_t D3DFMT_D24X8 = 77;
+constexpr uint32_t D3DFMT_G16R16F = 112;
+constexpr uint32_t D3DFMT_R32F = 114;
+constexpr uint32_t D3DFMT_DXT1 = 0x31545844u;
+constexpr uint32_t D3DFMT_DXT3 = 0x33545844u;
+constexpr uint32_t D3DFMT_DXT5 = 0x35545844u;
+
+enum _D3DCUBEMAP_FACES : uint32_t {
+    D3DCUBEMAP_FACE_POSITIVE_X = 0,
+    D3DCUBEMAP_FACE_NEGATIVE_X = 1,
+    D3DCUBEMAP_FACE_POSITIVE_Y = 2,
+    D3DCUBEMAP_FACE_NEGATIVE_Y = 3,
+    D3DCUBEMAP_FACE_POSITIVE_Z = 4,
+    D3DCUBEMAP_FACE_NEGATIVE_Z = 5,
+};
+
 struct D3DVIEWPORT9
 {
     uint32_t X, Y, Width, Height;
@@ -133,6 +157,12 @@ using IDirect3DIndexBuffer9 = KisakGLBuffer;
 struct KisakGLTexture
 {
     GLuint object = 0;
+    GLenum target = GL_TEXTURE_2D;
+    GLenum internalFormat = GL_RGBA8;
+    GLenum uploadFormat = GL_BGRA;
+    GLenum uploadType = GL_UNSIGNED_BYTE;
+    uint32_t width = 0, height = 0, depth = 1;
+    uint32_t mipLevels = 1;
     void Release()
     {
         if (object)
@@ -145,6 +175,13 @@ using IDirect3DBaseTexture9 = KisakGLTexture;
 using IDirect3DTexture9 = KisakGLTexture;
 using IDirect3DVolumeTexture9 = KisakGLTexture;
 using IDirect3DCubeTexture9 = KisakGLTexture;
+
+struct IDirect3DSurface9
+{
+    KisakGLTexture *texture = nullptr;
+    uint32_t level = 0;
+    void Release() { delete this; }
+};
 struct IDirect3DQuery9 { void Release() { delete this; } };
 
 class IDirect3DDevice9
