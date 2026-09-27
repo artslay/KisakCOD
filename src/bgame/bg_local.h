@@ -185,34 +185,6 @@ enum ShockViewTypes : __int32
     SHELLSHOCK_VIEWTYPE_NONE = 0x2,
 };
 
-#ifdef __SWITCH__
-enum ViewLockTypes : __int32
-{
-    PLAYERVIEWLOCK_NONE = 0x0,
-    PLAYERVIEWLOCK_FULL = 0x1,
-    PLAYERVIEWLOCK_WEAPONJITTER = 0x2,
-    PLAYERVIEWLOCKCOUNT = 0x3,
-};
-#endif
-
-#ifdef __SWITCH__
-struct pml_t
-{
-    float forward[3];
-    float right[3];
-    float up[3];
-    float frametime;
-    int32_t msec;
-    int32_t walking;
-    int32_t groundPlane;
-    int32_t almostGroundPlane;
-    trace_t groundTrace;
-    float impactSpeed;
-    float previous_origin[3];
-    float previous_velocity[3];
-};
-#endif
-
 union hudelem_color_t // sizeof=0x4
 {                                       // XREF: DrawSingleHudElem2d+114/r
     struct
@@ -224,26 +196,12 @@ union hudelem_color_t // sizeof=0x4
     };
     uint32_t rgba;
 };
-#if defined(KISAK_SP) && defined(__SWITCH__)
-enum he_type_t : __int32
-{
-    HE_TYPE_FREE = 0x0,
-    HE_TYPE_TEXT = 0x1,
-    HE_TYPE_VALUE = 0x2,
-    HE_TYPE_MATERIAL = 0x3,
-    HE_TYPE_TIMER_DOWN = 0x4,
-    HE_TYPE_TIMER_UP = 0x5,
-    HE_TYPE_TENTHS_TIMER_DOWN = 0x6,
-    HE_TYPE_TENTHS_TIMER_UP = 0x7,
-    HE_TYPE_CLOCK_DOWN = 0x8,
-    HE_TYPE_CLOCK_UP = 0x9,
-    HE_TYPE_WAYPOINT = 0xA,
-    HE_TYPE_COUNT = 0xB,
-};
+// Legacy definitions are shared with Switch; disable only the original 32-bit layout assertions.
+#ifdef __SWITCH__
+#define BG_LEGACY_STATIC_ASSERT(...)
+#else
+#define BG_LEGACY_STATIC_ASSERT(x) BG_LEGACY_STATIC_ASSERT(x)
 #endif
-
-#ifndef __SWITCH__
-// Native ARM64 layout differs from the original 32-bit runtime; serialized layouts are handled by Switch loaders.
 
 static_assert(sizeof(union hudelem_color_t) == 0x4);
 
@@ -287,7 +245,7 @@ struct scr_anim_s // sizeof=0x4
         const char* linkPointer;
     };
 };
-static_assert(sizeof(struct scr_anim_s) == 0x4);
+BG_LEGACY_STATIC_ASSERT(sizeof(struct scr_anim_s) == 0x4);
 
 struct loadAnim_t // sizeof=0x48
 {
@@ -295,31 +253,14 @@ struct loadAnim_t // sizeof=0x48
     int32_t iNameHash;
     char szAnimName[64];
 };
-static_assert((sizeof(struct loadAnim_t) * 512) == 36864);
-
-struct pml_t // sizeof=0x80
-{                                       // ...
-    float forward[3];
-    float right[3];                     // ...
-    float up[3];                        // ...
-    float frametime;                    // ...
-    int32_t msec;                           // ...
-    int32_t walking;                        // ...
-    int32_t groundPlane;                    // ...
-    int32_t almostGroundPlane;              // ...
-    trace_t groundTrace;
-    float impactSpeed;
-    float previous_origin[3];           // ...
-    float previous_velocity[3];         // ...
-};
-static_assert(sizeof(pml_t) == 0x80);
+BG_LEGACY_STATIC_ASSERT((sizeof(struct loadAnim_t) * 512) == 36864);
 
 struct animStringItem_t // sizeof=0x8
 {                                       // ...
     const char *string;                 // ...
     int32_t hash;                           // ...
 };
-static_assert(sizeof(animStringItem_t) == 0x8);
+BG_LEGACY_STATIC_ASSERT(sizeof(animStringItem_t) == 0x8);
 
 struct controller_info_t // sizeof=0x60
 {                                       // ...
@@ -327,14 +268,14 @@ struct controller_info_t // sizeof=0x60
     float tag_origin_angles[3];         // ...
     float tag_origin_offset[3];         // ...
 };
-static_assert(sizeof(controller_info_t) == 0x60);
+BG_LEGACY_STATIC_ASSERT(sizeof(controller_info_t) == 0x60);
 
 struct animConditionTable_t // sizeof=0x8
 {                                       // ...
     animScriptConditionTypes_t type;    // ...
     animStringItem_t *values;           // ...
 };
-static_assert(sizeof(animConditionTable_t) == 0x8);
+BG_LEGACY_STATIC_ASSERT(sizeof(animConditionTable_t) == 0x8);
 
 struct viewDamage_t // sizeof=0xC
 {                                       // ...
@@ -342,7 +283,7 @@ struct viewDamage_t // sizeof=0xC
     int32_t duration;
     float yaw;
 };
-static_assert(sizeof(viewDamage_t) == 0xC);
+BG_LEGACY_STATIC_ASSERT(sizeof(viewDamage_t) == 0xC);
 
 struct shellshock_parms_t_screenblend // sizeof=0x14
 {                                       // ...
@@ -352,7 +293,7 @@ struct shellshock_parms_t_screenblend // sizeof=0x14
     int32_t flashShotFadeTime;
     ShockViewTypes type;
 };
-static_assert(sizeof(shellshock_parms_t_screenblend) == 0x14);
+BG_LEGACY_STATIC_ASSERT(sizeof(shellshock_parms_t_screenblend) == 0x14);
 
 struct shellshock_parms_t_view // sizeof=0xC
 {                                       // ...
@@ -360,7 +301,7 @@ struct shellshock_parms_t_view // sizeof=0xC
     float kickRate;
     float kickRadius;
 };
-static_assert(sizeof(shellshock_parms_t_view) == 0xC);
+BG_LEGACY_STATIC_ASSERT(sizeof(shellshock_parms_t_view) == 0xC);
 
 struct shellshock_parms_t_sound // sizeof=0x230
 {                                       // ...
@@ -382,7 +323,7 @@ struct shellshock_parms_t_sound // sizeof=0x230
     int32_t loopFadeTime;
     int32_t loopEndDelay;
 };
-static_assert(sizeof(shellshock_parms_t_sound) == 0x230);
+BG_LEGACY_STATIC_ASSERT(sizeof(shellshock_parms_t_sound) == 0x230);
 
 struct shellshock_parms_t_lookcontrol // sizeof=0x14
 {                                       // ...
@@ -395,13 +336,13 @@ struct shellshock_parms_t_lookcontrol // sizeof=0x14
     float maxPitchSpeed;
     float maxYawSpeed;
 };
-static_assert(sizeof(shellshock_parms_t_lookcontrol) == 0x14);
+BG_LEGACY_STATIC_ASSERT(sizeof(shellshock_parms_t_lookcontrol) == 0x14);
 
 struct shellshock_parms_t_movement // sizeof=0x1
 {                                       // ...
     bool affect;
 };
-static_assert(sizeof(shellshock_parms_t_movement) == 0x1);
+BG_LEGACY_STATIC_ASSERT(sizeof(shellshock_parms_t_movement) == 0x1);
 
 struct shellshock_parms_t // sizeof=0x268
 {                                       // ...
@@ -414,7 +355,7 @@ struct shellshock_parms_t // sizeof=0x268
     // padding byte
     // padding byte
 };
-static_assert(sizeof(shellshock_parms_t) == 0x268);
+BG_LEGACY_STATIC_ASSERT(sizeof(shellshock_parms_t) == 0x268);
 
 struct shellshock_t // sizeof=0x20
 {                                       // ...
@@ -426,7 +367,7 @@ struct shellshock_t // sizeof=0x20
     float viewDelta[2];
     int32_t hasSavedScreen;
 };
-static_assert(sizeof(shellshock_t) == 0x20);
+BG_LEGACY_STATIC_ASSERT(sizeof(shellshock_t) == 0x20);
 
 struct __declspec(align(8)) animation_s // sizeof=0x68
 {                                       // ...
@@ -447,14 +388,14 @@ struct __declspec(align(8)) animation_s // sizeof=0x68
     // padding byte
     // padding byte
 };
-static_assert(sizeof(animation_s) == 0x68);
+BG_LEGACY_STATIC_ASSERT(sizeof(animation_s) == 0x68);
 
 struct animScriptCondition_t // sizeof=0xC
 {                                       // ...
     int32_t index;
     uint32_t value[2];
 };
-static_assert(sizeof(animScriptCondition_t) == 0xC);
+BG_LEGACY_STATIC_ASSERT(sizeof(animScriptCondition_t) == 0xC);
 
 
 struct animScriptCommand_t // sizeof=0x10
@@ -464,7 +405,7 @@ struct animScriptCommand_t // sizeof=0x10
     int16_t animDuration[2];
     snd_alias_list_t* soundAlias;
 };
-static_assert(sizeof(animScriptCommand_t) == 0x10);
+BG_LEGACY_STATIC_ASSERT(sizeof(animScriptCommand_t) == 0x10);
 
 enum animScriptParseMode_t : __int32
 {                                       // ...
@@ -483,14 +424,14 @@ struct animScriptItem_t // sizeof=0x100
     int32_t numCommands;
     animScriptCommand_t commands[8];
 };
-static_assert(sizeof(animScriptItem_t) == 0x100);
+BG_LEGACY_STATIC_ASSERT(sizeof(animScriptItem_t) == 0x100);
 
 struct animScript_t // sizeof=0x204
 {                                       // ...
     int32_t numItems;
     animScriptItem_t* items[128];
 };
-static_assert(sizeof(animScript_t) == 0x204);
+BG_LEGACY_STATIC_ASSERT(sizeof(animScript_t) == 0x204);
 
 struct scr_animtree_t // sizeof=0x4
 {                                       // ...
@@ -500,7 +441,7 @@ struct scr_animtree_t // sizeof=0x4
     }
     XAnim_s* anims;                     // ...
 };
-static_assert(sizeof(scr_animtree_t) == 0x4);
+BG_LEGACY_STATIC_ASSERT(sizeof(scr_animtree_t) == 0x4);
 
 struct __declspec(align(8)) animScriptData_t // sizeof=0x9A9D0
 {                                       // ...
@@ -525,7 +466,7 @@ struct __declspec(align(8)) animScriptData_t // sizeof=0x9A9D0
     // padding byte
     // padding byte
 };
-static_assert(sizeof(animScriptData_t) == 0x9A9D0);
+BG_LEGACY_STATIC_ASSERT(sizeof(animScriptData_t) == 0x9A9D0);
 
 struct lerpFrame_t // sizeof=0x30
 {                                       // ...
@@ -540,7 +481,7 @@ struct lerpFrame_t // sizeof=0x30
     float animSpeedScale;
     int32_t oldFrameSnapshotTime;
 };
-static_assert(sizeof(lerpFrame_t) == 0x30);
+BG_LEGACY_STATIC_ASSERT(sizeof(lerpFrame_t) == 0x30);
 
 struct clientControllers_t // sizeof=0x60
 {                                       // ...
@@ -548,7 +489,7 @@ struct clientControllers_t // sizeof=0x60
     float tag_origin_angles[3];
     float tag_origin_offset[3];
 };
-static_assert(sizeof(clientControllers_t) == 0x60);
+BG_LEGACY_STATIC_ASSERT(sizeof(clientControllers_t) == 0x60);
 
 #ifdef KISAK_MP
 struct clientInfo_t // sizeof=0x4CC
@@ -596,7 +537,7 @@ struct clientInfo_t // sizeof=0x4CC
     // padding byte
     // padding byte
 };
-static_assert(sizeof(clientInfo_t) == 0x4CC);
+BG_LEGACY_STATIC_ASSERT(sizeof(clientInfo_t) == 0x4CC);
 
 struct bgs_t_human // sizeof=0x10
 {                                       // ...
@@ -605,7 +546,7 @@ struct bgs_t_human // sizeof=0x10
     scr_anim_s legs;
     scr_anim_s turning;
 };
-static_assert(sizeof(bgs_t_human) == 0x10);
+BG_LEGACY_STATIC_ASSERT(sizeof(bgs_t_human) == 0x10);
 
 struct bgs_t // sizeof=0xADD08
 {                                       // ...
@@ -623,14 +564,14 @@ struct bgs_t // sizeof=0xADD08
     void* (__cdecl* AllocXAnim)(int32_t);   // ...
     clientInfo_t clientinfo[64];        // ...
 };
-static_assert(sizeof(bgs_t) == 0xADD08);
+BG_LEGACY_STATIC_ASSERT(sizeof(bgs_t) == 0xADD08);
 #endif
 
 struct hudElemSoundInfo_t // sizeof=0x4
 {                                       // ...
     int32_t lastPlayedTime;
 };
-static_assert(sizeof(hudElemSoundInfo_t) == 0x4);
+BG_LEGACY_STATIC_ASSERT(sizeof(hudElemSoundInfo_t) == 0x4);
 
 #ifdef KISAK_MP
 enum he_type_t : __int32
@@ -727,8 +668,10 @@ struct hudelem_s // sizeof=0xA0
     int32_t soundID;
     int32_t flags;
 };
-static_assert(sizeof(hudelem_s) == 0xA0);
+BG_LEGACY_STATIC_ASSERT(sizeof(hudelem_s) == 0xA0);
 #elif KISAK_SP
+#undef BG_LEGACY_STATIC_ASSERT
+
 #if defined(KISAK_SP) && defined(__SWITCH__)
 enum he_type_t : __int32
 {
@@ -803,7 +746,7 @@ struct MantleState // sizeof=0x10
     int32_t transIndex;
     int32_t flags;
 };
-static_assert(sizeof(MantleState) == 0x10);
+BG_LEGACY_STATIC_ASSERT(sizeof(MantleState) == 0x10);
 
 enum MantleAnims : __int32
 {
@@ -840,7 +783,7 @@ struct playerState_s_hud // sizeof=0x26C0
     hudelem_s current[31];              // XREF: Sys_GetPhysicalCpuCount+131/o
     hudelem_s archival[31];             // XREF: SV_Shutdown(char const *):loc_5D1039/o
 };
-static_assert(sizeof(playerState_s_hud) == 0x26C0);
+BG_LEGACY_STATIC_ASSERT(sizeof(playerState_s_hud) == 0x26C0);
 #elif KISAK_SP
 struct playerState_s_hud
 {
@@ -861,13 +804,13 @@ struct ActionSlotParam_SpecifyWeapon // sizeof=0x4
 {                                       // XREF: ActionSlotParam/r
     uint32_t index;
 };
-static_assert(sizeof(ActionSlotParam_SpecifyWeapon) == 0x4);
+BG_LEGACY_STATIC_ASSERT(sizeof(ActionSlotParam_SpecifyWeapon) == 0x4);
 
 struct ActionSlotParam // sizeof=0x4
 {                                       // XREF: playerState_s/r
     ActionSlotParam_SpecifyWeapon specifyWeapon;
 };
-static_assert(sizeof(ActionSlotParam) == 0x4);
+BG_LEGACY_STATIC_ASSERT(sizeof(ActionSlotParam) == 0x4);
 
 struct SprintState // sizeof=0x14
 {                                       // XREF: playerState_s/r cg_s/r
@@ -877,7 +820,7 @@ struct SprintState // sizeof=0x14
     int32_t lastSprintEnd;
     int32_t sprintStartMaxLength;
 };
-static_assert(sizeof(SprintState) == 0x14);
+BG_LEGACY_STATIC_ASSERT(sizeof(SprintState) == 0x14);
 
 enum objectiveState_t : __int32
 {                                       // XREF: objective_t/r
@@ -900,7 +843,7 @@ struct objective_t // sizeof=0x1C
     // _memcpy+2E8/o
     int32_t icon;
 };
-static_assert(sizeof(objective_t) == 0x1C);
+BG_LEGACY_STATIC_ASSERT(sizeof(objective_t) == 0x1C);
 
 enum pmflags_t : __int32 // (MP/SP same)
 {
@@ -1082,178 +1025,9 @@ struct playerState_s // sizeof=0x2F64
     // XREF: SV_Shutdown(char const *):loc_5D1039/o
     // TRACK_sv_main(void)+A/o ...
 };
-static_assert(sizeof(playerState_s) == 0x2F64);
+BG_LEGACY_STATIC_ASSERT(sizeof(playerState_s) == 0x2F64);
 
 #endif // KISAK_MP
-#endif // !__SWITCH__
-
-#if defined(KISAK_SP) && defined(__SWITCH__)
-// Switch SP runtime definitions that were historically inside the 32-bit layout block.
-struct shellshock_parms_t_screenblend
-{
-    int32_t blurredFadeTime;
-    int32_t blurredEffectTime;
-    int32_t flashWhiteFadeTime;
-    int32_t flashShotFadeTime;
-    ShockViewTypes type;
-};
-
-struct shellshock_parms_t_view
-{
-    int32_t fadeTime;
-    float kickRate;
-    float kickRadius;
-};
-
-struct shellshock_parms_t_sound
-{
-    bool affect;
-    char loop[64];
-    char loopSilent[64];
-    char end[64];
-    char endAbort[64];
-    int32_t fadeInTime;
-    int32_t fadeOutTime;
-    float drylevel;
-    float wetlevel;
-    char roomtype[16];
-    float channelvolume[64];
-    int32_t modEndDelay;
-    int32_t loopFadeTime;
-    int32_t loopEndDelay;
-};
-
-struct shellshock_parms_t_lookcontrol
-{
-    bool affect;
-    int32_t fadeTime;
-    float mouseSensitivity;
-    float maxPitchSpeed;
-    float maxYawSpeed;
-};
-
-struct shellshock_parms_t_movement
-{
-    bool affect;
-};
-
-struct shellshock_parms_t
-{
-    shellshock_parms_t_screenblend screenBlend;
-    shellshock_parms_t_view view;
-    shellshock_parms_t_sound sound;
-    shellshock_parms_t_lookcontrol lookControl;
-    shellshock_parms_t_movement movement;
-};
-
-struct shellshock_t
-{
-    const shellshock_parms_t *parms;
-    int32_t startTime;
-    int32_t duration;
-    int32_t loopEndTime;
-    float sensitivity;
-    float viewDelta[2];
-    int32_t hasSavedScreen;
-};
-
-struct clientControllers_t
-{
-    float angles[6][3];
-    float tag_origin_angles[3];
-    float tag_origin_offset[3];
-};
-
-struct MantleState
-{
-    float yaw;
-    int32_t timer;
-    int32_t transIndex;
-    int32_t flags;
-};
-
-enum MantleAnims : __int32
-{
-    MANTLE_ROOT = 0x0,
-    MANTLE_UP_57 = 0x1,
-    MANTLE_UP_51 = 0x2,
-    MANTLE_UP_45 = 0x3,
-    MANTLE_UP_39 = 0x4,
-    MANTLE_UP_33 = 0x5,
-    MANTLE_UP_27 = 0x6,
-    MANTLE_UP_21 = 0x7,
-    MANTLE_OVER_HIGH = 0x8,
-    MANTLE_OVER_MID = 0x9,
-    MANTLE_OVER_LOW = 0xA,
-    MANTLE_ANIM_COUNT = 0xB,
-    MANTLE_UP_FIRST = 0x1,
-    MANTLE_UP_LAST = 0x7,
-    MANTLE_UP_COUNT = 0x7,
-    MANTLE_OVER_FIRST = 0x8,
-    MANTLE_OVER_LAST = 0xA,
-    MANTLE_OVER_COUNT = 0x3,
-};
-
-enum PlayerSpreadOverrideState : __int32
-{
-    PSOS_DISABLED = 0x0,
-    PSOS_RESETTING = 0x1,
-    PSOS_ENABLED = 0x2,
-};
-
-struct playerState_s_hud
-{
-    hudelem_s elem[256];
-};
-
-enum ActionSlotType : __int32
-{
-    ACTIONSLOTTYPE_DONOTHING = 0x0,
-    ACTIONSLOTTYPE_SPECIFYWEAPON = 0x1,
-    ACTIONSLOTTYPE_ALTWEAPONTOGGLE = 0x2,
-    ACTIONSLOTTYPE_NIGHTVISION = 0x3,
-    ACTIONSLOTTYPECOUNT = 0x4,
-};
-
-struct ActionSlotParam_SpecifyWeapon
-{
-    uint32_t index;
-};
-
-struct ActionSlotParam
-{
-    ActionSlotParam_SpecifyWeapon specifyWeapon;
-};
-
-struct SprintState
-{
-    int32_t sprintButtonUpRequired;
-    int32_t sprintDelay;
-    int32_t lastSprintStart;
-    int32_t lastSprintEnd;
-    int32_t sprintStartMaxLength;
-};
-
-enum objectiveState_t : __int32
-{
-    OBJST_EMPTY = 0x0,
-    OBJST_ACTIVE = 0x1,
-    OBJST_INVISIBLE = 0x2,
-    OBJST_DONE = 0x3,
-    OBJST_CURRENT = 0x4,
-    OBJST_FAILED = 0x5,
-    OBJST_NUMSTATES = 0x6,
-};
-
-struct objective_t
-{
-    objectiveState_t state;
-    float origin[3];
-    int32_t entNum;
-    int32_t teamNum;
-    int32_t icon;
-};
-#endif
 
 #if defined(KISAK_SP) && !defined(__SWITCH__)
 enum pmtype_t : __int32
@@ -2633,55 +2407,6 @@ struct weaponState_t // sizeof=0x54
 #ifndef __SWITCH__
 static_assert(sizeof(weaponState_t) == 0x54);
 #endif
-#if defined(KISAK_SP) && defined(__SWITCH__)
-// HUD element layout is needed by the Switch SP playerState HUD block.
-struct hudelem_s
-{
-    he_type_t type;
-    float x;
-    float y;
-    float z;
-    int targetEntNum;
-    float fontScale;
-    float fromFontScale;
-    int fontScaleStartTime;
-    int fontScaleTime;
-    int font;
-    int alignOrg;
-    int alignScreen;
-    hudelem_color_t color;
-    hudelem_color_t fromColor;
-    int fadeStartTime;
-    int fadeTime;
-    int label;
-    int width;
-    int height;
-    int materialIndex;
-    int offscreenMaterialIdx;
-    int fromWidth;
-    int fromHeight;
-    int scaleStartTime;
-    int scaleTime;
-    float fromX;
-    float fromY;
-    int fromAlignOrg;
-    int fromAlignScreen;
-    int moveStartTime;
-    int moveTime;
-    int time;
-    int duration;
-    float value;
-    int text;
-    float sort;
-    hudelem_color_t glowColor;
-    int fxBirthTime;
-    int fxLetterTime;
-    int fxDecayStartTime;
-    int fxDecayDuration;
-    int soundID;
-    int flags;
-};
-
 void __cdecl TRACK_bg_weapons();
 void __cdecl BG_LoadPenetrationDepthTable();
 void __cdecl BG_ParsePenetrationDepthTable(const char *penetrateType, float *depthTable, char *buffer);
