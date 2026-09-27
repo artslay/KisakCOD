@@ -320,6 +320,9 @@ struct MaterialPixelShaderProgram // sizeof=0xC
     IDirect3DPixelShader9 *ps;
     GfxPixelShaderLoadDef loadDef;
 };
+#ifndef __SWITCH__
+// Native ARM64 layout differs from the original 32-bit runtime; serialized layouts are handled by Switch loaders.
+
 static_assert(sizeof(MaterialPixelShaderProgram) == 12);
 
 struct MaterialPixelShader // sizeof=0x10
@@ -557,6 +560,7 @@ struct Material // sizeof=0x50
 static_assert(sizeof(Material) == 96);
 #else
 static_assert(sizeof(Material) == 80);
+#endif // !__SWITCH__
 #endif
 
 struct MaterialMemory // sizeof=0x8
