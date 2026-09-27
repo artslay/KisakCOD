@@ -435,7 +435,7 @@ LABEL_20:
             R_SaveCubemapShot((char*)v29, v27, v10, v11);
             ++v28;
             ++v27;
-        } while ((int)v28 < (int)&szShotName[6]);
+        } while (reinterpret_cast<uintptr_t>(v28) < reinterpret_cast<uintptr_t>(&szShotName[6]));
     }
     else
     {
