@@ -653,7 +653,12 @@ void __cdecl DB_LoadXAssets(XZoneInfo *zoneInfo, uint32_t zoneCount, int32_t syn
 
     unloadedZone = 0;
     Material_ClearShaderUploadList();
+#ifdef __SWITCH__
+    if (g_zoneCount)
+        DB_SyncXAssets();
+#else
     DB_SyncXAssets();
+#endif
     
     iassert(!g_archiveBuf);
 
