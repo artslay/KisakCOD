@@ -17,6 +17,26 @@
 #include <universal/com_files.h>
 #include <universal/profile.h>
 
+#ifdef __SWITCH__
+// The Switch SP bootstrap loads materials from fastfiles. Keep the legacy loose-file
+// material path linkable without pulling D3DX9/HLSL tooling into the Switch target.
+MaterialTechniqueSet *__cdecl Material_FindTechniqueSet_LoadObj(
+    const char *name,
+    MtlTechSetNotFoundBehavior notFoundBehavior)
+{
+    (void)name;
+    (void)notFoundBehavior;
+    return nullptr;
+}
+
+Material *__cdecl Material_Register_LoadObj(const char *name, int imageTrack)
+{
+    (void)name;
+    (void)imageTrack;
+    return nullptr;
+}
+#endif
+
 //MaterialGlobals materialGlobals; // LWSS: moved to db_registry for DEDICATED
 
 const stream_source_info_t s_streamSourceInfo[16][STREAM_SRC_COUNT] =
