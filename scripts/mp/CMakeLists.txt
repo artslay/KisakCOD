@@ -93,7 +93,9 @@ if (USE_ASAN)
     target_link_options(${PROJECT_NAME} PRIVATE /fsanitize=address /LARGEADDRESSAWARE)
 else()
 # Tracy
-    include(${SCRIPTS_DIR}/extern/tracy.cmake)
+    if (NOT KISAK_PLATFORM STREQUAL "switch")
+        include(${SCRIPTS_DIR}/extern/tracy.cmake)
+    endif()
 endif()
 
 # OpenAL (sound backend, only needed when KISAK_OPENAL is enabled)
