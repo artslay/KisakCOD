@@ -276,7 +276,7 @@ struct pml_t // sizeof=0x80
     float previous_origin[3];           // ...
     float previous_velocity[3];         // ...
 };
-static_assert(sizeof(pml_t) == 0x88);
+static_assert(sizeof(pml_t) == 0x80);
 
 struct animStringItem_t // sizeof=0x8
 {                                       // ...
@@ -1031,7 +1031,7 @@ static_assert(sizeof(playerState_s) == 0x2F64);
 
 #endif // !__SWITCH__
 
-#if defined(KISAK_SP) && !defined(__SWITCH__)
+#ifdef KISAK_SP
 enum pmtype_t : __int32
 {
     PM_NORMAL = 0x0,
@@ -2288,113 +2288,267 @@ static_assert(sizeof(weaponState_t) == 0x54);
 #endif // !__SWITCH__
 
 #ifdef __SWITCH__
-// Switch runtime definitions for declarations that were part of the original 32-bit block.
-struct pml_t
+struct BulletFireParams
 {
-    float forward[3];
-    float right[3];
-    float up[3];
+    int32_t weaponEntIndex;
+    int32_t ignoreEntIndex;
+    float damageMultiplier;
+    int32_t methodOfDeath;
+    float origStart[3];
+    float start[3];
+    float end[3];
+    float dir[3];
+};
+static_assert(sizeof(BulletFireParams) == 0x40);
+
+struct BulletTraceResults
+{
+    trace_t trace;
+    struct gentity_s *hitEnt;
+    float hitPos[3];
+    bool ignoreHitEnt;
+    int32_t depthSurfaceType;
+};
+
+struct viewState_t
+{
+    playerState_s *ps;
+    int32_t damageTime;
+    int32_t time;
+    float v_dmg_pitch;
+    float v_dmg_roll;
+    float xyspeed;
     float frametime;
-    int32_t msec;
-    int32_t walking;
-    int32_t groundPlane;
-    int32_t almostGroundPlane;
-    trace_t groundTrace;
-    float impactSpeed;
-    float previous_origin[3];
-    float previous_velocity[3];
+    float fLastIdleFactor;
+    int32_t *weapIdleTime;
 };
-static_assert(sizeof(pml_t) == 0x88);
 
-enum he_type_t : __int32
+struct weaponState_t
 {
-    HE_TYPE_FREE = 0x0,
-    HE_TYPE_TEXT = 0x1,
-    HE_TYPE_VALUE = 0x2,
-    HE_TYPE_MATERIAL = 0x3,
-    HE_TYPE_TIMER_DOWN = 0x4,
-    HE_TYPE_TIMER_UP = 0x5,
-    HE_TYPE_TENTHS_TIMER_DOWN = 0x6,
-    HE_TYPE_TENTHS_TIMER_UP = 0x7,
-    HE_TYPE_CLOCK_DOWN = 0x8,
-    HE_TYPE_CLOCK_UP = 0x9,
-    HE_TYPE_WAYPOINT = 0xA,
-    HE_TYPE_COUNT = 0xB,
+    const playerState_s *ps;
+    float xyspeed;
+    float frametime;
+    float vLastMoveAng[3];
+    float fLastIdleFactor;
+    int32_t time;
+    int32_t damageTime;
+    float v_dmg_pitch;
+    float v_dmg_roll;
+    float vGunOffset[3];
+    float vGunSpeed[3];
+    float swayAngles[3];
+    int32_t *weapIdleTime;
 };
+#endif
 
-enum itemType_t : __int32
-{
-    IT_BAD = 0x0,
-    IT_WEAPON = 0x1,
-};
+void __cdecl TRACK_bg_weapons();
+void __cdecl BG_LoadPenetrationDepthTable();
+void __cdecl BG_ParsePenetrationDepthTable(const char *penetrateType, float *depthTable, char *buffer);
+char __cdecl BG_AdvanceTrace(BulletFireParams *bp, BulletTraceResults *br, float dist);
+double __cdecl BG_GetSurfacePenetrationDepth(const WeaponDef *weapDef, uint32_t surfaceType);
+void __cdecl BG_ShutdownWeaponDefFiles();
+void __cdecl BG_ClearWeaponDef();
+void __cdecl BG_FillInAllWeaponItems();
+void __cdecl BG_SetupWeaponIndex(uint32_t weapIndex);
+void __cdecl BG_FillInWeaponItems(uint32_t weapIndex);
+void __cdecl BG_SetupAmmoIndexes(uint32_t weapIndex);
+void __cdecl BG_SetupSharedAmmoIndexes(uint32_t weapIndex);
+void __cdecl BG_SetupClipIndexes(uint32_t weapIndex);
+void __cdecl PM_StartWeaponAnim(playerState_s *ps, int32_t anim);
+WeaponDef *__cdecl BG_GetWeaponDef(uint32_t weaponIndex);
+uint32_t __cdecl BG_GetWeaponIndex(const WeaponDef *weapDef);
+uint32_t __cdecl BG_GetNumWeapons();
+int32_t __cdecl BG_GetSharedAmmoCapSize(uint32_t capIndex);
+uint32_t __cdecl BG_FindWeaponIndexForName(const char *name);
+uint32_t __cdecl BG_GetWeaponIndexForName(const char *name, void(__cdecl *regWeap)(uint32_t));
+uint32_t __cdecl BG_SetupWeaponDef(WeaponDef *weapDef, void(__cdecl *regWeap)(uint32_t));
+void __cdecl BG_SetupWeaponAlts(uint32_t weapIndex, void(__cdecl *regWeap)(uint32_t));
+uint32_t __cdecl BG_GetViewmodelWeaponIndex(const playerState_s *ps);
+int32_t __cdecl BG_GetFirstAvailableOffhand(const playerState_s *ps, int32_t offhandClass);
+int32_t __cdecl BG_GetFirstEquippedOffhand(const playerState_s *ps, int32_t offhandClass);
+int32_t __cdecl BG_IsAimDownSightWeapon(uint32_t weaponIndex);
+bool __cdecl BG_CanPlayerHaveWeapon(uint32_t weaponIndex);
+bool __cdecl BG_ValidateWeaponNumber(uint32_t weaponIndex);
+bool __cdecl BG_IsWeaponValid(const playerState_s *ps, uint32_t weaponIndex);
+bool __cdecl BG_WeaponBlocksProne(uint32_t weapIndex);
+int32_t __cdecl BG_TakePlayerWeapon(playerState_s *ps, uint32_t weaponIndex, int32_t takeAwayAmmo);
+int32_t __cdecl AmmoAfterWeaponRemoved(const playerState_s *ps, uint32_t weaponIndex);
+int32_t __cdecl BG_GetAmmoPlayerMax(const playerState_s *ps, uint32_t weaponIndex, uint32_t weaponIndexToSkip);
+int32_t __cdecl BG_GetMaxPickupableAmmo(const playerState_s *ps, uint32_t weaponIndex);
+int32_t __cdecl BG_GetTotalAmmoReserve(const playerState_s *ps, uint32_t weaponIndex);
+void __cdecl BG_GetSpreadForWeapon(
+    const playerState_s *ps,
+    const WeaponDef *weapDef,
+    float *minSpread,
+    float *maxSpread);
+void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml);
+bool __cdecl PM_IsAdsAllowed(playerState_s *ps, pml_t *pml);
+void __cdecl PM_ExitAimDownSight(playerState_s *ps);
+void __cdecl PM_UpdateAimDownSightLerp(pmove_t *pm, pml_t *pml);
+bool __cdecl BG_UsingSniperScope(playerState_s *ps);
+int32_t __cdecl PM_InteruptWeaponWithProneMove(playerState_s *ps);
+int32_t __cdecl BG_ClipForWeapon(uint32_t weapon);
+int32_t __cdecl BG_AmmoForWeapon(uint32_t weapon);
+int32_t __cdecl BG_WeaponIsClipOnly(uint32_t weapon);
+int32_t __cdecl BG_WeaponAmmo(const playerState_s *ps, uint32_t weapon);
+int32_t __cdecl PM_WeaponAmmoAvailable(playerState_s *ps);
+void __cdecl PM_AdjustAimSpreadScale(pmove_t *pm, pml_t *pml);
+bool __cdecl ShotLimitReached(playerState_s *ps, WeaponDef *weapDef);
+int32_t __cdecl PM_GetWeaponFireButton(uint32_t weapon);
+void __cdecl PM_Weapon_Idle(playerState_s *ps);
+void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml);
+void __cdecl PM_UpdateHoldBreath(pmove_t *pm, pml_t *pml);
+void __cdecl PM_StartHoldBreath(playerState_s *ps);
+void __cdecl PM_EndHoldBreath(playerState_s *ps);
+int32_t __cdecl PM_Weapon_CheckForRechamber(playerState_s *ps, int32_t delayedAction);
+void __cdecl PM_Weapon_FinishRechamber(playerState_s *ps);
+void __cdecl PM_ContinueWeaponAnim(playerState_s *ps, int32_t anim);
+void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick);
+bool __cdecl PM_WeaponClipEmpty(playerState_s *ps);
+void __cdecl PM_Weapon_BeginWeaponRaise(
+    playerState_s *ps,
+    uint32_t anim,
+    uint32_t time,
+    float aim,
+    int32_t altSwitch);
+void __cdecl BG_TakeClipOnlyWeaponIfEmpty(playerState_s *ps, int32_t weaponIndex);
+void __cdecl PM_Weapon_FinishWeaponRaise(playerState_s *ps);
+void __cdecl PM_Weapon_FinishReloadStart(pmove_t *pm, int32_t delayedAction);
+void __cdecl PM_SetReloadingState(playerState_s *ps);
+void __cdecl PM_SetWeaponReloadAddAmmoDelay(playerState_s *ps);
+int32_t __cdecl PM_Weapon_AllowReload(playerState_s *ps);
+void __cdecl PM_Weapon_ReloadDelayedAction(playerState_s *ps);
+void __cdecl PM_ReloadClip(playerState_s *ps);
+void __cdecl PM_Weapon_FinishReload(pmove_t *pm, int32_t delayedAction);
+void __cdecl PM_Weapon_FinishReloadEnd(playerState_s *ps);
+void __cdecl PM_Weapon_CheckForReload(pmove_t *pm);
+void __cdecl PM_BeginWeaponReload(playerState_s *ps);
+bool __cdecl BurstFirePending(playerState_s *ps);
+void __cdecl UpdatePendingTriggerPull(pmove_t *pm);
+int32_t __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml);
+bool __cdecl WeaponUsesBurstCooldown(uint32_t weaponIdx);
+void __cdecl PM_Weapon_CheckForChangeWeapon(pmove_t *pm);
+void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool quick);
+int32_t __cdecl PM_Weapon_ShouldBeFiring(pmove_t *pm, int32_t delayedAction);
+void __cdecl PM_Weapon_FireWeapon(playerState_s *ps, int32_t delayedAction);
+void __cdecl PM_HoldBreathFire(playerState_s *ps);
+void __cdecl PM_WeaponUseAmmo(playerState_s *ps, uint32_t wp, int32_t amount);
+void __cdecl BG_SwitchWeaponsIfEmpty(playerState_s *ps);
+void __cdecl PM_Weapon_StartFiring(playerState_s *ps, int32_t delayedAction);
+int32_t __cdecl PM_Weapon_CheckFiringAmmo(playerState_s *ps);
+void __cdecl PM_Weapon_SetFPSFireAnim(playerState_s *ps);
+void __cdecl PM_Weapon_AddFiringAimSpreadScale(playerState_s *ps);
+void __cdecl PM_Weapon_MeleeEnd(playerState_s *ps);
+void __cdecl PM_Weapon_MeleeFire(playerState_s *ps);
+void __cdecl PM_Weapon_CheckForMelee(pmove_t *pm, int32_t delayedAction);
+void __cdecl PM_Weapon_MeleeInit(playerState_s *ps);
+bool __cdecl PM_WeaponHasChargeMelee(playerState_s *ps);
+void __cdecl PM_Weapon_OffHandPrepare(playerState_s *ps);
+void __cdecl PM_Weapon_OffHandHold(playerState_s *ps);
+void __cdecl PM_Weapon_OffHandStart(pmove_t *pm);
+void __cdecl PM_Weapon_OffHand(pmove_t *pm);
+void __cdecl PM_Weapon_OffHandEnd(playerState_s *ps);
+void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm);
+void __cdecl PM_Weapon_OffHandInit(playerState_s *ps);
+void __cdecl PM_SendEmtpyOffhandEvent(playerState_s *ps, OffhandClass offhandClass);
+bool __cdecl PM_Weapon_IsHoldingGrenade(pmove_t *pm);
+char __cdecl PM_UpdateGrenadeThrow(playerState_s *ps, pml_t *pml);
+char __cdecl PM_Weapon_CheckGrenadeHold(pmove_t *pm, int32_t delayedAction);
+void __cdecl PM_Weapon_CheckForDetonation(pmove_t *pm);
+void __cdecl PM_Weapon_CheckForGrenadeThrowCancel(pmove_t *pm);
+void __cdecl PM_Detonate(playerState_s *ps, int32_t delayedAction);
+void __cdecl PM_Weapon_CheckForNightVision(pmove_t *pm);
+void __cdecl PM_Weapon_FinishNightVisionWear(playerState_s *ps);
+void __cdecl PM_Weapon_FinishNightVisionRemove(playerState_s *ps);
 
-// Switch runtime definitions. These are native ARM64 runtime types, not serialized 32-bit layouts.
+#ifdef KISAK_SP
+bool __cdecl ViewModelOverride(playerState_s *ps, pml_t *pml);
+#endif
+
+void __cdecl Sprint_State_Loop(playerState_s *ps);
+void __cdecl PM_Weapon_CheckForSprint(pmove_t *pm);
+void __cdecl Sprint_State_Raise(playerState_s *ps);
+void __cdecl Sprint_State_Drop(playerState_s *ps);
+void __cdecl PM_ResetWeaponState(playerState_s *ps);
+void __cdecl BG_WeaponFireRecoil(const playerState_s *ps, float *vGunSpeed, float *kickAVel);
+float __cdecl BG_GetBobCycle(const playerState_s *ps);
+float __cdecl BG_GetVerticalBobFactor(const playerState_s *ps, float cycle, float speed, float maxAmp);
+float __cdecl BG_GetHorizontalBobFactor(const playerState_s *ps, float cycle, float speed, float maxAmp);
+void __cdecl BG_CalculateWeaponAngles(weaponState_t *ws, float *angles);
+void __cdecl BG_CalculateWeaponPosition_BaseAngles(weaponState_t *ws, float *angles);
+void __cdecl BG_CalculateWeaponPosition_BasePosition_angles(weaponState_t *ws, float *angles);
+void __cdecl BG_CalculateWeaponPosition_IdleAngles(weaponState_t *ws, float *angles);
+void __cdecl BG_CalculateWeaponPosition_BobOffset(weaponState_t *ws, float *angles);
+void __cdecl BG_CalculateWeaponPosition_DamageKick(weaponState_t *ws, float *angles);
+void __cdecl BG_CalculateWeaponPosition_GunRecoil(weaponState_t *ws, float *angles);
+int32_t __cdecl BG_CalculateWeaponPosition_GunRecoil_SingleAngle(
+    float *fOffset,
+    float *speed,
+    float fTimeStep,
+    float fOfsCap,
+    float fGunKickAccel,
+    float fGunKickSpeedMax,
+    float fGunKickSpeedDecay,
+    float fGunKickStaticDecay);
+void __cdecl BG_CalculateViewAngles(viewState_t *vs, float *angles);
+void __cdecl BG_CalculateView_DamageKick(viewState_t *vs, float *angles);
+void __cdecl BG_CalculateView_IdleAngles(viewState_t *vs, float *angles);
+void __cdecl BG_CalculateView_BobAngles(viewState_t *vs, float *angles);
+void __cdecl BG_CalculateView_Velocity(viewState_t *vs, float *angles);
+void __cdecl BG_CalculateWeaponPosition_Sway(
+    const playerState_s *ps,
+    float *swayViewAngles,
+    float *swayOffset,
+    float *swayAngles,
+    float ssSwayScale,
+    int32_t frametime);
+int32_t __cdecl BG_PlayerWeaponCountPrimaryTypes(const playerState_s *ps);
+bool __cdecl BG_PlayerWeaponsFull_Primaries(const playerState_s *ps);
+char __cdecl BG_PlayerHasCompatibleWeapon(const playerState_s *ps, uint32_t weaponIndex);
+bool __cdecl BG_ThrowingBackGrenade(const playerState_s *ps);
+WeaponDef *__cdecl BG_LoadWeaponDef(const char *name);
+WeaponDef *__cdecl BG_LoadWeaponDef_FastFile(const char *name);
+void __cdecl BG_AssertOffhandIndexOrNone(uint32_t offHandIndex);
+void __cdecl BG_StringCopy(uint8_t *member, const char *keyValue);
+int BG_ValidateWeaponNumberOffhand(uint32_t weaponIndex);
+
+
 #ifdef KISAK_MP
-struct hudelem_s // sizeof=0xA0
-{                                       // XREF: .data:g_dummyHudCurrent/r
-    he_type_t type;
-    float x;
-    float y;
-    float z;                            // XREF: .rdata:off_866438/o
-    int32_t targetEntNum;
-    float fontScale;
-    int32_t font;
-    int32_t alignOrg;
-    int32_t alignScreen;
-    hudelem_color_t color;
-    hudelem_color_t fromColor;
-    int32_t fadeStartTime;                  // XREF: _memmove:UnwindDown3/o
-    int32_t fadeTime;                       // XREF: Sys_GetPhysicalCpuCount+131/o
-    int32_t label;
-    int32_t width;
-    int32_t height;
-    int32_t materialIndex;
-    int32_t offscreenMaterialIdx;           // XREF: Image_CopyBitmapData:off_810011/o
-    int32_t fromWidth;                      // XREF: .rdata:008CF9F1/o
-    int32_t fromHeight;
-    int32_t scaleStartTime;                 // XREF: .rdata:008CFA4D/o
-    int32_t scaleTime;
-    float fromX;
-    float fromY;
-    int32_t fromAlignOrg;
-    int32_t fromAlignScreen;                // XREF: SV_Shutdown(char const *):loc_5D1039/o
-    int32_t moveStartTime;                  // XREF: .rdata:val_dc_luminance/o
-    int32_t moveTime;                       // XREF: .rdata:008CFA2D/o
-    int32_t time;                           // XREF: .rdata:off_866450/o
-    int32_t duration;
-    float value;                        // XREF: unzlocal_CheckCurrentFileCoherencyHeader:loc_67D5A6/o
-    int32_t text;
-    float sort;
-    hudelem_color_t glowColor;
-    int32_t fxBirthTime;                    // XREF: R_Cinematic_BinkOpenPath:loc_792B62/o
-    int32_t fxLetterTime;                   // XREF: .rdata:008CFA1D/o
-    int32_t fxDecayStartTime;               // XREF: .rdata:008CFA31/o
-    int32_t fxDecayDuration;                // XREF: .rdata:008E8CBD/o
-    int32_t soundID;
-    int32_t flags;
-};
-static_assert(sizeof(hudelem_s) == 0xA0);
-#elif KISAK_SP
-struct hudelem_s
-{
-    he_type_t type;
-    float x;
-    float y;
-    float z;
-    int targetEntNum;
-    float fontScale;
-    float fromFontScale;
-    int fontScaleStartTime;
-    int fontScaleTime;
-    int font;
-    int alignOrg;
-    int alignScreen;
-    hudelem_color_t color;
-    hudelem_color_t fromColor;
-    int fadeStartTime;
-    int fadeTime;
-    int label;
-    int width;
-    int height;
-    int materialIndex;
-    int offscreenMaterialIdx;
+// bg_vehicles_mp
+uint16 BG_VehiclesGetSlotTagName(int slotIndex);
+#endif
+
+
+// bg_slidemove
+void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity);
+int32_t __cdecl PM_VerifyPronePosition(pmove_t *pm, float *vFallbackOrg, float *vFallbackVel);
+bool __cdecl PM_SlideMove(pmove_t *pm, pml_t *pml, int32_t gravity);
+double __cdecl PM_PermuteRestrictiveClipPlanes(
+    const float *velocity,
+    int32_t planeCount,
+    const float (*planes)[3],
+    int32_t *permutation);
+
+
+// bg_weapons_load_obj
+char *__cdecl BG_GetPlayerAnimTypeName(int32_t index);
+void __cdecl TRACK_bg_weapons_load_obj();
+const char *__cdecl BG_GetWeaponTypeName(weapType_t type);
+const char *__cdecl BG_GetWeaponClassName(weapClass_t type);
+const char *__cdecl BG_GetWeaponInventoryTypeName(weapInventoryType_t type);
+void __cdecl BG_LoadWeaponStrings();
+void __cdecl BG_LoadPlayerAnimTypes();
+WeaponDef *__cdecl BG_LoadDefaultWeaponDef();
+WeaponDef *__cdecl BG_LoadDefaultWeaponDef_FastFile();
+
+
+
+// bg_misctables
+extern gitem_s bg_itemlist[2048];
+extern int itemRegistered[2048];
+
+const float playerMins[] = { -15.0, -15.0, 0.0 };
+const float playerMaxs[] = { 15.0, 15.0, 70.0 };
+
+const int serverOnlyEvents[4] = { 31, 20, 19, -1 }; // idb
+const int singleClientEvents[13] = { 6, 7, 8, 34, 13, 14, 32, 33, 34, 37, 42, 43, -1 }; // idb
