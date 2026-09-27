@@ -15,67 +15,9 @@ include(${SCRIPTS_DIR}/source_groups.cmake)
 # message(${SRC_DIR})
 include (${PLATFORM_DIR}/${KISAK_PLATFORM}/platform.cmake)
 
-# Switch currently builds the platform/graphics bootstrap only. This keeps the
-# first Switch build independent from the Win32/D3D9 renderer while the
-# platform layer is being ported.
-if (KISAK_PLATFORM STREQUAL "switch" AND KISAK_SWITCH_BOOTSTRAP)
-    add_executable(${PROJECT_NAME}
-        ${SWITCH_SRC}
-    )
-else()
-# Add the new executable
 add_executable(${PROJECT_NAME}
-    ${SRCROOT}
-    ${DYNENTITY} 
-    ${EFFECTSCORE} 
-    ${AIM_ASSIST} 
-    ${BGAME} 
-    ${BINKLIB} 
-    ${CGAME} 
-    ${CGAME_MP} 
-    ${CLIENT} 
-    ${CLIENT_MP} 
-    ${COMMON} 
-    ${DATABASE} 
-    ${DEVGUI} 
-    ${GAME} 
-    ${GAME_MP} 
-    ${GFX_D3D} 
-    ${GROUPVOICE} 
-    ${GROUPVOICE_SPEEX} 
-    ${MSSLIB} 
-    ${ODE} 
-    ${PHYSICS} 
-    ${PHYSICS_ODE} 
-    ${QCOMMON} 
-    ${RAGDOLL} 
-    ${SCRIPT} 
-    ${SERVER} 
-    ${SERVER_MP} 
-    ${SOUND}
-    ${SOUND_BACKEND}
-    ${SPEEX}
-    ${STRINGED} 
-    ${UI} 
-    ${UI_MP} 
-    ${UNIVERSAL} 
-    ${WIN32_SRC}
-    ${XANIM} 
-    ${ZLIB} 
-    ${STEAM_HEADERS}
+    ${SWITCH_SRC}
 )
-
-endif()
-
-if (KISAK_PLATFORM STREQUAL "switch" AND KISAK_SWITCH_BOOTSTRAP)
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-        glad
-        EGL
-        glapi
-        drm_nouveau
-        nx
-    )
-endif()
 
 # Add multiplayer flag
 target_compile_definitions(${PROJECT_NAME} PUBLIC KISAK_MP CINEMA USE_SEPARATE_BLIT_TEXTURE)
