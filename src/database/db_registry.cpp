@@ -729,6 +729,42 @@ void DB_Init()
 
 
 #ifdef __SWITCH__
+void __cdecl DB_LoadXZone(XZoneInfo *zoneInfo, uint32_t zoneCount)
+{
+    uint32_t j; // [esp+0h] [ebp-Ch]
+    char *zoneName; // [esp+4h] [ebp-8h]
+    uint32_t zoneInfoCount; // [esp+8h] [ebp-4h]
+
+    if (g_zoneCount == 32)
+        Com_Error(ERR_DROP, "Max zone count exceeded");
+    if (g_zoneInfoCount)
+        MyAssertHandler(".\\database\\db_registry.cpp", 3240, 0, "%s", "!g_zoneInfoCount");
+    if (g_loadingAssets)
+        MyAssertHandler(".\\database\\db_registry.cpp", 3241, 0, "%s", "!g_loadingAssets");
+    zoneInfoCount = 0;
+    for (j = 0; j < zoneCount; ++j)
+    {
+        zoneName = (char *)zoneInfo[j].name;
+        if (zoneName)
+        {
+            if (zoneInfoCount >= 8)
+                MyAssertHandler(".\\database\\db_registry.cpp", 3249, 0, "%s", "zoneInfoCount < ARRAY_COUNT( g_zoneInfo )");
+            I_strncpyz(g_zoneInfo[zoneInfoCount].name, zoneName, 64);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Loading fastfile %s\n", g_zoneInfo[zoneInfoCount].name);
+            g_zoneInfo[zoneInfoCount++].flags = zoneInfo[j].allocFlags;
+        }
+    }
+    if (zoneInfoCount)
+    {
+        g_loadingAssets = zoneInfoCount;
+        Sys_WakeDatabase2();
+        Sys_WakeDatabase();
+        g_zoneInfoCount = zoneInfoCount;
+        Sys_NotifyDatabase();
+    }
+}
+
+#ifdef __SWITCH__
 void __cdecl DB_InitThread()
 {
     if (!Sys_SpawnDatabaseThread((void(__cdecl *)(uint32_t))DB_Thread))
