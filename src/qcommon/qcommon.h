@@ -1164,7 +1164,11 @@ struct SpawnVar // sizeof=0xA0C
     int32_t numSpawnVarChars;
     char spawnVarChars[2048];
 };
+#ifndef __SWITCH__
+// Native ARM64 layout differs from the original 32-bit runtime; serialized layouts are handled by Switch loaders.
+
 static_assert(sizeof(SpawnVar) == 0xA0C);
+#endif // !__SWITCH__
 
 void __cdecl CM_LoadMapData_LoadObj(const char *name);
 struct cplane_s *__cdecl CM_GetPlanes();
