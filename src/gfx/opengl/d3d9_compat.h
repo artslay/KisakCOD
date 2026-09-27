@@ -294,6 +294,10 @@ class IDirect3DDevice9
     float m_viewportWidth = 1280.0f;
     float m_viewportHeight = 720.0f;
     GLenum m_textureTargets[16]{};
+    uint32_t m_srcBlend = 2;
+    uint32_t m_dstBlend = 1;
+    uint32_t m_srcBlendAlpha = 2;
+    uint32_t m_dstBlendAlpha = 1;
     std::array<std::array<float, 4>, 256> m_vsConstants{};
     std::array<std::array<float, 4>, 256> m_psConstants{};
     IDirect3DSurface9 *m_color = nullptr;
@@ -829,6 +833,15 @@ void main()
         }
     }
 
+    void ApplyBlendFactors()
+    {
+        glBlendFuncSeparate(
+            BlendFactor(m_srcBlend),
+            BlendFactor(m_dstBlend),
+            BlendFactor(m_srcBlendAlpha),
+            BlendFactor(m_dstBlendAlpha));
+    }
+
     static GLenum BlendOperation(uint32_t value)
     {
         switch (value)
@@ -855,16 +868,23 @@ void main()
             if (value) glEnable(GL_BLEND); else glDisable(GL_BLEND);
             break;
         case D3DRS_SRCBLEND:
-            glBlendFuncSeparate(BlendFactor(value), GL_DST_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            m_srcBlend = value;
+            ApplyBlendFactors();
             break;
         case D3DRS_DESTBLEND:
-            glBlendFuncSeparate(GL_SRC_ALPHA, BlendFactor(value), GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            m_dstBlend = value;
+            ApplyBlendFactors();
             break;
         case D3DRS_BLENDOP:
             glBlendEquation(BlendOperation(value));
             break;
         case D3DRS_SRCBLENDALPHA:
+            m_srcBlendAlpha = value;
+            ApplyBlendFactors();
+            break;
         case D3DRS_DESTBLENDALPHA:
+            m_dstBlendAlpha = value;
+            ApplyBlendFactors();
             break;
         case D3DRS_BLENDOPALPHA:
             glBlendEquationSeparate(GL_FUNC_ADD, BlendOperation(value));
