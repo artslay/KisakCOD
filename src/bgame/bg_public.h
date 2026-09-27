@@ -587,7 +587,17 @@ enum MissileFlightMode : __int32
     MISSILEFLIGHTMODE_DIRECT = 0x1,
 };
 
+#ifdef KISAK_SP
+enum team_t : __int32
+{
+    TEAM_FREE = 0,
+    TEAM_AXIS = 1,
+    TEAM_ALLIES = 2,
+    TEAM_SPECTATOR = 3,
+};
+#else
 enum team_t;
+#endif
 #ifdef KISAK_MP
 struct corpse_ent_t // sizeof=0x4
 {                                       // ...
