@@ -1715,6 +1715,27 @@ void __cdecl R_HW_SetBackStencilFunc(IDirect3DDevice9 *device, uint32_t stencilF
     } while (alwaysfails);
 }
 
+#ifdef __SWITCH__
+void __cdecl R_HW_SetVertexShader(IDirect3DDevice9 *device, const MaterialVertexShader *vertexShader)
+{
+    if (device && vertexShader)
+        device->SetVertexShader(vertexShader->prog.vs);
+}
+
+void __cdecl R_HW_SetPixelShader(IDirect3DDevice9 *device, const MaterialPixelShader *pixelShader)
+{
+    if (device && pixelShader)
+        device->SetPixelShader(pixelShader->prog.ps);
+}
+
+void __cdecl R_HW_SetSamplerTexture(IDirect3DDevice9 *device, uint32_t samplerIndex, const GfxTexture *texture)
+{
+    if (!device || !texture)
+        return;
+    device->SetTexture(samplerIndex, texture->basemap);
+}
+#endif
+
 void __cdecl R_SetSampler(
     GfxCmdBufContext context,
     uint32_t samplerIndex,
