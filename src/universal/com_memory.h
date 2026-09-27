@@ -18,6 +18,46 @@ struct TempMemInfo // sizeof=0x28
 
 union XAssetHeader;
 
+struct HunkUser;
+
+class LargeLocal
+{
+public:
+    explicit LargeLocal(int32_t sizeParam);
+    ~LargeLocal();
+    uint8_t* GetBuf();
+
+private:
+    int32_t startPos;
+    int32_t size;
+};
+
+uint8_t* __cdecl Hunk_Alloc(uint32_t size, const char* name, int32_t type);
+uint8_t* __cdecl Hunk_AllocAlign(uint32_t size, int32_t alignment, const char* name, int32_t type);
+uint8_t* __cdecl Hunk_AllocLow(uint32_t size, const char* name, int32_t type);
+uint8_t* __cdecl Hunk_AllocLowAlign(uint32_t size, int32_t alignment, const char* name, int32_t type);
+uint32_t* __cdecl Hunk_AllocateTempMemory(int32_t size, const char* name);
+uint32_t __cdecl Hunk_AllocateTempMemoryHigh(int32_t size, const char* name);
+void __cdecl Hunk_FreeTempMemory(char* buf);
+void __cdecl Hunk_ClearTempMemory();
+void Hunk_ClearTempMemoryHigh();
+void Hunk_CheckTempMemoryClear();
+void Hunk_CheckTempMemoryHighClear();
+
+HunkUser* __cdecl Hunk_UserCreate(int32_t maxSize, const char* name, bool fixed, bool tempMem, int32_t type);
+void* __cdecl Hunk_UserAlloc(HunkUser* user, uint32_t size, int32_t alignment);
+void* __cdecl Hunk_UserAllocAlignStrict(HunkUser* user, uint32_t size);
+void __cdecl Hunk_UserSetPos(HunkUser* user, uint8_t* pos);
+void __cdecl Hunk_UserReset(HunkUser* user);
+void __cdecl Hunk_UserDestroy(HunkUser* user);
+char* __cdecl Hunk_CopyString(HunkUser* user, const char* in);
+
+int32_t __cdecl LargeLocalBegin(int32_t size);
+uint32_t __cdecl LargeLocalRoundSize(int32_t size);
+void __cdecl LargeLocalEnd(int32_t startPos);
+uint8_t* __cdecl LargeLocalGetBuf(int32_t startPos);
+
+
 void __cdecl Hunk_AddAsset(XAssetHeader header, _DWORD *data);
 
 void Com_TouchMemory();
