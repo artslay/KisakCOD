@@ -55,6 +55,9 @@ struct GfxPackedVertex // sizeof=0x20
     PackedUnitVec normal;
     PackedUnitVec tangent;
 };
+#ifndef __SWITCH__
+// Native ARM64 layout differs from the original 32-bit runtime; serialized layouts are handled by Switch loaders.
+
 static_assert(sizeof(GfxPackedVertex) == 32);
 
 struct GfxPackedVertexNormal // sizeof=0x8
@@ -677,6 +680,7 @@ struct GfxPixelShaderLoadDef // sizeof=0x8
     uint16_t loadForRenderer;
 };
 static_assert(sizeof(GfxPixelShaderLoadDef) == 8);
+#endif // !__SWITCH__
 
 struct GfxDepthOfField // sizeof=0x20
 {                                       // ...
