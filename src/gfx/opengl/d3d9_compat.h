@@ -21,6 +21,11 @@
 struct HINSTANCE__ {};
 struct IDirect3DSwapChain9 { void Release() { delete this; } };
 using _D3DMULTISAMPLE_TYPE = uint32_t;
+enum _D3DTEXTUREFILTERTYPE : uint32_t
+{
+    
+    D3DTEXF_ANISOTROPIC = 3,
+};
 #ifndef GL_GLEXT_PROTOTYPES
 #define GL_GLEXT_PROTOTYPES 1
 #endif
