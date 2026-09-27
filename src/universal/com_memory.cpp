@@ -29,6 +29,7 @@ struct HunkUser
     bool fixed;
     bool tempMem;
     int32_t type;
+    uint8_t _pad[8];
     uint8_t buf[1];
 };
 
@@ -914,7 +915,7 @@ void* Hunk_UserAlloc(HunkUser* user, uint32_t size, int32_t alignment)
     {
         pos = current->pos;
         result = ~alignment & (alignment + pos);
-        if ((signed int)(size + result) <= current->end)
+        if ((uintptr_t)size + result <= current->end)
             break;
         if (user->fixed)
             Com_Error(ERR_FATAL, "Hunk_UserAlloc: out of memory");
