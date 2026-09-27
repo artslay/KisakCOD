@@ -29,7 +29,7 @@ const dvar_t *vehHudReticleBouncingRadius;
 const dvar_t *vehHudReticleBouncingSpeed;
 
 bool __cdecl ClampScreenPosToEdges(
-    const float *localClientNum,
+    int localClientNum,
     Material *point,
     double padLeft,
     double padRight,
