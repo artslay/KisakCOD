@@ -12,6 +12,7 @@
 
 struct Material;
 struct XModel;
+struct GfxImage;
 
 #define NULL_VERTEX_BUFFER 0
 
