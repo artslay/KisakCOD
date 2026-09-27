@@ -27,7 +27,11 @@
 
 #include <ode/config.h>
 
+#if defined(__SWITCH__)
+#include <stdarg.h>
+#else
 #include <vadefs.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
