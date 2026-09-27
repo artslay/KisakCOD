@@ -196,14 +196,11 @@ union hudelem_color_t // sizeof=0x4
     };
     uint32_t rgba;
 };
-// Legacy definitions are shared with Switch; disable only the original 32-bit layout assertions.
-#ifdef __SWITCH__
-#define BG_LEGACY_STATIC_ASSERT(...)
-#else
-#define BG_LEGACY_STATIC_ASSERT(x) BG_LEGACY_STATIC_ASSERT(x)
-#endif
-
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(union hudelem_color_t) == 0x4);
+#endif
+#endif
 
 enum ViewLockTypes : __int32
 {                                       // XREF: playerState_s/r
@@ -245,7 +242,11 @@ struct scr_anim_s // sizeof=0x4
         const char* linkPointer;
     };
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(struct scr_anim_s) == 0x4);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(struct scr_anim_s) == 0x4);
+#endif
+#endif
 
 struct loadAnim_t // sizeof=0x48
 {
@@ -253,14 +254,22 @@ struct loadAnim_t // sizeof=0x48
     int32_t iNameHash;
     char szAnimName[64];
 };
-BG_LEGACY_STATIC_ASSERT((sizeof(struct loadAnim_t) * 512) == 36864);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert((sizeof(struct loadAnim_t) * 512) == 36864);
+#endif
+#endif
 
 struct animStringItem_t // sizeof=0x8
 {                                       // ...
     const char *string;                 // ...
     int32_t hash;                           // ...
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(animStringItem_t) == 0x8);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(animStringItem_t) == 0x8);
+#endif
+#endif
 
 struct controller_info_t // sizeof=0x60
 {                                       // ...
@@ -268,14 +277,22 @@ struct controller_info_t // sizeof=0x60
     float tag_origin_angles[3];         // ...
     float tag_origin_offset[3];         // ...
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(controller_info_t) == 0x60);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(controller_info_t) == 0x60);
+#endif
+#endif
 
 struct animConditionTable_t // sizeof=0x8
 {                                       // ...
     animScriptConditionTypes_t type;    // ...
     animStringItem_t *values;           // ...
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(animConditionTable_t) == 0x8);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(animConditionTable_t) == 0x8);
+#endif
+#endif
 
 struct viewDamage_t // sizeof=0xC
 {                                       // ...
@@ -283,7 +300,11 @@ struct viewDamage_t // sizeof=0xC
     int32_t duration;
     float yaw;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(viewDamage_t) == 0xC);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(viewDamage_t) == 0xC);
+#endif
+#endif
 
 struct shellshock_parms_t_screenblend // sizeof=0x14
 {                                       // ...
@@ -293,7 +314,11 @@ struct shellshock_parms_t_screenblend // sizeof=0x14
     int32_t flashShotFadeTime;
     ShockViewTypes type;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(shellshock_parms_t_screenblend) == 0x14);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(shellshock_parms_t_screenblend) == 0x14);
+#endif
+#endif
 
 struct shellshock_parms_t_view // sizeof=0xC
 {                                       // ...
@@ -301,7 +326,11 @@ struct shellshock_parms_t_view // sizeof=0xC
     float kickRate;
     float kickRadius;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(shellshock_parms_t_view) == 0xC);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(shellshock_parms_t_view) == 0xC);
+#endif
+#endif
 
 struct shellshock_parms_t_sound // sizeof=0x230
 {                                       // ...
@@ -323,7 +352,11 @@ struct shellshock_parms_t_sound // sizeof=0x230
     int32_t loopFadeTime;
     int32_t loopEndDelay;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(shellshock_parms_t_sound) == 0x230);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(shellshock_parms_t_sound) == 0x230);
+#endif
+#endif
 
 struct shellshock_parms_t_lookcontrol // sizeof=0x14
 {                                       // ...
@@ -336,13 +369,21 @@ struct shellshock_parms_t_lookcontrol // sizeof=0x14
     float maxPitchSpeed;
     float maxYawSpeed;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(shellshock_parms_t_lookcontrol) == 0x14);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(shellshock_parms_t_lookcontrol) == 0x14);
+#endif
+#endif
 
 struct shellshock_parms_t_movement // sizeof=0x1
 {                                       // ...
     bool affect;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(shellshock_parms_t_movement) == 0x1);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(shellshock_parms_t_movement) == 0x1);
+#endif
+#endif
 
 struct shellshock_parms_t // sizeof=0x268
 {                                       // ...
@@ -355,7 +396,11 @@ struct shellshock_parms_t // sizeof=0x268
     // padding byte
     // padding byte
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(shellshock_parms_t) == 0x268);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(shellshock_parms_t) == 0x268);
+#endif
+#endif
 
 struct shellshock_t // sizeof=0x20
 {                                       // ...
@@ -367,7 +412,11 @@ struct shellshock_t // sizeof=0x20
     float viewDelta[2];
     int32_t hasSavedScreen;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(shellshock_t) == 0x20);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(shellshock_t) == 0x20);
+#endif
+#endif
 
 struct __declspec(align(8)) animation_s // sizeof=0x68
 {                                       // ...
@@ -388,14 +437,22 @@ struct __declspec(align(8)) animation_s // sizeof=0x68
     // padding byte
     // padding byte
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(animation_s) == 0x68);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(animation_s) == 0x68);
+#endif
+#endif
 
 struct animScriptCondition_t // sizeof=0xC
 {                                       // ...
     int32_t index;
     uint32_t value[2];
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(animScriptCondition_t) == 0xC);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(animScriptCondition_t) == 0xC);
+#endif
+#endif
 
 
 struct animScriptCommand_t // sizeof=0x10
@@ -405,7 +462,11 @@ struct animScriptCommand_t // sizeof=0x10
     int16_t animDuration[2];
     snd_alias_list_t* soundAlias;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(animScriptCommand_t) == 0x10);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(animScriptCommand_t) == 0x10);
+#endif
+#endif
 
 enum animScriptParseMode_t : __int32
 {                                       // ...
@@ -424,14 +485,22 @@ struct animScriptItem_t // sizeof=0x100
     int32_t numCommands;
     animScriptCommand_t commands[8];
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(animScriptItem_t) == 0x100);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(animScriptItem_t) == 0x100);
+#endif
+#endif
 
 struct animScript_t // sizeof=0x204
 {                                       // ...
     int32_t numItems;
     animScriptItem_t* items[128];
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(animScript_t) == 0x204);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(animScript_t) == 0x204);
+#endif
+#endif
 
 struct scr_animtree_t // sizeof=0x4
 {                                       // ...
@@ -441,7 +510,11 @@ struct scr_animtree_t // sizeof=0x4
     }
     XAnim_s* anims;                     // ...
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(scr_animtree_t) == 0x4);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(scr_animtree_t) == 0x4);
+#endif
+#endif
 
 struct __declspec(align(8)) animScriptData_t // sizeof=0x9A9D0
 {                                       // ...
@@ -466,7 +539,11 @@ struct __declspec(align(8)) animScriptData_t // sizeof=0x9A9D0
     // padding byte
     // padding byte
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(animScriptData_t) == 0x9A9D0);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(animScriptData_t) == 0x9A9D0);
+#endif
+#endif
 
 struct lerpFrame_t // sizeof=0x30
 {                                       // ...
@@ -481,7 +558,11 @@ struct lerpFrame_t // sizeof=0x30
     float animSpeedScale;
     int32_t oldFrameSnapshotTime;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(lerpFrame_t) == 0x30);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(lerpFrame_t) == 0x30);
+#endif
+#endif
 
 struct clientControllers_t // sizeof=0x60
 {                                       // ...
@@ -489,7 +570,11 @@ struct clientControllers_t // sizeof=0x60
     float tag_origin_angles[3];
     float tag_origin_offset[3];
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(clientControllers_t) == 0x60);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(clientControllers_t) == 0x60);
+#endif
+#endif
 
 #ifdef KISAK_MP
 struct clientInfo_t // sizeof=0x4CC
@@ -537,7 +622,11 @@ struct clientInfo_t // sizeof=0x4CC
     // padding byte
     // padding byte
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(clientInfo_t) == 0x4CC);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(clientInfo_t) == 0x4CC);
+#endif
+#endif
 
 struct bgs_t_human // sizeof=0x10
 {                                       // ...
@@ -546,7 +635,11 @@ struct bgs_t_human // sizeof=0x10
     scr_anim_s legs;
     scr_anim_s turning;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(bgs_t_human) == 0x10);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(bgs_t_human) == 0x10);
+#endif
+#endif
 
 struct bgs_t // sizeof=0xADD08
 {                                       // ...
@@ -564,14 +657,22 @@ struct bgs_t // sizeof=0xADD08
     void* (__cdecl* AllocXAnim)(int32_t);   // ...
     clientInfo_t clientinfo[64];        // ...
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(bgs_t) == 0xADD08);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(bgs_t) == 0xADD08);
+#endif
+#endif
 #endif
 
 struct hudElemSoundInfo_t // sizeof=0x4
 {                                       // ...
     int32_t lastPlayedTime;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(hudElemSoundInfo_t) == 0x4);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(hudElemSoundInfo_t) == 0x4);
+#endif
+#endif
 
 #ifdef KISAK_MP
 enum he_type_t : __int32
@@ -668,27 +769,13 @@ struct hudelem_s // sizeof=0xA0
     int32_t soundID;
     int32_t flags;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(hudelem_s) == 0xA0);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(hudelem_s) == 0xA0);
+#endif
+#endif
 #elif KISAK_SP
-#undef BG_LEGACY_STATIC_ASSERT
-
 #if defined(KISAK_SP) && defined(__SWITCH__)
-enum he_type_t : __int32
-{
-    HE_TYPE_FREE = 0x0,
-    HE_TYPE_TEXT = 0x1,
-    HE_TYPE_VALUE = 0x2,
-    HE_TYPE_MATERIAL = 0x3,
-    HE_TYPE_TIMER_DOWN = 0x4,
-    HE_TYPE_TIMER_UP = 0x5,
-    HE_TYPE_TENTHS_TIMER_DOWN = 0x6,
-    HE_TYPE_TENTHS_TIMER_UP = 0x7,
-    HE_TYPE_CLOCK_DOWN = 0x8,
-    HE_TYPE_CLOCK_UP = 0x9,
-    HE_TYPE_WAYPOINT = 0xA,
-    HE_TYPE_COUNT = 0xB,
-};
-
 struct hudelem_s
 {
     he_type_t type;
@@ -746,7 +833,11 @@ struct MantleState // sizeof=0x10
     int32_t transIndex;
     int32_t flags;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(MantleState) == 0x10);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(MantleState) == 0x10);
+#endif
+#endif
 
 enum MantleAnims : __int32
 {
@@ -783,7 +874,11 @@ struct playerState_s_hud // sizeof=0x26C0
     hudelem_s current[31];              // XREF: Sys_GetPhysicalCpuCount+131/o
     hudelem_s archival[31];             // XREF: SV_Shutdown(char const *):loc_5D1039/o
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(playerState_s_hud) == 0x26C0);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(playerState_s_hud) == 0x26C0);
+#endif
+#endif
 #elif KISAK_SP
 struct playerState_s_hud
 {
@@ -804,13 +899,21 @@ struct ActionSlotParam_SpecifyWeapon // sizeof=0x4
 {                                       // XREF: ActionSlotParam/r
     uint32_t index;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(ActionSlotParam_SpecifyWeapon) == 0x4);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(ActionSlotParam_SpecifyWeapon) == 0x4);
+#endif
+#endif
 
 struct ActionSlotParam // sizeof=0x4
 {                                       // XREF: playerState_s/r
     ActionSlotParam_SpecifyWeapon specifyWeapon;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(ActionSlotParam) == 0x4);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(ActionSlotParam) == 0x4);
+#endif
+#endif
 
 struct SprintState // sizeof=0x14
 {                                       // XREF: playerState_s/r cg_s/r
@@ -820,7 +923,11 @@ struct SprintState // sizeof=0x14
     int32_t lastSprintEnd;
     int32_t sprintStartMaxLength;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(SprintState) == 0x14);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(SprintState) == 0x14);
+#endif
+#endif
 
 enum objectiveState_t : __int32
 {                                       // XREF: objective_t/r
@@ -843,7 +950,11 @@ struct objective_t // sizeof=0x1C
     // _memcpy+2E8/o
     int32_t icon;
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(objective_t) == 0x1C);
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(objective_t) == 0x1C);
+#endif
+#endif
 
 enum pmflags_t : __int32 // (MP/SP same)
 {
@@ -1025,9 +1136,11 @@ struct playerState_s // sizeof=0x2F64
     // XREF: SV_Shutdown(char const *):loc_5D1039/o
     // TRACK_sv_main(void)+A/o ...
 };
-BG_LEGACY_STATIC_ASSERT(sizeof(playerState_s) == 0x2F64);
-
-#endif // KISAK_MP
+#ifndef __SWITCH__
+#ifndef __SWITCH__
+static_assert(sizeof(playerState_s) == 0x2F64);
+#endif
+#endif
 
 #if defined(KISAK_SP) && !defined(__SWITCH__)
 enum pmtype_t : __int32
@@ -1299,7 +1412,9 @@ struct CEntPlayerInfo // sizeof=0xC
     // padding byte
 };
 #ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(CEntPlayerInfo) == 0xC);
+#endif
 #endif
 
 struct CEntTurretAngles // sizeof=0x8
@@ -1307,7 +1422,11 @@ struct CEntTurretAngles // sizeof=0x8
     float pitch;
     float yaw;
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(CEntTurretAngles) == 0x8);
+#endif
+#endif
 
 struct CEntTurretInfo // sizeof=0x10
 {                                       // ...
@@ -1322,7 +1441,11 @@ struct CEntTurretInfo // sizeof=0x10
     uint8_t tag_aim_animated;
     uint8_t tag_flash;
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(CEntTurretInfo) == 0x10);
+#endif
+#endif
 
 #if defined(KISAK_MP) || defined(KISAK_RADIANT)
 struct CEntVehicleInfo // sizeof=0x24
@@ -1343,7 +1466,11 @@ struct CEntVehicleInfo // sizeof=0x24
     uint8_t tag_barrel;
     // padding byte
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(CEntVehicleInfo) == 0x24);
+#endif
+#endif
 #endif
 #ifdef KISAK_SP
 struct CEntVehicleInfo // sizeof=0x28
@@ -1362,7 +1489,11 @@ struct CEntVehicleInfo // sizeof=0x28
     uint8_t tag_barrel;     // 0x24
     // pad[3]               // 0x25
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(CEntVehicleInfo) == 0x28);
+#endif
+#endif
 #endif
 
 struct CEntFx // sizeof=0x8  (SP/MP Same)
@@ -1371,7 +1502,9 @@ struct CEntFx // sizeof=0x8  (SP/MP Same)
     FxEffect* effect;
 };
 #ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(CEntFx) == 0x8);
+#endif
 #endif
 
 #if defined(KISAK_MP) || defined(KISAK_RADIANT) // radiant: for cpose_t
@@ -1382,7 +1515,11 @@ struct GfxSkinCacheEntry // sizeof=0xC
     uint16_t numSkinnedVerts;
     uint16_t ageCount;
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(GfxSkinCacheEntry) == 0xC);
+#endif
+#endif
 struct cpose_t // sizeof=0x64
 {                                       // ...
     uint16_t lightingHandle;
@@ -1405,7 +1542,11 @@ struct cpose_t // sizeof=0x64
         CEntFx fx;
     };
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(cpose_t) == 0x64);
+#endif
+#endif
 #elif KISAK_SP
 struct CEntActorInfo
 {
@@ -1478,7 +1619,11 @@ struct turretInfo_s // sizeof=0x48
     uint8_t stopSnd;
     uint8_t stopSndPlayer;
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(turretInfo_s) == 0x48);
+#endif
+#endif
 
 #ifdef KISAK_MP
 enum vehicleRideSlots_t : __int32
@@ -1495,7 +1640,11 @@ struct VehicleRideSlot_t // sizeof=0xC
     int32_t boneIdx;
     int32_t entNum;
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(VehicleRideSlot_t) == 0xC);
+#endif
+#endif
 #endif
 
 struct vehicle_node_t // sizeof=0x44 // (SP/MP Same)
@@ -1517,7 +1666,11 @@ struct vehicle_node_t // sizeof=0x44 // (SP/MP Same)
     int16_t nextIdx;
     int16_t prevIdx;
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(vehicle_node_t) == 0x44);
+#endif
+#endif
 
 struct vehicle_pathpos_t // sizeof=0xC0 // (SP/MP Same)
 {                                       // ...
@@ -1532,7 +1685,11 @@ struct vehicle_pathpos_t // sizeof=0xC0 // (SP/MP Same)
     float lookPos[3];
     vehicle_node_t switchNode[2];
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(vehicle_pathpos_t) == 0xC0);
+#endif
+#endif
 
 #ifdef KISAK_MP
 struct vehicle_physic_t // sizeof=0xF8
@@ -1566,7 +1723,11 @@ struct vehicle_physic_t // sizeof=0xF8
     float worldTilt[3];
     float worldTiltVel[3];
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(vehicle_physic_t) == 0xF8);
+#endif
+#endif
 #elif KISAK_SP
 struct vehicle_physic_t
 {
@@ -1606,7 +1767,11 @@ struct VehicleTags // sizeof=0x60
     int32_t flash[5];
     int32_t wheel[4];
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(VehicleTags) == 0x60);
+#endif
+#endif
 #elif KISAK_SP
 struct VehicleTags
 {
@@ -1651,7 +1816,11 @@ struct VehicleTurret // sizeof=0x14 // (SP/MP Same)
     int32_t barrelBlocked;
     VehicleTurretState turretState;
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(VehicleTurret) == 0x14);
+#endif
+#endif
 
 struct VehicleJitter // sizeof=0x3C // (SP/MP Same)
 {                                       // ...
@@ -1663,7 +1832,11 @@ struct VehicleJitter // sizeof=0x3C // (SP/MP Same)
     float jitterAccel[3];
     float jitterPos[3];
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(VehicleJitter) == 0x3C);
+#endif
+#endif
 
 struct VehicleHover // sizeof=0x1C // (SP/MP same)
 {                                       // ...
@@ -1673,7 +1846,11 @@ struct VehicleHover // sizeof=0x1C // (SP/MP same)
     float hoverGoalPos[3];
     int32_t useHoverAccelForAngles;
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(VehicleHover) == 0x1C);
+#endif
+#endif
 
 #ifdef KISAK_MP
 struct scr_vehicle_s // sizeof=0x354
@@ -1735,7 +1912,11 @@ struct scr_vehicle_s // sizeof=0x354
     int32_t turretHitNum;
     float forcedMaterialSpeed;
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(scr_vehicle_s) == 0x354);
+#endif
+#endif
 #elif KISAK_SP
 struct scr_vehicle_s // sizeof=0x338
 {                                       // XREF: .data:s_vehicles/r
@@ -1814,8 +1995,11 @@ struct gitem_s // sizeof=0x4
 {
     itemType_t giType;
 };
-extern gitem_s bg_itemlist[2048];
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(gitem_s) == 0x4);
+#endif
+#endif
 
 enum PmStanceFrontBack : __int32
 {                                       // ...
@@ -1835,15 +2019,35 @@ struct viewLerpWaypoint_s // sizeof=0xC
     float fViewHeight;
     int32_t iOffset;
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(viewLerpWaypoint_s) == 0xC);
+#endif
+#endif
 
 // bg_jump
 
 struct pmove_t;
-#ifndef __SWITCH__
+#ifdef __SWITCH__
+struct pml_t
+{
+    float forward[3];
+    float right[3];
+    float up[3];
+    float frametime;
+    int32_t msec;
+    int32_t walking;
+    int32_t groundPlane;
+    int32_t almostGroundPlane;
+    trace_t groundTrace;
+    float impactSpeed;
+    float previous_origin[3];
+    float previous_velocity[3];
+};
+#else
 struct pml_t;
 #endif
-struct playerState_s;
+
 
 void __cdecl Jump_RegisterDvars();
 void __cdecl Jump_ClearState(playerState_s *ps);
@@ -2178,8 +2382,6 @@ struct pmove_t;
 struct trace_t;
 struct usercmd_s;
 
-bool __cdecl PM_SlideMove(pmove_t *pm, pml_t *pml, int32_t gravity);
-int __cdecl PM_VerifyPronePosition(pmove_t *pm, float *vFallbackOrg, float *vFallbackVel);
 void __cdecl PM_trace(
     pmove_t *pm,
     trace_t *results,
@@ -2314,7 +2516,11 @@ struct MantleResults // sizeof=0x38
     int32_t flags;                          // ...
     int32_t duration;
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(MantleResults) == 0x38);
+#endif
+#endif
 
 struct MantleAnimTransition // sizeof=0xC
 {                                       // ...
@@ -2322,7 +2528,11 @@ struct MantleAnimTransition // sizeof=0xC
     int32_t overAnimIndex;                  // ...
     float height;                       // ...
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(MantleAnimTransition) == 0xC);
+#endif
+#endif
 
 void __cdecl Mantle_RegisterDvars();
 void __cdecl Mantle_CreateAnims(void *(__cdecl *xanimAlloc)(int32_t));
@@ -2358,7 +2568,11 @@ struct BulletFireParams // sizeof=0x40
     float end[3];                       // ...
     float dir[3];                       // ...
 };
+#ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(BulletFireParams) == 0x40);
+#endif
+#endif
 
 struct BulletTraceResults // sizeof=0x44
 {                                       // ...
@@ -2372,7 +2586,9 @@ struct BulletTraceResults // sizeof=0x44
     int32_t depthSurfaceType;               // ...
 };
 #ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(BulletTraceResults) == 0x44);
+#endif
 #endif
 
 struct viewState_t // sizeof=0x24
@@ -2388,7 +2604,9 @@ struct viewState_t // sizeof=0x24
     int32_t*weapIdleTime;                  // ...
 };
 #ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(viewState_t) == 0x24);
+#endif
 #endif
 
 struct weaponState_t // sizeof=0x54
@@ -2408,10 +2626,12 @@ struct weaponState_t // sizeof=0x54
     int32_t*weapIdleTime;                  // ...
 };
 #ifndef __SWITCH__
+#ifndef __SWITCH__
 static_assert(sizeof(weaponState_t) == 0x54);
 #endif
-uint32_t __cdecl BG_GetViewmodelWeaponIndex(const playerState_s *ps);
-char __cdecl BG_PlayerHasCompatibleWeapon(const playerState_s *ps, uint32_t weaponIndex);
+#endif
+#endif // !__SWITCH__
+
 void __cdecl TRACK_bg_weapons();
 void __cdecl BG_LoadPenetrationDepthTable();
 void __cdecl BG_ParsePenetrationDepthTable(const char *penetrateType, float *depthTable, char *buffer);
@@ -2432,3 +2652,326 @@ uint32_t __cdecl BG_GetNumWeapons();
 int32_t __cdecl BG_GetSharedAmmoCapSize(uint32_t capIndex);
 uint32_t __cdecl BG_FindWeaponIndexForName(const char *name);
 uint32_t __cdecl BG_GetWeaponIndexForName(const char *name, void(__cdecl *regWeap)(uint32_t));
+uint32_t __cdecl BG_SetupWeaponDef(WeaponDef *weapDef, void(__cdecl *regWeap)(uint32_t));
+void __cdecl BG_SetupWeaponAlts(uint32_t weapIndex, void(__cdecl *regWeap)(uint32_t));
+uint32_t __cdecl BG_GetViewmodelWeaponIndex(const playerState_s *ps);
+int32_t __cdecl BG_GetFirstAvailableOffhand(const playerState_s *ps, int32_t offhandClass);
+int32_t __cdecl BG_GetFirstEquippedOffhand(const playerState_s *ps, int32_t offhandClass);
+int32_t __cdecl BG_IsAimDownSightWeapon(uint32_t weaponIndex);
+bool __cdecl BG_CanPlayerHaveWeapon(uint32_t weaponIndex);
+bool __cdecl BG_ValidateWeaponNumber(uint32_t weaponIndex);
+bool __cdecl BG_IsWeaponValid(const playerState_s *ps, uint32_t weaponIndex);
+bool __cdecl BG_WeaponBlocksProne(uint32_t weapIndex);
+int32_t __cdecl BG_TakePlayerWeapon(playerState_s *ps, uint32_t weaponIndex, int32_t takeAwayAmmo);
+int32_t __cdecl AmmoAfterWeaponRemoved(const playerState_s *ps, uint32_t weaponIndex);
+int32_t __cdecl BG_GetAmmoPlayerMax(const playerState_s *ps, uint32_t weaponIndex, uint32_t weaponIndexToSkip);
+int32_t __cdecl BG_GetMaxPickupableAmmo(const playerState_s *ps, uint32_t weaponIndex);
+int32_t __cdecl BG_GetTotalAmmoReserve(const playerState_s *ps, uint32_t weaponIndex);
+void __cdecl BG_GetSpreadForWeapon(
+    const playerState_s *ps,
+    const WeaponDef *weapDef,
+    float *minSpread,
+    float *maxSpread);
+void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml);
+bool __cdecl PM_IsAdsAllowed(playerState_s *ps, pml_t *pml);
+void __cdecl PM_ExitAimDownSight(playerState_s *ps);
+void __cdecl PM_UpdateAimDownSightLerp(pmove_t *pm, pml_t *pml);
+bool __cdecl BG_UsingSniperScope(playerState_s *ps);
+int32_t __cdecl PM_InteruptWeaponWithProneMove(playerState_s *ps);
+int32_t __cdecl BG_ClipForWeapon(uint32_t weapon);
+int32_t __cdecl BG_AmmoForWeapon(uint32_t weapon);
+int32_t __cdecl BG_WeaponIsClipOnly(uint32_t weapon);
+int32_t __cdecl BG_WeaponAmmo(const playerState_s *ps, uint32_t weapon);
+int32_t __cdecl PM_WeaponAmmoAvailable(playerState_s *ps);
+void __cdecl PM_AdjustAimSpreadScale(pmove_t *pm, pml_t *pml);
+bool __cdecl ShotLimitReached(playerState_s *ps, WeaponDef *weapDef);
+int32_t __cdecl PM_GetWeaponFireButton(uint32_t weapon);
+void __cdecl PM_Weapon_Idle(playerState_s *ps);
+void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml);
+void __cdecl PM_UpdateHoldBreath(pmove_t *pm, pml_t *pml);
+void __cdecl PM_StartHoldBreath(playerState_s *ps);
+void __cdecl PM_EndHoldBreath(playerState_s *ps);
+int32_t __cdecl PM_Weapon_CheckForRechamber(playerState_s *ps, int32_t delayedAction);
+void __cdecl PM_Weapon_FinishRechamber(playerState_s *ps);
+void __cdecl PM_ContinueWeaponAnim(playerState_s *ps, int32_t anim);
+void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick);
+bool __cdecl PM_WeaponClipEmpty(playerState_s *ps);
+void __cdecl PM_Weapon_BeginWeaponRaise(
+    playerState_s *ps,
+    uint32_t anim,
+    uint32_t time,
+    float aim,
+    int32_t altSwitch);
+void __cdecl BG_TakeClipOnlyWeaponIfEmpty(playerState_s *ps, int32_t weaponIndex);
+void __cdecl PM_Weapon_FinishWeaponRaise(playerState_s *ps);
+void __cdecl PM_Weapon_FinishReloadStart(pmove_t *pm, int32_t delayedAction);
+void __cdecl PM_SetReloadingState(playerState_s *ps);
+void __cdecl PM_SetWeaponReloadAddAmmoDelay(playerState_s *ps);
+int32_t __cdecl PM_Weapon_AllowReload(playerState_s *ps);
+void __cdecl PM_Weapon_ReloadDelayedAction(playerState_s *ps);
+void __cdecl PM_ReloadClip(playerState_s *ps);
+void __cdecl PM_Weapon_FinishReload(pmove_t *pm, int32_t delayedAction);
+void __cdecl PM_Weapon_FinishReloadEnd(playerState_s *ps);
+void __cdecl PM_Weapon_CheckForReload(pmove_t *pm);
+void __cdecl PM_BeginWeaponReload(playerState_s *ps);
+bool __cdecl BurstFirePending(playerState_s *ps);
+void __cdecl UpdatePendingTriggerPull(pmove_t *pm);
+int32_t __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml);
+bool __cdecl WeaponUsesBurstCooldown(uint32_t weaponIdx);
+void __cdecl PM_Weapon_CheckForChangeWeapon(pmove_t *pm);
+void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool quick);
+int32_t __cdecl PM_Weapon_ShouldBeFiring(pmove_t *pm, int32_t delayedAction);
+void __cdecl PM_Weapon_FireWeapon(playerState_s *ps, int32_t delayedAction);
+void __cdecl PM_HoldBreathFire(playerState_s *ps);
+void __cdecl PM_WeaponUseAmmo(playerState_s *ps, uint32_t wp, int32_t amount);
+void __cdecl BG_SwitchWeaponsIfEmpty(playerState_s *ps);
+void __cdecl PM_Weapon_StartFiring(playerState_s *ps, int32_t delayedAction);
+int32_t __cdecl PM_Weapon_CheckFiringAmmo(playerState_s *ps);
+void __cdecl PM_Weapon_SetFPSFireAnim(playerState_s *ps);
+void __cdecl PM_Weapon_AddFiringAimSpreadScale(playerState_s *ps);
+void __cdecl PM_Weapon_MeleeEnd(playerState_s *ps);
+void __cdecl PM_Weapon_MeleeFire(playerState_s *ps);
+void __cdecl PM_Weapon_CheckForMelee(pmove_t *pm, int32_t delayedAction);
+void __cdecl PM_Weapon_MeleeInit(playerState_s *ps);
+bool __cdecl PM_WeaponHasChargeMelee(playerState_s *ps);
+void __cdecl PM_Weapon_OffHandPrepare(playerState_s *ps);
+void __cdecl PM_Weapon_OffHandHold(playerState_s *ps);
+void __cdecl PM_Weapon_OffHandStart(pmove_t *pm);
+void __cdecl PM_Weapon_OffHand(pmove_t *pm);
+void __cdecl PM_Weapon_OffHandEnd(playerState_s *ps);
+void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm);
+void __cdecl PM_Weapon_OffHandInit(playerState_s *ps);
+void __cdecl PM_SendEmtpyOffhandEvent(playerState_s *ps, OffhandClass offhandClass);
+bool __cdecl PM_Weapon_IsHoldingGrenade(pmove_t *pm);
+char __cdecl PM_UpdateGrenadeThrow(playerState_s *ps, pml_t *pml);
+char __cdecl PM_Weapon_CheckGrenadeHold(pmove_t *pm, int32_t delayedAction);
+void __cdecl PM_Weapon_CheckForDetonation(pmove_t *pm);
+void __cdecl PM_Weapon_CheckForGrenadeThrowCancel(pmove_t *pm);
+void __cdecl PM_Detonate(playerState_s *ps, int32_t delayedAction);
+void __cdecl PM_Weapon_CheckForNightVision(pmove_t *pm);
+void __cdecl PM_Weapon_FinishNightVisionWear(playerState_s *ps);
+void __cdecl PM_Weapon_FinishNightVisionRemove(playerState_s *ps);
+
+#ifdef KISAK_SP
+bool __cdecl ViewModelOverride(playerState_s *ps, pml_t *pml);
+#endif
+
+void __cdecl Sprint_State_Loop(playerState_s *ps);
+void __cdecl PM_Weapon_CheckForSprint(pmove_t *pm);
+void __cdecl Sprint_State_Raise(playerState_s *ps);
+void __cdecl Sprint_State_Drop(playerState_s *ps);
+void __cdecl PM_ResetWeaponState(playerState_s *ps);
+void __cdecl BG_WeaponFireRecoil(const playerState_s *ps, float *vGunSpeed, float *kickAVel);
+float __cdecl BG_GetBobCycle(const playerState_s *ps);
+float __cdecl BG_GetVerticalBobFactor(const playerState_s *ps, float cycle, float speed, float maxAmp);
+float __cdecl BG_GetHorizontalBobFactor(const playerState_s *ps, float cycle, float speed, float maxAmp);
+void __cdecl BG_CalculateWeaponAngles(weaponState_t *ws, float *angles);
+void __cdecl BG_CalculateWeaponPosition_BaseAngles(weaponState_t *ws, float *angles);
+void __cdecl BG_CalculateWeaponPosition_BasePosition_angles(weaponState_t *ws, float *angles);
+void __cdecl BG_CalculateWeaponPosition_IdleAngles(weaponState_t *ws, float *angles);
+void __cdecl BG_CalculateWeaponPosition_BobOffset(weaponState_t *ws, float *angles);
+void __cdecl BG_CalculateWeaponPosition_DamageKick(weaponState_t *ws, float *angles);
+void __cdecl BG_CalculateWeaponPosition_GunRecoil(weaponState_t *ws, float *angles);
+int32_t __cdecl BG_CalculateWeaponPosition_GunRecoil_SingleAngle(
+    float *fOffset,
+    float *speed,
+    float fTimeStep,
+    float fOfsCap,
+    float fGunKickAccel,
+    float fGunKickSpeedMax,
+    float fGunKickSpeedDecay,
+    float fGunKickStaticDecay);
+void __cdecl BG_CalculateViewAngles(viewState_t *vs, float *angles);
+void __cdecl BG_CalculateView_DamageKick(viewState_t *vs, float *angles);
+void __cdecl BG_CalculateView_IdleAngles(viewState_t *vs, float *angles);
+void __cdecl BG_CalculateView_BobAngles(viewState_t *vs, float *angles);
+void __cdecl BG_CalculateView_Velocity(viewState_t *vs, float *angles);
+void __cdecl BG_CalculateWeaponPosition_Sway(
+    const playerState_s *ps,
+    float *swayViewAngles,
+    float *swayOffset,
+    float *swayAngles,
+    float ssSwayScale,
+    int32_t frametime);
+int32_t __cdecl BG_PlayerWeaponCountPrimaryTypes(const playerState_s *ps);
+bool __cdecl BG_PlayerWeaponsFull_Primaries(const playerState_s *ps);
+char __cdecl BG_PlayerHasCompatibleWeapon(const playerState_s *ps, uint32_t weaponIndex);
+bool __cdecl BG_ThrowingBackGrenade(const playerState_s *ps);
+WeaponDef *__cdecl BG_LoadWeaponDef(const char *name);
+WeaponDef *__cdecl BG_LoadWeaponDef_FastFile(const char *name);
+void __cdecl BG_AssertOffhandIndexOrNone(uint32_t offHandIndex);
+void __cdecl BG_StringCopy(uint8_t *member, const char *keyValue);
+int BG_ValidateWeaponNumberOffhand(uint32_t weaponIndex);
+
+
+#ifdef KISAK_MP
+// bg_vehicles_mp
+uint16 BG_VehiclesGetSlotTagName(int slotIndex);
+#endif
+
+
+// bg_slidemove
+void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity);
+int32_t __cdecl PM_VerifyPronePosition(pmove_t *pm, float *vFallbackOrg, float *vFallbackVel);
+bool __cdecl PM_SlideMove(pmove_t *pm, pml_t *pml, int32_t gravity);
+double __cdecl PM_PermuteRestrictiveClipPlanes(
+    const float *velocity,
+    int32_t planeCount,
+    const float (*planes)[3],
+    int32_t *permutation);
+
+
+// bg_weapons_load_obj
+char *__cdecl BG_GetPlayerAnimTypeName(int32_t index);
+void __cdecl TRACK_bg_weapons_load_obj();
+const char *__cdecl BG_GetWeaponTypeName(weapType_t type);
+const char *__cdecl BG_GetWeaponClassName(weapClass_t type);
+const char *__cdecl BG_GetWeaponInventoryTypeName(weapInventoryType_t type);
+void __cdecl BG_LoadWeaponStrings();
+void __cdecl BG_LoadPlayerAnimTypes();
+WeaponDef *__cdecl BG_LoadDefaultWeaponDef();
+WeaponDef *__cdecl BG_LoadDefaultWeaponDef_FastFile();
+
+
+
+// bg_misctables
+struct gitem_s;
+extern gitem_s bg_itemlist[2048];
+extern int itemRegistered[2048];
+
+const float playerMins[] = { -15.0, -15.0, 0.0 };
+const float playerMaxs[] = { 15.0, 15.0, 70.0 };
+
+const int serverOnlyEvents[4] = { 31, 20, 19, -1 }; // idb
+const int singleClientEvents[13] = { 6, 7, 8, 34, 13, 14, 32, 33, 34, 37, 42, 43, -1 }; // idb
+
+#if defined(KISAK_SP) && defined(__SWITCH__)
+enum pmtype_t : __int32
+{
+    PM_NORMAL = 0x0,
+    PM_NORMAL_LINKED = 0x1,
+    PM_NOCLIP = 0x2,
+    PM_UFO = 0x3,
+    PM_MPVIEWER = 0x4,
+    PM_DEAD = 0x5,
+    PM_DEAD_LINKED = 0x6,
+};
+inline pmtype_t &operator--(pmtype_t &e) {
+    e = static_cast<pmtype_t>(static_cast<int>(e) - 1);
+    return e;
+}
+inline pmtype_t &operator--(pmtype_t &e, int i)
+{
+    --e;
+    return e;
+}
+struct playerState_s
+{
+    int commandTime;
+    pmtype_t pm_type;
+    int bobCycle;
+    int pm_flags;
+    int weapFlags;
+    int otherFlags;
+    int pm_time;
+    float origin[3];
+    float velocity[3];
+    float oldVelocity[2];
+    int weaponTime;
+    int weaponDelay;
+    int grenadeTimeLeft;
+    int throwBackGrenadeOwner;
+    int throwBackGrenadeTimeLeft;
+    int weaponRestrictKickTime;
+    int foliageSoundTime;
+    int gravity;
+    float leanf;
+    int speed;
+    float delta_angles[3];
+    int groundEntityNum;
+    float vLadderVec[3];
+    int jumpTime;
+    float jumpOriginZ;
+    int movementDir;
+    int eFlags; // 0x20000 = USING_VEHICLE
+    int eventSequence;
+    int events[4];
+    uint32_t eventParms[4];
+    int oldEventSequence;
+    int clientNum;
+    int offHandIndex;
+    OffhandSecondaryClass offhandSecondary;
+    uint32_t weapon;
+    weaponstate_t weaponstate;
+    uint32_t weaponShotCount;
+    float fWeaponPosFrac;
+    int adsDelayTime;
+    int spreadOverride;
+    int spreadOverrideState;
+    int viewmodelIndex;
+    float viewangles[3];
+    int viewHeightTarget;
+    float viewHeightCurrent;
+    int viewHeightLerpTime;
+    int viewHeightLerpTarget;
+    int viewHeightLerpDown;
+    float viewAngleClampBase[2];
+    float viewAngleClampRange[2];
+    int damageEvent;
+    int damageYaw;
+    int damagePitch;
+    int damageCount;
+    int stats[4];
+    int ammo[128];
+    int ammoclip[128];
+    uint32_t weapons[4];
+    uint32_t weaponold[4];
+    uint32_t weaponrechamber[4];
+    float proneDirection;
+    float proneDirectionPitch;
+    float proneTorsoPitch;
+    ViewLockTypes viewlocked;
+    int viewlocked_entNum;
+    int vehicleType;
+    float linkAngles[3];
+    float groundTiltAngles[3];
+    int cursorHint;
+    int cursorHintString;
+    int cursorHintEntIndex;
+    int locationSelectionInfo;
+    SprintState sprintState;
+    float fTorsoPitch;
+    float fWaistPitch;
+    float holdBreathScale;
+    int holdBreathTimer;
+    float moveSpeedScaleMultiplier;
+    MantleState mantleState;
+    float meleeChargeYaw;
+    int meleeChargeDist;
+    int meleeChargeTime;
+    int weapLockFlags;
+    int weapLockedEntnum;
+    uint32_t forcedViewAnimWeaponIdx;
+    int forcedViewAnimWeaponState;
+    uint32_t forcedViewAnimOriginalWeaponIdx;
+    ActionSlotType actionSlotType[4];
+    ActionSlotParam actionSlotParam[4];
+    int entityEventSequence;
+    int weapAnim;
+    float aimSpreadScale;
+    int shellshockIndex;
+    int shellshockTime;
+    int shellshockDuration;
+    float dofNearStart;
+    float dofNearEnd;
+    float dofFarStart;
+    float dofFarEnd;
+    float dofNearBlur;
+    float dofFarBlur;
+    float dofViewmodelStart;
+    float dofViewmodelEnd;
+    int hudElemLastAssignedSoundID;
+    uint8_t weaponmodels[128];
+    playerState_s_hud hud;
+};
+#endif // KISAK_SP
