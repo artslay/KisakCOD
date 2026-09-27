@@ -214,6 +214,10 @@ struct KisakGLShader
 using IDirect3DVertexShader9 = KisakGLShader;
 using IDirect3DPixelShader9 = KisakGLShader;
 
+class IDirect3DDevice9;
+using LPDIRECT3DTEXTURE9 = KisakGLTexture*;
+using LPDIRECT3DDEVICE9 = IDirect3DDevice9*;
+
 struct KisakGLTexture
 {
     GLuint object = 0;
