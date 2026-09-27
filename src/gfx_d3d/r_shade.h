@@ -19,7 +19,10 @@ void __cdecl R_ChangeObjectPlacement(GfxCmdBufSourceState *source, const GfxScal
 int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, uint8_t *indices, int triCount);
 void __cdecl R_SetupPassPerPrimArgs(GfxCmdBufContext context);
 void __cdecl R_SetVertexShaderConstantFromCode(GfxCmdBufContext context, const MaterialShaderArgument *routingData);
-void __cdecl R_HW_SetVertexShaderConstant(__int64 device, __int64 data);
+void __cdecl R_HW_SetVertexShaderConstant(IDirect3DDevice9 *device, uint32_t dest, const float *data, uint32_t rowCount);
+void __cdecl R_HW_SetVertexShader(IDirect3DDevice9 *device, const MaterialVertexShader *vertexShader);
+void __cdecl R_HW_SetPixelShader(IDirect3DDevice9 *device, const MaterialPixelShader *pixelShader);
+void __cdecl R_HW_SetSamplerTexture(IDirect3DDevice9 *device, uint32_t samplerIndex, const GfxTexture *texture);
 float *__cdecl R_GetCodeConstant(GfxCmdBufContext context, uint32_t constant);
 char __cdecl R_IsVertexShaderConstantUpToDate(GfxCmdBufContext context, const MaterialShaderArgument *routingData);
 char __cdecl R_IsShaderMatrixUpToDate(
