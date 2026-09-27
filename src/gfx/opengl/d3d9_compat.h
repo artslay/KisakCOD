@@ -677,9 +677,12 @@ layout(location=12) in vec4 aColor;
 out vec2 vTexCoord;
 out vec4 vColor;
 uniform vec4 u_vsConstants[256];
+uniform vec2 uScreenSize;
 void main()
 {
-    gl_Position = aPosition;
+    vec2 clip = vec2((aPosition.x / max(uScreenSize.x, 1.0)) * 2.0 - 1.0,
+                     1.0 - (aPosition.y / max(uScreenSize.y, 1.0)) * 2.0);
+    gl_Position = vec4(clip, aPosition.z, aPosition.w);
     vTexCoord = aTexCoord;
     vColor = aColor;
 }
