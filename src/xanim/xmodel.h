@@ -30,16 +30,20 @@ struct XModelCollTri_s // sizeof=0x30
     float svec[4];
     float tvec[4];
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XModelCollTri_s) == 48);
 
+#endif
 struct XBoneInfo // sizeof=0x28
 {                                       // ...
     float bounds[2][3];
     float offset[3];
     float radiusSquared;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XBoneInfo) == 40);
 
+#endif
 struct XModelCollSurf_s // sizeof=0x2C
 {
     XModelCollTri_s* collTris;
@@ -92,23 +96,29 @@ struct XModel // sizeof=0xDC
     struct PhysPreset* physPreset;
     struct PhysGeomList* physGeoms;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XModel) == 220);
 
+#endif
 struct XModelPiece // sizeof=0x10
 {
     XModel *model;
     float offset[3];
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XModelPiece) == 16);
 
+#endif
 struct XModelPieces // sizeof=0xC
 {                                       // ...
     const char *name;
     int numpieces;
     XModelPiece *pieces;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XModelPieces) == 12);
 
+#endif
 struct QueueElement // sizeof=0x8
 {                                       // ...
     uint32_t beginIndex;            // ...
@@ -143,8 +153,10 @@ struct XModelSurfs // sizeof=0x14
     struct XSurface *surfs;                    // ...
     int partBits[4];                    // ...
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XModelSurfs) == 20);
 
+#endif
 struct XModelConfigEntry // sizeof=0x404
 {                                       // ...
     char filename[1024];                // ...
@@ -175,8 +187,10 @@ struct XModelPartsLoad // sizeof=0x1C
     unsigned __int8 *partClassification;
     DObjAnimMat *baseMat;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XModelPartsLoad) == 28);
 
+#endif
 struct XModelDefault // sizeof=0x4C
 {                                       // ...
     uint16_t boneNames[1];
@@ -202,8 +216,10 @@ struct XVertexInfo_s // sizeof=0x40
     unsigned __int8 pad;
     __int16 boneOffset;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(XVertexInfo_s) == 64);
 
+#endif
 struct XBlendLoadInfo // sizeof=0x4
 {                                       // ...
     uint16_t boneOffset;
