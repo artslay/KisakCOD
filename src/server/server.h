@@ -1,6 +1,11 @@
 #pragma once
 #include <qcommon/ent.h>
 
+#ifdef __SWITCH__
+#include <cstdio>
+using _iobuf = FILE;
+#endif
+
 #ifndef KISAK_SP 
 #error This file is for SinglePlayer only 
 #endif
