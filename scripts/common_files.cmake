@@ -1,5 +1,6 @@
 # Platform-specific source groups used by the top-level targets.
 set(GFX_OPENGL
+    "${SRC_DIR}/gfx/gfx_backend.cpp"
     "${SRC_DIR}/gfx/opengl/gl_backend.cpp"
     "${SRC_DIR}/gfx/opengl/gl_backend.h"
 )
