@@ -7468,6 +7468,20 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         varXAssetHeader = &varXAsset->header;
 
         Load_XAssetHeader(0);
+#ifdef __SWITCH__
+        if (i < 16)
+        {
+            const char *assetName = "unresolved";
+            if (varXAsset->header.data && varXAsset->type >= 0 && varXAsset->type < ASSET_TYPE_COUNT)
+                assetName = DB_GetXAssetName(varXAsset);
+            Com_Printf(CON_CHANNEL_FILES,
+                       "Switch DB: asset[%d] type=%d name=%s header=%p\n",
+                       i,
+                       static_cast<int>(varXAsset->type),
+                       assetName ? assetName : "<null>",
+                       varXAsset->header.data);
+        }
+#endif
         ++var;
     }
 #else
