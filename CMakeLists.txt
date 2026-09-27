@@ -31,8 +31,11 @@ include(${SCRIPTS_DIR}/platform_override.cmake)
 message("Building KISAK_PLATFORM: ${KISAK_PLATFORM}")
 
 add_subdirectory(${SCRIPTS_DIR}/mp)
-add_subdirectory(${SCRIPTS_DIR}/sp)
-add_subdirectory(${SCRIPTS_DIR}/dedi)
+
+if (NOT (KISAK_PLATFORM STREQUAL "switch" AND KISAK_SWITCH_BOOTSTRAP))
+    add_subdirectory(${SCRIPTS_DIR}/sp)
+    add_subdirectory(${SCRIPTS_DIR}/dedi)
+endif()
 
 if (KISAK_PLATFORM STREQUAL "win32")
     add_subdirectory(${SCRIPTS_DIR}/radiant)
