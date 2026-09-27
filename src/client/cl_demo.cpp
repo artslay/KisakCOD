@@ -577,7 +577,7 @@ void CL_DemoPlaybackStartup()
                         MemFile_MoveToSegment(&v7, -1);
                         Z_VirtualFree(v3);
                         R_SyncRenderThread();
-                        Material_Sort();
+                        Material_DirtySort();
                         R_SortWorldSurfaces();
                     }
                     else
