@@ -28,7 +28,10 @@ CPP_SOURCES := $(shell find src -type f -name '*.cpp' \\
     ! -name 'win_common.cpp' \\
     ! -name 'win_shared.cpp' \\
     ! -name 'snd_mss.cpp' \\
-    ! -name 'snd_driver.cpp')
+    ! -name 'snd_driver.cpp' \\
+    ! -name 'threads.cpp' \\
+    ! -name 'timing.cpp' \\
+    ! -name 'profile.cpp')
 
 C_SOURCES := $(shell find src -type f -name '*.c' \\
     ! -path 'src/gfx_d3d/*' \\
@@ -40,7 +43,7 @@ C_SOURCES := $(shell find src -type f -name '*.c' \\
 # zlib is required by the engine's archive/zip loader.
 C_SOURCES += $(shell find deps/zlib -type f -name '*.c')
 
-CPP_SOURCES += src/platform/switch/switch_main.cpp src/platform/switch/switch_fs.cpp
+CPP_SOURCES += src/platform/switch/switch_main.cpp src/platform/switch/switch_fs.cpp src/platform/switch/switch_threads.cpp src/platform/switch/switch_timing.cpp src/platform/switch/switch_profile.cpp
 CPP_SOURCES += src/gfx_d3d/r_init_switch.cpp src/gfx_d3d/r_buffers.cpp src/gfx_d3d/r_state.cpp
 CPP_SOURCES += src/gfx_d3d/r_shade.cpp src/gfx_d3d/rb_shade.cpp src/gfx_d3d/r_material.cpp
 CPP_SOURCES += src/gfx_d3d/r_image.cpp src/gfx_d3d/r_image_load_common.cpp src/gfx_d3d/r_image_load_obj.cpp src/gfx_d3d/r_image_utils.cpp src/gfx_d3d/r_image_wavelet.cpp src/gfx_d3d/r_imagedecode.cpp src/gfx_d3d/r_rendertarget.cpp
