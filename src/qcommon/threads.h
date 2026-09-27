@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Windows.h> // literally just for some of the extern types at the bottom
+#ifdef __SWITCH__\n#include <cstdint>\nusing DWORD = uint32_t;\nusing HANDLE = void*;\n#else\n#include <Windows.h> // literally just for some of the extern types at the bottom\n#endif
 #include <gfx_d3d/rb_backend.h> // THREAD_CONTEXT_COUNT
 
 enum ThreadOwner : __int32
