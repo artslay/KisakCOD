@@ -734,6 +734,33 @@ struct GfxPixelShaderLoadDef
 };
 #endif
 
+#ifdef __SWITCH__
+// Runtime versions of types whose original serialized layouts are 32-bit-only.
+struct GfxDrawSurfFields
+{
+    uint64_t objectId : 16;
+    uint64_t reflectionProbeIndex : 8;
+    uint64_t customIndex : 5;
+    uint64_t materialSortedIndex : 11;
+    uint64_t prepass : 2;
+    uint64_t primaryLightIndex : 8;
+    uint64_t surfType : 4;
+    uint64_t primarySortKey : 6;
+    uint64_t unused : 4;
+};
+union GfxDrawSurf
+{
+    GfxDrawSurfFields fields;
+    uint64_t packed;
+    uint32_t packed_low;
+};
+
+struct GfxStateBits
+{
+    uint32_t loadBits[2];
+};
+#endif
+
 struct GfxDepthOfField // sizeof=0x20
 {                                       // ...
     float viewModelStart;
