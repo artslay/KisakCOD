@@ -40,6 +40,9 @@ struct GfxMarkContext // sizeof=0x6
     uint8_t modelTypeAndSurf;   // ...
     uint16_t modelIndex;        // ...
 };
+#ifndef __SWITCH__
+// Native ARM64 layout differs from the original 32-bit runtime; serialized layouts are handled by Switch loaders.
+
 static_assert(sizeof(GfxMarkContext) == 6);
 
 struct FxElemDef;
@@ -494,6 +497,7 @@ template<typename ITEM_TYPE, size_t LIMIT>
 uint16 FX_PoolToHandle_Generic(FxPool<ITEM_TYPE>* poolArray, ITEM_TYPE* item)
 {
     static_assert((LIMIT * ITEM_TYPE::HANDLE_SCALE) <= 0xFFFF, "do not support huge pools at the moment");
+#endif // !__SWITCH__
 
     vassert(item && item >= &poolArray[0].item && item < &poolArray[LIMIT].item, "%p %p", poolArray, item);
     return ((char*)item - (char*)poolArray) / ITEM_TYPE::HANDLE_SCALE;
