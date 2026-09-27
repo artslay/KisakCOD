@@ -122,6 +122,10 @@
 #undef IS_LINUX
 #endif
 
+#ifdef IS_SWITCH
+#undef IS_SWITCH
+#endif
+
 #ifdef IS_STATIC
 #undef IS_STATIC
 #endif
@@ -172,6 +176,12 @@
   #undef MSSRESTRICT
   #define MSSRESTRICT
   
+#elif defined(__SWITCH__)
+  #define IS_SWITCH
+  #define IS_64REGS
+  #define IS_LE
+  #undef MSSRESTRICT
+  #define MSSRESTRICT __restrict
 #elif defined( __DOS__ )
   #define IS_DOS
   #define IS_32
@@ -299,7 +309,7 @@
 // Pipeline filters supported on following platforms
 //
 
-#if defined(IS_WIN32API) || defined(IS_MAC) || defined(IS_LINUX) || defined(IS_DOS) || defined(IS_PS2) || defined(IS_XENON) || defined(IS_PS3) || defined(IS_WII)
+#if defined(IS_WIN32API) || defined(IS_MAC) || defined(IS_LINUX) || defined(IS_SWITCH) || defined(IS_DOS) || defined(IS_PS2) || defined(IS_XENON) || defined(IS_PS3) || defined(IS_WII)
    #define MSS_FLT_SUPPORTED 1
    #define EXTRA_BUILD_BUFFERS 1
    #define FLT_A (MAX_SPEAKERS)
@@ -311,7 +321,7 @@
    #define EXTRA_BUILD_BUFFERS 0
 #endif
 
-#if defined(IS_WIN32) || defined(IS_MAC) || defined(IS_LINUX) || defined(IS_PS2) || defined(IS_XENON) || defined(IS_PS3) || defined(IS_WII)
+#if defined(IS_WIN32) || defined(IS_MAC) || defined(IS_LINUX) || defined(IS_SWITCH) || defined(IS_PS2) || defined(IS_XENON) || defined(IS_PS3) || defined(IS_WII)
    #define MSS_REVERB_SUPPORTED 1
 #endif
 
@@ -633,7 +643,7 @@ typedef LPVOID AILLPDIRECTSOUNDBUFFER;
 
 #else
 
-#ifdef IS_LINUX
+#if defined(IS_LINUX) || defined(IS_SWITCH)
 
 #define FAR
 
