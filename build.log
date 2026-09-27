@@ -4612,3 +4612,576 @@ src/aim_assist/aim_assist.cpp: In function 'void AimAssist_DrawTargets(int64_t, 
 src/aim_assist/aim_assist.cpp:1183:66: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
  1183 |     int32_t weapIndex = AimAssist_GetWeaponIndex(localClientNum, (const playerState_s *)HIDWORD(localClientNum)); // [esp+78h] [ebp-1Ch]
 make: *** [Makefile:72: build/src/aim_assist/aim_assist.o] Error 1
+aarch64-none-elf-g++ -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE -I/home/artslay/KisakCOD/src -I/home/artslay/KisakCOD/deps -I/home/artslay/KisakCOD/mesa-sdk/opt/devkitpro/portlibs/switch/include -march=armv8-a -mtune=cortex-a57 -mtp=soft -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP -c src/aim_assist/aim_assist.cpp -o build/src/aim_assist/aim_assist.o
+In file included from src/aim_assist/aim_assist.cpp:1:
+C:/Users/artslay/KisakCOD/src/universal/q_shared.h:1074:35: error: static assertion failed
+ 1074 | static_assert(sizeof(StringTable) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+In file included from C:/Users/artslay/KisakCOD/src/server/sv_world.h:3,
+                 from C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:2,
+                 from C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:3,
+                 from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:3,
+                 from src/aim_assist/aim_assist.h:2,
+                 from src/aim_assist/aim_assist.cpp:2:
+C:/Users/artslay/KisakCOD/src/qcommon/qcommon.h:1167:32: error: static assertion failed
+ 1167 | static_assert(sizeof(SpawnVar) == 0xA0C);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(3088 == 2572)'
+In file included from C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:10:
+C:/Users/artslay/KisakCOD/src/game/enthandle.h:12:37: error: static assertion failed
+   12 | static_assert(sizeof(EntHandleInfo) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:590:6: error: use of enum 'team_t' without previous declaration
+  590 | enum team_t;
+      |      ^~~~~~
+C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:783:5: error: 'team_t' does not name a type
+  783 |     team_t team;
+      |     ^~~~~~
+C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:790:37: error: static assertion failed
+  790 | static_assert(sizeof(missile_ent_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 84)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_public.h:830:5: error: 'team_t' does not name a type
+  830 |     team_t eTeam;
+      |     ^~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/script/scr_stringlist.h:3,
+                 from C:/Users/artslay/KisakCOD/src/universal/com_memory.h:3,
+                 from C:/Users/artslay/KisakCOD/src/bgame/bg_weapons.h:2,
+                 from C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:16:
+C:/Users/artslay/KisakCOD/src/script/scr_memorytree.h:65:40: error: static assertion failed
+   65 | static_assert(sizeof(scrMemTreeGlob_t) == 0xC0380);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(787244 == 787328)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h: In constructor 'scr_anim_s::scr_anim_s(int)':
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:227:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  227 |         linkPointer = (const char *)i; // KISAKHACK
+      |                       ^~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h: At global scope:
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:241:41: error: static assertion failed
+  241 | static_assert(sizeof(struct scr_anim_s) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:249:49: error: static assertion failed
+  249 | static_assert((sizeof(struct loadAnim_t) * 512) == 36864);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(40960 == 36864)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:266:29: error: static assertion failed
+  266 | static_assert(sizeof(pml_t) == 0x80);
+      |               ~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(136 == 128)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:273:40: error: static assertion failed
+  273 | static_assert(sizeof(animStringItem_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:288:44: error: static assertion failed
+  288 | static_assert(sizeof(animConditionTable_t) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:357:1: error: 'const' can only be specified for objects and functions
+  357 | const struct shellshock_parms_t // sizeof=0x268
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:380:36: error: static assertion failed
+  380 | static_assert(sizeof(shellshock_t) == 0x20);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(40 == 32)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:418:43: error: static assertion failed
+  418 | static_assert(sizeof(animScriptCommand_t) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:437:40: error: static assertion failed
+  437 | static_assert(sizeof(animScriptItem_t) == 0x100);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(320 == 256)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:444:36: error: static assertion failed
+  444 | static_assert(sizeof(animScript_t) == 0x204);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1032 == 516)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:454:38: error: static assertion failed
+  454 | static_assert(sizeof(scr_animtree_t) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:479:40: error: static assertion failed
+  479 | static_assert(sizeof(animScriptData_t) == 0x9A9D0);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(820112 == 633296)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:494:35: error: static assertion failed
+  494 | static_assert(sizeof(lerpFrame_t) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:1157:38: error: static assertion failed
+ 1157 | static_assert(sizeof(CEntPlayerInfo) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:1227:30: error: static assertion failed
+ 1227 | static_assert(sizeof(CEntFx) == 0x8);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:2218:42: error: static assertion failed
+ 2218 | static_assert(sizeof(BulletTraceResults) == 0x44);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(80 == 68)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:2232:35: error: static assertion failed
+ 2232 | static_assert(sizeof(viewState_t) == 0x24);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 36)'
+C:/Users/artslay/KisakCOD/src/bgame/bg_local.h:2250:37: error: static assertion failed
+ 2250 | static_assert(sizeof(weaponState_t) == 0x54);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(96 == 84)'
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:3,
+                 from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:5:
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:167:15: error: ambiguating new declaration of 'float random()'
+  167 | float __cdecl random();
+      |               ^~~~~~
+In file included from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/bits/std_abs.h:44,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/cmath:59,
+                 from C:/devkitPro/devkitA64/aarch64-none-elf/include/c++/16.1.0/math.h:36,
+                 from C:/Users/artslay/KisakCOD/src/universal/q_shared.h:32:
+C:/devkitPro/devkitA64/aarch64-none-elf/include/stdlib.h:260:9: note: old declaration 'long int random()'
+  260 | long    random (void);
+      |         ^~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:459:1: error: '__forceinline' does not name a type
+  459 | __forceinline static float COERCE_FLOAT(unsigned val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:467:1: error: '__forceinline' does not name a type
+  467 | __forceinline static uint32_t COERCE_UNSIGNED_INT(float val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/universal/com_math.h:475:1: error: '__forceinline' does not name a type
+  475 | __forceinline static int COERCE_INT(float val) {
+      | ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:78:35: error: static assertion failed
+   78 | static_assert(sizeof(FxEffectDef) == 32);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(40 == 32)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:361:1: error: 'const' can only be specified for objects and functions
+  361 | const struct FxElemVisStateSample // sizeof=0x30
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:381:1: error: 'const' can only be specified for objects and functions
+  381 | const struct FxElemVelStateSample // sizeof=0x60
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:429:1: error: 'const' can only be specified for objects and functions
+  429 | const struct FxElemDef // sizeof=0xFC
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/fxprimitives.h:480:37: error: static assertion failed
+  480 | static_assert(sizeof(FxImpactTable) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:4,
+                 from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:6:
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:47:20: error: redefinition of 'constexpr const uint32_t D3DFMT_X8R8G8B8'
+   47 | constexpr uint32_t D3DFMT_X8R8G8B8 = 22;
+      |                    ^~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:28:22: note: 'constexpr const _D3DFORMAT D3DFMT_X8R8G8B8' previously defined here
+   28 | constexpr _D3DFORMAT D3DFMT_X8R8G8B8 = 22;
+      |                      ^~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In constructor 'KisakGLBuffer::KisakGLBuffer(GLenum, size_t)':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:144:9: error: 'glGenBuffers' was not declared in this scope; did you mean 'glReadBuffer'?
+  144 |         glGenBuffers(1, &object);
+      |         ^~~~~~~~~~~~
+      |         glReadBuffer
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:145:9: error: 'glBindBuffer' was not declared in this scope; did you mean 'glReadBuffer'?
+  145 |         glBindBuffer(target, object);
+      |         ^~~~~~~~~~~~
+      |         glReadBuffer
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:146:9: error: 'glBufferData' was not declared in this scope
+  146 |         glBufferData(target, (GLsizeiptr)size, nullptr, GL_DYNAMIC_DRAW);
+      |         ^~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In destructor 'KisakGLBuffer::~KisakGLBuffer()':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:152:13: error: 'glDeleteBuffers' was not declared in this scope; did you mean 'glSelectBuffer'?
+  152 |             glDeleteBuffers(1, &object);
+      |             ^~~~~~~~~~~~~~~
+      |             glSelectBuffer
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In member function 'HRESULT KisakGLBuffer::Unlock()':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:171:13: error: 'glBindBuffer' was not declared in this scope; did you mean 'glReadBuffer'?
+  171 |             glBindBuffer(target, object);
+      |             ^~~~~~~~~~~~
+      |             glReadBuffer
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:172:13: error: 'glBufferSubData' was not declared in this scope
+  172 |             glBufferSubData(target, 0, (GLsizeiptr)shadow.size(), shadow.data());
+      |             ^~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In static member function 'static GLuint IDirect3DDevice9::CompileShader(GLenum, const char*)':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:312:31: error: 'glCreateShader' was not declared in this scope
+  312 |         const GLuint shader = glCreateShader(stage);
+      |                               ^~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:313:9: error: 'glShaderSource' was not declared in this scope
+  313 |         glShaderSource(shader, 1, &source, nullptr);
+      |         ^~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:314:9: error: 'glCompileShader' was not declared in this scope; did you mean 'CompileShader'?
+  314 |         glCompileShader(shader);
+      |         ^~~~~~~~~~~~~~~
+      |         CompileShader
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:316:9: error: 'glGetShaderiv' was not declared in this scope
+  316 |         glGetShaderiv(shader, GL_COMPILE_STATUS, &ok);
+      |         ^~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:319:13: error: 'glDeleteShader' was not declared in this scope
+  319 |             glDeleteShader(shader);
+      |             ^~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In member function 'void IDirect3DDevice9::RebuildProgram()':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:330:32: error: 'glCreateProgram' was not declared in this scope
+  330 |         const GLuint program = glCreateProgram();
+      |                                ^~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:331:9: error: 'glAttachShader' was not declared in this scope
+  331 |         glAttachShader(program, m_vertexShader->object);
+      |         ^~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:333:9: error: 'glLinkProgram' was not declared in this scope; did you mean 'glHistogram'?
+  333 |         glLinkProgram(program);
+      |         ^~~~~~~~~~~~~
+      |         glHistogram
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:336:9: error: 'glGetProgramiv' was not declared in this scope
+  336 |         glGetProgramiv(program, GL_LINK_STATUS, &ok);
+      |         ^~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:339:13: error: 'glDeleteProgram' was not declared in this scope
+  339 |             glDeleteProgram(program);
+      |             ^~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:344:13: error: 'glDeleteProgram' was not declared in this scope
+  344 |             glDeleteProgram(m_program);
+      |             ^~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:346:9: error: 'glUseProgram' was not declared in this scope
+  346 |         glUseProgram(m_program);
+      |         ^~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:348:34: error: 'glGetUniformLocation' was not declared in this scope
+  348 |         m_textureStageLocation = glGetUniformLocation(m_program, "uTexture0");
+      |                                  ^~~~~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:356:13: error: 'glUniform1i' was not declared in this scope
+  356 |             glUniform1i(m_textureStageLocation, 0);
+      |             ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:358:13: error: 'glUniform2f' was not declared in this scope
+  358 |             glUniform2f(m_screenSizeLocation, m_viewportWidth, m_viewportHeight);
+      |             ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:360:13: error: 'glUniform1i' was not declared in this scope
+  360 |             glUniform1i(m_screenSpaceLocation, m_switchUnlit ? 1 : 0);
+      |             ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:362:13: error: 'glUniform1i' was not declared in this scope
+  362 |             glUniform1i(m_useTextureLocation, m_texture0Bound ? 1 : 0);
+      |             ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:364:13: error: 'glUniform4fv' was not declared in this scope
+  364 |             glUniform4fv(m_vsConstantsLocation, 256, &m_vsConstants[0][0]);
+      |             ^~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:366:13: error: 'glUniform4fv' was not declared in this scope
+  366 |             glUniform4fv(m_psConstantsLocation, 256, &m_psConstants[0][0]);
+      |             ^~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In member function 'void IDirect3DDevice9::BindRenderTargets()':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:373:13: error: 'glBindFramebuffer' was not declared in this scope
+  373 |             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      |             ^~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:378:13: error: 'glGenFramebuffers' was not declared in this scope
+  378 |             glGenFramebuffers(1, &m_fbo);
+      |             ^~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:380:9: error: 'glBindFramebuffer' was not declared in this scope
+  380 |         glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+      |         ^~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:384:13: error: 'glFramebufferTexture2D' was not declared in this scope
+  384 |             glFramebufferTexture2D(
+      |             ^~~~~~~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:395:13: error: 'glFramebufferTexture2D' was not declared in this scope
+  395 |             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+      |             ^~~~~~~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:403:13: error: 'glFramebufferTexture2D' was not declared in this scope
+  403 |             glFramebufferTexture2D(
+      |             ^~~~~~~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:415:13: error: 'glFramebufferTexture2D' was not declared in this scope
+  415 |             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
+      |             ^~~~~~~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In member function 'void IDirect3DDevice9::RebuildVertexLayout()':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:445:13: error: 'glGenVertexArrays' was not declared in this scope
+  445 |             glGenVertexArrays(1, &m_vao);
+      |             ^~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:446:9: error: 'glBindVertexArray' was not declared in this scope
+  446 |         glBindVertexArray(m_vao);
+      |         ^~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:449:13: error: 'glDisableVertexAttribArray' was not declared in this scope
+  449 |             glDisableVertexAttribArray(attrib);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:479:13: error: 'glBindBuffer' was not declared in this scope; did you mean 'glReadBuffer'?
+  479 |             glBindBuffer(GL_ARRAY_BUFFER, m_streams[e.Stream].buffer->object);
+      |             ^~~~~~~~~~~~
+      |             glReadBuffer
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:480:13: error: 'glEnableVertexAttribArray' was not declared in this scope
+  480 |             glEnableVertexAttribArray(attrib);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:481:13: error: 'glVertexAttribPointer' was not declared in this scope; did you mean 'glVertexPointer'?
+  481 |             glVertexAttribPointer(
+      |             ^~~~~~~~~~~~~~~~~~~~~
+      |             glVertexPointer
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:489:13: error: 'glBindBuffer' was not declared in this scope; did you mean 'glReadBuffer'?
+  489 |             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indices->object);
+      |             ^~~~~~~~~~~~
+      |             glReadBuffer
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In destructor 'IDirect3DDevice9::~IDirect3DDevice9()':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:495:24: error: 'glDeleteProgram' was not declared in this scope
+  495 |         if (m_program) glDeleteProgram(m_program);
+      |                        ^~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:502:13: error: 'glDeleteFramebuffers' was not declared in this scope
+  502 |             glDeleteFramebuffers(1, &m_fbo);
+      |             ^~~~~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:504:13: error: 'glDeleteVertexArrays' was not declared in this scope
+  504 |             glDeleteVertexArrays(1, &m_vao);
+      |             ^~~~~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In member function 'HRESULT IDirect3DDevice9::SetTexture(uint32_t, IDirect3DBaseTexture9*)':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:694:13: error: 'glUseProgram' was not declared in this scope
+  694 |             glUseProgram(m_program);
+      |             ^~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:696:17: error: 'glUniform1i' was not declared in this scope
+  696 |                 glUniform1i(m_textureStageLocation, 0);
+      |                 ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:698:17: error: 'glUniform1i' was not declared in this scope
+  698 |                 glUniform1i(m_useTextureLocation, m_texture0Bound ? 1 : 0);
+      |                 ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In member function 'HRESULT IDirect3DDevice9::SetVertexShaderConstantF(uint32_t, const float*, uint32_t)':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:776:13: error: 'glUseProgram' was not declared in this scope
+  776 |             glUseProgram(m_program);
+      |             ^~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:777:13: error: 'glUniform4fv' was not declared in this scope
+  777 |             glUniform4fv(m_vsConstantsLocation, 256, &m_vsConstants[0][0]);
+      |             ^~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In member function 'HRESULT IDirect3DDevice9::SetPixelShaderConstantF(uint32_t, const float*, uint32_t)':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:789:13: error: 'glUseProgram' was not declared in this scope
+  789 |             glUseProgram(m_program);
+      |             ^~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:790:13: error: 'glUniform4fv' was not declared in this scope
+  790 |             glUniform4fv(m_psConstantsLocation, 256, &m_psConstants[0][0]);
+      |             ^~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In member function 'HRESULT IDirect3DDevice9::SetViewport(const D3DVIEWPORT9*)':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:799:9: error: 'glDepthRangef' was not declared in this scope; did you mean 'glDepthRange'?
+  799 |         glDepthRangef(vp->MinZ, vp->MaxZ);
+      |         ^~~~~~~~~~~~~
+      |         glDepthRange
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:804:13: error: 'glUseProgram' was not declared in this scope
+  804 |             glUseProgram(m_program);
+      |             ^~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:806:17: error: 'glUniform2f' was not declared in this scope
+  806 |                 glUniform2f(m_screenSizeLocation, static_cast<float>(vp->Width), static_cast<float>(vp->Height));
+      |                 ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:808:17: error: 'glUniform1i' was not declared in this scope
+  808 |                 glUniform1i(m_screenSpaceLocation, m_switchUnlit ? 1 : 0);
+      |                 ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In member function 'HRESULT IDirect3DDevice9::SetSwitchUnlitMode(bool)':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:818:13: error: 'glUseProgram' was not declared in this scope
+  818 |             glUseProgram(m_program);
+      |             ^~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:819:13: error: 'glUniform1i' was not declared in this scope
+  819 |             glUniform1i(m_screenSpaceLocation, enabled ? 1 : 0);
+      |             ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In member function 'void IDirect3DDevice9::ApplyBlendFactors()':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:873:9: error: 'glBlendFuncSeparate' was not declared in this scope
+  873 |         glBlendFuncSeparate(
+      |         ^~~~~~~~~~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In member function 'HRESULT IDirect3DDevice9::SetRenderState(uint32_t, uint32_t)':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:925:13: error: 'glBlendEquationSeparate' was not declared in this scope; did you mean 'glBlendEquationSeparateATI'?
+  925 |             glBlendEquationSeparate(GL_FUNC_ADD, BlendOperation(value));
+      |             ^~~~~~~~~~~~~~~~~~~~~~~
+      |             glBlendEquationSeparateATI
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h: In member function 'HRESULT IDirect3DDevice9::Clear(uint32_t, uint32_t, uint32_t, uint32_t, float, uint32_t)':
+C:/Users/artslay/KisakCOD/src/gfx/opengl/d3d9_compat.h:984:9: error: 'glClearDepthf' was not declared in this scope; did you mean 'glClearDepth'?
+  984 |         glClearDepthf(depth);
+      |         ^~~~~~~~~~~~~
+      |         glClearDepth
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h: At global scope:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:250:32: error: static assertion failed
+  250 | static_assert(sizeof(GfxImage) == 36);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(48 == 36)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:402:42: error: static assertion failed
+  402 | static_assert(sizeof(GfxWorldDpvsStatic) == 0x68);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(168 == 104)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_gfx.h:679:45: error: static assertion failed
+  679 | static_assert(sizeof(GfxPixelShaderLoadDef) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+In file included from C:/Users/artslay/KisakCOD/src/cgame/cg_local.h:7:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:323:50: error: static assertion failed
+  323 | static_assert(sizeof(MaterialPixelShaderProgram) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:514:44: error: static assertion failed
+  514 | static_assert(sizeof(MaterialTechniqueSet) == 148);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(296 == 148)'
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_material.h:559:32: error: static assertion failed
+  559 | static_assert(sizeof(Material) == 80);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(104 == 80)'
+src/aim_assist/aim_assist.h:111:32: error: static assertion failed
+  111 | static_assert(sizeof(AimInput) == 0x30);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(56 == 48)'
+In file included from C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:5,
+                 from C:/Users/artslay/KisakCOD/src/client/client.h:4,
+                 from src/aim_assist/aim_assist.cpp:6:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_font.h:29:30: error: static assertion failed
+   29 | static_assert(sizeof(Font_s) == 24);
+      |               ~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(40 == 24)'
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h: In member function 'bool KeywordHashEntry<T, useless, HASH_SEED>::KeywordHash_IsValidSeed(int, int)':
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1409:5: warning: no return statement in function returning non-void [-Wreturn-type]
+ 1409 |     }
+      |     ^
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h: In member function 'int KeywordHashEntry<T, useless, HASH_SEED>::KeywordHash_PickSeed(int)':
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1412:29: error: there are no arguments to 'IsValidSeed' that depend on a template parameter, so a declaration of 'IsValidSeed' must be available [-Wtemplate-body]
+ 1412 |         for (int seed = 0; !IsValidSeed(count, HASH_SEED); seed++)
+      |                             ^~~~~~~~~~~
+C:/Users/artslay/KisakCOD/src/ui/ui_shared.h:1412:29: note: (if you use '-fpermissive', G++ will accept your code, but allowing the use of an undeclared name is deprecated)
+In file included from src/aim_assist/aim_assist.cpp:8:
+C:/Users/artslay/KisakCOD/src/universal/profile.h: At global scope:
+C:/Users/artslay/KisakCOD/src/universal/profile.h:889:1: error: 'volatile' can only be specified for objects and functions
+  889 | volatile struct ProfileReadable // sizeof=0xC
+      | ^~~~~~~~
+In file included from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_primarylights.h:2,
+                 from C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:4,
+                 from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:7,
+                 from src/aim_assist/aim_assist.cpp:16:
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_rendercmds.h:446:1: error: 'const' can only be specified for objects and functions
+  446 | const struct GfxViewInfo // sizeof=0x67B0
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_rendercmds.h:514:1: error: 'const' can only be specified for objects and functions
+  514 | const struct __declspec(align(16)) GfxBackEndData // sizeof=0x11E780
+      | ^~~~~
+C:/Users/artslay/KisakCOD/src/gfx_d3d/r_bsp.h:205:32: error: static assertion failed
+  205 | static_assert(sizeof(GfxWorld) == 0x2DC);
+      |               ~~~~~~~~~~~~~~~~~^~~~~~~~
+  • the comparison reduces to '(1032 == 732)'
+In file included from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:11:
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:185:35: error: static assertion failed
+  185 | static_assert(sizeof(LoadedSound) == 44);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(64 == 44)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:224:32: error: static assertion failed
+  224 | static_assert(sizeof(SndCurve) == 72);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(80 == 72)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:277:35: error: static assertion failed
+  277 | static_assert(sizeof(snd_alias_t) == 92);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(128 == 92)'
+C:/Users/artslay/KisakCOD/src/sound/snd_public.h:285:40: error: static assertion failed
+  285 | static_assert(sizeof(snd_alias_list_t) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+In file included from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:13:
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:95:30: error: static assertion failed
+   95 | static_assert(sizeof(XModel) == 220);
+      |               ~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(280 == 220)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:102:35: error: static assertion failed
+  102 | static_assert(sizeof(XModelPiece) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:110:36: error: static assertion failed
+  110 | static_assert(sizeof(XModelPieces) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:146:35: error: static assertion failed
+  146 | static_assert(sizeof(XModelSurfs) == 20);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 20)'
+C:/Users/artslay/KisakCOD/src/xanim/xmodel.h:178:39: error: static assertion failed
+  178 | static_assert(sizeof(XModelPartsLoad) == 28);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(56 == 28)'
+In file included from C:/Users/artslay/KisakCOD/src/game/pathnode.h:2,
+                 from C:/Users/artslay/KisakCOD/src/xanim/xanim.h:18:
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:97:43: error: static assertion failed
+   97 | static_assert(sizeof(VariableStackBuffer) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:131:37: error: static assertion failed
+  131 | static_assert(sizeof(VariableUnion) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:139:37: error: static assertion failed
+  139 | static_assert(sizeof(VariableValue) == 0x8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:190:47: error: static assertion failed
+  190 | static_assert(sizeof(VariableValueInternal_u) == 0x4);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:219:45: error: static assertion failed
+  219 | static_assert(sizeof(VariableValueInternal) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(24 == 16)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:232:40: error: static assertion failed
+  232 | static_assert(sizeof(scrVarDebugPub_t) == 0xE0004);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+  • the comparison reduces to '(1310728 == 917508)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:238:36: error: static assertion failed
+  238 | static_assert(sizeof(scrVarGlob_t) == 0x180000);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+  • the comparison reduces to '(2359296 == 1572864)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:274:41: error: static assertion failed
+  274 | static_assert(sizeof(scr_classStruct_t) == 0xC);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:283:41: error: static assertion failed
+  283 | static_assert(sizeof(VariableDebugInfo) == 0x10);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(32 == 16)'
+C:/Users/artslay/KisakCOD/src/script/scr_variable.h:439:39: error: static assertion failed
+  439 | static_assert(sizeof(ThreadDebugInfo) == 0x8C);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(272 == 140)'
+C:/Users/artslay/KisakCOD/src/game/pathnode.h:199:45: error: static assertion failed
+  199 | static_assert(sizeof(pathnode_tree_nodes_t) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+In file included from C:/Users/artslay/KisakCOD/src/game/actor_badplace.h:2,
+                 from C:/Users/artslay/KisakCOD/src/game/pathnode.h:235:
+C:/Users/artslay/KisakCOD/src/game/actor.h:416:31: error: static assertion failed: actor_s size drift vs CoD3SP IDA
+  416 | static_assert(sizeof(actor_s) == 0x1e90, "actor_s size drift vs CoD3SP IDA");
+      |               ~~~~~~~~~~~~~~~~^~~~~~~~~
+  • the comparison reduces to '(12256 == 7824)'
+C:/Users/artslay/KisakCOD/src/game/actor.h:417:47: error: static assertion failed: actor_s.sentientInfo offset drift vs CoD3SP IDA
+  417 | static_assert(offsetof(actor_s, sentientInfo) == 0x834, "actor_s.sentientInfo offset drift vs CoD3SP IDA");
+      |                                               ^
+  • the comparison reduces to '(2216 == 2100)'
+C:/Users/artslay/KisakCOD/src/game/actor.h:418:39: error: static assertion failed: sentient_info_t size drift vs CoD3SP IDA
+  418 | static_assert(sizeof(sentient_info_t) == 0x28, "sentient_info_t size drift vs CoD3SP IDA");
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(48 == 40)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:38:36: error: static assertion failed
+   38 | static_assert(sizeof(XAnimIndices) == 4);
+      |               ~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(8 == 4)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:182:34: error: static assertion failed
+  182 | static_assert(sizeof(XAnimParts) == 88);
+      |               ~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(136 == 88)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:829:33: error: static assertion failed
+  829 | static_assert(sizeof(WeaponDef) == 2168);
+      |               ~~~~~~~~~~~~~~~~~~^~~~~~~
+  • the comparison reduces to '(2832 == 2168)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:842:31: error: static assertion failed
+  842 | static_assert(sizeof(RawFile) == 12);
+      |               ~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(24 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1002:30: error: static assertion failed
+ 1002 | static_assert(sizeof(XAsset) == 8);
+      |               ~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1113:40: error: static assertion failed
+ 1113 | static_assert(sizeof(ScriptStringList) == 8);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  • the comparison reduces to '(16 == 8)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1121:34: error: static assertion failed
+ 1121 | static_assert(sizeof(XAssetList) == 16);
+      |               ~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(32 == 16)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1166:38: error: static assertion failed
+ 1166 | static_assert(sizeof(XRigidVertList) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1173:42: error: static assertion failed
+ 1173 | static_assert(sizeof(XSurfaceVertexInfo) == 12);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(16 == 12)'
+C:/Users/artslay/KisakCOD/src/xanim/xanim.h:1192:32: error: static assertion failed
+ 1192 | static_assert(sizeof(XSurface) == 56);
+      |               ~~~~~~~~~~~~~~~~~^~~~~
+  • the comparison reduces to '(80 == 56)'
+src/aim_assist/aim_assist.cpp: In function 'void AimAssist_DrawTargets(int64_t, const float*)':
+src/aim_assist/aim_assist.cpp:1183:66: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1183 |     int32_t weapIndex = AimAssist_GetWeaponIndex(localClientNum, (const playerState_s *)HIDWORD(localClientNum)); // [esp+78h] [ebp-1Ch]
+make: *** [Makefile:72: build/src/aim_assist/aim_assist.o] Error 1
