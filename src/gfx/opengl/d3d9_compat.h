@@ -448,9 +448,6 @@ public:
         return S_OK;
     }
 
-    HRESULT SetRenderTarget(uint32_t, void*) { return S_OK; }
-    HRESULT SetDepthStencilSurface(void*) { return S_OK; }
-
     HRESULT SetSamplerState(uint32_t stage, uint32_t state, uint32_t value)
     {
         glActiveTexture(GL_TEXTURE0 + stage);
@@ -507,7 +504,9 @@ public:
         return S_OK;
     }
 
-    HRESULT TestCooperativeLevel() { return S_OK; }\n\n    HRESULT Clear(uint32_t, uint32_t, uint32_t flags, uint32_t color, float depth, uint32_t stencil)
+    HRESULT TestCooperativeLevel() { return S_OK; }
+
+    HRESULT Clear(uint32_t, uint32_t, uint32_t flags, uint32_t color, float depth, uint32_t stencil)
     {
         GLbitfield mask = 0;
         if (flags & 1) mask |= GL_DEPTH_BUFFER_BIT;
