@@ -508,6 +508,36 @@ typedef ll              int64;
 typedef ll              sint64;
 typedef ull             uint64;
 
+#ifdef __SWITCH__
+#ifndef KISAK_SWITCH_PLATFORM_TYPES
+#define KISAK_SWITCH_PLATFORM_TYPES
+typedef unsigned int DWORD;
+typedef int LONG;
+#endif
+
+#ifndef KISAK_SWITCH_INTERLOCKED_DEFINED
+#define KISAK_SWITCH_INTERLOCKED_DEFINED
+template <typename T>
+inline T InterlockedIncrement(volatile T *addend)
+{
+    return __atomic_add_fetch(addend, static_cast<T>(1), __ATOMIC_SEQ_CST);
+}
+
+template <typename T>
+inline T InterlockedDecrement(volatile T *addend)
+{
+    return __atomic_sub_fetch(addend, static_cast<T>(1), __ATOMIC_SEQ_CST);
+}
+
+template <typename T>
+inline T InterlockedCompareExchange(volatile T *destination, T exchange, T comparand)
+{
+    __atomic_compare_exchange_n(destination, &comparand, exchange, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    return comparand;
+}
+#endif
+#endif
+
 // Partially defined types. They are used when the decompiler does not know
 // anything about the type except its size.
 #define _BYTE  uint8
