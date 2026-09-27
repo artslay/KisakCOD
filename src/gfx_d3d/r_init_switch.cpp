@@ -99,6 +99,9 @@ void R_InitGraphicsApi() {
     vidConfig.maxTextureSize = 4096;
     vidConfig.maxTextureMaps = 16;
     vidConfig.deviceSupportsGamma = false;
+    dx.depthStencilFormat = D3DFMT_D24S8;
+    dx.multiSampleType = D3DMULTISAMPLE_NONE;
+    dx.multiSampleQuality = 0;
 }
 void R_InitSystems() {
     R_InitImages();
