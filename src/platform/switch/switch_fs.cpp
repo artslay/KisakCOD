@@ -352,7 +352,7 @@ int __cdecl FS_WriteFile(char *filename, char *buffer, uint32_t size)
 
 int __cdecl FS_WriteFileToDir(const char *filename, const char *dir, char *buffer, uint32_t size)
 {
-    int h = FS_FOpenFileWriteToDir(filename, dir,);
+    int h = FS_FOpenFileWriteToDir(filename, dir);
     if (!h) return 0;
     uint32_t n = FS_Write(buffer, size, h);
     FS_FCloseFile(h);
