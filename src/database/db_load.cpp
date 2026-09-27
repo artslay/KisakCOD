@@ -986,6 +986,25 @@ void __cdecl Load_TempStringArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_XString(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    uint32_t serialized = 0;
+    Load_Stream(atStreamStart, reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+    *varXString = nullptr;
+    if (serialized)
+    {
+        if (serialized == UINT32_MAX)
+        {
+            *varXString = reinterpret_cast<const char *>(AllocLoad_raw_byte());
+            varConstChar = *varXString;
+            Load_XStringCustom((char **)varXString);
+        }
+        else
+        {
+            DB_ConvertOffsetToPointer(&serialized);
+            *varXString = reinterpret_cast<const char *>(static_cast<uintptr_t>(serialized));
+        }
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varXString, 4);
     if (*varXString)
     {
@@ -1000,6 +1019,7 @@ void __cdecl Load_XString(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)varXString);
         }
     }
+#endif
 }
 
 void __cdecl Load_XStringArray(bool atStreamStart, int32_t count)
