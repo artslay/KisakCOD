@@ -7459,6 +7459,7 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
     {
         SerializedXAsset serialized{};
         DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+        DB_IncStreamPos(sizeof(serialized));
 
         varXAsset = var;
         memset(varXAsset, 0, sizeof(*varXAsset));
@@ -7501,6 +7502,7 @@ void Load_XAssetListCustom()
 
     SerializedXAssetList serialized{};
     DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+    DB_IncStreamPos(sizeof(serialized));
 
     varXAssetList = &g_varXAssetList;
     memset(varXAssetList, 0, sizeof(*varXAssetList));
@@ -7517,6 +7519,7 @@ void Load_XAssetListCustom()
         {
             uint32_t stringOffset = 0;
             DB_LoadXFileData(reinterpret_cast<uint8_t *>(&stringOffset), sizeof(stringOffset));
+            DB_IncStreamPos(sizeof(stringOffset));
 
             const char **dst = &varXAssetList->stringList.strings[i];
             if (!stringOffset)
