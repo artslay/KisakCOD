@@ -4,6 +4,11 @@
 #include <universal/profile.h>
 #include "r_init.h"
 
+#ifdef __SWITCH__
+#include <glad/glad.h>
+#include <algorithm>
+#endif
+
 uint32_t __cdecl Image_CubemapFace(uint32_t faceIndex)
 {
     iassert(faceIndex < 6);
@@ -177,206 +182,57 @@ LABEL_17:
     }
 }
 
-void __cdecl Image_Upload3D_CopyData_PC(
-    const GfxImage *image,
-    _D3DFORMAT format,
-    uint32_t mipLevel,
-    uint8_t *src)
+void __cdecl Image_Upload3D_CopyData_PC(const GfxImage *image,_D3DFORMAT format,uint32_t mipLevel,uint8_t *src)
 {
-    int v6; // [esp+0h] [ebp-44h]
-    int v7; // [esp+4h] [ebp-40h]
-    int v8; // [esp+8h] [ebp-3Ch]
-    int v9; // [esp+18h] [ebp-2Ch]
-    int hr; // [esp+1Ch] [ebp-28h]
-    int srcRowPitch; // [esp+24h] [ebp-20h]
-    int sliceIndex; // [esp+28h] [ebp-1Ch]
-    _D3DLOCKED_BOX lockedBox; // [esp+2Ch] [ebp-18h] BYREF
-    int width; // [esp+38h] [ebp-Ch]
-    int height; // [esp+3Ch] [ebp-8h]
-    uint8_t *dst; // [esp+40h] [ebp-4h]
-
-    iassert(image);
-    iassert(image->mapType == MAPTYPE_3D);
-
-    if (image->width >> mipLevel > 1)
-        v8 = image->width >> mipLevel;
-    else
-        v8 = 1;
-    width = v8;
-    if (image->height >> mipLevel > 1)
-        v7 = image->height >> mipLevel;
-    else
-        v7 = 1;
-    height = v7;
-    if (image->depth >> mipLevel > 1)
-        v6 = image->depth >> mipLevel;
-    else
-        v6 = 1;
-    srcRowPitch = Image_SourceBytesPerSlice_PC(format, width, height);
-    iassert(image->texture.volmap);
-    do
-    {
-        if (r_logFile && r_logFile->current.integer)
-            RB_LogPrint("image->texture.volmap->LockBox( mipLevel, &lockedBox, 0, 0 )\n");
-
-        hr = image->texture.volmap->LockBox(mipLevel, &lockedBox, NULL, NULL);
-        if (hr < 0)
-        {
-            do
-            {
-                ++g_disableRendering;
-                Com_Error(
-                    ERR_FATAL,
-                    ".\\r_image_load_common.cpp (%i) image->texture.volmap->LockBox( mipLevel, &lockedBox, 0, 0 ) failed: %s\n",
-                    709,
-                    R_ErrorDescription(hr));
-            } while (alwaysfails);
-        }
-    } while (alwaysfails);
-
-    dst = (uint8_t *)lockedBox.pBits;
-    for (sliceIndex = 0; sliceIndex < v6; ++sliceIndex)
-    {
-        Image_Upload2D_CopyDataBlock_PC(width, height, src, format, lockedBox.RowPitch, dst);
-        src += srcRowPitch;
-        dst += lockedBox.SlicePitch;
-    }
-    do
-    {
-        if (r_logFile && r_logFile->current.integer)
-            RB_LogPrint("image->texture.volmap->UnlockBox( mipLevel )\n");
-
-        v9 = image->texture.volmap->UnlockBox(mipLevel);
-        if (v9 < 0)
-        {
-            do
-            {
-                ++g_disableRendering;
-                Com_Error(
-                    ERR_FATAL,
-                    ".\\r_image_load_common.cpp (%i) image->texture.volmap->UnlockBox( mipLevel ) failed: %s\n",
-                    719,
-                    R_ErrorDescription(v9));
-            } while (alwaysfails);
-        }
-    } while (alwaysfails);
+#ifdef __SWITCH__
+    if(!image||!image->texture.volmap||!src)return;
+    auto *x=image->texture.volmap;GLenum internalFmt,uploadFmt,uploadType;bool compressed=false;
+    switch(format){
+    case D3DFMT_A8R8G8B8:case D3DFMT_X8R8G8B8:internalFmt=GL_RGBA8;uploadFmt=GL_BGRA;uploadType=GL_UNSIGNED_BYTE;break;
+    case D3DFMT_A8:case D3DFMT_L8:internalFmt=GL_R8;uploadFmt=GL_RED;uploadType=GL_UNSIGNED_BYTE;break;
+    case D3DFMT_A8L8:internalFmt=GL_RG8;uploadFmt=GL_RG;uploadType=GL_UNSIGNED_BYTE;break;
+    case D3DFMT_R32F:internalFmt=GL_R32F;uploadFmt=GL_RED;uploadType=GL_FLOAT;break;
+    case D3DFMT_G16R16F:internalFmt=GL_RG16F;uploadFmt=GL_RG;uploadType=GL_HALF_FLOAT;break;
+    default:return;}
+    glBindTexture(GL_TEXTURE_3D,x->object);uint32_t w=std::max(1u,(uint32_t)image->width>>mipLevel),h=std::max(1u,(uint32_t)image->height>>mipLevel),d=std::max(1u,(uint32_t)image->depth>>mipLevel);
+    glTexSubImage3D(GL_TEXTURE_3D,mipLevel,0,0,0,w,h,d,uploadFmt,uploadType,src);
+#else
+    /* original D3D9 implementation */
+    int width = image->width >> mipLevel > 1 ? image->width >> mipLevel : 1;
+    int height = image->height >> mipLevel > 1 ? image->height >> mipLevel : 1;
+    int depth = image->depth >> mipLevel > 1 ? image->depth >> mipLevel : 1;
+    int srcRowPitch = Image_SourceBytesPerSlice_PC(format,width,height);
+    _D3DLOCKED_BOX lockedBox{};
+    HRESULT hr=image->texture.volmap->LockBox(mipLevel,&lockedBox,nullptr,0);
+    if(hr<0)Com_Error(ERR_FATAL,"LockBox failed: %s",R_ErrorDescription(hr));
+    uint8_t *dst=(uint8_t*)lockedBox.pBits;
+    for(int slice=0;slice<depth;++slice){Image_Upload2D_CopyDataBlock_PC(width,height,src,format,lockedBox.RowPitch,dst);src+=srcRowPitch;dst+=lockedBox.SlicePitch;}
+    image->texture.volmap->UnlockBox(mipLevel);
+#endif
 }
 
-void __cdecl Image_Upload2D_CopyData_PC(
-    const GfxImage *image,
-    _D3DFORMAT format,
-    _D3DCUBEMAP_FACES face,
-    uint32_t mipLevel,
-    uint8_t *src)
+void __cdecl Image_Upload2D_CopyData_PC(const GfxImage *image,_D3DFORMAT format,_D3DCUBEMAP_FACES face,uint32_t mipLevel,uint8_t *src)
 {
-    uint32_t v9; // [esp+0h] [ebp-30h]
-    uint32_t v10; // [esp+4h] [ebp-2Ch]
-    int v11; // [esp+10h] [ebp-20h]
-    int v12; // [esp+14h] [ebp-1Ch]
-    int v13; // [esp+18h] [ebp-18h]
-    int hr; // [esp+1Ch] [ebp-14h]
-    _D3DLOCKED_RECT lockedRect; // [esp+20h] [ebp-10h] BYREF
-    uint32_t width; // [esp+28h] [ebp-8h]
-    uint32_t height; // [esp+2Ch] [ebp-4h]
-
-    if (image->width >> mipLevel > 1)
-        v10 = image->width >> mipLevel;
-    else
-        v10 = 1;
-    width = v10;
-    if (image->height >> mipLevel > 1)
-        v9 = image->height >> mipLevel;
-    else
-        v9 = 1;
-    height = v9;
-    if (image->mapType == MAPTYPE_2D)
-    {
-        iassert(image->texture.map);
-        do
-        {
-            if (r_logFile && r_logFile->current.integer)
-                RB_LogPrint("image->texture.map->LockRect( mipLevel, &lockedRect, 0, 0 )\n");
-
-            hr = image->texture.map->LockRect(mipLevel, &lockedRect, 0, 0);
-            if (hr < 0)
-            {
-                do
-                {
-                    ++g_disableRendering;
-                    Com_Error(
-                        ERR_FATAL,
-                        ".\\r_image_load_common.cpp (%i) image->texture.map->LockRect( mipLevel, &lockedRect, 0, 0 ) failed: %s\n",
-                        561,
-                        R_ErrorDescription(hr));
-                } while (alwaysfails);
-            }
-        } while (alwaysfails);
-        Image_Upload2D_CopyDataBlock_PC(width, height, src, format, lockedRect.Pitch, (uint8_t *)lockedRect.pBits);
-        do
-        {
-            if (r_logFile && r_logFile->current.integer)
-                RB_LogPrint("image->texture.map->UnlockRect( mipLevel )\n");
-
-            v13 = image->texture.map->UnlockRect(mipLevel);
-            if (v13 < 0)
-            {
-                do
-                {
-                    ++g_disableRendering;
-                    Com_Error(
-                        ERR_FATAL,
-                        ".\\r_image_load_common.cpp (%i) image->texture.map->UnlockRect( mipLevel ) failed: %s\n",
-                        563,
-                        R_ErrorDescription(v13));
-                } while (alwaysfails);
-            }
-        } while (alwaysfails);
-    }
-    else
-    {
-        iassert(image->mapType == MAPTYPE_CUBE);
-        iassert((face == D3DCUBEMAP_FACE_POSITIVE_X || face == D3DCUBEMAP_FACE_NEGATIVE_X || face == D3DCUBEMAP_FACE_POSITIVE_Y || face == D3DCUBEMAP_FACE_NEGATIVE_Y || face == D3DCUBEMAP_FACE_POSITIVE_Z || face == D3DCUBEMAP_FACE_NEGATIVE_Z));
-        iassert(image->texture.cubemap);
-
-        do
-        {
-            if (r_logFile && r_logFile->current.integer)
-                RB_LogPrint("image->texture.cubemap->LockRect( face, mipLevel, &lockedRect, 0, 0 )\n");
-            v12 = image->texture.cubemap->LockRect(face, mipLevel, &lockedRect, 0, 0);
-            if (v12 < 0)
-            {
-                do
-                {
-                    ++g_disableRendering;
-                    Com_Error(
-                        ERR_FATAL,
-                        ".\\r_image_load_common.cpp (%i) image->texture.cubemap->LockRect( face, mipLevel, &lockedRect, 0, 0 ) failed: %s\n",
-                        571,
-                        R_ErrorDescription(v12));
-                } while (alwaysfails);
-            }
-        } while (alwaysfails);
-        Image_Upload2D_CopyDataBlock_PC(width, height, src, format, lockedRect.Pitch, (uint8_t *)lockedRect.pBits);
-        do
-        {
-            if (r_logFile && r_logFile->current.integer)
-                RB_LogPrint("image->texture.cubemap->UnlockRect( face, mipLevel )\n");
-
-            v11 = image->texture.cubemap->UnlockRect(face, mipLevel);
-            if (v11 < 0)
-            {
-                do
-                {
-                    ++g_disableRendering;
-                    Com_Error(
-                        ERR_FATAL,
-                        ".\\r_image_load_common.cpp (%i) image->texture.cubemap->UnlockRect( face, mipLevel ) failed: %s\n",
-                        573,
-                        R_ErrorDescription(v11));
-                } while (alwaysfails);
-            }
-        } while (alwaysfails);
-    }
+#ifdef __SWITCH__
+    if(!image||!image->texture.basemap||!src)return;
+    auto *x=image->texture.basemap;glBindTexture(x->target,x->object);
+    uint32_t w=std::max(1u,(uint32_t)image->width>>mipLevel),h=std::max(1u,(uint32_t)image->height>>mipLevel);
+    GLenum internalFmt=0,uploadFmt=0,uploadType=GL_UNSIGNED_BYTE;bool compressed=false;
+    switch(format){
+    case D3DFMT_A8R8G8B8:case D3DFMT_X8R8G8B8:internalFmt=GL_RGBA8;uploadFmt=GL_BGRA;break;
+    case D3DFMT_A8:case D3DFMT_L8:internalFmt=GL_R8;uploadFmt=GL_RED;break;
+    case D3DFMT_A8L8:internalFmt=GL_RG8;uploadFmt=GL_RG;break;
+    case D3DFMT_R32F:internalFmt=GL_R32F;uploadFmt=GL_RED;uploadType=GL_FLOAT;break;
+    default:return;}
+    if(x->target==GL_TEXTURE_CUBE_MAP)glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+face,mipLevel,0,0,w,h,uploadFmt,uploadType,src);
+    else glTexSubImage2D(GL_TEXTURE_2D,mipLevel,0,0,w,h,uploadFmt,uploadType,src);
+#else
+    uint32_t width=image->width>>mipLevel>1?image->width>>mipLevel:1,height=image->height>>mipLevel>1?image->height>>mipLevel:1;
+    _D3DLOCKED_RECT lockedRect{};HRESULT hr= image->mapType==MAPTYPE_2D ? image->texture.map->LockRect(mipLevel,&lockedRect,nullptr,0) : image->texture.cubemap->LockRect(face,mipLevel,&lockedRect,nullptr,0);
+    if(hr<0)Com_Error(ERR_FATAL,"LockRect failed: %s",R_ErrorDescription(hr));
+    Image_Upload2D_CopyDataBlock_PC(width,height,src,format,lockedRect.Pitch,(uint8_t*)lockedRect.pBits);
+    if(image->mapType==MAPTYPE_2D)image->texture.map->UnlockRect(mipLevel);else image->texture.cubemap->UnlockRect(face,mipLevel);
+#endif
 }
 
 
