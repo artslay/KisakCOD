@@ -169,6 +169,7 @@ struct Scr_StringNode_s // sizeof=0x8
     const char *text;
     Scr_StringNode_s *next;
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(Scr_StringNode_s) == 0x8);
 
 struct function_stack_t // sizeof=0x14
@@ -401,3 +402,4 @@ extern scrVmPub_t scrVmPub;
 extern scrVmDebugPub_t scrVmDebugPub;
 
 extern const dvar_s *logScriptTimes;
+#endif // KISAK_SWITCH legacy 32-bit layout asserts
