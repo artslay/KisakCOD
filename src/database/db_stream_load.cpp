@@ -47,7 +47,17 @@ void __cdecl DB_ConvertOffsetToAlias(uint32_t *data)
 
 void __cdecl DB_ConvertOffsetToPointer(uint32_t *data)
 {
-    *data = (uint32_t)&g_streamZoneMem->blocks[(uint32_t)(*data - 1) >> 28].data[(*data - 1) & 0xFFFFFFF];
+    const uint32_t offset = *data;
+    iassert(offset && offset != UINT32_MAX && offset != UINT32_MAX - 1);
+    const uint32_t block = (offset - 1) >> 28;
+    const uint32_t blockOffset = (offset - 1) & 0xFFFFFFF;
+    const uintptr_t ptr = reinterpret_cast<uintptr_t>(
+        &g_streamZoneMem->blocks[block].data[blockOffset]);
+#ifdef __SWITCH__
+    *reinterpret_cast<uintptr_t *>(data) = ptr;
+#else
+    *data = static_cast<uint32_t>(ptr);
+#endif
 }
 
 void __cdecl Load_XStringCustom(char **str)
