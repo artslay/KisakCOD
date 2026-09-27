@@ -289,6 +289,13 @@ uint8_t *__cdecl Material_Alloc(uint32_t size)
 void __cdecl Load_CreateMaterialPixelShader(GfxPixelShaderLoadDef *loadDef, MaterialPixelShader *mtlShader)
 {
     iassert( loadDef == &mtlShader->prog.loadDef );
+    #ifdef __SWITCH__
+    // Switch uses the GLSL bootstrap shader irrespective of the original D3D9 bytecode.
+    if (r_loadForRenderer->current.enabled)
+    {
+        ProfLoad_Begin("Create Switch pixel shader");
+        dx.device->CreatePixelShader(loadDef->program, &mtlShader->prog.ps);
+#else
     if (r_loadForRenderer->current.enabled && loadDef->loadForRenderer == r_rendererInUse->current.integer)
     {
         ProfLoad_Begin("Create pixel shader");
@@ -299,11 +306,18 @@ void __cdecl Load_CreateMaterialPixelShader(GfxPixelShaderLoadDef *loadDef, Mate
     {
         mtlShader->prog.ps = 0;
     }
+#endif
 }
 
 void __cdecl Load_CreateMaterialVertexShader(GfxVertexShaderLoadDef *loadDef, MaterialVertexShader *mtlShader)
 {
     iassert( loadDef == &mtlShader->prog.loadDef );
+    #ifdef __SWITCH__
+    if (r_loadForRenderer->current.enabled)
+    {
+        ProfLoad_Begin("Create Switch vertex shader");
+        dx.device->CreateVertexShader(loadDef->program, &mtlShader->prog.vs);
+#else
     if (r_loadForRenderer->current.enabled && loadDef->loadForRenderer == r_rendererInUse->current.integer)
     {
         ProfLoad_Begin("Create vertex shader");
@@ -314,6 +328,7 @@ void __cdecl Load_CreateMaterialVertexShader(GfxVertexShaderLoadDef *loadDef, Ma
     {
         mtlShader->prog.vs = 0;
     }
+#endif
 }
 
 void __cdecl AssertValidVertexDeclOffsets(const stream_source_info_t *streamTable)
@@ -922,7 +937,7 @@ void __cdecl Material_CollateTechniqueSets(XAssetHeader header, TechniqueSetList
 
 bool __cdecl IsValidMaterialHandle(Material *const handle)
 {
-    iassert( ( 0x0003 & reinterpret_cast<int>( handle ) ) == 0x0 );
+    iassert( ( 0x0003 & reinterpret_cast<uintptr_t>( handle ) ) == 0x0 );
     return handle && handle->info.name && *handle->info.name;
 }
 
