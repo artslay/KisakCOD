@@ -11,6 +11,17 @@ const dvar_t *jump_slowdownEnable;
 const dvar_t *jump_ladderPushVel;
 const dvar_t *jump_spreadAdd;
 
+// Local forward declarations: these helpers are defined later in this translation unit
+// or provided by the shared movement/event code.
+double __cdecl Jump_GetSlowdownFriction(playerState_s *ps);
+double __cdecl Jump_GetLandFactor(playerState_s *ps);
+void __cdecl Jump_Start(pmove_t *pm, pml_t *pml, float height);
+void __cdecl Jump_PushOffLadder(playerState_s *ps, pml_t *pml);
+void __cdecl Jump_AddSurfaceEvent(playerState_s *ps, pml_t *pml);
+int32_t __cdecl PM_GetEffectiveStance(const playerState_s *ps);
+int32_t __cdecl PM_GroundSurfaceType(const pml_t *pml);
+void __cdecl BG_AddPredictableEventToPlayerstate(int32_t event, uint32_t eventParm, playerState_s *ps);
+
 void __cdecl Jump_RegisterDvars()
 {
     DvarLimits min; // [esp+4h] [ebp-14h]
@@ -366,4 +377,3 @@ void __cdecl Jump_AddSurfaceEvent(playerState_s *ps, pml_t *pml)
             BG_AddPredictableEventToPlayerstate(EV_JUMP, surfType, ps);
     }
 }
-
