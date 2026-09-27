@@ -513,6 +513,7 @@ typedef ull             uint64;
 #define KISAK_SWITCH_PLATFORM_TYPES
 typedef unsigned int DWORD;
 typedef int LONG;
+typedef int BOOL;
 #endif
 
 #ifndef KISAK_SWITCH_INTERLOCKED_DEFINED
