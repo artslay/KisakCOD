@@ -1,6 +1,14 @@
 #pragma once
 
+#ifdef __SWITCH__
+#include <gfx/opengl/d3d9_compat.h>
+#else
+#ifdef __SWITCH__
+#include <gfx/opengl/d3d9_compat.h>
+#else
 #include <d3d9.h>
+#endif
+#endif
 #include "r_rendercmds.h"
 #include "rb_backend.h"
 
