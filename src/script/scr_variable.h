@@ -94,7 +94,9 @@ struct VariableStackBuffer // sizeof=0xC
     uint8_t time;
     char buf[1];
 };
+#ifndef __SWITCH__
 static_assert(sizeof(VariableStackBuffer) == 0xC);
+#endif
 
 union VariableUnion // sizeof=0x4
 {                                       // ...
@@ -128,7 +130,9 @@ union VariableUnion // sizeof=0x4
     VariableStackBuffer *stackValue;
     uint32_t entityOffset;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(VariableUnion) == 0x4);
+#endif
 
 struct VariableValue // sizeof=0x8
 {   
@@ -136,7 +140,9 @@ struct VariableValue // sizeof=0x8
     VariableUnion u;                    // ...
     Vartype_t type;                           // ...
 };
+#ifndef __SWITCH__
 static_assert(sizeof(VariableValue) == 0x8);
+#endif
 
 union ObjectInfo_u // sizeof=0x2
 {                                       // ...
@@ -145,28 +151,36 @@ union ObjectInfo_u // sizeof=0x2
     uint16_t nextEntId;
     uint16_t self;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(ObjectInfo_u) == 0x2);
+#endif
 
 struct ObjectInfo // sizeof=0x4
 {                                       // ...
     uint16_t refCount;
     ObjectInfo_u u;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(ObjectInfo) == 0x4);
+#endif
 
 union Variable_u // sizeof=0x2
 {                                       // ...
     uint16_t prev;
     uint16_t prevSibling;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(Variable_u) == 0x2);
+#endif
 
 struct Variable // sizeof=0x4
 {                                       // ...
     uint16_t id;                // ...
     Variable_u u;                       // ...
 };
+#ifndef __SWITCH__
 static_assert(sizeof(Variable) == 0x4);
+#endif
 
 union VariableValueInternal_u // sizeof=0x4
 {                                       // ...
@@ -187,7 +201,9 @@ union VariableValueInternal_u // sizeof=0x4
     VariableUnion u;
     ObjectInfo o;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(VariableValueInternal_u) == 0x4);
+#endif
 
 union VariableValueInternal_w // sizeof=0x4
 {                                       // ...
@@ -199,14 +215,18 @@ union VariableValueInternal_w // sizeof=0x4
     uint32_t waitTime;
     uint32_t parentLocalId;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(VariableValueInternal_w) == 0x4);
+#endif
 
 union VariableValueInternal_v // sizeof=0x2
 {                                       // ...
     uint16_t next;
     uint16_t index;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(VariableValueInternal_v) == 0x2);
+#endif
 
 struct VariableValueInternal // sizeof=0x10
 {                                       // ...
@@ -216,7 +236,9 @@ struct VariableValueInternal // sizeof=0x10
     VariableValueInternal_v v;          // ...
     uint16_t nextSibling;       // ...
 };
+#ifndef __SWITCH__
 static_assert(sizeof(VariableValueInternal) == 0x10);
+#endif
 
 struct scrVarDebugPub_t // sizeof=0xE0004
 {                                       // ...
@@ -229,13 +251,17 @@ struct scrVarDebugPub_t // sizeof=0xE0004
     // padding byte
     // padding byte
 };
+#ifndef __SWITCH__
 static_assert(sizeof(scrVarDebugPub_t) == 0xE0004);
+#endif
 
 struct scrVarGlob_t // sizeof=0x180000
 {                                       // ...
     VariableValueInternal variableList[0x18000]; // ...
 };
+#ifndef __SWITCH__
 static_assert(sizeof(scrVarGlob_t) == 0x180000);
+#endif
 
 struct scr_entref_t // sizeof=0x4
 {                                       // ...
@@ -252,7 +278,9 @@ struct scr_entref_t // sizeof=0x4
     uint16_t entnum;            // ...
     uint16_t classnum;          // ...
 };
+#ifndef __SWITCH__
 static_assert(sizeof(scr_entref_t) == 0x4);
+#endif
 
 struct scr_classStruct_t // sizeof=0xC
 {
@@ -271,7 +299,9 @@ struct scr_classStruct_t // sizeof=0xC
     // padding byte
     const char *name;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(scr_classStruct_t) == 0xC);
+#endif
 
 struct VariableDebugInfo // sizeof=0x10
 {
@@ -280,7 +310,9 @@ struct VariableDebugInfo // sizeof=0x10
     const char *functionName;
     int varUsage;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(VariableDebugInfo) == 0x10);
+#endif
 
 //void  TRACK_scr_variable(void);
 void __cdecl Scr_Cleanup();
@@ -436,7 +468,9 @@ struct ThreadDebugInfo // sizeof=0x8C
     float varUsage;                     // ...
     float endonUsage;                   // ...
 };
+#ifndef __SWITCH__
 static_assert(sizeof(ThreadDebugInfo) == 0x8C);
+#endif
 
 void  Scr_DumpScriptThreads(void);
 void  Scr_ShutdownVariables(void);
