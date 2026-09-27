@@ -288,13 +288,18 @@ uint8_t *__cdecl Material_Alloc(uint32_t size)
 
 void __cdecl Load_CreateMaterialPixelShader(GfxPixelShaderLoadDef *loadDef, MaterialPixelShader *mtlShader)
 {
-    iassert( loadDef == &mtlShader->prog.loadDef );
-    #ifdef __SWITCH__
-    // Switch uses the GLSL bootstrap shader irrespective of the original D3D9 bytecode.
+    iassert(loadDef == &mtlShader->prog.loadDef);
+#ifdef __SWITCH__
     if (r_loadForRenderer->current.enabled)
     {
         ProfLoad_Begin("Create Switch pixel shader");
         dx.device->CreatePixelShader(loadDef->program, &mtlShader->prog.ps);
+        ProfLoad_End();
+    }
+    else
+    {
+        mtlShader->prog.ps = 0;
+    }
 #else
     if (r_loadForRenderer->current.enabled && loadDef->loadForRenderer == r_rendererInUse->current.integer)
     {
@@ -311,12 +316,18 @@ void __cdecl Load_CreateMaterialPixelShader(GfxPixelShaderLoadDef *loadDef, Mate
 
 void __cdecl Load_CreateMaterialVertexShader(GfxVertexShaderLoadDef *loadDef, MaterialVertexShader *mtlShader)
 {
-    iassert( loadDef == &mtlShader->prog.loadDef );
-    #ifdef __SWITCH__
+    iassert(loadDef == &mtlShader->prog.loadDef);
+#ifdef __SWITCH__
     if (r_loadForRenderer->current.enabled)
     {
         ProfLoad_Begin("Create Switch vertex shader");
         dx.device->CreateVertexShader(loadDef->program, &mtlShader->prog.vs);
+        ProfLoad_End();
+    }
+    else
+    {
+        mtlShader->prog.vs = 0;
+    }
 #else
     if (r_loadForRenderer->current.enabled && loadDef->loadForRenderer == r_rendererInUse->current.integer)
     {
