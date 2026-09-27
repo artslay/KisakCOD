@@ -44,6 +44,11 @@ volatile int g_timeout = 0;
 
 static void *g_values[THREAD_CONTEXT_COUNT][4] = {};
 static thread_local jmp_buf g_switchJmpBuffer;
+static std::mutex g_databaseMutex;
+static std::condition_variable g_databaseCv;
+static bool g_databaseRequested = false;
+static bool g_databaseCompleted = false;
+
 
 static uint32_t ThreadId()
 {
@@ -170,11 +175,12 @@ void __cdecl Sys_SuspendDatabaseThread(ThreadOwner) {}
 void __cdecl Sys_ResumeDatabaseThread(ThreadOwner) {}
 bool __cdecl Sys_HaveSuspendedDatabaseThread(ThreadOwner) { return false; }
 void __cdecl Sys_WaitDatabaseThread() {}
-void __cdecl Sys_WaitStartDatabase() {}
-void __cdecl Sys_NotifyDatabase() {}
+void __cdecl Sys_SyncDatabase()\n{\n    std::unique_lock<std::mutex> lock(g_databaseMutex);\n    g_databaseCv.wait(lock, [] { return g_databaseCompleted || !g_databaseRequested; });\n    g_databaseCompleted = false;\n}
+void __cdecl Sys_WaitStartDatabase()\n{\n    std::unique_lock<std::mutex> lock(g_databaseMutex);\n    g_databaseCv.wait(lock, [] { return g_databaseRequested; });\n    g_databaseRequested = false;\n}
+void __cdecl Sys_NotifyDatabase()\n{\n    { std::lock_guard<std::mutex> lock(g_databaseMutex); g_databaseRequested = true; }\n    g_databaseCv.notify_one();\n}
 void __cdecl Sys_WakeDatabase() {}
-void __cdecl Sys_DatabaseCompleted() {}
-void __cdecl Sys_DatabaseCompleted2() {}
+void __cdecl Sys_DatabaseCompleted()\n{\n    { std::lock_guard<std::mutex> lock(g_databaseMutex); g_databaseCompleted = true; }\n    g_databaseCv.notify_all();\n}
+void __cdecl Sys_DatabaseCompleted2() { Sys_DatabaseCompleted(); }
 bool __cdecl Sys_IsDatabaseReady() { return true; }
 bool __cdecl Sys_IsDatabaseReady2() { return true; }
 void __cdecl Sys_WakeDatabase2() {}
