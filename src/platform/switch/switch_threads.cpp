@@ -176,7 +176,14 @@ void __cdecl Sys_SuspendDatabaseThread(ThreadOwner) {}
 void __cdecl Sys_ResumeDatabaseThread(ThreadOwner) {}
 bool __cdecl Sys_HaveSuspendedDatabaseThread(ThreadOwner) { return false; }
 void __cdecl Sys_WaitDatabaseThread() {}
-void __cdecl Sys_SyncDatabase()\n{\n    std::unique_lock<std::mutex> lock(g_databaseMutex);\n    g_databaseCv.wait(lock, [] { return g_databaseCompleted || !g_databasePending; });\n    g_databaseCompleted = false;\n    g_databasePending = false;\n}\n
+void __cdecl Sys_SyncDatabase()
+{
+    std::unique_lock<std::mutex> lock(g_databaseMutex);
+    g_databaseCv.wait(lock, [] { return g_databaseCompleted || !g_databasePending; });
+    g_databaseCompleted = false;
+    g_databasePending = false;
+}
+
 void __cdecl Sys_WaitStartDatabase()\n{\n    std::unique_lock<std::mutex> lock(g_databaseMutex);\n    g_databaseCv.wait(lock, [] { return g_databaseRequested; });\n    g_databaseRequested = false;\n}
 void __cdecl Sys_NotifyDatabase()\n{\n    { std::lock_guard<std::mutex> lock(g_databaseMutex); g_databaseRequested = true; g_databasePending = true; }\n    g_databaseCv.notify_one();\n}
 void __cdecl Sys_WakeDatabase() {}
