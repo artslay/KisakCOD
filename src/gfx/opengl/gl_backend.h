@@ -2,11 +2,6 @@
 #include "gfx_backend.h"
 #include <string>
 
-#ifdef __SWITCH__
-    #include <glad/glad.h>
-#else
-    #include <GL/glew.h>
-#endif
 
 class OpenGLBackend : public IGfxBackend
 {
@@ -93,9 +88,9 @@ private:
     bool InitCapabilities();
     void LogGLError(const char* context);
 
-    GLFWwindow* m_window = nullptr;
-    GLuint m_vertexArrayObject = 0;
-    GLuint m_currentProgram = 0;
+    void* m_window = nullptr;
+    uint32_t m_vertexArrayObject = 0;
+    uint32_t m_currentProgram = 0;
     bool m_deviceLost = false;
     std::string m_lastError;
 
@@ -105,7 +100,7 @@ private:
 
     // Framebuffer objects for render targets
     static constexpr uint32_t MAX_RENDER_TARGETS = 8;
-    GLuint m_renderTargets[MAX_RENDER_TARGETS] = {};
-    GLuint m_renderTargetTextures[MAX_RENDER_TARGETS] = {};
+    uint32_t m_renderTargets[MAX_RENDER_TARGETS] = {};
+    uint32_t m_renderTargetTextures[MAX_RENDER_TARGETS] = {};
     uint32_t m_currentRenderTarget = 0;
 };
