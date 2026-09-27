@@ -40,6 +40,7 @@ C_SOURCES := $(shell find src -type f -name '*.c' \\
 C_SOURCES += $(shell find deps/zlib -type f -name '*.c')
 
 CPP_SOURCES += src/platform/switch/switch_main.cpp
+CPP_SOURCES += src/gfx_d3d/r_init_switch.cpp src/gfx_d3d/r_buffers.cpp src/gfx_d3d/r_state.cpp
 CPP_SOURCES += src/gfx_d3d/r_buffers.cpp src/gfx_d3d/r_state.cpp
 
 CPP_OBJECTS := $(CPP_SOURCES:%.cpp=$(BUILD)/%.o)
