@@ -10,7 +10,7 @@ BUILD       := build
 ARCH        := -march=armv8-a -mtune=cortex-a57 -mtp=soft
 MESA_SDK    := $(CURDIR)/mesa-sdk/opt/devkitpro/portlibs/switch
 CPPFLAGS    := -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE \
-               -I$(CURDIR)/src -I$(CURDIR)/deps -I$(CURDIR)/deps/msslib \
+               -I$(CURDIR)/src -I$(CURDIR)/deps \
                -I$(MESA_SDK)/include
 CXXFLAGS    := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP
 CFLAGS      := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -MMD -MP
@@ -27,6 +27,9 @@ CPP_SOURCES := $(shell find src -type f -name '*.cpp' \
     ! -path 'src/platform/*' \
     ! -name 'com_files.cpp' \
     ! -path 'src/groupvoice/*' \
+    ! -path 'src/radiant/*' \
+    ! -path 'src/*_mp/*' \
+    ! -name '*_mp.cpp' \
     ! -name 'win_common.cpp' \
     ! -name 'win_shared.cpp' \
     ! -name 'snd_mss.cpp' \
@@ -40,7 +43,10 @@ C_SOURCES := $(shell find src -type f -name '*.c' \
     ! -path 'src/win32/*' \
     ! -path 'src/linux/*' \
     ! -path 'src/platform/*' \
-    ! -path 'src/groupvoice/*')
+    ! -path 'src/groupvoice/*' \
+    ! -path 'src/radiant/*' \
+    ! -path 'src/*_mp/*' \
+    ! -name '*_mp.c')
 
 # zlib is required by the engine's archive/zip loader.
 C_SOURCES += $(shell find deps/zlib -type f -name '*.c')
