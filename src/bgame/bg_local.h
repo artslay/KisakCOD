@@ -811,13 +811,6 @@ struct playerState_s_hud
 };
 #endif
 
-#if defined(KISAK_SP) && defined(__SWITCH__)
-struct playerState_s_hud
-{
-    hudelem_s elem[256];
-};
-#endif
-
 enum ActionSlotType : __int32
 {                                       // XREF: playerState_s/r
     ACTIONSLOTTYPE_DONOTHING = 0x0,
@@ -2743,6 +2736,13 @@ enum pmflags_t : __int32 // (MP/SP same)
 #endif
 };
 #endif // __SWITCH__
+
+#if defined(KISAK_SP) && defined(__SWITCH__)
+struct playerState_s_hud
+{
+    hudelem_s elem[256];
+};
+#endif
 
 enum ActionSlotType : __int32
 {                                       // XREF: playerState_s/r
