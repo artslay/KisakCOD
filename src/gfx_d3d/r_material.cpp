@@ -759,6 +759,34 @@ bool __cdecl Material_CastsStencilShadow(Material *handle)
 
 void __cdecl Material_ReleasePassResources(MaterialPass *pass)
 {
+#ifdef __SWITCH__
+    iassert(pass);
+    iassert(pass->pixelShader);
+    if (pass->pixelShader->prog.ps)
+    {
+        delete pass->pixelShader->prog.ps;
+        pass->pixelShader->prog.ps = nullptr;
+    }
+
+    iassert(pass->vertexShader);
+    if (pass->vertexShader->prog.vs)
+    {
+        delete pass->vertexShader->prog.vs;
+        pass->vertexShader->prog.vs = nullptr;
+    }
+
+    iassert(pass->vertexDecl);
+    if (pass->vertexDecl->isLoaded)
+    {
+        pass->vertexDecl->isLoaded = false;
+        for (int declIndex = 0; declIndex < 16; ++declIndex)
+        {
+            delete pass->vertexDecl->routing.decl[declIndex];
+            pass->vertexDecl->routing.decl[declIndex] = nullptr;
+        }
+    }
+#else
+
     IDirect3DSurface9 *v1; // [esp+0h] [ebp-10h]
     IDirect3DSurface9 *var; // [esp+4h] [ebp-Ch]
     IDirect3DPixelShader9 *varCopy; // [esp+8h] [ebp-8h]
@@ -818,6 +846,7 @@ void __cdecl Material_ReleasePassResources(MaterialPass *pass)
             }
         }
     }
+#endif
 }
 
 void __cdecl Material_ReleaseTechniqueSetResources(MaterialTechniqueSet *techniqueSet)
