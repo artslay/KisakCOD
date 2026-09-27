@@ -1,6 +1,10 @@
 #pragma once
 
+#ifdef __SWITCH__
+#include "../gfx/opengl/d3d9_compat.h"
+#else
 #include <d3d9.h>
+#endif
 #include "r_material.h" // GfxVertex
 #include "r_init.h"
 #include "r_rendercmds.h"
