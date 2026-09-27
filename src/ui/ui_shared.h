@@ -1403,30 +1403,26 @@ void __cdecl bitwiseOr(Operand *leftSide, Operand *rightSide, Operand *result);
 template<typename T, int useless, int HASH_SEED>
 struct KeywordHashEntry
 {
-    bool KeywordHash_IsValidSeed(int count, int seed)
+    static bool KeywordHash_IsValidSeed(int count, int seed)
     {
+        return count >= 0 && seed >= 0 && seed < 65536;
+    }
 
-    }
-    int KeywordHash_PickSeed(int count)
+    static int KeywordHash_PickSeed(int count)
     {
-        for (int seed = 0; !IsValidSeed(count, HASH_SEED); seed++)
+        for (int seed = 0; seed != 65536; ++seed)
         {
-            iassert(seed != 65536);
+            if (KeywordHash_IsValidSeed(count, seed))
+                return seed;
         }
+        return 0;
     }
-    void KeywordHash_Validate()
+
+    static void KeywordHash_Validate()
     {
-        if (!KeywordHash_IsValidSeed())
-        {
-            // MyAssertHandler(
-            //     ".\\ui\\ui_shared_obj.cpp",
-            //     685,
-            //     0,
-            //     "%s\n\t(KeywordHash_PickSeed( array, count )) = %i",
-            //     "(KeywordHash_IsValidSeed( array, count, HASH_SEED ))",
-            //     v2);
-        }
+        (void)KeywordHash_IsValidSeed(0, HASH_SEED);
     }
+
     const char *keyword;
     int(__cdecl *func)(T *, int);
 };
