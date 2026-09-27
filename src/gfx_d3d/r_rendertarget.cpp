@@ -491,6 +491,7 @@ void __cdecl R_InitFrameBufferRenderTarget_Win32(GfxRenderTarget *renderTarget)
     renderTarget->surface.color = new IDirect3DSurface9;
     renderTarget->surface.color->texture = nullptr;
     renderTarget->surface.color->level = 0;
+    renderTarget->surface.color->defaultFramebuffer = true;
 
     if (!g_allocateMinimalResources)
     {
