@@ -33,6 +33,9 @@ struct vidConfig_t // sizeof=0x30 — subset needed by r_init; matches client_mp
 #ifdef __SWITCH__
 #include <gfx/opengl/d3d9_compat.h>
 struct HWND__;
+using HWND = HWND__*;
+struct _D3DCAPS9 {};
+struct _D3DPRESENT_PARAMETERS_ {};
 #else
 #include <Windows.h>
 #include <d3d9.h>
