@@ -8,16 +8,21 @@ TARGET      := kisakcod
 BUILD       := build
 
 ARCH        := -march=armv8-a -mtune=cortex-a57 -mtp=soft
-CPPFLAGS    := -D__SWITCH__ -DKISAK_SWITCH -DKISAK_MP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE \\
+CPPFLAGS    := -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE \\
                -I$(CURDIR)/src -I$(CURDIR)/deps -I$(CURDIR)/deps/msslib
 CXXFLAGS    := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP
 CFLAGS      := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -MMD -MP
 LDFLAGS     := $(ARCH) -specs=$(DEVKITPRO)/libnx/switch.specs -Wl,--gc-sections
 LIBS        := -lglad -lEGL -lglapi -ldrm_nouveau -lnx -lm
 
-# Keep engine/game code, but not platform-specific Windows/D3D9 code.
+include $(DEVKITPRO)/libnx/switch_rules
+
+# Singleplayer Switch build. Keep shared engine/game code, but exclude MP, Windows and D3D9.
 CPP_SOURCES := $(shell find src -type f -name '*.cpp' \\
     ! -path 'src/gfx_d3d/*' \\
+    ! -path 'src/mp/*' \\
+    ! -path 'src/game_mp/*' \\
+    ! -path 'src/cgame_mp/*' \\
     ! -path 'src/win32/*' \\
     ! -path 'src/linux/*' \\
     ! -path 'src/platform/*' \\
@@ -29,6 +34,9 @@ CPP_SOURCES := $(shell find src -type f -name '*.cpp' \\
 
 C_SOURCES := $(shell find src -type f -name '*.c' \\
     ! -path 'src/gfx_d3d/*' \\
+    ! -path 'src/mp/*' \\
+    ! -path 'src/game_mp/*' \\
+    ! -path 'src/cgame_mp/*' \\
     ! -path 'src/win32/*' \\
     ! -path 'src/linux/*' \\
     ! -path 'src/platform/*' \\
