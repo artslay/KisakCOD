@@ -1,35 +1,44 @@
 #include <cstdio>
+#include <memory>
 
-#ifdef __SWITCH__
 #include <switch.h>
-#endif
 
-int main(int argc, char** argv)
+#include <gfx/gfx_backend.h>
+
+int main()
 {
-#ifdef __SWITCH__
-    consoleInit(NULL);
-    printf("KisakCOD Switch bootstrap\\n");
-    printf("Graphics backend bootstrap: OpenGL/Mesa\\n");
-    printf("argc: %d\\n", argc);
-    printf("Press + to exit.\\n");
+    std::printf("KisakCOD Switch bootstrap\n");
+    std::printf("Initializing OpenGL through Mesa/EGL...\n");
+
+    auto backend = CreateOpenGLBackend();
+    if (!backend)
+    {
+        std::printf("CreateOpenGLBackend failed\n");
+        return 1;
+    }
+
+    if (!backend->Init(nullptr))
+    {
+        std::printf("OpenGL initialization failed: %s\n", backend->GetLastError());
+        return 1;
+    }
+
+    padConfigureInput(1, HidNpadStyleSet_NpadStandard);
+
+    PadState pad;
+    padInitializeDefault(&pad);
 
     while (appletMainLoop())
     {
-        hidScanInput();
+        padUpdate(&pad);
 
-        const u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
-        if (kDown & KEY_PLUS)
+        if (padGetButtonsDown(&pad) & HidNpadButton_Plus)
             break;
 
-        consoleUpdate(NULL);
+        backend->Clear(0.08f, 0.12f, 0.20f, 1.0f);
+        backend->Present();
     }
 
-    consoleExit(NULL);
-#else
-    (void)argc;
-    (void)argv;
-    std::puts("KisakCOD Switch bootstrap requires a Switch toolchain.");
-#endif
-
+    backend->Shutdown();
     return 0;
 }
