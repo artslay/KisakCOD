@@ -507,3 +507,4 @@ FxPool<ITEM_TYPE>* FX_PoolFromHandle_Generic(FxPool<ITEM_TYPE>* poolArray, uint 
     vassert(handle < (LIMIT * sizeof(ITEM_TYPE) / ITEM_TYPE::HANDLE_SCALE) && handle % (sizeof(ITEM_TYPE) / ITEM_TYPE::HANDLE_SCALE) == 0, "%p %u", poolArray, handle);
     return (FxPool<ITEM_TYPE> *)((char*)poolArray + (handle * ITEM_TYPE::HANDLE_SCALE));
 }
+#endif // !__SWITCH__
