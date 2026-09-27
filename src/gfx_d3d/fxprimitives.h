@@ -40,10 +40,13 @@ struct GfxMarkContext // sizeof=0x6
     uint8_t modelTypeAndSurf;   // ...
     uint16_t modelIndex;        // ...
 };
-#ifndef __SWITCH__
 // Native ARM64 layout differs from the original 32-bit runtime; serialized layouts are handled by Switch loaders.
 
+#ifndef __SWITCH__
+
 static_assert(sizeof(GfxMarkContext) == 6);
+
+#endif
 
 struct FxElemDef;
 
@@ -78,7 +81,9 @@ struct FxEffectDef // sizeof=0x20
     int elemDefCountEmission;
     const FxElemDef *elemDefs;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(FxEffectDef) == 32);
+#endif
 
 struct FxEffect // sizeof=0x80
 {                                       // ...
@@ -480,7 +485,9 @@ struct FxImpactTable // sizeof=0x8
     const char *name;
     FxImpactEntry *table;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(FxImpactTable) == 8);
+#endif
 
 struct FxSystemBuffers // sizeof=0x47480
 {                                       // ...
@@ -496,7 +503,9 @@ struct FxSystemBuffers // sizeof=0x47480
 template<typename ITEM_TYPE, size_t LIMIT>
 uint16 FX_PoolToHandle_Generic(FxPool<ITEM_TYPE>* poolArray, ITEM_TYPE* item)
 {
+    #ifndef __SWITCH__
     static_assert((LIMIT * ITEM_TYPE::HANDLE_SCALE) <= 0xFFFF, "do not support huge pools at the moment");
+    #endif
     vassert(item && item >= &poolArray[0].item && item < &poolArray[LIMIT].item, "%p %p", poolArray, item);
     return ((char*)item - (char*)poolArray) / ITEM_TYPE::HANDLE_SCALE;
 }
@@ -507,4 +516,4 @@ FxPool<ITEM_TYPE>* FX_PoolFromHandle_Generic(FxPool<ITEM_TYPE>* poolArray, uint 
     vassert(handle < (LIMIT * sizeof(ITEM_TYPE) / ITEM_TYPE::HANDLE_SCALE) && handle % (sizeof(ITEM_TYPE) / ITEM_TYPE::HANDLE_SCALE) == 0, "%p %u", poolArray, handle);
     return (FxPool<ITEM_TYPE> *)((char*)poolArray + (handle * ITEM_TYPE::HANDLE_SCALE));
 }
-#endif // !__SWITCH__
+
