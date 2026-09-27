@@ -14,6 +14,9 @@ struct AimTarget // sizeof=0x2C
     float maxs[3];
     float velocity[3];
 };
+#ifndef __SWITCH__
+// Native ARM64 layout differs from the original 32-bit runtime; serialized layouts are handled by Switch loaders.
+
 static_assert(sizeof(AimTarget) == 0x2C);
 
 struct AimTargetGlob // sizeof=0x1608
@@ -121,6 +124,7 @@ struct AimOutput // sizeof=0x10
     // padding byte
 };
 static_assert(sizeof(AimOutput) == 0x10);
+#endif // !__SWITCH__
 
 void __cdecl TRACK_aim_assist();
 void __cdecl AimAssist_Init(int32_t localClientNum);
