@@ -776,6 +776,7 @@ struct hudelem_s
     int flags;
 };
 #endif
+#endif // KISAK_SP / KISAK_MP
 
 struct MantleState // sizeof=0x10
 {                                       // XREF: playerState_s/r
