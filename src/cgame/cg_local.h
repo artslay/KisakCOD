@@ -16,6 +16,10 @@ struct ScreenPlacement;
 struct centity_s;
 struct GfxScaledPlacement;
 
+struct FxEffectDef;
+struct cpose_t;
+struct shellshock_parms_t;
+
 #define MAX_EFFECT_NAMES 100
 
 #define ACTIONSLOTS_NUM 3
