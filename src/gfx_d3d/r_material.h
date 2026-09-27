@@ -794,7 +794,8 @@ struct Material // sizeof=0x50
 // editorLocale@88; sizeof rounds to 96 because GfxDrawSurf (in MaterialInfo) forces
 // 8-byte alignment. The pad is harmless — the fields are read/written by name.
 #else
-#endif // !__SWITCH__
+#endif // KISAK_RADIANT
+#endif // __SWITCH__
 
 struct MaterialMemory // sizeof=0x8
 {                                       // ...
@@ -997,69 +998,3 @@ MaterialTechniqueSet *__cdecl Material_FindTechniqueSet_LoadObj(
 void __cdecl Material_GetInfo(Material *handle, MaterialInfo *matInfo);
 
 Material *__cdecl Material_Duplicate(Material *mtlCopy, char *name);
-
-void __cdecl Material_Sort();
-
-char __cdecl Material_SetPassShaderArguments_DX(
-    const char **text,
-    const char *shaderName,
-    MaterialShaderType shaderType,
-    uint32_t *program,
-    uint16_t *techFlags,
-    ShaderParameterSet *paramSet,
-    uint32_t argLimit,
-    uint32_t *argCount,
-    MaterialShaderArgument *args);
-
-const char *__cdecl Material_RegisterString(char *string);
-const char *__cdecl Material_NameForStreamDest(uint8_t dest);
-MaterialTechniqueSet *__cdecl Material_RegisterTechniqueSet(const char *name);
-void __cdecl Material_SetMaterialDrawRegion(Material *material);
-char __cdecl Material_Validate(const Material *material);
-void __cdecl Material_SetStateBits(Material *material, uint32_t (*stateBitsTable)[2], uint32_t stateBitsCount);
-bool __cdecl Material_GenerateShaderString_r(
-    GfxAssembledShaderText *prog,
-    char *shaderName,
-    const char *file,
-    uint32_t fileSize,
-    bool isInLibDir);
-
-// r_material_override
-const GfxMtlFeatureMap *__cdecl Material_FindFeature(
-    const char *featureName,
-    const GfxMtlFeatureMap *featureMap,
-    uint32_t featureCount);
-uint32_t __cdecl Material_ExtendTechniqueSetName(
-    char *nameSoFar,
-    uint32_t nameLen,
-    char *token,
-    uint32_t tokenLen,
-    bool prependUnderscore);
-uint32_t __cdecl Material_NextTechniqueSetNameToken(const char **parse, char *token);
-void __cdecl Material_OverrideTechniqueSets();
-void __cdecl Material_OriginalRemapTechniqueSet(MaterialTechniqueSet *techSet);
-void __cdecl Material_DirtyTechniqueSetOverrides();
-void __cdecl Material_ClearShaderUploadList();
-bool __cdecl Material_WouldTechniqueSetBeOverridden(const MaterialTechniqueSet *techSet);
-
-
-inline bool Material_UsesDepthBuffer(Material *mat)
-{
-    return (mat->stateFlags & 0x10);
-}
-
-inline bool R_IsModelSurfaceType(int surfType)
-{
-    return (surfType >= SF_BEGIN_XMODEL && surfType < SF_END_XMODEL);
-}
-
-struct ShaderBinNames
-{
-    int key;
-    int val;
-};
-
-extern int g_vertexNamesCount;
-extern ShaderBinNames *g_vertexNamesList;
-extern int g_pixelNamesCount;
-extern ShaderBinNames *g_pixelNamesList;
