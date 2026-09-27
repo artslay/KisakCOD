@@ -536,6 +536,12 @@ inline T InterlockedCompareExchange(volatile T *destination, T exchange, T compa
     __atomic_compare_exchange_n(destination, &comparand, exchange, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
     return comparand;
 }
+
+template <typename T>
+inline T InterlockedExchangeAdd(volatile T *addend, T value)
+{
+    return __atomic_fetch_add(addend, value, __ATOMIC_SEQ_CST);
+}
 #endif
 #endif
 
