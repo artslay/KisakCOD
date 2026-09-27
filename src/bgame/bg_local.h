@@ -196,6 +196,9 @@ union hudelem_color_t // sizeof=0x4
     };
     uint32_t rgba;
 };
+#ifndef __SWITCH__
+// Native ARM64 layout differs from the original 32-bit runtime; serialized layouts are handled by Switch loaders.
+
 static_assert(sizeof(union hudelem_color_t) == 0x4);
 
 enum ViewLockTypes : __int32
@@ -2248,6 +2251,7 @@ struct weaponState_t // sizeof=0x54
     int32_t*weapIdleTime;                  // ...
 };
 static_assert(sizeof(weaponState_t) == 0x54);
+#endif // !__SWITCH__
 
 void __cdecl TRACK_bg_weapons();
 void __cdecl BG_LoadPenetrationDepthTable();
