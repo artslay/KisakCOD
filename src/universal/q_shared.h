@@ -51,6 +51,15 @@
 #ifndef __declspec
 #define __declspec(x)
 #endif
+#ifndef __forceinline
+#define __forceinline inline __attribute__((always_inline))
+#endif
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(a) (sizeof(a) / sizeof((a)[0]))
+#endif
+#ifndef sprintf_s
+#define sprintf_s snprintf
+#endif
 #endif
 
 // this is the define for determining if we have an asm version of a C function
