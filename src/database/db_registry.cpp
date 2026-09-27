@@ -764,7 +764,6 @@ void __cdecl DB_LoadXZone(XZoneInfo *zoneInfo, uint32_t zoneCount)
     }
 }
 
-#ifdef __SWITCH__
 void __cdecl DB_InitThread()
 {
     if (!Sys_SpawnDatabaseThread((void(__cdecl *)(uint32_t))DB_Thread))
