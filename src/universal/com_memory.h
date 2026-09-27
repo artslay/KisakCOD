@@ -27,6 +27,7 @@ uint8_t* __cdecl Hunk_AllocPhysPresetPrecache(uint32_t size);
 void* __cdecl Hunk_AllocXAnimClient(int size);
 uint8_t* __cdecl Hunk_AllocXAnimServer(uint32_t size);
 
+uint8_t* __cdecl Hunk_AllocLow(uint32_t size, const char* name, int32_t type);
 uint8_t* __cdecl Hunk_AllocLowAlign(uint32_t size, int32_t alignment, const char* name, int32_t type);
 
 //void __cdecl TRACK_com_memory();
