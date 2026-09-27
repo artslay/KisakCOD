@@ -216,8 +216,9 @@ const void **__cdecl DB_InsertPointer();
 // db_stream_load
 void __cdecl Load_Stream(bool atStreamStart, uint8_t *ptr, int32_t size);
 void __cdecl Load_DelayStream();
-void __cdecl DB_ConvertOffsetToAlias(uint32_t *data);
-void __cdecl DB_ConvertOffsetToPointer(uint32_t *data);
+void __cdecl DB_ConvertOffsetToAlias(void *data);
+uintptr_t __cdecl DB_ConvertOffsetToPointerValue(uint32_t offset);
+void __cdecl DB_ConvertOffsetToPointer(void *data);
 void __cdecl Load_XStringCustom(char **str);
 void __cdecl Load_TempStringCustom(char **str);
 
