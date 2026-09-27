@@ -341,19 +341,11 @@ class IDirect3DDevice9
         m_program = program;
         glUseProgram(m_program);
 
-        m_textureStageLocation = glGetUniformLocation(m_program, "uTextureStage");
+        m_textureStageLocation = glGetUniformLocation(m_program, "uTexture0");
         m_vsConstantsLocation = glGetUniformLocation(m_program, "u_vsConstants[0]");
         m_psConstantsLocation = glGetUniformLocation(m_program, "u_psConstants[0]");
         m_screenSizeLocation = glGetUniformLocation(m_program, "uScreenSize");
 
-        const GLint samplerBase = glGetUniformLocation(m_program, "uTextures[0]");
-        if (samplerBase >= 0)
-        {
-            GLint samplers[16];
-            for (int i = 0; i < 16; ++i)
-                samplers[i] = i;
-            glUniform1iv(samplerBase, 16, samplers);
-        }
 
         if (m_textureStageLocation >= 0)
             glUniform1i(m_textureStageLocation, 0);
@@ -667,17 +659,29 @@ public:
         {
             m_textureTargets[stage] = tex->target;
             glBindTexture(tex->target, tex->object);
+            if (stage != 0)
+            {
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(tex->target, tex->object);
+                glActiveTexture(GL_TEXTURE0 + stage);
+            }
         }
         else
         {
             m_textureTargets[stage] = GL_TEXTURE_2D;
             glBindTexture(GL_TEXTURE_2D, 0);
+            if (stage != 0)
+            {
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                glActiveTexture(GL_TEXTURE0 + stage);
+            }
         }
         if (m_program)
         {
             glUseProgram(m_program);
             if (m_textureStageLocation >= 0)
-                glUniform1i(m_textureStageLocation, static_cast<GLint>(stage));
+                glUniform1i(m_textureStageLocation, 0);
         }
         return S_OK;
     }
@@ -718,12 +722,11 @@ void main()
 in vec2 vTexCoord;
 in vec4 vColor;
 out vec4 FragColor;
-uniform sampler2D uTextures[16];
-uniform int uTextureStage;
+uniform sampler2D uTexture0;
 uniform vec4 u_psConstants[256];
 void main()
 {
-    FragColor = vColor * texture(uTextures[uTextureStage], vTexCoord);
+    FragColor = vColor * texture(uTexture0, vTexCoord);
 }
 )";
         const GLuint object = CompileShader(GL_FRAGMENT_SHADER, source);
