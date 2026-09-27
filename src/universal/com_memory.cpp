@@ -18,6 +18,20 @@
 #include "physicalmemory.h"
 
 #include <cstdint>
+struct HunkUser
+{
+    HunkUser *current;
+    HunkUser *next;
+    uintptr_t pos;
+    uintptr_t end;
+    uint32_t maxSize;
+    const char *name;
+    bool fixed;
+    bool tempMem;
+    int32_t type;
+    uint8_t buf[1];
+};
+
 
 HunkUser *g_user;
 fileData_s *com_hunkData;
@@ -855,9 +869,15 @@ HunkUser* __cdecl Hunk_UserCreate(int32_t maxSize, const char* name, bool fixed,
     if (maxSize % 4096)
         MyAssertHandler(".\\universal\\com_memory.cpp", 2834, 0, "%s\n\t(maxSize) = %i", "(!(maxSize % (4*1024)))", maxSize);
     user = (HunkUser*)Z_VirtualReserve(maxSize);
+#ifdef __SWITCH__
+    Z_VirtualCommit(user, (int)offsetof(HunkUser, buf));
+    user->end = (uintptr_t)user + (uintptr_t)maxSize;
+    user->pos = (uintptr_t)user->buf;
+#else
     Z_VirtualCommit(user, 32);
     user->end = (int)user + maxSize;
     user->pos = (int)user->buf;
+#endif
     if ((user->pos & 0x1F) != 0)
         MyAssertHandler(".\\universal\\com_memory.cpp", 2848, 0, "%s\n\t(user->pos) = %i", "(!(user->pos & 31))", user->pos);
     user->maxSize = maxSize;
@@ -873,8 +893,13 @@ HunkUser* __cdecl Hunk_UserCreate(int32_t maxSize, const char* name, bool fixed,
 
 void* Hunk_UserAlloc(HunkUser* user, uint32_t size, int32_t alignment)
 {
+#ifdef __SWITCH__
+    uintptr_t pos;
+    uintptr_t result;
+#else
     int32_t pos; // [esp+4h] [ebp-10h]
     int32_t result; // [esp+8h] [ebp-Ch]
+#endif
     HunkUser* current; // [esp+Ch] [ebp-8h]
     HunkUser* newCurrent; // [esp+10h] [ebp-4h]
 
@@ -921,7 +946,11 @@ void __cdecl Hunk_UserSetPos(HunkUser* user, uint8_t* pos)
     iassert(pos >= user->buf);
     iassert((uintptr_t)pos <= user->pos); // (psize_int)pos <= user->pos
 
+#ifdef __SWITCH__
+    user->pos = (uintptr_t)pos;
+#else
     user->pos = (int)pos;
+#endif
 }
 
 void __cdecl Hunk_UserReset(HunkUser* user)
@@ -934,6 +963,17 @@ void __cdecl Hunk_UserReset(HunkUser* user)
         user->current = user;
         user->next = 0;
     }
+#ifdef __SWITCH__
+    uintptr_t resetPos = (reinterpret_cast<uintptr_t>(user->buf) + 4095u) & ~uintptr_t(0xFFF);
+    uintptr_t usedEnd = (user->pos + 4095u) & ~uintptr_t(0xFFF);
+    if (resetPos != usedEnd)
+    {
+        if (user->pos <= resetPos)
+            MyAssertHandler(".\\universal\\com_memory.cpp", 3019, 0, "%s", "user->pos - pos > 0");
+        Z_VirtualDecommit((void*)resetPos, (int)(user->pos - resetPos));
+    }
+    user->pos = reinterpret_cast<uintptr_t>(user->buf);
+#else
     pos = (void*)(((uint32_t)&user[114].name + 3) & 0xFFFFF000);
     if (pos != (void*)((user->pos + 4095) & 0xFFFFF000))
     {
