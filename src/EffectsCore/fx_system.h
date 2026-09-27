@@ -238,6 +238,7 @@ struct FxMarkTri // sizeof=0xC
     uint16_t indices[3];        // ...
     GfxMarkContext context;             // ...
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(FxMarkTri) == 0xC);
 
 struct MarkInfoCollidedDObj // sizeof=0xC
@@ -1263,3 +1264,5 @@ int32_t __cdecl FX_DecideIntervalLimit(const FxEditorElemDef *edElemDef);
 
 extern const float fx_randomTable[507];
 extern int32_t fx_serverVisClient;
+
+#endif // KISAK_SWITCH legacy 32-bit layout asserts
