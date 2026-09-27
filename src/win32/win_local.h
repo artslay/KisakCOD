@@ -1,6 +1,10 @@
 // win_local.h: Win32-specific Quake3 header file
 #pragma once // addition
 
+#ifdef __SWITCH__
+#include <mutex>
+#endif
+
 #if defined (_MSC_VER) && (_MSC_VER >= 1200)
 #pragma warning(disable : 4201)
 #pragma warning( push )
