@@ -26,7 +26,11 @@ struct Font_s // sizeof=0x18 // (SP/MP same)
     struct Material *glowMaterial;
     Glyph *glyphs;
 };
+#ifndef __SWITCH__
+// Native ARM64 layout differs from the original 32-bit runtime; serialized layouts are handled by Switch loaders.
+
 static_assert(sizeof(Font_s) == 24);
+#endif // !__SWITCH__
 
 const Glyph *__cdecl R_GetCharacterGlyph(Font_s *font, uint32_t letter);
 uint32_t __cdecl R_FontGetRandomLetter(Font_s *font, int seed);
