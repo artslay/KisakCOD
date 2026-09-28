@@ -122,7 +122,13 @@ uint16_t __cdecl DevGui_CreateMenu(uint16_t parentHandle, const char *label, __i
     menu = devguiGlob.nextFreeMenu;
     if (!devguiGlob.nextFreeMenu)
         Com_Error(ERR_DROP, "Too many devgui entries (more than %i)", 600);
+#ifdef __SWITCH__
+    uintptr_t nextFreeMenu = 0;
+    memcpy(&nextFreeMenu, menu->label, sizeof(nextFreeMenu));
+    devguiGlob.nextFreeMenu = reinterpret_cast<DevMenuItem *>(nextFreeMenu);
+#else
     devguiGlob.nextFreeMenu = *(DevMenuItem **)menu->label;
+#endif
     handle = DevGui_GetMenuHandle(menu);
     v5 = menu;
     do
