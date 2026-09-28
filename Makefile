@@ -36,8 +36,7 @@ CPP_SOURCES := $(shell find src -type f -name '*.cpp' \
     ! -name 'snd_driver.cpp' \
     ! -name 'threads.cpp' \
     ! -name 'timing.cpp' \
-    ! -name 'profile.cpp' \
-    ! -name 'buildnumber.cpp')
+    ! -name 'profile.cpp' )
 
 C_SOURCES := $(shell find src -type f -name '*.c' \
     ! -path 'src/gfx_d3d/*' \

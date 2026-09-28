@@ -604,11 +604,11 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         if (*(unsigned int *)v3)
         {
             v4 = static_cast<unsigned int>(
-                *reinterpret_cast<gentity_s **>(v3) - g_entities + 1);
+                *reinterpret_cast<gentity_s * const *>(v3) - g_entities + 1);
             if (v4 > 0x880)
                 Com_Error(ERR_DROP, "WriteField1: entity out of range (%i)", v4);
 
-            *(int *)v3 = v4;
+            *reinterpret_cast<uintptr_t *>(v3) = static_cast<uintptr_t>(v4);
         }
         else
         {
@@ -632,13 +632,13 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         break;
     case SF_CLIENT:
-        if (*(unsigned int *)v3)
+        if (*reinterpret_cast<gclient_s * const *>(v3))
         {
             v7 = static_cast<unsigned int>(
-                *reinterpret_cast<gclient_s **>(v3) - level.clients + 1);
+                *reinterpret_cast<gclient_s * const *>(v3) - level.clients + 1);
             if (v7 >= 2)
                 Com_Error(ERR_DROP, "WriteField1: client out of range (%i)", v7);
-            *(int *)v3 = v7;
+            *reinterpret_cast<uintptr_t *>(v3) = static_cast<uintptr_t>(v7);
         }
         else
         {
@@ -646,13 +646,13 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         break;
     case SF_ACTOR:
-        if (*(unsigned int *)v3)
+        if (*reinterpret_cast<actor_s * const *>(v3))
         {
             v8 = static_cast<unsigned int>(
-                *reinterpret_cast<actor_s **>(v3) - level.actors + 1);
+                *reinterpret_cast<actor_s * const *>(v3) - level.actors + 1);
             if (v8 > 0x20)
                 Com_Error(ERR_DROP, "WriteField1: actor out of range (%i)", v8);
-            *(int *)v3 = v8;
+            *reinterpret_cast<uintptr_t *>(v3) = static_cast<uintptr_t>(v8);
         }
         else
         {
@@ -660,13 +660,13 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         break;
     case SF_SENTIENT:
-        if (*(unsigned int *)v3)
+        if (*reinterpret_cast<sentient_s * const *>(v3))
         {
             v9 = static_cast<unsigned int>(
-                *reinterpret_cast<sentient_s **>(v3) - level.sentients + 1);
+                *reinterpret_cast<sentient_s * const *>(v3) - level.sentients + 1);
             if (v9 >= 0x22)
                 Com_Error(ERR_DROP, "WriteField1: sentient out of range (%i)", v9);
-            *(int *)v3 = v9;
+            *reinterpret_cast<uintptr_t *>(v3) = static_cast<uintptr_t>(v9);
         }
         else
         {
@@ -690,13 +690,13 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         break;
     case SF_VEHICLE:
-        if (*(unsigned int *)v3)
+        if (*reinterpret_cast<scr_vehicle_s * const *>(v3))
         {
             v11 = static_cast<unsigned int>(
-                *reinterpret_cast<scr_vehicle_s **>(v3) - level.vehicles + 1);
+                *reinterpret_cast<scr_vehicle_s * const *>(v3) - level.vehicles + 1);
             if (v11 > 0x40)
                 Com_Error(ERR_DROP, "WriteField1: vehicle out of range (%i)", v11);
-            *(int *)v3 = v11;
+            *reinterpret_cast<uintptr_t *>(v3) = static_cast<uintptr_t>(v11);
         }
         else
         {
@@ -704,13 +704,13 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         break;
     case SF_TURRETINFO:
-        if (*(unsigned int *)v3)
+        if (*reinterpret_cast<TurretInfo * const *>(v3))
         {
             v12 = static_cast<unsigned int>(
-                *reinterpret_cast<TurretInfo **>(v3) - level.turrets + 1);
+                *reinterpret_cast<TurretInfo * const *>(v3) - level.turrets + 1);
             if (v12 > 0x20)
                 Com_Error(ERR_DROP, "WriteField1: turret out of range (%i)", v12);
-            *(int *)v3 = v12;
+            *reinterpret_cast<uintptr_t *>(v3) = static_cast<uintptr_t>(v12);
         }
         else
         {
@@ -721,13 +721,13 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         v3->number = Scr_ConvertThreadToSave(v3->number);
         break;
     case SF_ANIMSCRIPT:
-        v13 = (unsigned __int8 *)*(unsigned int *)v3;
-        if (*(unsigned int *)v3)
+        v13 = *reinterpret_cast<unsigned __int8 * const *>(v3);
+        if (v13)
         {
             if (v13 == original + 504)
             {
 
-                *(int *)v3 = -1;
+                *reinterpret_cast<uintptr_t *>(v3) = static_cast<uintptr_t>(-1);
             }
             else
             {
@@ -741,7 +741,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
                         "%s\n\t(index) = %i",
                         "(index > 0 && index <= (int)( sizeof( AnimScriptList ) * MAX_AI_SPECIES / sizeof( scr_animscript_t ) ))",
                         v14 + 1);
-                *(int *)v3 = v15;
+                *reinterpret_cast<uintptr_t *>(v3) = static_cast<uintptr_t>(v15);
             }
         }
         else
@@ -750,16 +750,17 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         break;
     case SF_PATHNODE:
-        *(int *)v3 = Path_SaveIndex(*(const pathnode_t **)v3);
+        *reinterpret_cast<uintptr_t *>(v3) = static_cast<uintptr_t>(
+            Path_SaveIndex(*reinterpret_cast<const pathnode_t * const *>(v3)));
         break;
     case SF_ANIMTREE:
-        if (*(unsigned int *)v3)
+        if (*reinterpret_cast<const XAnimTree_s * const *>(v3))
         {
-            anims = XAnimGetAnims(*(const XAnimTree_s **)v3);
+            anims = XAnimGetAnims(*reinterpret_cast<const XAnimTree_s * const *>(v3));
             iassert(anims);
             index = Scr_GetAnimsIndex(anims);
             iassert(index);
-            *(int *)v3 = index;
+            *reinterpret_cast<uintptr_t *>(v3) = static_cast<uintptr_t>(index);
         }
         else
         {
@@ -769,7 +770,8 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
     case SF_TYPE_TAG_INFO:
     case SF_TYPE_SCRIPTED:
         //*v3 = (EntHandle)((_cntlzw((unsigned int)*v3) & 0x20) == 0);
-        *(int *)v3 = (*(unsigned int *)v3 != 0);
+        *reinterpret_cast<uintptr_t *>(v3) =
+            (*reinterpret_cast<uintptr_t *>(v3) != 0);
         break;
     case SF_MODELUSHORT:
     case SF_MODELINT:
@@ -1108,7 +1110,7 @@ void WriteEntity(gentity_s *ent, SaveGame *save)
 {
     unsigned int UsedSize; // r3
     unsigned int v7; // r3
-    unsigned __int8 v8[632]; // [sp+50h] [-290h] BYREF
+    unsigned __int8 v8[sizeof(gentity_s)]; // [sp+50h] [-290h] BYREF
 
     iassert(save);
     memcpy(v8, ent, sizeof(gentity_s));

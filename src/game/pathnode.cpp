@@ -708,19 +708,14 @@ unsigned int Path_InitLinkCounts()
             nodes = gameWorldSp.path.nodes;
             if (gameWorldSp.path.nodes[v2].constant.totalLinkCount)
             {
-                v4 = 0;
-                v5 = v2 * 128 + 64;
-                do
+                pathlink_s *links = gameWorldSp.path.nodes[v2].constant.Links;
+                for (v4 = 0; v4 < gameWorldSp.path.nodes[v2].constant.totalLinkCount; ++v4)
                 {
-                    ++v3;
-                    *(_BYTE *)(*(nodeType *)((char *)&nodes->constant.type + v5) + v4 + 8) = 0;
-                    *(_BYTE *)(*(nodeType *)((char *)&gameWorldSp.path.nodes->constant.type + v5) + v4 + 9) = 0;
-                    *(_BYTE *)(*(nodeType *)((char *)&gameWorldSp.path.nodes->constant.type + v5) + v4 + 10) = 0;
-                    v6 = *(nodeType *)((char *)&gameWorldSp.path.nodes->constant.type + v5) + v4;
-                    v4 += 12;
-                    *(_BYTE *)(v6 + 11) = 0;
-                    nodes = gameWorldSp.path.nodes;
-                } while (v3 < gameWorldSp.path.nodes[v2].constant.totalLinkCount);
+                    links[v4].ubBadPlaceCount[0] = 0;
+                    links[v4].ubBadPlaceCount[1] = 0;
+                    links[v4].ubBadPlaceCount[2] = 0;
+                    links[v4].ubBadPlaceCount[3] = 0;
+                }
             }
             ++result;
             ++v2;

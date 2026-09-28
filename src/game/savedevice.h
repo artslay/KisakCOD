@@ -4,6 +4,8 @@
 #error This file is for SinglePlayer only 
 #endif
 
+enum SaveType : __int32;
+
 #ifdef KISAK_XBOX
 static const char *CONSOLE_DEFAULT_SAVE_NAME = "savegame.svg";
 #endif
