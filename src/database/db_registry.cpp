@@ -1560,6 +1560,12 @@ static XAssetHeader __cdecl node1_(void *pool)
     return (XAssetHeader)pool;
 }
 
+static static void __cdecl DB_FreeXAssetHeader_StringTable_(void *arg, XAssetHeader header);
+void __cdecl R_EnumMaterials(void(__cdecl *func)(Material *, void *), void *data);
+void __cdecl R_EnumTechniqueSets(void(__cdecl *func)(MaterialTechniqueSet *, void *), void *data);
+void __cdecl R_EnumImages(void(__cdecl *func)(GfxImage *, void *), void *data);
+void __cdecl Material_OverrideTechniqueSets();
+
 static XAssetHeader __cdecl DB_AllocXAsset_StringTable_(void *arg)
 {
     XAssetHeader *pool = (XAssetHeader*)arg;
@@ -1745,12 +1751,12 @@ static void __cdecl DB_DynamicCloneMenu(XAssetHeader from, XAssetHeader to, int3
     to.xmodelPieces[6].pieces = from.xmodelPieces[6].pieces;
     for (int32_t toIndex = 0; toIndex < (int)to.xmodelPieces[13].pieces; ++toIndex)
     {
-        toWindow = *(windowDef_t **)(to.xmodelPieces[23].numpieces + 4 * toIndex);
+        toWindow = *reinterpret_cast<windowDef_t **>(reinterpret_cast<uintptr_t>(to.xmodelPieces[23].numpieces) + sizeof(windowDef_t *) * static_cast<uintptr_t>(toIndex));
         if (toWindow->name)
         {
             for (int32_t fromIndex = 0; fromIndex < (int)from.xmodelPieces[13].pieces; ++fromIndex)
             {
-                fromWindow = *(windowDef_t **)(from.xmodelPieces[23].numpieces + 4 * fromIndex);
+                fromWindow = *reinterpret_cast<windowDef_t **>(reinterpret_cast<uintptr_t>(from.xmodelPieces[23].numpieces) + sizeof(windowDef_t *) * static_cast<uintptr_t>(fromIndex));
                 if (fromWindow->name && !strcmp(fromWindow->name, toWindow->name))
                 {
                     toWindow->dynamicFlags[0] = fromWindow->dynamicFlags[0];
@@ -1807,6 +1813,36 @@ static int32_t __cdecl DB_GetAllXAssetOfType_LoadObj(XAssetType type, XAssetHead
     assetList.maxCount = maxCount;
     DB_EnumXAssets(type, (void(__cdecl*)(XAssetHeader, void*))Hunk_AddAsset, &assetList, 0);
     return assetList.assetCount;
+}
+
+void __cdecl R_EnumMaterials(void(__cdecl *func)(Material *, void *), void *data)
+{
+    for (uint32_t hashIndex = 0; hashIndex < 0x800; ++hashIndex)
+    {
+        Material *header = rg.materialHashTable[hashIndex];
+        if (header)
+            func(header, data);
+    }
+}
+
+void __cdecl R_EnumTechniqueSets(void(__cdecl *func)(MaterialTechniqueSet *, void *), void *data)
+{
+    for (uint32_t hashIndex = 0; hashIndex < 0x400; ++hashIndex)
+    {
+        MaterialTechniqueSet *header = materialGlobals.techniqueSetHashTable[hashIndex];
+        if (header)
+            func(header, data);
+    }
+}
+
+void __cdecl R_EnumImages(void(__cdecl *func)(GfxImage *, void *), void *data)
+{
+    for (uint32_t imageIndex = 0; imageIndex < IMAGE_HASH_TABLE_SIZE; ++imageIndex)
+    {
+        GfxImage *header = imageGlobals.imageHashTable[imageIndex];
+        if (header && !Image_IsProg(header))
+            func(header, data);
+    }
 }
 
 void __cdecl DB_EnumXAssets_FastFile(
