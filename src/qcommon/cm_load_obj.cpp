@@ -65,7 +65,7 @@ static void CM_LoadTempMemoryReset(HunkUser *user)
 static uint8_t *CM_LoadTempMalloc(uint32_t size)
 {
     iassert(s_cmLoadTempUser);
-    return static_cast<uint8_t *>(Hunk_UserAlloc(s_cmLoadTempUser, size, 1));
+    return static_cast<uint8_t *>(Hunk_UserAlloc(s_cmLoadTempUser, size, 32));
 }
 
 struct dbrush_t // sizeof=0x4
