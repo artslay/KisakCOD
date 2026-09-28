@@ -50,7 +50,7 @@ int __cdecl Hunk_SetMarkLow();
 void __cdecl Hunk_ClearToMarkLow(int mark);
 void __cdecl Hunk_ResetDebugMem();
 void* Hunk_AllocDebugMem(uint32_t size, const char* name = nullptr);
-void __cdecl Hunk_FreeDebugMem(void* ptr);
+void __cdecl Hunk_FreeDebugMem(void* ptr = nullptr);
 void __cdecl Hunk_InitDebugMemory();
 void __cdecl Hunk_ShutdownDebugMemory();
 void Hunk_Clear();
