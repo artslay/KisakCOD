@@ -522,7 +522,7 @@ void __cdecl AddOperandToStack(OperandStack *dataStack, Operand *data)
     operandInternalDataUnion v2; // ecx
     int numOperandLists; // edx
 
-    if (data->dataType == VAL_STRING && !data->internals.intVal)
+    if (data->dataType == VAL_STRING && !data->internals.string)
         MyAssertHandler(
             ".\\ui\\ui_expressions.cpp",
             1605,
@@ -551,7 +551,7 @@ char __cdecl GetOperand(OperandStack *dataStack, Operand *data)
             data->dataType = list->operands[0].dataType;
             data->internals = v4;
             --dataStack->numOperandLists;
-            if (data->dataType == VAL_STRING && !data->internals.intVal)
+            if (data->dataType == VAL_STRING && !data->internals.string)
                 MyAssertHandler(
                     ".\\ui\\ui_expressions.cpp",
                     1796,
@@ -2258,7 +2258,7 @@ void __cdecl RunCommaOp(int localClientNum, OperandStack *dataStack, OperandList
             v4.intVal = (int)list1->operands[list1Operand].internals;
             finalList[operand].dataType = list1->operands[list1Operand].dataType;
             finalList[operand].internals = v4;
-            if (finalList[operand].dataType == VAL_STRING && !finalList[operand].internals.intVal)
+            if (finalList[operand].dataType == VAL_STRING && !finalList[operand].internals.string)
                 MyAssertHandler(
                     ".\\ui\\ui_expressions.cpp",
                     1637,
@@ -2272,7 +2272,7 @@ void __cdecl RunCommaOp(int localClientNum, OperandStack *dataStack, OperandList
             v5.intVal = (int)list2->operands[list2Operand].internals;
             finalList[operand].dataType = list2->operands[list2Operand].dataType;
             finalList[operand].internals = v5;
-            if (finalList[operand].dataType == VAL_STRING && !finalList[operand].internals.intVal)
+            if (finalList[operand].dataType == VAL_STRING && !finalList[operand].internals.string)
                 MyAssertHandler(
                     ".\\ui\\ui_expressions.cpp",
                     1643,
@@ -2337,13 +2337,13 @@ void __cdecl TableLookup(int localClientNum, OperandList *list, Operand *operand
                 "UI Expression Error: Expected 4 params to function StringTableLookup, found %i\n",
                 list->operandCount);
             operandResult->dataType = VAL_STRING;
-            operandResult->internals.intVal = (int)"";
+            operandResult->internals.string = "";
         }
     }
     else
     {
         operandResult->dataType = VAL_STRING;
-        operandResult->internals.intVal = (int)"";
+        operandResult->internals.string = "";
     }
 }
 
@@ -2467,7 +2467,7 @@ void __cdecl LocalizeString(OperandList *list, Operand *operandResult)
     operandResult->dataType = VAL_STRING;
     operandResult->internals.string = SEH_LocalizeTextMessage(string, "ui string", LOCMSG_NOERR);
     if (!operandResult->internals.intVal)
-        operandResult->internals.intVal = (int)"";
+        operandResult->internals.string = "";
 }
 
 void __cdecl LocalizationError(const char *errorMessage)
