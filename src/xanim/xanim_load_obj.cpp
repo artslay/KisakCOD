@@ -953,6 +953,8 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
     BOOL v69; // [esp+BBCh] [ebp-928h]
     uint32_t PartQuatType; // [esp+BC0h] [ebp-924h]
     XAnimPartQuatPtr v71[128]; // [esp+BC4h] [ebp-920h]
+    XAnimPartTrans *transPtrs[128];
+    uint32_t transPartIndices[128];
     unsigned short boneIndexes[130]; // [esp+FC4h] [ebp-520h] BYREF
     XAnimPartTransPtr v73[128]; // [esp+10CCh] [ebp-418h] BYREF
     XAnimParts *parts; // [esp+14CCh] [ebp-18h]
@@ -1211,7 +1213,7 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
             animPartIndex = boneIndexes[i];
             v8 = *(_DWORD *)&v73[animPartIndex].partIndex;
             v9 = i;
-            transPtrs[i] = reinterpret_cast<uintptr_t>(v73[animPartIndex].trans);
+            transPtrs[i] = v73[animPartIndex].trans;
             transPartIndices[v9] = static_cast<uint32_t>(v8);
             PartQuatType = XAnimGetPartTransType(animPartIndex);
             v51[PartQuatType] = i + 1;
