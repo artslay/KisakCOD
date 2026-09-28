@@ -1,3 +1,5 @@
+#include <cstdarg>
+
 #pragma once
 
 enum dlStatus_t : __int32

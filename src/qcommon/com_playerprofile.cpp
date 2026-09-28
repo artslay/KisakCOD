@@ -25,7 +25,7 @@ int __cdecl Com_BuildPlayerProfilePath_Internal(
     int pathSize,
     const char *playerName,
     const char *format,
-    char *vargs)
+    va_list vargs)
 {
     int totalLength; // [esp+0h] [ebp-Ch]
     int totalLengtha; // [esp+0h] [ebp-Ch]
@@ -40,7 +40,7 @@ int __cdecl Com_BuildPlayerProfilePath_Internal(
     prefixLength = Com_sprintf(path, pathSize, "profiles/%s/", playerName);
     if (prefixLength < 0 || prefixLength >= pathSize)
         return pathSize;
-    nameLength = _vsnprintf(&path[prefixLength], pathSize - prefixLength, format, vargs);
+    nameLength = vsnprintf(&path[prefixLength], pathSize - prefixLength, format, vargs);
     totalLength = nameLength + prefixLength;
     if (nameLength >= 0 && totalLength < pathSize)
     {
@@ -558,27 +558,33 @@ void __cdecl Com_SetRecommended(int localClientNum, int restart)
 
 bool __cdecl Sys_ShouldUpdateForInfoChange()
 {
-    HWND ActiveWindow; // eax
-    char *v2; // [esp-Ch] [ebp-Ch]
-    char *v3; // [esp-8h] [ebp-8h]
-
     Sys_ArchiveInfo(0);
+#ifdef __SWITCH__
+    return false;
+#else
+    HWND ActiveWindow;
+    char *v2;
+    char *v3;
     v3 = Win_LocalizeRef("WIN_COMPUTER_CHANGE_TITLE");
     v2 = Win_LocalizeRef("WIN_COMPUTER_CHANGE_BODY");
     ActiveWindow = GetActiveWindow();
     return MessageBoxA(ActiveWindow, v2, v3, 0x44u) == 6;
+#endif
 }
 
 bool __cdecl Sys_ShouldUpdateForConfigChange()
 {
-    HWND ActiveWindow; // eax
-    char *v2; // [esp-Ch] [ebp-Ch]
-    char *v3; // [esp-8h] [ebp-8h]
-
+#ifdef __SWITCH__
+    return false;
+#else
+    HWND ActiveWindow;
+    char *v2;
+    char *v3;
     v3 = Win_LocalizeRef("WIN_CONFIGURE_UPDATED_TITLE");
     v2 = Win_LocalizeRef("WIN_CONFIGURE_UPDATED_BODY");
     ActiveWindow = GetActiveWindow();
     return MessageBoxA(ActiveWindow, v2, v3, 0x44u) == 6;
+#endif
 }
 
 bool __cdecl Sys_HasInfoChanged()

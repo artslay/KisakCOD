@@ -1,4 +1,5 @@
 #include <universal/q_shared.h>
+#include <cstdarg>
 #include "dl_main.h"
 #include "qcommon.h"
 
@@ -8,11 +9,11 @@
 
 #include <universal/com_files.h>
 
-int __cdecl DL_VPrintf(const char *fmt, char *argptr)
+int __cdecl DL_VPrintf(const char *fmt, va_list argptr)
 {
     char msg[1028]; // [esp+10h] [ebp-408h] BYREF
 
-    _vsnprintf(msg, 0x400u, fmt, argptr);
+    vsnprintf(msg, 0x400u, fmt, argptr);
     Com_Printf(CON_CHANNEL_DONT_FILTER, "%s", msg);
     return &msg[strlen(msg) + 1] - &msg[1];
 }

@@ -92,6 +92,7 @@ void __cdecl Z_VirtualCommitInternal(void* ptr, int size);
 void __cdecl Z_VirtualFree(void* ptr);
 void __cdecl Z_Free(void* ptr, int type);
 void* __cdecl Z_Malloc(int32_t size, const char* name, int32_t type);
+char* __cdecl Z_MallocGarbage(int32_t size, const char* name, int32_t type);
 
 const char* CopyString(const char* in);
 const char* CopyString(char* in);
