@@ -6,6 +6,9 @@
 #include "r_rendertarget.h"
 #include "r_buffers.h"
 #include "r_scene.h"
+#include "r_water.h"
+#include "r_light.h"
+#include "r_workercmds.h"
 #include "r_draw_method.h"
 #include <gfx/gfx_backend.h>
 #include <gfx/opengl/gl_backend.h>
@@ -43,7 +46,7 @@ void R_CalcGammaRamp(GfxGammaRamp *ramp) {
 void R_GammaCorrect(uint8_t *, int) {}
 void SetGfxConfig(const GfxConfiguration *config) { if (config) gfxCfg = *config; }
 
-void R_InitThreads() { R_InitRenderThread(); R_InitWorkerThreads(); }
+void R_InitThreads() { R_InitRenderThread(); }
 void R_ShutdownStreams() {}
 void R_ShutdownMaterialUsage() {}
 
@@ -106,11 +109,9 @@ void R_InitGraphicsApi() {
 void R_InitSystems() {
     R_InitImages();
     R_InitFonts();
-    R_InitLoadWater();
-    R_InitLightDefs();
     R_InitDebug();
 }
-void R_PreCreateWindow() {}
+char R_PreCreateWindow() { return 1; }
 void R_StoreDirect3DCaps(uint32_t) {}
 void R_GetDirect3DCaps(uint32_t, _D3DCAPS9 *) {}
 void R_SetShadowmapFormats_DX(uint32_t) {
@@ -162,11 +163,7 @@ void R_InitGlobalStructs() {
 }
 void R_EndRegistration() {}
 void R_TrackStatistics(trStatistics_t *) {}
-void R_UpdateTeamColors(int team, const float *allies, const float *axis) {
-    rgp.team = team;
-    if (allies) memcpy(rgp.color_allies.array, allies, sizeof(float) * 0);
-    (void)axis;
-}
+void R_UpdateTeamColors(int, const float *, const float *) {}
 void R_ConfigureRenderer(const GfxConfiguration *config) { SetGfxConfig(config); }
 void R_ComErrorCleanup() {}
 bool R_CheckLostDevice() { return false; }
