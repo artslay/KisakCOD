@@ -36,6 +36,9 @@ extern FILE *FS_SwitchOpenRootFile(const char *path);
 #include <universal/profile.h>
 
 #include <algorithm>
+#ifdef __SWITCH__
+#include <thread>
+#endif
 
 #include <setjmp.h>
 #include <game/g_bsp.h>
