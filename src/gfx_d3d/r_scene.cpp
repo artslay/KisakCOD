@@ -224,7 +224,7 @@ void __cdecl R_AddDObjToScene(
                 sceneModel->obj = obj;
                 sceneModel->entnum = entnum;
                 scene.dpvs.sceneXModelIndex[entnum] = sceneEntIndex;
-                sceneModel->cachedLightingHandle = (uint16_t *)LongNoSwap((uint32_t)pose);
+                sceneModel->cachedLightingHandle = reinterpret_cast<uint16_t *>(const_cast<cpose_t *>(pose));
                 radius = XModelGetRadius(model);
                 CG_GetPoseOrigin(pose, sceneModel->placement.base.origin);
                 CG_GetPoseAngles(pose, angles);
@@ -1014,7 +1014,12 @@ bool __cdecl R_EndFencePending()
 {
     _BYTE v2[4]; // [esp+Ch] [ebp-4h] BYREF
 
+#ifdef __SWITCH__
+    (void)v2;
+    return false;
+#else
     return frontEndDataOut->endFence && frontEndDataOut->endFence->GetData(v2, 4u, 1u) == 1;
+#endif
 }
 
 void __cdecl R_SetEndTime(int endTime)
@@ -1450,7 +1455,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
     MaterialTechniqueType EmissiveTechnique; // eax
     char DoesDrawSurfListInfoNeedFloatz; // al
     float *viewOrigin; // [esp+BCh] [ebp-BCh]
-    uint32_t data[20]; // [esp+C4h] [ebp-B4h] BYREF
+    ShadowCookieCmd data{}; // shadow cookie worker command
     float bestError; // [esp+120h] [ebp-58h]
     uint32_t bestNum; // [esp+124h] [ebp-54h]
     float error; // [esp+128h] [ebp-50h]
@@ -1662,11 +1667,11 @@ void __cdecl R_GenerateSortedDrawSurfs(
         }
         else if (dynamicShadowType == SHADOW_COOKIE)
         {
-            data[0] = (uint32_t)viewParmsDpvs;
-            data[1] = (uint32_t)viewParmsDraw;
-            data[2] = (uint32_t)&viewInfo->shadowCookieList;
-            data[3] = viewInfo->localClientNum;
-            R_AddWorkerCmd(WRKCMD_SHADOW_COOKIE, (uint8_t *)data);
+            data.viewParmsDpvs = viewParmsDpvs;
+            data.viewParmsDraw = viewParmsDraw;
+            data.shadowCookieList = &viewInfo->shadowCookieList;
+            data.localClientNum = viewInfo->localClientNum;
+            R_AddWorkerCmd(WRKCMD_SHADOW_COOKIE, reinterpret_cast<uint8_t *>(&data));
         }
     }
     R_SetAllStaticModelLighting();
@@ -2021,7 +2026,7 @@ void R_GenerateMarkVertsForDynamicModels()
         entnum = sceneEntity->entnum;
         if (entnum < gfxCfg.entnumOrdinaryEnd && (scene.sceneDObjVisData[0][dobjIndex] & 1) != 0)
         {
-            lightHandle = *(_WORD *)LongNoSwap((uint32_t)sceneEntity->info.pose);
+            lightHandle = *reinterpret_cast<const uint16_t *>(sceneEntity->info.pose);
             FX_GenerateMarkVertsForEntDObj(
                 scene.dpvs.localClientNum,
                 entnum,
