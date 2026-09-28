@@ -1480,7 +1480,6 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
         v56 += parts->boneCount[4];
         while (animPartIndex < v56)
         {
-            v10 = nullptr;
             v11 = dataShort;
             *reinterpret_cast<int32_t *>(dataShort) = reinterpret_cast<const int32_t *>(v71[animPartIndex].quat->u.frame0)[0];
             reinterpret_cast<int32_t *>(v11)[1] = reinterpret_cast<const int32_t *>(v71[animPartIndex].quat->u.frame0)[1];
