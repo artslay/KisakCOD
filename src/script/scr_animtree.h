@@ -17,7 +17,9 @@ struct scrAnimPub_t // sizeof=0x41C
     // padding byte
     // padding byte
 };
+#ifndef __SWITCH__
 static_assert(sizeof(scrAnimPub_t) == 0x41C);
+#endif
 
 struct scrAnimGlob_t // sizeof=0x20C
 {                                       // ...
@@ -26,7 +28,9 @@ struct scrAnimGlob_t // sizeof=0x20C
     uint16_t using_xanim_lookup[2][MAX_XANIMTREE_NUM]; // ...
     int bAnimCheck;                     // ...
 };
+#ifndef __SWITCH__
 static_assert(sizeof(scrAnimGlob_t) == 0x20C);
+#endif
 
 void __cdecl TRACK_scr_animtree();
 void __cdecl SetAnimCheck(int bAnimCheck);
