@@ -579,6 +579,49 @@ void __cdecl DB_UnloadXAssetsMemory(XZone *zone, int32_t sortedIndex)
     }
 }
 
+XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
+{
+    XAssetEntryPoolEntry *assetEntry = DB_FindXAssetEntry(type, name);
+    if (assetEntry)
+    {
+        assetEntry->entry.inuse = 1;
+        return assetEntry->entry.asset.header;
+    }
+
+    if (type == ASSET_TYPE_LOCALIZE_ENTRY || type == ASSET_TYPE_RAWFILE)
+        return {};
+
+    XAssetEntryPoolEntry *newEntry = DB_CreateDefaultEntry(type, (char *)name);
+    return newEntry ? newEntry->entry.asset.header : XAssetHeader{};
+}
+
+bool __cdecl DB_IsXAssetDefault(XAssetType type, const char *name)
+{
+    const uint32_t hash = DB_HashForName(name, type);
+    InterlockedIncrement(&db_hashCritSect.readCount);
+    while (db_hashCritSect.writeCount)
+        std::this_thread::yield();
+
+    for (uint32_t assetEntryIndex = db_hashTable[hash];
+         assetEntryIndex;
+         assetEntryIndex = g_assetEntryPool[assetEntryIndex].entry.nextHash)
+    {
+        XAssetEntryPoolEntry *assetEntry = &g_assetEntryPool[assetEntryIndex];
+        if (assetEntry->entry.asset.type == type)
+        {
+            const char *assetName = DB_GetXAssetName(&assetEntry->entry.asset);
+            if (assetName && !I_stricmp(assetName, name))
+            {
+                InterlockedDecrement(&db_hashCritSect.readCount);
+                return assetEntry->entry.zoneIndex == 0;
+            }
+        }
+    }
+
+    InterlockedDecrement(&db_hashCritSect.readCount);
+    return true;
+}
+
 void __cdecl DB_ReplaceModel(const char *original, const char *replacement)
 {
     DB_ReplaceXAsset(ASSET_TYPE_XMODEL, original, replacement);
