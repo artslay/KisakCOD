@@ -245,6 +245,14 @@ static void __cdecl  DB_Thread(uint32_t threadContext);
 static void DB_TryLoadXFile();
 static int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags);
 static void __cdecl DB_RemoveLoadedSound(XAssetHeader header);
+void __cdecl DB_RemoveXAsset(XAsset *asset);
+void __cdecl DB_SyncExternalAssets();
+void DB_FreeDefaultEntries();
+void DB_FreeUnusedResources();
+void __cdecl DB_UnloadXZoneMemory(XZone *zone);
+void __cdecl DB_UnloadXAssetsMemory(XZone *zone, int32_t sortedIndex);
+void __cdecl DB_ReplaceXAsset(XAssetType type, const char *original, const char *replacement);
+void __cdecl DB_CloneXAsset(const XAsset *from, XAsset *to);
 void __cdecl Material_DirtyTechniqueSetOverrides();
 void __cdecl Material_ClearShaderUploadList();
 static void __cdecl DB_RemoveLoadedSound(XAssetHeader header)
