@@ -124,4 +124,6 @@ void __cdecl ReplaceString(const char** str, const char* in);
 void FreeString(const char* str);
 
 void* __cdecl Hunk_FindDataForFile(int type, const char* name);
+bool __cdecl Hunk_DataOnHunk(uint8_t* data);
+void __cdecl Hunk_AddData(int32_t type, void* data, void* (__cdecl* alloc)(int));
 void* __cdecl Hunk_FindDataForFileInternal(int type, const char* name, int hash);
