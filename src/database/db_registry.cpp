@@ -176,6 +176,8 @@ static void __cdecl DB_InitPool(void *arg, int32_t size)
     pool->entries[size - 1].next = NULL;
 }
 
+static void __cdecl DB_InitSingleton(void *pool, int32_t size);
+
 void(__cdecl *DB_InitPoolHeaderHandler[ASSET_TYPE_COUNT])(void *, int) =
 {
   DB_InitPool<XAssetPool<XModelPieces, POOLSIZE_XMODELPIECES>>,
