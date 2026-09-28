@@ -1168,7 +1168,7 @@ void __cdecl EmitObject(sval_u expr, sval_u sourcePos)
 {
     signed int ObjectType; // [esp+0h] [ebp-18h]
     int classnum; // [esp+4h] [ebp-14h]
-    char *s; // [esp+Ch] [ebp-Ch]
+    const char *s; // [esp+Ch] [ebp-Ch]
     int entnum; // [esp+10h] [ebp-8h]
     unsigned int idValue; // [esp+14h] [ebp-4h]
 
@@ -1597,7 +1597,7 @@ void __cdecl EmitBoolOrExpression(
     scr_block_s *block)
 {
     unsigned __int8 *pos; // [esp+0h] [ebp-Ch]
-    char *offset; // [esp+4h] [ebp-8h]
+    ptrdiff_t offset; // [esp+4h] [ebp-8h]
     char *nextPos; // [esp+8h] [ebp-4h]
 
     EmitExpression(expr1, block);
@@ -1608,8 +1608,8 @@ void __cdecl EmitBoolOrExpression(
     nextPos = TempMalloc(0);
     EmitExpression(expr2, block);
     EmitCastBool(expr2sourcePos);
-    offset = (char*)(TempMalloc(0) - nextPos);
-    if (offset >= (char*)0x10000)
+    offset = TempMalloc(0) - nextPos;
+    if (offset >= 0x10000)
         MyAssertHandler(".\\script\\scr_compiler.cpp", 2731, 0, "%s", "offset < 65536");
     *pos = (unsigned char)offset;
 }
@@ -1682,7 +1682,7 @@ void __cdecl EmitBoolAndExpression(
     scr_block_s *block)
 {
     unsigned __int8 *pos; // [esp+0h] [ebp-Ch]
-    char *offset; // [esp+4h] [ebp-8h]
+    ptrdiff_t offset; // [esp+4h] [ebp-8h]
     char *nextPos; // [esp+8h] [ebp-4h]
 
     EmitExpression(expr1, block);
@@ -1693,8 +1693,8 @@ void __cdecl EmitBoolAndExpression(
     nextPos = TempMalloc(0);
     EmitExpression(expr2, block);
     EmitCastBool(expr2sourcePos);
-    offset = (char*)(TempMalloc(0) - nextPos);
-    if (offset >= (char*)0x10000)
+    offset = TempMalloc(0) - nextPos;
+    if (offset >= 0x10000)
         MyAssertHandler(".\\script\\scr_compiler.cpp", 2751, 0, "%s", "offset < 65536");
     *pos = (unsigned char)offset;
 }
@@ -2146,7 +2146,7 @@ void __cdecl EmitIfStatement(
     sval_u *ifStatBlock)
 {
     unsigned __int8 *pos; // [esp+0h] [ebp-Ch]
-    char *offset; // [esp+4h] [ebp-8h]
+    ptrdiff_t offset; // [esp+4h] [ebp-8h]
     char *nextPos; // [esp+8h] [ebp-4h]
 
     EmitExpression(expr, block);
@@ -2159,8 +2159,8 @@ void __cdecl EmitIfStatement(
     EmitStatement(stmt, lastStatement, endSourcePos, ifStatBlock->block);
     iassert(ifStatBlock->block->localVarsPublicCount == block->localVarsCreateCount);
     EmitNOP2(lastStatement, endSourcePos, ifStatBlock->block);
-    offset = (char*)(TempMalloc(0) - nextPos);
-    if (offset >= (char*)0x10000)
+    offset = TempMalloc(0) - nextPos;
+    if (offset >= 0x10000)
         MyAssertHandler(".\\script\\scr_compiler.cpp", 3169, 0, "%s", "offset < 65536");
     *pos = (unsigned char)offset;
 }
@@ -2216,8 +2216,8 @@ void __cdecl EmitIfElseStatement(
         nextPos2 = TempMalloc(0);
     }
     scrVarPub.checksum = checksum + 1;
-    offset = (char*)(TempMalloc(0) - nextPos1);
-    if (offset >= (char*)0x10000)
+    offset = TempMalloc(0) - nextPos1;
+    if (offset >= 0x10000)
         MyAssertHandler(".\\script\\scr_compiler.cpp", 3233, 0, "%s", "offset < 65536");
     *pos1 = (unsigned char)offset;
     Scr_TransferBlock(block, elseStatBlock->block);
@@ -4140,7 +4140,7 @@ void __cdecl SetThreadPosition(unsigned int threadId)
 
     v1 = TempMalloc(0);
     Variable = FindVariable(threadId, 1u);
-    GetVariableValueAddress(Variable)->u.intValue = (int)v1;
+    GetVariableValueAddress(Variable)->u.codePosValue = v1;
 }
 
 void __cdecl InitThread(int type)
@@ -4429,8 +4429,8 @@ void __cdecl ScriptCompile(
     PrecacheEntry *entries,
     int entriesCount)
 {
-    char *v5; // eax
-    char *v6; // eax
+    const char *v5; // eax
+    const char *v6; // eax
     unsigned int Variable_DONE; // eax
     VariableValueInternal_u *VariableValueAddress_DONE; // esi
     PrecacheEntry *v9; // [esp+4h] [ebp-54h]

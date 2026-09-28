@@ -343,7 +343,7 @@ VariableStackBuffer *__cdecl Scr_ReadStack(MemoryFile *memFile)
     int v3; // r28
     int v4; // r31
     unsigned __int16 v5; // r29
-    _WORD *v6; // r31
+    VariableStackBuffer *v6; // r31
     char *v7; // r29
     __int16 v8; // r11
     __int16 v9; // r28
@@ -362,16 +362,16 @@ VariableStackBuffer *__cdecl Scr_ReadStack(MemoryFile *memFile)
             0,
             "%s",
             "bufLen == (unsigned short)bufLen");
-    v6 = (uint16*)MT_Alloc(v4, MT_TYPE_THREAD);
+    v6 = (VariableStackBuffer*)MT_Alloc((int)(offsetof(VariableStackBuffer, buf) + 5 * v3), MT_TYPE_THREAD);
     ++scrVarPub.numScriptThreads;
-    v6[2] = v2;
-    v6[3] = v5;
-    *(unsigned int *)v6 = (unsigned int)Scr_ReadCodepos(memFile);
+    v6->pos = Scr_ReadCodepos(memFile);
+    v6->size = v2;
+    v6->bufLen = v5;
     MemFile_ReadData(memFile, 1, v11);
-    v6[4] = Scr_ReadId(memFile, v11[0]);
+    v6->localId = Scr_ReadId(memFile, v11[0]);
     MemFile_ReadData(memFile, 1, v11);
-    v7 = (char *)v6 + 11;
-    *((_BYTE *)v6 + 10) = v11[0];
+    v6->time = v11[0];
+    v7 = v6->buf;
     if (v3)
     {
         v8 = v3;
@@ -1173,7 +1173,7 @@ void __cdecl Scr_LoadShutdown()
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\script\\scr_readwrite.cpp", 1115, 0, "%s", "CheckReferences()");
 }
 
-void __cdecl DoSaveEntryInternal(unsigned int type, VariableUnion *u, MemoryFile *memFile)
+void __cdecl DoSaveEntryInternal(unsigned int type, uintptr_t u, MemoryFile *memFile)
 {
     unsigned int UsedSize; // r3
     unsigned int v7; // r3
@@ -1213,7 +1213,7 @@ void __cdecl DoSaveEntryInternal(unsigned int type, VariableUnion *u, MemoryFile
     {
         UsedSize = MemFile_GetUsedSize(memFile);
         //ProfMem_Begin("pointer", UsedSize);
-        WriteId((unsigned int)u, 1u, memFile);
+        WriteId((uint32_t)u, 1u, memFile);
         v7 = MemFile_GetUsedSize(memFile);
         //ProfMem_End(v7);
     }
@@ -1240,32 +1240,32 @@ void __cdecl DoSaveEntryInternal(unsigned int type, VariableUnion *u, MemoryFile
             //ProfMem_End(v21);
             break;
         case VAR_VECTOR:
-            WriteVector(&u->floatValue, memFile);
+            WriteVector((float *)u, memFile);
             break;
         case VAR_FLOAT:
-            WriteFloat(*(float *)&u, memFile);
+            WriteFloat(*reinterpret_cast<float *>(&u), memFile);
             break;
         case VAR_INTEGER:
             v22 = MemFile_GetUsedSize(memFile);
             //ProfMem_Begin("int", v22);
-            v31[0] = (unsigned int)(uintptr_t)u;
+            v31[0] = (uint32_t)u;
             MemFile_WriteData(memFile, 4, v31);
             v23 = MemFile_GetUsedSize(memFile);
             //ProfMem_End(v23);
             break;
         case VAR_CODEPOS:
         case VAR_FUNCTION:
-            WriteCodepos((const char *)u, memFile);
+            WriteCodepos(reinterpret_cast<const char *>(u), memFile);
             break;
         case VAR_STACK:
             v24 = MemFile_GetUsedSize(memFile);
             //ProfMem_Begin("stack", v24);
-            WriteStack((const VariableStackBuffer *)u, memFile);
+            WriteStack(reinterpret_cast<const VariableStackBuffer *>(u), memFile);
             v25 = MemFile_GetUsedSize(memFile);
             //ProfMem_End(v25);
             break;
         case VAR_ANIMATION:
-            v31[0] = (unsigned int)(uintptr_t)u;
+            v31[0] = (uint32_t)u;
             MemFile_WriteData(memFile, 4, v31);
             break;
         default:
@@ -1472,7 +1472,7 @@ void __cdecl AddSaveEntryInternal(unsigned int type, const VariableStackBuffer *
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __cdecl DoSaveEntry(VariableValue *value, VariableValue *name, bool isArray, MemoryFile *memFile)
+void __cdecl DoSaveEntry(VariableValue *value, uintptr_t name, bool isArray, MemoryFile *memFile)
 {
     unsigned int UsedSize; // r3
     unsigned int v9; // r3
@@ -1502,7 +1502,7 @@ void __cdecl DoSaveEntry(VariableValue *value, VariableValue *name, bool isArray
     //ProfMem_Begin("DoSaveEntry", UsedSize);
     v9 = MemFile_GetUsedSize(memFile);
     //ProfMem_Begin("DoSaveEntryInternal", v9);
-    DoSaveEntryInternal(value->type, (VariableUnion *)value->u.intValue, memFile);
+    DoSaveEntryInternal(value->type, value->u.pointerValue, memFile);
     v10 = MemFile_GetUsedSize(memFile);
     //ProfMem_End(v10);
     if (!isArray)
@@ -1822,7 +1822,7 @@ void __cdecl WriteGameEntry(MemoryFile *memFile)
 {
     DoSaveEntryInternal(
         scrVarGlob.variableList[scrVarPub.gameId + VARIABLELIST_CHILD_BEGIN].w.type & 0x1F,
-        (VariableUnion *)scrVarGlob.variableList[scrVarPub.gameId + VARIABLELIST_CHILD_BEGIN].u.u.intValue,
+        scrVarGlob.variableList[scrVarPub.gameId + VARIABLELIST_CHILD_BEGIN].u.u.pointerValue,
         memFile);
 }
 
@@ -1859,7 +1859,7 @@ void __cdecl Scr_SavePost(MemoryFile *memFile)
     //ProfMem_End(v5);
     DoSaveEntryInternal(
         scrVarGlob.variableList[scrVarPub.gameId + VARIABLELIST_CHILD_BEGIN].w.type & VAR_MASK,
-        (VariableUnion *)scrVarGlob.variableList[scrVarPub.gameId + VARIABLELIST_CHILD_BEGIN].u.u.intValue,
+        scrVarGlob.variableList[scrVarPub.gameId + VARIABLELIST_CHILD_BEGIN].u.u.pointerValue,
         memFile);
     WriteId(scrVarPub.levelId, 0, memFile);
     WriteId(scrVarPub.animId, 0, memFile);
@@ -1879,7 +1879,7 @@ void __cdecl Scr_SavePost(MemoryFile *memFile)
 void __cdecl AddSaveStack(const VariableStackBuffer *stackBuf)
 {
     int size; // r9
-    CONST char *buf; // r31
+    const char *buf; // r31
     int v4; // r10
     __int16 v5; // r29
     const VariableStackBuffer *v6; // r3

@@ -1,4 +1,5 @@
 #include <universal/q_shared.h>
+#include <universal/com_memory.h>
 #include "scr_debugger.h"
 #include "scr_animtree.h"
 #include "scr_parser.h"
@@ -1159,11 +1160,11 @@ void __cdecl Scr_ConnectElementChildren(Scr_WatchElement_s *parentElement)
 
 void __cdecl Scr_SortElementChildren(Scr_WatchElement_s *parentElement)
 {
-    uint32_t v1; // [esp+0h] [ebp-14h]
+    uintptr_t v1; // [esp+0h] [ebp-14h]
     int newIndex; // [esp+4h] [ebp-10h]
     int newIndexa; // [esp+4h] [ebp-10h]
     Scr_WatchElement_s *newElements; // [esp+8h] [ebp-Ch]
-    uint32_t *elementList; // [esp+Ch] [ebp-8h]
+    uintptr_t *elementList; // [esp+Ch] [ebp-8h]
     int count; // [esp+10h] [ebp-4h]
 
     if (!scrDebuggerGlob.debugger_inited_system)
@@ -1172,26 +1173,27 @@ void __cdecl Scr_SortElementChildren(Scr_WatchElement_s *parentElement)
         MyAssertHandler(".\\script\\scr_debugger.cpp", 5635, 0, "%s", "Scr_IsSortWatchElement( parentElement )");
     count = parentElement->childCount;
     newElements = parentElement->childArrayHead;
-    elementList = Scr_AllocDebugMem(4 * count, "Scr_SortElementChildren");
+    elementList = (uintptr_t *)Scr_AllocDebugMem((int)(sizeof(uintptr_t) * count), "Scr_SortElementChildren");
     for (newIndex = 0; newIndex < count; ++newIndex)
-        elementList[newIndex] = (uint32_t)&newElements[newIndex];
-    qsort(elementList, count, 4u, (int(__cdecl *)(const void *, const void *))CompareThreadElements);
+        elementList[newIndex] = (uintptr_t)&newElements[newIndex];
+    qsort(elementList, count, sizeof(uintptr_t), (int(__cdecl *)(const void *, const void *))CompareThreadElements);
     for (newIndexa = 0; newIndexa < count; ++newIndexa)
     {
         if (newIndexa >= count - 1)
             v1 = 0;
         else
             v1 = elementList[newIndexa + 1];
-        *(uint32_t *)(elementList[newIndexa] + 96) = v1;
+        reinterpret_cast<Scr_WatchElement_s *>(elementList[newIndexa])->next =
+            reinterpret_cast<Scr_WatchElement_s *>(v1);
     }
-    parentElement->childHead = (Scr_WatchElement_s *)*elementList;
+    parentElement->childHead = reinterpret_cast<Scr_WatchElement_s *>(*elementList);
     Scr_FreeDebugMem(elementList);
 }
 
-int __cdecl CompareThreadElements(int *arg1, int *arg2)
+int __cdecl CompareThreadElements(uintptr_t *arg1, uintptr_t *arg2)
 {
-    int elements; // [esp+8h] [ebp-8h]
-    int elements_4; // [esp+Ch] [ebp-4h]
+    uintptr_t elements; // [esp+8h] [ebp-8h]
+    uintptr_t elements_4; // [esp+Ch] [ebp-4h]
 
     elements = *arg1;
     elements_4 = *arg2;
@@ -1379,7 +1381,7 @@ bool __cdecl Scr_RefToVariable(uint32_t id, int isObject)
     Scr_WatchElementNode_s **pElementNode; // [esp+0h] [ebp-1Ch]
     Scr_WatchElementNode_s *elementNodeNext; // [esp+4h] [ebp-18h]
     Scr_WatchElementDoubleNode_t *breakpoints; // [esp+8h] [ebp-14h]
-    uint32_t *elementNodec; // [esp+Ch] [ebp-10h]
+    Scr_WatchElementNode_s *elementNodec; // [esp+Ch] [ebp-10h]
     Scr_WatchElementNode_s *elementNode; // [esp+Ch] [ebp-10h]
     Scr_WatchElementNode_s *elementNodea; // [esp+Ch] [ebp-10h]
     Scr_WatchElementNode_s *elementNodeb; // [esp+Ch] [ebp-10h]
@@ -1423,10 +1425,10 @@ bool __cdecl Scr_RefToVariable(uint32_t id, int isObject)
     {
         if (*pElementNode)
             return 0;
-        elementNodec = Scr_AllocDebugMem(8, "Scr_RefToVariable2");
-        *elementNodec = (uint32_t)scrDebuggerGlob.currentElement;
-        elementNodec[1] = (uint32_t)breakpoints->list;
-        breakpoints->list = (Scr_WatchElementNode_s *)elementNodec;
+        elementNodec = (Scr_WatchElementNode_s *)Scr_AllocDebugMem(sizeof(Scr_WatchElementNode_s), "Scr_RefToVariable2");
+        elementNodec->element = scrDebuggerGlob.currentElement;
+        elementNodec->next = breakpoints->list;
+        breakpoints->list = elementNodec;
     }
     else
     {
@@ -2289,7 +2291,7 @@ void __cdecl Scr_DebugTerminateThread(int topThread)
     }
     else
     {
-        scrVmPub.stack[3 * topThread - 96].u.intValue = (int)&g_EndPos;
+        scrVmPub.stack[3 * topThread - 96].u.codePosValue = &g_EndPos;
     }
 }
 

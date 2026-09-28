@@ -44,6 +44,9 @@
 #ifdef __SWITCH__
 #ifndef __cdecl
 #define __cdecl
+#ifndef __thiscall
+#define __thiscall
+#endif
 #endif
 #ifndef __stdcall
 #define __stdcall

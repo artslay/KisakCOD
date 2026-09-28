@@ -1,4 +1,5 @@
 #include <universal/q_shared.h>
+#include <universal/com_memory.h>
 #include "scr_evaluate.h"
 #include "scr_animtree.h"
 #include "scr_variable.h"

@@ -33,7 +33,7 @@ void __cdecl Scr_ReadGameEntry(MemoryFile *memFile);
 void __cdecl Scr_SaveShutdown(bool savegame);
 void __cdecl Scr_LoadPre(int sys, MemoryFile *memFile);
 void __cdecl Scr_LoadShutdown();
-void __cdecl DoSaveEntryInternal(unsigned int type, VariableUnion *u, MemoryFile *memFile);
+void __cdecl DoSaveEntryInternal(unsigned int type, uintptr_t u, MemoryFile *memFile);
 void __cdecl Scr_SaveSource(MemoryFile *memFile);
 void __cdecl SaveMemory_SaveWriteImmediate(const void *buffer, unsigned int len, SaveImmediate *save);
 void __cdecl Scr_SaveSourceImmediate(SaveImmediate *save);
@@ -42,7 +42,7 @@ void __cdecl Scr_SkipSource(MemoryFile *memFile, void *fileHandle);
 void __cdecl AddSaveStackInternal(const VariableStackBuffer *stackBuf);
 void __cdecl AddSaveEntryInternal(unsigned int type, const VariableStackBuffer *u);
 // local variable allocation has failed, the output may be wrong!
-void __cdecl DoSaveEntry(VariableValue *value, VariableValue *name, bool isArray, MemoryFile *memFile);
+void __cdecl DoSaveEntry(VariableValue *value, uintptr_t name, bool isArray, MemoryFile *memFile);
 void __cdecl AddSaveObjectChildren(unsigned int parentId);
 void __cdecl AddSaveObject(unsigned int parentId);
 void __cdecl DoSaveObjectInfo(unsigned int parentId, MemoryFile *memFile);

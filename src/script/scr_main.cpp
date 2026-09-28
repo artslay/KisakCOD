@@ -135,7 +135,7 @@ void __cdecl Scr_BeginLoadScripts()
         scrVarPub.programHunkUser = Hunk_UserCreate(0x100000, "Scr_BeginLoadScripts", 1, 0, 7);
         TempMemoryReset(scrVarPub.programHunkUser);
         scrVarPub.programBuffer = TempMalloc(0);
-        if (((int)scrVarPub.programBuffer & 0x1F) != 0)
+        if (((uintptr_t)scrVarPub.programBuffer & 0x1F) != 0)
             MyAssertHandler(
                 ".\\script\\scr_main.cpp",
                 209,

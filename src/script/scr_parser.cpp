@@ -1,4 +1,5 @@
 #include <universal/q_shared.h>
+#include <universal/com_memory.h>
 #include "scr_parser.h"
 #include <qcommon/mem_track.h>
 #include <universal/assertive.h>
@@ -119,7 +120,7 @@ void __cdecl AddOpcodePos(uint32_t sourcePos, int type)
 
                 newOpcodeLookup = (OpcodeLookup *)Hunk_AllocDebugMem(sizeof(OpcodeLookup) * scrParserGlob.opcodeLookupMaxLen);
                 memcpy(newOpcodeLookup, scrParserGlob.opcodeLookup, sizeof(OpcodeLookup) * scrParserGlob.opcodeLookupLen);
-                Hunk_FreeDebugMem();
+                Hunk_FreeDebugMem(scrParserGlob.opcodeLookup);
                 scrParserGlob.opcodeLookup = newOpcodeLookup;
             }
 
@@ -131,7 +132,7 @@ void __cdecl AddOpcodePos(uint32_t sourcePos, int type)
 
                 newSourcePosLookup = (SourceLookup *)Hunk_AllocDebugMem(sizeof(SourceLookup) * scrParserGlob.sourcePosLookupMaxLen);
                 memcpy(newSourcePosLookup, scrParserGlob.sourcePosLookup, sizeof(SourceLookup) * scrParserGlob.sourcePosLookupLen);
-                Hunk_FreeDebugMem();
+                Hunk_FreeDebugMem(scrParserGlob.sourcePosLookup);
                 scrParserGlob.sourcePosLookup = (SourceLookup *)newSourcePosLookup;
             }
             if (scrParserGlob.currentCodePos == scrCompilePub.opcodePos)
@@ -611,7 +612,7 @@ SourceBufferInfo *__cdecl Scr_GetNewSourceBuffer()
 
         newSourceBufferInfo = (char *)Hunk_AllocDebugMem(sizeof(SourceBufferInfo) * scrParserGlob.sourceBufferLookupMaxLen);
         Com_Memcpy(newSourceBufferInfo, (char *)scrParserPub.sourceBufferLookup, 44 * scrParserPub.sourceBufferLookupLen);
-        Hunk_FreeDebugMem();
+        Hunk_FreeDebugMem(scrParserPub.sourceBufferLookup);
         scrParserPub.sourceBufferLookup = (SourceBufferInfo *)newSourceBufferInfo;
     }
     return &scrParserPub.sourceBufferLookup[scrParserPub.sourceBufferLookupLen++];
@@ -652,7 +653,7 @@ char *__cdecl Scr_AddSourceBuffer(const char *filename, char *extFilename, const
         }
         *dest = 0;
         if (saveSourceBuffer->sourceBuf)
-            Hunk_FreeDebugMem();
+            Hunk_FreeDebugMem(saveSourceBuffer->sourceBuf);
         Scr_AddSourceBufferInternal(extFilename, codePos, sourceBuf, len, 1, archive);
     }
     else
@@ -1330,8 +1331,8 @@ char __cdecl Scr_PrintProfileTimes(float minTime)
             maxNameLength = 0;
         for (profileIndexa = 0; profileIndexa < 40; ++profileIndexa)
         {
-            v4 = (int)&profile->profileScriptNames[profileIndexa][1];
-            v5 = (uint32_t)&profile->profileScriptNames[profileIndexa][strlen(profile->profileScriptNames[profileIndexa])
+            v4 = (uintptr_t)&profile->profileScriptNames[profileIndexa][1];
+            v5 = (uintptr_t)&profile->profileScriptNames[profileIndexa][strlen(profile->profileScriptNames[profileIndexa])
                 + 1];
             if (v5 - v4 > maxNameLength)
                 maxNameLength = v5 - v4;
@@ -1389,7 +1390,7 @@ void CompileError(uint32_t sourcePos, const char *msg, ...)
     va_list va; // [esp+81Ch] [ebp+10h] BYREF
 
     va_start(va, msg);
-    _vsnprintf(text, 0x400u, msg, va);
+    vsnprintf(text, 0x400u, msg, va);
     if (scrVarPub.evaluate)
     {
         if (!scrVarPub.error_message)
@@ -1446,7 +1447,7 @@ void CompileError2(char *codePos, const char *msg, ...)
     Scr_IgnoreLeaks();
     Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "\n");
     Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "******* script compile error *******\n");
-    _vsnprintf(text, 0x400u, msg, va);
+    vsnprintf(text, 0x400u, msg, va);
     Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "%s: ", text);
     Scr_PrintPrevCodePos(CON_CHANNEL_PARSERSCRIPT, codePos, 0);
     Com_Printf(CON_CHANNEL_PARSERSCRIPT, "************************************\n");

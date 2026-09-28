@@ -853,8 +853,9 @@ void __cdecl Hunk_ResetDebugMem()
     Hunk_UserReset(g_debugUser);
 }
 
-void* Hunk_AllocDebugMem(uint32_t size)
+void* Hunk_AllocDebugMem(uint32_t size, const char* name)
 {
+    (void)name;
     iassert(Sys_IsMainThread());
     iassert(g_debugUser);
 

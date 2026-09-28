@@ -31,7 +31,9 @@ bool __cdecl IN_IsForegroundWindow();
 
 void IN_ActivateMouse(qboolean force);
 void __cdecl IN_RecenterMouse();
+#ifndef KISAK_SWITCH
 void __cdecl IN_SetCursorPos(tagPOINT x);
+#endif
 // LWSS end
 
 #define IN_CMD_GOTO_XTIMES	-5
