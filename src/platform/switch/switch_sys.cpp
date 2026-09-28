@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <cerrno>
 #include <string>
+#include <cstring>
 #include <cstdarg>
 #include <qcommon/qcommon.h>
 #include <qcommon/threads.h>
