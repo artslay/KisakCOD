@@ -1,5 +1,5 @@
 #ifdef __SWITCH__
-#include "profile.h"
+#include <universal/profile.h>
 
 ProfileScript profileScript = {};
 int g_profileStack[256] = {};
