@@ -104,7 +104,7 @@ void *__cdecl R_AllocStaticIndexBuffer(IDirect3DIndexBuffer9 **ib, int sizeInByt
     //    ib,
     //    0) < 0)
     //    return 0;
-    if (dx.device->CreateIndexBuffer(sizeInBytes, 8, (D3DFORMAT)101, D3DPOOL_DEFAULT, ib, 0) < 0)
+    if (dx.device->CreateIndexBuffer(sizeInBytes, 8, D3DFMT_INDEX16, D3DPOOL_DEFAULT, ib, 0) < 0)
     {
         return 0;
     }
