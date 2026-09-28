@@ -3634,7 +3634,6 @@ void  Scr_AddFieldsForFile(char const* filename)
 		SourceFile_FastFile_DONE = (const char*)Scr_GetSourceFile_FastFile(filename);
 	else
 		SourceFile_FastFile_DONE = Scr_GetSourceFile_LoadObj(filename);
-	tempType[1] = (int)SourceFile_FastFile_DONE;
 	sourcePos = SourceFile_FastFile_DONE;
 	Com_BeginParseSession("Scr_AddFields");
 	for (targetPos = TempMalloc(0); ; *targetPos = 0)
