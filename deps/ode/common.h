@@ -25,6 +25,21 @@
 
 #define USE_POOL_ALLOCATOR
 
+#include <stdint.h>
+
+#ifndef __cdecl
+#define __cdecl
+#endif
+#ifndef __int16
+#define __int16 short
+#endif
+#ifndef __int32
+#define __int32 int
+#endif
+#ifndef __int64
+#define __int64 long long
+#endif
+
 // make alloca happy
 #include <malloc.h>
 
