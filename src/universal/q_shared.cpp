@@ -767,24 +767,20 @@ void __cdecl Info_RemoveKey_Big(char *s, const char *key)
 
 bool __cdecl Info_Validate(const char *s)
 {
-    int v1; // eax
-    int v3; // eax
-
-    v1 = (int)strchr(s, 0x22u);
+    const char *v1 = strchr(s, 0x22u);
+    const char *v3 = strchr(s, 0x3Bu);
 
     if (v1)
         return 0;
 
-    v3 = (int)strchr(s, 0x3Bu);
-
-    return v3 == 0;
+    return v3 == nullptr;
 }
 
 void __cdecl Info_SetValueForKey(char *s, const char *key, const char *value)
 {
-    int v3; // eax
-    int v4; // eax
-    int v5; // eax
+    const char *v3; // eax
+    const char *v4; // eax
+    const char *v5; // eax
     int j; // [esp+54h] [ebp-818h]
     char c; // [esp+5Bh] [ebp-811h]
     char cleanValue[1028]; // [esp+5Ch] [ebp-810h] BYREF
@@ -812,21 +808,21 @@ void __cdecl Info_SetValueForKey(char *s, const char *key, const char *value)
         if (j >= 1024)
             MyAssertHandler(".\\universal\\q_shared.cpp", 1275, 0, "%s", "j < MAX_INFO_STRING");
         cleanValue[j] = 0;
-        v3 = (int)strchr(key, 0x5Cu);
+        v3 = strchr(key, 0x5Cu);
         if (v3)
         {
             Com_Printf(CON_CHANNEL_SYSTEM, "Can't use keys with a \\ key: %s value: %s", key, value);
         }
         else
         {
-            v4 = (int)strchr(key, 0x3Bu);
+            v4 = strchr(key, 0x3Bu);
             if (v4)
             {
                 Com_Printf(CON_CHANNEL_SYSTEM, "Can't use keys with a semicolon. key: %s value: %s", key, value);
             }
             else
             {
-                v5 = (int)strchr(key, 0x22u);
+                v5 = strchr(key, 0x22u);
                 if (v5)
                 {
                     Com_Printf(CON_CHANNEL_SYSTEM, "Can't use keys with a \". key: %s value: %s", key, value);
@@ -1036,13 +1032,13 @@ bool __cdecl ParseConfigStringToStructCustomSize(
 #endif
                     {
                         v9 = FX_Register(src);
-                        *(uint32_t *)&pStruct[v20->iOffset] = (uint32_t)v9;
+                        *reinterpret_cast<const FxEffectDef **>(&pStruct[v20->iOffset]) = v9;
                     }
                     break;
                 case CSPFT_XMODEL:
                     I_strncpyz(dest, src, 0x2000);
                     v22 = R_RegisterModel(dest);
-                    *(uint32_t *)&pStruct[v20->iOffset] = (uint32_t)v22;
+                    *reinterpret_cast<XModel **>(&pStruct[v20->iOffset]) = v22;
                     if (!v22)
                         v18 = 1;
                     break;
@@ -1052,12 +1048,12 @@ bool __cdecl ParseConfigStringToStructCustomSize(
 #endif
                     {
                         v10 = Material_RegisterHandle(src, IMAGE_TRACK_MISC);
-                        *(uint32_t *)&pStruct[v20->iOffset] = (uint32_t)v10;
+                        *reinterpret_cast<Material **>(&pStruct[v20->iOffset]) = v10;
                     }
                     break;
                 case CSPFT_SOUND:
                     SoundAlias = Com_FindSoundAlias(src);
-                    *(uint32_t *)&pStruct[v20->iOffset] = (uint32_t)SoundAlias;
+                    *reinterpret_cast<snd_alias_list_t **>(&pStruct[v20->iOffset]) = SoundAlias;
                     break;
                 default:
                     if (v20->iFieldType >= CSPFT_STRING)
