@@ -75,9 +75,17 @@ uint32_t __cdecl RB_UploadMaterialPassVertexDecl(
         return 0;
     primState->vertDeclType = vertDeclType;
     R_SetVertexDecl(primState, vertexDecl);
-    //(dx.device->DrawPrimitiveUP)(dx.device, dx.device, 4, 1, data, stride);
+#ifdef __SWITCH__
+    // Switch uses the OpenGL backend; there is no D3D9 DrawPrimitiveUP path.
+    (void)primState;
+    (void)vertexDecl;
+    (void)data;
+    (void)stride;
+    return 0;
+#else
     dx.device->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, data, stride);
     return 1;
+#endif
 }
 
 uint32_t RB_UploadMaterialPass(
