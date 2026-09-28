@@ -14,6 +14,7 @@ extern FILE *FS_SwitchOpenRootFile(const char *path);
 #include <win32/win_net.h>
 #endif
 #include <qcommon/threads.h>
+#include <win32/win_local.h>
 #include <qcommon/com_bsp.h>
 #include <gfx_d3d/r_init.h>
 #ifndef __SWITCH__
