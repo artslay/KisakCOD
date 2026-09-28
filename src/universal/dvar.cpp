@@ -1665,7 +1665,7 @@ void __cdecl Dvar_PerformUnregistration(dvar_s *dvar)
         dvar->reset.integer = 0;
         v2 = Dvar_DisplayableResetValue(dvar);
         Dvar_AssignResetStringValue(dvar, &resetString, v2);
-        dvar->reset.integer = resetString.integer;
+        dvar->reset.string = resetString.string;
         dvar->type = DVAR_TYPE_STRING;
     }
 }
