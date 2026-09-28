@@ -19,6 +19,9 @@
 static const auto g_sysStart = std::chrono::steady_clock::now();
 static std::mutex g_sysCritical[32];
 
+int g_debugClient = 0;
+unsigned char g_debugPacket[1][8192] = {};
+
 uint32_t __cdecl Sys_Milliseconds()
 {
     return (uint32_t)std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -46,7 +49,7 @@ void __cdecl Sys_LeaveCriticalSection(int section)
     if (section >= 0 && section < 32) g_sysCritical[section].unlock();
 }
 
-bool __cdecl Sys_IsRemoteDebugClient() { return false; }
+int __cdecl Sys_IsRemoteDebugClient() { return 0; }
 
 char *__cdecl Sys_GetClipboardData()
 {
@@ -114,6 +117,91 @@ void __cdecl Sys_DestroySplashWindow() {}
 void __cdecl Sys_NormalExit() {}
 void __cdecl Sys_OpenURL(const char *, int) {}
 void NET_RestartDebug() {}
+
+void __cdecl NET_ShutdownDebug()
+{
+    g_debugClient = 0;
+}
+
+void NET_InitDebug()
+{
+    g_debugClient = 0;
+}
+
+void __cdecl Sys_Listen_f()
+{
+}
+
+void Sys_DebugSocketError(const char *message)
+{
+    if (message)
+        Com_Printf(CON_CHANNEL_SYSTEM, "%s\n", message);
+}
+
+int __cdecl Sys_ReadDebugSocketInt()
+{
+    return 0;
+}
+
+void __cdecl Sys_WriteDebugSocketInt(int)
+{
+}
+
+void __cdecl Sys_WriteDebugSocketString(char *)
+{
+}
+
+int __cdecl Sys_ReadDebugSocketMessageType(unsigned char *type, int)
+{
+    if (type)
+        *type = 0;
+    return 0;
+}
+
+int __cdecl Sys_UpdateDebugSocket()
+{
+    return 0;
+}
+
+int __cdecl Sys_ReadDebugSocketData(char *buffer, int len, int)
+{
+    if (buffer && len > 0)
+        std::memset(buffer, 0, static_cast<size_t>(len));
+    return 0;
+}
+
+void __cdecl Sys_ReadDebugSocketStringBuffer(char *buffer, int len)
+{
+    if (buffer && len > 0)
+        buffer[0] = '\0';
+}
+
+void __cdecl Sys_FlushDebugSocketData()
+{
+}
+
+void __cdecl Sys_AckDebugSocket()
+{
+}
+
+char *__cdecl Sys_ReadDebugSocketString()
+{
+    static char empty[] = "";
+    return empty;
+}
+
+void __cdecl Sys_WriteDebugSocketData(unsigned char *, int)
+{
+}
+
+void __cdecl Sys_WriteDebugSocketMessageType(unsigned char)
+{
+}
+
+void __cdecl Sys_EndWriteDebugSocket()
+{
+}
+
 
 void __cdecl Sys_NoFreeFilesError() { Sys_Error("Filesystem is full"); }
 
