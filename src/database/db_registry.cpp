@@ -1552,3 +1552,352 @@ void __cdecl DB_InitPoolHeader(XAssetType type)
 }
 
 
+
+
+// Restored DB registry allocation, enumeration and post-load helpers.
+static XAssetHeader __cdecl node1_(void *pool)
+{
+    return (XAssetHeader)pool;
+}
+
+static XAssetHeader __cdecl DB_AllocXAsset_StringTable_(void *arg)
+{
+    XAssetHeader *pool = (XAssetHeader*)arg;
+    XAssetHeader header;
+
+    if (pool->xmodelPieces)
+    {
+        header.xmodelPieces = pool->xmodelPieces;
+        pool->xmodelPieces = (XModelPieces *)pool->xmodelPieces->name;
+    }
+    else
+    {
+        header.xmodelPieces = 0;
+    }
+    return header;
+}
+
+XAssetHeader(__cdecl *DB_AllocXAssetHeaderHandler[ASSET_TYPE_COUNT])(void *) =
+{
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocMaterial,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &node1_,
+  &node1_,
+  &node1_,
+  &node1_,
+  &node1_,
+  &DB_AllocXAsset_StringTable_,
+  &node1_,
+  &DB_AllocXAsset_StringTable_,
+  NULL,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  NULL,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_
+};
+
+void __cdecl DB_FreeXAssetHeader_StringTable_(void *arg, XAssetHeader header)
+{
+    XAssetPoolEntry<StringTable> **pool = (XAssetPoolEntry<StringTable> **)arg;
+    XAssetPoolEntry<StringTable> *oldFreeHead = *pool;
+    *pool = (XAssetPoolEntry<StringTable> *)header.xmodelPieces;
+    header.xmodelPieces->name = (const char *)oldFreeHead;
+}
+
+void __cdecl NULLSUB(void *crap, XAssetHeader head)
+{
+    (void)crap;
+    (void)head;
+}
+
+void(__cdecl *DB_FreeXAssetHeaderHandler[ASSET_TYPE_COUNT])(void *, XAssetHeader) =
+{
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeMaterial,
+  DB_FreeMaterial,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  NULLSUB,
+  NULLSUB,
+  NULLSUB,
+  NULLSUB,
+  NULLSUB,
+  DB_FreeXAssetHeader_StringTable_,
+  NULLSUB,
+  DB_FreeXAssetHeader_StringTable_,
+  NULL,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  NULL,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_
+};
+
+static void __cdecl DB_InitSingleton(void *pool, int32_t size)
+{
+    (void)pool;
+    if (size != 1)
+        MyAssertHandler(".\\database\\db_registry.cpp", 528, 0, "%s\\n\\t(size) = %i", "(size == 1)", size);
+}
+
+static XAssetHeader __cdecl DB_AllocXAssetHeader(XAssetType type)
+{
+    XAssetHeader header;
+    header.data = DB_AllocXAssetHeaderHandler[type](DB_XAssetPool[type]).data;
+    if (!header.data)
+    {
+        Sys_UnlockWrite(&db_hashCritSect);
+        Com_PrintError(CON_CHANNEL_ERROR, "Exceeded limit of %d '%s' assets.\\n", g_poolSize[type], g_assetNames[type]);
+        DB_EnumXAssets(type, (void(__cdecl *)(XAssetHeader, void *))DB_PrintAssetName, &type, 1);
+        Com_Error(ERR_DROP, "Exceeded limit of %d '%s' assets.\\n", g_poolSize[type], g_assetNames[type]);
+    }
+    return header;
+}
+
+static void __cdecl DB_FreeXAssetHeader(XAssetType type, XAssetHeader header)
+{
+    if (DB_FreeXAssetHeaderHandler[type])
+        DB_FreeXAssetHeaderHandler[type](DB_XAssetPool[type], header);
+}
+
+static XAssetEntryPoolEntry *__cdecl DB_AllocXAssetEntry(XAssetType type, uint8_t zoneIndex)
+{
+    XAssetEntryPoolEntry *freeHead = g_freeAssetEntryHead;
+    if (!freeHead)
+    {
+        Sys_UnlockWrite(&db_hashCritSect);
+        Com_Error(ERR_DROP, "Could not allocate asset - increase XASSET_ENTRY_POOL_SIZE");
+    }
+    g_freeAssetEntryHead = freeHead->next;
+    freeHead->entry.asset.type = type;
+    freeHead->entry.asset.header = DB_AllocXAssetHeader(type);
+    freeHead->entry.zoneIndex = zoneIndex;
+    freeHead->entry.inuse = 0;
+    freeHead->entry.nextHash = 0;
+    freeHead->entry.nextOverride = 0;
+    return freeHead;
+}
+
+static void __cdecl DB_PrintAssetName(XAssetHeader header, int32_t *data)
+{
+    const char *XAssetHeaderName = DB_GetXAssetHeaderName(*data, &header);
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "%s\\n", XAssetHeaderName);
+}
+
+static void __cdecl DB_RemoveWindowFocus(windowDef_t *window)
+{
+    for (uint32_t i = 0; i < 1; i++)
+        window->dynamicFlags[0] &= ~2u;
+}
+
+static void __cdecl DB_DynamicCloneMenu(XAssetHeader from, XAssetHeader to, int32_t swag)
+{
+    (void)swag;
+    windowDef_t *toWindow;
+    windowDef_t *fromWindow;
+
+    to.xmodelPieces[6].pieces = from.xmodelPieces[6].pieces;
+    for (int32_t toIndex = 0; toIndex < (int)to.xmodelPieces[13].pieces; ++toIndex)
+    {
+        toWindow = *(windowDef_t **)(to.xmodelPieces[23].numpieces + 4 * toIndex);
+        if (toWindow->name)
+        {
+            for (int32_t fromIndex = 0; fromIndex < (int)from.xmodelPieces[13].pieces; ++fromIndex)
+            {
+                fromWindow = *(windowDef_t **)(from.xmodelPieces[23].numpieces + 4 * fromIndex);
+                if (fromWindow->name && !strcmp(fromWindow->name, toWindow->name))
+                {
+                    toWindow->dynamicFlags[0] = fromWindow->dynamicFlags[0];
+                    break;
+                }
+            }
+        }
+        DB_RemoveWindowFocus(toWindow);
+    }
+}
+
+static void __cdecl DB_EnumXAssetsFor(
+    fileData_s *fileData,
+    int32_t fileDataType,
+    void(__cdecl *func)(void*, void*),
+    void *inData)
+{
+    while (fileData)
+    {
+        if (fileData->type == fileDataType && fileData->type == 5)
+            func(fileData->data, inData);
+        fileData = fileData->next;
+    }
+}
+
+static void __cdecl DB_EnumXAssets_LoadObj(XAssetType type, void(*func)(void*, void*), void *inData)
+{
+    uint32_t hash;
+    switch (type)
+    {
+    case ASSET_TYPE_XMODEL:
+        for (hash = 0; hash < 0x400; ++hash)
+            DB_EnumXAssetsFor(com_fileDataHashTable[hash], 5, func, inData);
+        break;
+    case ASSET_TYPE_MATERIAL:
+        R_EnumMaterials((void(__cdecl*)(Material*, void*))func, inData);
+        break;
+    case ASSET_TYPE_TECHNIQUE_SET:
+        R_EnumTechniqueSets((void(__cdecl*)(MaterialTechniqueSet*, void*))func, inData);
+        break;
+    case ASSET_TYPE_IMAGE:
+        R_EnumImages((void(__cdecl*)(GfxImage*, void*))func, inData);
+        break;
+    default:
+        return;
+    }
+}
+
+static int32_t __cdecl DB_GetAllXAssetOfType_LoadObj(XAssetType type, XAssetHeader *assets, int32_t maxCount)
+{
+    AssetList assetList;
+    assetList.assets = assets;
+    assetList.assetCount = 0;
+    assetList.maxCount = maxCount;
+    DB_EnumXAssets(type, (void(__cdecl*)(XAssetHeader, void*))Hunk_AddAsset, &assetList, 0);
+    return assetList.assetCount;
+}
+
+static void __cdecl DB_EnumXAssets_FastFile(
+    XAssetType type,
+    void(__cdecl *func)(XAssetHeader, void *),
+    void *inData,
+    bool includeOverride)
+{
+    uint32_t hash;
+    uint32_t assetEntryIndex;
+    XAssetEntryPoolEntry *assetEntry;
+    uint32_t overrideAssetEntryIndex;
+
+    InterlockedIncrement(&db_hashCritSect.readCount);
+    while (db_hashCritSect.writeCount)
+        NET_Sleep(0);
+    for (hash = 0; hash < 0x8000; ++hash)
+    {
+        for (assetEntryIndex = db_hashTable[hash]; assetEntryIndex; assetEntryIndex = assetEntry->entry.nextHash)
+        {
+            assetEntry = &g_assetEntryPool[assetEntryIndex];
+            if (assetEntry->entry.asset.type == type)
+            {
+                func(assetEntry->entry.asset.header, inData);
+                if (includeOverride)
+                {
+                    for (overrideAssetEntryIndex = assetEntry->entry.nextOverride;
+                        overrideAssetEntryIndex;
+                        overrideAssetEntryIndex = g_assetEntryPool[overrideAssetEntryIndex].entry.nextOverride)
+                    {
+                        func(g_assetEntryPool[overrideAssetEntryIndex].entry.asset.header, inData);
+                    }
+                }
+            }
+        }
+    }
+    if (db_hashCritSect.readCount <= 0)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/threads_interlock.h",
+            76,
+            0,
+            "%s",
+            "critSect->readCount > 0");
+    InterlockedDecrement(&db_hashCritSect.readCount);
+}
+
+static void DB_PostLoadXZone()
+{
+    uint32_t i;
+    int32_t remoteScreenUpdateNesting;
+
+    iassert(Sys_IsMainThread() || Sys_IsRenderThread());
+    iassert(!g_loadingZone);
+    iassert(!g_zoneInfoCount);
+
+    if (!Sys_IsDatabaseReady2())
+    {
+        if (g_copyInfoCount)
+        {
+            remoteScreenUpdateNesting = 0;
+            if (!Sys_IsMainThread()
+                || (++g_mainThreadBlocked,
+                    remoteScreenUpdateNesting = R_PopRemoteScreenUpdate(),
+                    --g_mainThreadBlocked,
+                    g_copyInfoCount))
+            {
+                DB_ArchiveAssets();
+                Sys_LockWrite(&db_hashCritSect);
+                for (i = 0; i < g_copyInfoCount; ++i)
+                    DB_LinkXAssetEntry((XAssetEntryPoolEntry *)g_copyInfo[i], 1);
+                g_copyInfoCount = 0;
+                Sys_UnlockWrite(&db_hashCritSect);
+                Material_DirtyTechniqueSetOverrides();
+                Material_OverrideTechniqueSets();
+                DB_UnarchiveAssets();
+                if (Sys_IsMainThread())
+                    R_PushRemoteScreenUpdate(remoteScreenUpdateNesting);
+                Sys_DatabaseCompleted2();
+            }
+            else
+            {
+                R_PushRemoteScreenUpdate(remoteScreenUpdateNesting);
+            }
+        }
+        else
+        {
+            DB_ExternalInitAssets();
+            Sys_DatabaseCompleted2();
+        }
+    }
+}
+
+static void __cdecl DB_UpdateDebugZone()
+{
+    XZoneInfo zoneInfo[2];
+    if (g_debugZoneName[0])
+    {
+        zoneInfo[0].name = 0;
+        zoneInfo[0].allocFlags = 0;
+        zoneInfo[1].name = g_debugZoneName;
+        Com_SyncThreads();
+        zoneInfo[0].freeFlags = DB_ZONE_DEV;
+        zoneInfo[1].allocFlags = DB_ZONE_DEV;
+        zoneInfo[1].freeFlags = DB_ZONE_DEV;
+        DB_LoadXAssets(zoneInfo, 2u, 1);
+        CG_VisionSetMyChanges();
+    }
+}
