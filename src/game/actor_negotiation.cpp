@@ -29,7 +29,7 @@ actor_think_result_t __cdecl Actor_Negotiation_Think(actor_s *pSelf)
     const char *v4; // r3
     const char *v5; // r3
     const char *v6; // r3
-    pathnode_t *HasNegotiationNode; // r3
+    bool HasNegotiationNode; // r3
 
     v2 = AI_ANIM_USE_BOTH_DELTAS_NOGRAVITY;
     eTraverseMode = pSelf->eTraverseMode;
