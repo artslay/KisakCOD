@@ -31,7 +31,7 @@ UILocalVarContext *__cdecl UILocalVar_Find(UILocalVarContext *context, const cha
     uint32_t hash; // [esp+0h] [ebp-4h] BYREF
 
     if (UILocalVar_FindLocation(context, name, &hash))
-        return (UILocalVarContext *)((char *)context + 12 * hash);
+        return reinterpret_cast<UILocalVarContext *>(&context->table[hash]);
     else
         return 0;
 }
@@ -75,7 +75,7 @@ UILocalVarContext *__cdecl UILocalVar_FindOrCreate(UILocalVarContext *context, c
     uint32_t hash; // [esp+4h] [ebp-4h] BYREF
 
     if (UILocalVar_FindLocation(context, name, &hash))
-        return (UILocalVarContext *)((char *)context + 12 * hash);
+        return reinterpret_cast<UILocalVarContext *>(&context->table[hash]);
     var = &context->table[hash];
     var->name = CopyString(name);
     var->type = UILOCALVAR_INT;
@@ -147,7 +147,7 @@ char *__cdecl UILocalVar_GetString(const UILocalVar *var, char *stringBuf, uint3
         {
             if (var->type != UILOCALVAR_STRING)
                 MyAssertHandler(".\\ui\\ui_localvars.cpp", 184, 0, "var->type == UILOCALVAR_STRING\n\t%i, %i", var->type, 2);
-            return (char *)var->u.integer;
+            return var->u.string;
         }
     }
     else
@@ -186,6 +186,6 @@ void __cdecl UILocalVar_SetString(UILocalVar *var, char *s)
     if (var->type == UILOCALVAR_STRING)
         FreeString(var->u.string);
     var->type = UILOCALVAR_STRING;
-    var->u.integer = (int)CopyString(s);
+    var->u.string = CopyString(s);
 }
 
