@@ -44,7 +44,7 @@ void __cdecl BuildAssertMessage(const char* expr, const char* filename, int line
         messageOut,
         4096,
         "Build: %s\nExpression:\n    %s\n\nFile:    %s\nLine:    %d\n\n",
-        Dvar_GetString("version"),
+        "Switch",
         expr ? expr : "<unknown>",
         filename ? filename : "<unknown>",
         line);
