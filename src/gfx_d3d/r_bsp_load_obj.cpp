@@ -716,7 +716,7 @@ void __cdecl R_CopyLightmap(
     }
 }
 
-void __cdecl R_CopyLightDefAttenuationImage(GfxLightDef *def, LightDefCopyConfig anonymousConfig->dest)
+void __cdecl R_CopyLightDefAttenuationImage(GfxLightDef *def, LightDefCopyConfig *anonymousConfig)
 {
     int endCount; // [esp+30h] [ebp-7Ch]
     uint8_t *dstPixel; // [esp+38h] [ebp-74h]
@@ -1154,7 +1154,7 @@ MaterialUsage *__cdecl R_GetMaterialUsageData(Material *material)
 
 void __cdecl R_MaterialUsage(Material *material, uint32_t firstVertex, int vertexCount, int surfPlusIndexSize)
 {
-    uint32_t *v4; // eax
+    VertUsage *v4; // eax
     VertUsage *vertUsage; // [esp+0h] [ebp-8h]
     MaterialUsage *materialUsage; // [esp+4h] [ebp-4h]
 
