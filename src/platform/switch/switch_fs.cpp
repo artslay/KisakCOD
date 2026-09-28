@@ -15,6 +15,7 @@
 #include <universal/com_memory.h>
 #include <qcommon/com_fileaccess.h>
 #include <qcommon/qcommon.h>
+#include <stringed/stringed_hooks.h>
 
 const dvar_t *fs_remotePCDirectory = nullptr;
 const dvar_t *fs_remotePCName = nullptr;
@@ -48,9 +49,9 @@ static void SwitchPath(char *dst, size_t dstSize, const char *base, const char *
 {
     if (!base || !*base) base = kSwitchRoot;
     if (!game || !*game) game = fs_gamedir;
-    while (*qpath == '/' || *qpath == '\') ++qpath;
+    while (*qpath == '/' || *qpath == '\\') ++qpath;
     std::snprintf(dst, dstSize, "%s/%s/%s", base, game, qpath);
-    for (char *p = dst; *p; ++p) if (*p == '\') *p = '/';
+    for (char *p = dst; *p; ++p) if (*p == '\\') *p = '/';
 }
 
 static int AllocHandle()
@@ -464,7 +465,7 @@ char *__cdecl FS_LoadedIwdNames() { static char s[4] = ""; return s; }
 char *__cdecl FS_LoadedIwdChecksums() { static char s[4] = ""; return s; }
 char *__cdecl FS_LoadedIwdPureChecksums() { static char s[4] = ""; return s; }
 void __cdecl FS_Printf(int h, const char *fmt, ...) { if(h<=0||h>=65||!g_fsh[h].handleFiles.file.o)return; va_list ap; va_start(ap,fmt); vfprintf(g_fsh[h].handleFiles.file.o,fmt,ap); va_end(ap); }
-int __cdecl FS_WriteLog(const char *b,uint32_t n,int h){return (int)FS_Write(b,n,h);}
+uint32_t __cdecl FS_WriteLog(const char *b, uint32_t n, int h){return FS_Write(b, n, h);}
 int __cdecl FS_FOpenFileWriteToDirForThread(const char*,const char*,FsThread);
 
 #endif
