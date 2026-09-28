@@ -26,9 +26,7 @@
 #define _ODE_MEMORY_H_
 
 #include "ode/config.h"
-
-// MOD: goodbye!
-#if 0
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
