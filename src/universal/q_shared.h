@@ -41,6 +41,23 @@
 #include <cstdint>
 #include <climits>
 
+#if !defined(_MSC_VER)
+#ifndef _snprintf
+#define _snprintf snprintf
+#endif
+#ifndef _vsnprintf
+#define _vsnprintf vsnprintf
+#endif
+#ifndef _stricmp
+#define _stricmp I_stricmp
+#endif
+#endif
+
+#ifdef __SWITCH__
+char *__cdecl Sys_GetClipboardData();
+void __cdecl Sys_SetClipboardData(const char *text);
+#endif
+
 #ifdef __SWITCH__
 #ifndef __cdecl
 #define __cdecl
