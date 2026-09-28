@@ -468,4 +468,13 @@ void __cdecl FS_Printf(int h, const char *fmt, ...) { if(h<=0||h>=65||!g_fsh[h].
 uint32_t __cdecl FS_WriteLog(const char *b, uint32_t n, int h){return FS_Write(b, n, h);}
 int __cdecl FS_FOpenFileWriteToDirForThread(const char*,const char*,FsThread);
 
+
+void __cdecl Com_GetBspFilename(char *filename, uint32_t size, const char *mapname)
+{
+    if (!filename || !size)
+        return;
+
+    Com_sprintf(filename, size, "maps/%s.d3dbsp", mapname ? mapname : "");
+}
+
 #endif
