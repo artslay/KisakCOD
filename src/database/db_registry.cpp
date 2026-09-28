@@ -707,10 +707,26 @@ void __cdecl DB_Cleanup()
 
 int32_t __cdecl DB_FileSize(const char *zoneName, int32_t isMod)
 {
-    char filename[260]; // [esp+0h] [ebp-110h] BYREF
-    int32_t size; // [esp+108h] [ebp-8h]
-    void *zoneFile; // [esp+10Ch] [ebp-4h]
+    char filename[260];
+#ifdef __SWITCH__
+    if (isMod)
+        DB_BuildOSPath_Mod(zoneName, sizeof(filename), filename);
+    else
+        DB_BuildOSPath(zoneName, sizeof(filename), filename);
 
+    FILE *zoneFile = FS_SwitchOpenRootFile(filename);
+    if (!zoneFile)
+        return 0;
+
+    long saved = std::ftell(zoneFile);
+    std::fseek(zoneFile, 0, SEEK_END);
+    long size = std::ftell(zoneFile);
+    std::fseek(zoneFile, saved, SEEK_SET);
+    std::fclose(zoneFile);
+    return size > 0 ? static_cast<int32_t>(size) : 0;
+#else
+    int32_t size;
+    void *zoneFile;
     if (isMod)
         DB_BuildOSPath_Mod(zoneName, 0x100u, filename);
     else
@@ -721,6 +737,7 @@ int32_t __cdecl DB_FileSize(const char *zoneName, int32_t isMod)
     size = GetFileSize(zoneFile, 0);
     CloseHandle(zoneFile);
     return size;
+#endif
 }
 
 void __cdecl Load_GetCurrentZoneHandle(uint8_t *handle)
