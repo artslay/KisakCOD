@@ -1,5 +1,6 @@
 #include <universal/q_shared.h>
 #include "fx_system.h"
+#include <xanim/xmodel.h>
 #include <gfx_d3d/r_material.h>
 #include <universal/com_math.h>
 
