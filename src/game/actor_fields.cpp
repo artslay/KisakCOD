@@ -13,11 +13,11 @@
 #include "g_main.h"
 
 static_assert(offsetof(actor_s, ent) == 0, "actor_s::ent must be first (field offsets rebase here)");
-static_assert(offsetof(actor_s, grenadeAwareness) == 3604, "actor_s script-field offset drift: grenadeawareness");
-static_assert(offsetof(actor_s, pGrenade) == 3608, "actor_s script-field offset drift: grenade");
-static_assert(offsetof(actor_s, iGrenadeWeaponIndex) == 3612, "actor_s script-field offset drift: grenadeweapon");
-static_assert(offsetof(actor_s, iGrenadeAmmo) == 3628, "actor_s script-field offset drift: grenadeammo");
-static_assert(offsetof(actor_s, suppressionMeter) == 3580, "actor_s script-field offset drift: suppressionmeter");
+static_assert(offsetof(actor_s, grenadeAwareness) == 4024, "actor_s script-field offset drift: grenadeawareness");
+static_assert(offsetof(actor_s, pGrenade) == 4028, "actor_s script-field offset drift: grenade");
+static_assert(offsetof(actor_s, iGrenadeWeaponIndex) == 4032, "actor_s script-field offset drift: grenadeweapon");
+static_assert(offsetof(actor_s, iGrenadeAmmo) == 4048, "actor_s script-field offset drift: grenadeammo");
+static_assert(offsetof(actor_s, suppressionMeter) == 4000, "actor_s script-field offset drift: suppressionmeter");
 
 const actor_fields_s aifields[82] =
 {
@@ -47,14 +47,14 @@ const actor_fields_s aifields[82] =
   { "suppressionwait", 3568, F_INT, NULL, NULL },
   { "suppressionduration", 3572, F_INT, NULL, NULL },
   { "suppressionstarttime", 3576, F_INT, &ActorScr_ReadOnly, NULL },
-  { "suppressionmeter", 3580, F_FLOAT, &ActorScr_ReadOnly, NULL },
+  { "suppressionmeter", 4000, F_FLOAT, &ActorScr_ReadOnly, NULL },
   { "name", 212, F_STRING, NULL, NULL },
   { "weapon", 214, F_STRING, NULL, NULL },
   { "dontavoidplayer", 1836, F_INT, NULL, NULL },
-  { "grenadeawareness", 3604, F_FLOAT, &ActorScr_Clamp_0_1, NULL },
-  { "grenade", 3608, F_ENTHANDLE, &ActorScr_ReadOnly, NULL },
-  { "grenadeweapon", 3612, F_INT, &ActorScr_SetWeapon, &ActorScr_GetWeapon },
-  { "grenadeammo", 3628, F_INT, NULL, NULL },
+  { "grenadeawareness", 4024, F_FLOAT, &ActorScr_Clamp_0_1, NULL },
+  { "grenade", 4028, F_ENTHANDLE, &ActorScr_ReadOnly, NULL },
+  { "grenadeweapon", 4032, F_INT, &ActorScr_SetWeapon, &ActorScr_GetWeapon },
+  { "grenadeammo", 4048, F_INT, NULL, NULL },
   { "favoriteenemy", 3420, F_SENTIENTHANDLE, NULL, NULL },
   { "allowpain", 184, F_BYTE, NULL, NULL },
   { "allowdeath", 185, F_BYTE, NULL, NULL },

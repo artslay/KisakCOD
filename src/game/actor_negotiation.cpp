@@ -69,8 +69,8 @@ actor_think_result_t __cdecl Actor_Negotiation_Think(actor_s *pSelf)
     }
     else
     {
-        HasNegotiationNode = (pathnode_t *)Path_HasNegotiationNode(&pSelf->Path);
-        if ((_BYTE)HasNegotiationNode)
+        HasNegotiationNode = Path_HasNegotiationNode(&pSelf->Path);
+        if (HasNegotiationNode)
         {
             if (pSelf->Path.wNegotiationStartNode >= pSelf->Path.wPathLen)
                 MyAssertHandler(
