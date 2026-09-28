@@ -127,6 +127,84 @@ int32_t g_poolSize[ASSET_TYPE_COUNT] =
 
 bool g_archiveBuf;
 
+struct XZoneInfoInternal
+{
+    char name[64];
+    int32_t flags;
+};
+
+uint32_t volatile g_mainThreadBlocked;
+XAssetEntryPoolEntry *g_freeAssetEntryHead;
+uint16_t db_hashTable[32768];
+XAssetEntry *g_copyInfo[0x800];
+uint32_t g_copyInfoCount;
+XZone g_zones[ASSET_TYPE_COUNT]{ 0 };
+uint8_t g_zoneHandles[32];
+XAssetEntryPoolEntry g_assetEntryPool[32768];
+uint8_t g_fileBuf[524288];
+FastCriticalSection db_hashCritSect;
+
+bool g_zoneInited;
+int32_t g_zoneCount;
+bool g_isRecoveringLostDevice;
+bool g_mayRecoverLostAssets;
+volatile bool g_loadingZone;
+volatile uint32_t g_zoneInfoCount;
+bool g_initializing;
+char g_debugZoneName[64];
+uint32_t g_zoneAllocType;
+uint32_t g_zoneIndex;
+uint32_t _S1;
+const dvar_t *zone_reorder;
+volatile uint32_t g_loadingAssets;
+XZoneInfoInternal g_zoneInfo[8];
+
+int32_t g_defaultAssetCount;
+const char *g_defaultAssetName[ASSET_TYPE_COUNT] =
+{
+    "",
+    "default",
+    "void",
+    "void",
+    "$default",
+    "default",
+    "$white",
+    "null",
+    "default",
+    "null.wav",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "light_dynamic",
+    "",
+    "fonts/consolefont",
+    "ui/default.menu",
+    "default_menu",
+    "CGAME_UNKNOWN",
+#ifdef KISAK_MP
+    "defaultweapon_mp",
+#elif KISAK_SP
+    "defaultweapon",
+#else
+    "defaultweapon",
+#endif
+    "",
+    "misc/missing_fx",
+    "default",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "mp/defaultStringTable.csv"
+};
+
+int32_t g_sync;
+cmd_function_s DB_LoadZone_f_VAR;
+
 // --- file-local forward declarations (moved out of database.h) ---
 static void __cdecl DB_InitSingleton(void *pool, int32_t size);
 static void __cdecl DB_RemoveClipMap(XAssetHeader ass);
