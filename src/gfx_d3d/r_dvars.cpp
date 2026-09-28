@@ -440,7 +440,7 @@
          Material_PreventOverrideTechniqueGeneration();
  }
 
- static void __cdecl R_WarnInitDvars()
+ void __cdecl R_WarnInitDvars()
  {
      DvarLimits min; // [esp+4h] [ebp-10h]
 
