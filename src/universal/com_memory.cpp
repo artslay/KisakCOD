@@ -367,7 +367,7 @@ char* __cdecl Hunk_SetDataForFile(int32_t type, const char* name, void* data, vo
     hash = FS_HashFileName(name, 1024);
     if (Hunk_FindDataForFileInternal(type, name, hash))
         MyAssertHandler(".\\universal\\com_memory.cpp", 1483, 0, "%s", "!Hunk_FindDataForFileInternal( type, name, hash )");
-    fileData = (fileData_s*)alloc(strlen(name) + 10);
+    fileData = (fileData_s*)alloc(sizeof(fileData_s) + strlen(name));
     if (!Hunk_DataOnHunk((uint8_t*)fileData))
         MyAssertHandler(".\\universal\\com_memory.cpp", 1488, 0, "%s", "Hunk_DataOnHunk( fileData )");
     fileData->data = data;
@@ -392,7 +392,7 @@ void __cdecl Hunk_AddData(int32_t type, void* data, void* (__cdecl* alloc)(int))
 
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\universal\\com_memory.cpp", 1511, 0, "%s", "Sys_IsMainThread()");
-    fileData = (fileData_s*)alloc(9);
+    fileData = (fileData_s*)alloc(sizeof(fileData_s));
     if (!Hunk_DataOnHunk((uint8_t*)fileData))
         MyAssertHandler(".\\universal\\com_memory.cpp", 1516, 0, "%s", "Hunk_DataOnHunk( fileData )");
     fileData->data = data;
