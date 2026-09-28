@@ -24,7 +24,9 @@ struct GfxModelSkinnedSurface // sizeof=0x18
         int oldSkinnedCachedOffset;
     };
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(GfxModelSkinnedSurface) == 24);
+#endif
 
 struct GfxModelRigidSurface // sizeof=0x38
 {
