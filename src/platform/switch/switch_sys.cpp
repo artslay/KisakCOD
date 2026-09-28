@@ -5,6 +5,11 @@
 #include <cstdlib>
 #include <thread>
 #include <mutex>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <cerrno>
+#include <string>
 #include <cstdarg>
 #include <qcommon/qcommon.h>
 #include <qcommon/threads.h>
@@ -110,5 +115,122 @@ void __cdecl Sys_OpenURL(const char *, int) {}
 void NET_RestartDebug() {}
 
 void __cdecl Sys_NoFreeFilesError() { Sys_Error("Filesystem is full"); }
+
+
+uint32_t __cdecl Sys_MillisecondsRaw()
+{
+    return (uint32_t)std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
+}
+
+void __cdecl Sys_SnapVector(float *v)
+{
+    if (!v)
+        return;
+
+    v[0] = SnapFloat(v[0]);
+    v[1] = SnapFloat(v[1]);
+    v[2] = SnapFloat(v[2]);
+}
+
+void __cdecl NET_Sleep(int msec)
+{
+    if (msec <= 0)
+    {
+        std::this_thread::yield();
+        return;
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(msec));
+}
+
+char *__cdecl Sys_DefaultInstallPath()
+{
+    static char installPath[] = "sdmc:/switch/KisakCOD/game";
+    return installPath;
+}
+
+BOOL __cdecl Sys_RemoveDirTree(const char *path)
+{
+    if (!path || !*path)
+        return FALSE;
+
+    struct stat st {};
+    if (stat(path, &st) != 0)
+        return FALSE;
+
+    if (!S_ISDIR(st.st_mode))
+        return std::remove(path) == 0 ? TRUE : FALSE;
+
+    DIR *dir = opendir(path);
+    if (!dir)
+        return FALSE;
+
+    bool ok = true;
+    while (dirent *entry = readdir(dir))
+    {
+        if (!entry)
+            continue;
+
+        const char *name = entry->d_name;
+        if (!std::strcmp(name, ".") || !std::strcmp(name, ".."))
+            continue;
+
+        std::string child(path);
+        if (!child.empty() && child.back() != '/')
+            child.push_back('/');
+        child += name;
+
+        struct stat childStat {};
+        if (stat(child.c_str(), &childStat) != 0)
+        {
+            ok = false;
+            break;
+        }
+
+        if (S_ISDIR(childStat.st_mode))
+        {
+            if (!Sys_RemoveDirTree(child.c_str()))
+            {
+                ok = false;
+                break;
+            }
+        }
+        else if (std::remove(child.c_str()) != 0)
+        {
+            ok = false;
+            break;
+        }
+    }
+
+    closedir(dir);
+
+    if (!ok)
+        return FALSE;
+
+    return rmdir(path) == 0 ? TRUE : FALSE;
+}
+
+bool __cdecl IN_IsForegroundWindow()
+{
+    return true;
+}
+
+void __cdecl IN_SetForegroundWindow()
+{
+}
+
+void __cdecl IN_ActivateMouse(int)
+{
+}
+
+void __cdecl IN_Frame()
+{
+}
+
+void __cdecl IN_Activate(qboolean active)
+{
+    (void)active;
+}
 
 #endif
