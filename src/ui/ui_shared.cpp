@@ -589,16 +589,16 @@ void __cdecl Script_SetItemColor(UiContext *dc, itemDef_s *item, const char **ar
 
 int __cdecl Menu_ItemsMatchingGroup(menuDef_t *menu, char *name)
 {
-    int v2; // eax
+    char *v2; // eax
     int wildcard; // [esp+4h] [ebp-Ch]
     int i; // [esp+8h] [ebp-8h]
     int count; // [esp+Ch] [ebp-4h]
 
     count = 0;
     wildcard = -1;
-    v2 = (int)strstr(name, "*");
+    v2 = strstr(name, "*");
     if (v2)
-        wildcard = v2 - (uint32_t)name;
+        wildcard = static_cast<int>(v2 - name);
     for (i = 0; i < menu->itemCount; ++i)
     {
         if (wildcard == -1)
@@ -620,16 +620,16 @@ int __cdecl Menu_ItemsMatchingGroup(menuDef_t *menu, char *name)
 
 itemDef_s *__cdecl Menu_GetMatchingItemByNumber(menuDef_t *menu, int index, char *name)
 {
-    int v3; // eax
+    char *v3; // eax
     int wildcard; // [esp+4h] [ebp-Ch]
     int i; // [esp+8h] [ebp-8h]
     int count; // [esp+Ch] [ebp-4h]
 
     count = 0;
     wildcard = -1;
-    v3 = (int)strstr(name, "*");
+    v3 = strstr(name, "*");
     if (v3)
-        wildcard = v3 - (uint32_t)name;
+        wildcard = static_cast<int>(v3 - name);
     for (i = 0; i < menu->itemCount; ++i)
     {
         if (wildcard == -1)
@@ -6730,7 +6730,7 @@ void __cdecl Menu_PaintAll_AppendToVisibleList(char *stringBegin, uint32_t strin
     //    //(std::reverse_iterator<char *>)stringBegin,
     //    &_Val)->current - 1;
     auto it = std::find<std::reverse_iterator<char *>, char>(_Last, _First, _Val); // KISAKTODO: i'd be surprised if this works.
-    lastNewline = it._Get_current() - 1;
+    lastNewline = it.base() - 1;
 
     if (stringEnd - lastNewline <= 80)
         terminus = ", ";
