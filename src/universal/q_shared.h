@@ -530,17 +530,25 @@ inline T InterlockedDecrement(volatile T *addend)
     return __atomic_sub_fetch(addend, static_cast<T>(1), __ATOMIC_SEQ_CST);
 }
 
-template <typename T>
-inline T InterlockedCompareExchange(volatile T *destination, T exchange, T comparand)
+template <typename T, typename U, typename V>
+inline T InterlockedCompareExchange(volatile T *destination, U exchange, V comparand)
 {
-    __atomic_compare_exchange_n(destination, &comparand, exchange, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
-    return comparand;
+    T expected = static_cast<T>(comparand);
+    const T desired = static_cast<T>(exchange);
+    __atomic_compare_exchange_n(destination, &expected, desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    return expected;
 }
 
-template <typename T>
-inline T InterlockedExchangeAdd(volatile T *addend, T value)
+template <typename T, typename U>
+inline T InterlockedExchangeAdd(volatile T *addend, U value)
 {
-    return __atomic_fetch_add(addend, value, __ATOMIC_SEQ_CST);
+    return __atomic_fetch_add(addend, static_cast<T>(value), __ATOMIC_SEQ_CST);
+}
+
+template <typename T, typename U>
+inline T InterlockedExchange(volatile T *destination, U value)
+{
+    return __atomic_exchange_n(destination, static_cast<T>(value), __ATOMIC_SEQ_CST);
 }
 #endif
 #endif
