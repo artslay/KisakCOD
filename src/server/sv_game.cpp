@@ -521,10 +521,7 @@ void __cdecl SV_CheckLoadLevel(SaveGame *save)
     Hunk_CheckTempMemoryHighClear();
 }
 
-static void SV_FreeReliableCommandsForClient(client_t *cl)
-{
-    Com_Memset(&cl->reliableCommands, 0, 12);
-}
+void __cdecl SV_FreeReliableCommandsForClient(client_t *cl);
 static void SV_ShutdownGameVM(int clearScripts)
 {
     iassert(Sys_IsMainThread());
@@ -569,7 +566,7 @@ void __cdecl SV_InitGameVM(uint32_t randomSeed, int restart, int savegame, SaveG
     if (!++sv.skelTimeStamp)
         sv.skelTimeStamp = 1;
     sv.skelMemPos = 0;
-    g_sv_skel_memory_start = (char *)((uint32_t)&g_sv_skel_memory[15] & 0xFFFFFFF0);
+    g_sv_skel_memory_start = reinterpret_cast<char *>(reinterpret_cast<uintptr_t>(&g_sv_skel_memory[15]) & ~static_cast<uintptr_t>(SKEL_MEM_ALIGNMENT - 1));
     SND_ErrorCleanup();
 
     {
