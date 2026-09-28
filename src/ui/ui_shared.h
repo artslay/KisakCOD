@@ -543,7 +543,7 @@ struct menuDef_t // sizeof=0x11C
     itemDef_s **items;
 };
 
-union UILocalVar_u // sizeof=0x4
+union UILocalVar_u
 {                                       // ...
     UILocalVar_u()
     {
@@ -565,7 +565,10 @@ union UILocalVar_u // sizeof=0x4
     float value;
     const char *string;
 };
-struct UILocalVar // sizeof=0xC
+#ifndef __SWITCH__
+static_assert(sizeof(UILocalVar_u) == 4);
+#endif
+struct UILocalVar
 {                                       // ...
     UILocalVarType type;
     const char *name;
