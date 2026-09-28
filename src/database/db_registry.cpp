@@ -1577,6 +1577,20 @@ static XAssetHeader __cdecl DB_AllocXAsset_StringTable_(void *arg)
     return header;
 }
 
+static XAssetHeader __cdecl DB_AllocMaterial(void *arg)
+{
+    XAssetHeader *pool = (XAssetHeader*)arg;
+    Material_DirtySort();
+    return DB_AllocXAsset_StringTable_(pool);
+}
+
+static void __cdecl DB_FreeMaterial(void *arg, XAssetHeader header)
+{
+    XAssetPoolEntry<StringTable> **pool = (XAssetPoolEntry<StringTable> **)arg;
+    Material_DirtySort();
+    DB_FreeXAssetHeader_StringTable_(pool, header);
+}
+
 XAssetHeader(__cdecl *DB_AllocXAssetHeaderHandler[ASSET_TYPE_COUNT])(void *) =
 {
   &DB_AllocXAsset_StringTable_,
@@ -1633,7 +1647,7 @@ void(__cdecl *DB_FreeXAssetHeaderHandler[ASSET_TYPE_COUNT])(void *, XAssetHeader
   DB_FreeXAssetHeader_StringTable_,
   DB_FreeXAssetHeader_StringTable_,
   DB_FreeXAssetHeader_StringTable_,
-  DB_FreeMaterial,
+  DB_FreeXAssetHeader_StringTable_,
   DB_FreeMaterial,
   DB_FreeXAssetHeader_StringTable_,
   DB_FreeXAssetHeader_StringTable_,
@@ -1748,7 +1762,7 @@ static void __cdecl DB_DynamicCloneMenu(XAssetHeader from, XAssetHeader to, int3
     }
 }
 
-static void __cdecl DB_EnumXAssetsFor(
+void __cdecl DB_EnumXAssetsFor(
     fileData_s *fileData,
     int32_t fileDataType,
     void(__cdecl *func)(void*, void*),
@@ -1795,7 +1809,7 @@ static int32_t __cdecl DB_GetAllXAssetOfType_LoadObj(XAssetType type, XAssetHead
     return assetList.assetCount;
 }
 
-static void __cdecl DB_EnumXAssets_FastFile(
+void __cdecl DB_EnumXAssets_FastFile(
     XAssetType type,
     void(__cdecl *func)(XAssetHeader, void *),
     void *inData,
@@ -1885,7 +1899,7 @@ static void DB_PostLoadXZone()
     }
 }
 
-static void __cdecl DB_UpdateDebugZone()
+void __cdecl DB_UpdateDebugZone()
 {
     XZoneInfo zoneInfo[2];
     if (g_debugZoneName[0])
