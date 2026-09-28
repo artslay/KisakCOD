@@ -1794,7 +1794,7 @@ void __cdecl G_LoadWeaponCue(SaveGame *save)
         if (!v5)
             droppedWeaponCue->setEnt(&g_entities[v4 - 1]);
         ++droppedWeaponCue;
-    } while ((int)droppedWeaponCue < (int)&level.changelevel);
+    } while (droppedWeaponCue < &level.droppedWeaponCue[32]);
 }
 
 void __cdecl G_SaveDvars(SaveGame *save)

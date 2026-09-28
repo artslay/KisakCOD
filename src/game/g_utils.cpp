@@ -1862,6 +1862,36 @@ void __cdecl G_FreeEntityAfterEvent(gentity_s *ent)
 
 int __cdecl G_SaveFreeEntities(unsigned __int8 *buf)
 {
+#ifdef __SWITCH__
+    auto encodeEntity = [](gentity_s *ent) -> unsigned int
+    {
+        return ent ? static_cast<unsigned int>(ent - g_entities + 1) : 0;
+    };
+
+    gentity_s *firstFreeEnt = level.firstFreeEnt;
+    int result = 8;
+    unsigned __int8 *v4 = buf ? buf + 8 : nullptr;
+
+    if (buf)
+    {
+        *reinterpret_cast<unsigned int *>(buf) = encodeEntity(level.firstFreeEnt);
+        *reinterpret_cast<unsigned int *>(buf + 4) = encodeEntity(level.lastFreeEnt);
+    }
+
+    while (firstFreeEnt)
+    {
+        if (buf)
+        {
+            *reinterpret_cast<unsigned int *>(v4) = encodeEntity(firstFreeEnt->nextFree);
+            v4 += 4;
+        }
+
+        firstFreeEnt = firstFreeEnt->nextFree;
+        result += 4;
+    }
+
+    return result;
+#else
     gentity_s *firstFreeEnt; // r9
     int result; // r3
     unsigned __int8 *v4; // r11
@@ -1891,10 +1921,40 @@ int __cdecl G_SaveFreeEntities(unsigned __int8 *buf)
         } while (firstFreeEnt);
     }
     return result;
+#endif
 }
 
 void __cdecl G_LoadFreeEntities(unsigned __int8 *buf)
 {
+#ifdef __SWITCH__
+    auto decodeEntity = [](unsigned int encoded) -> gentity_s *
+    {
+        if (!encoded)
+            return nullptr;
+        const unsigned int index = encoded - 1;
+        if (index >= MAX_GENTITIES)
+            return nullptr;
+        return &g_entities[index];
+    };
+
+    if (!buf)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 2608, 0, "%s", "buf");
+
+    const unsigned int firstEncoded = *reinterpret_cast<unsigned int *>(buf);
+    const unsigned int lastEncoded = *reinterpret_cast<unsigned int *>(buf + 4);
+    level.firstFreeEnt = decodeEntity(firstEncoded);
+    level.lastFreeEnt = decodeEntity(lastEncoded);
+
+    gentity_s *ent = level.firstFreeEnt;
+    unsigned __int8 *v4 = buf + 8;
+    while (ent)
+    {
+        const unsigned int nextEncoded = *reinterpret_cast<unsigned int *>(v4);
+        ent->nextFree = decodeEntity(nextEncoded);
+        v4 += 4;
+        ent = ent->nextFree;
+    }
+#else
     _BYTE *v2; // r11
     bool v3; // cr58
     unsigned __int8 *v4; // r9
@@ -1920,6 +1980,7 @@ void __cdecl G_LoadFreeEntities(unsigned __int8 *buf)
             v2 = (_BYTE *)*((unsigned int *)v2 + 156);
         } while (v2);
     }
+#endif
 }
 
 void __cdecl G_AddPredictableEvent(gentity_s *ent, entity_event_t event, unsigned int eventParm)
