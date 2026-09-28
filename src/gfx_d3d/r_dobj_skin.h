@@ -33,7 +33,9 @@ struct GfxModelRigidSurface // sizeof=0x38
     GfxModelSkinnedSurface surf;
     GfxScaledPlacement placement;
 };
+#ifndef KISAK_SWITCH
 static_assert(sizeof(GfxModelRigidSurface) == 56);
+#endif
 
 struct SkinXModelCmd // sizeof=0x1C
 {                                       // ...
