@@ -1,7 +1,6 @@
 #include <universal/q_shared.h>
 #include <qcommon/qcommon.h>
 
-#include <Windows.h>
 #include <win32/win_local.h>
 #include <qcommon/cmd.h>
 #include "com_files.h"
