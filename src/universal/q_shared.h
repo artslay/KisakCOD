@@ -67,6 +67,7 @@
 #ifdef __SWITCH__
 char *Sys_GetClipboardData();
 int Sys_SetClipboardData(const char *text);
+void Sys_OutOfMemErrorInternal(const char *filename, int line);
 #endif
 #ifndef __declspec
 #define __declspec(x)
