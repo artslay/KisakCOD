@@ -52,7 +52,7 @@ void __cdecl FX_SortEffects(FxSystem *system)
 
 void __cdecl FX_WaitBeginIteratingOverEffects_Exclusive(FxSystem *system)
 {
-    volatile long *Destination; // [esp+0h] [ebp-4h]
+    volatile int32_t *Destination; // [esp+0h] [ebp-4h]
 
     if (system->isArchiving)
         MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 512, 0, "%s", "!system->isArchiving");
