@@ -1021,3 +1021,5 @@ int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags)
 }
 
 #endif
+
+#endif
