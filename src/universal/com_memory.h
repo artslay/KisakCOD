@@ -86,6 +86,7 @@ uint8_t* __cdecl Hunk_AllocLowAlign(uint32_t size, int32_t alignment, const char
 // There are a few memory pools of fixed size that allocations come from.
 void* __cdecl Z_VirtualReserve(int size);
 char* __cdecl Z_VirtualAlloc(int size, const char* name, int type);
+char* __cdecl Z_TryVirtualAlloc(int32_t size, const char* name, int32_t type);
 void __cdecl Z_VirtualDecommitInternal(void* ptr, int size);
 void* __cdecl Z_VirtualFreeInternal(void* ptr);
 void* __cdecl Z_TryVirtualAllocInternal(int size);
