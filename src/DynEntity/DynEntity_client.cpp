@@ -1192,7 +1192,7 @@ char __cdecl DynEntCl_DynEntImpactEvent(
         if (!dynEntClient->physObjId)
         {
             PhysObj = DynEntCl_CreatePhysObj(dynEntDef, &dynEntPose->pose);
-            dynEntClient->physObjId = (int)PhysObj;
+            dynEntClient->physObjId = static_cast<int32_t>(reinterpret_cast<uintptr_t>(PhysObj));
         }
         if (dynEntClient->physObjId)
             Phys_ObjBulletImpact(
@@ -1657,7 +1657,7 @@ void __cdecl DynEntCl_JitterEvent(
                 {
                     dynEntPosea = DynEnt_GetClientPose(dynEntList[i], drawType);
                     PhysObj = DynEntCl_CreatePhysObj(dynEntDef, &dynEntPosea->pose);
-                    ClientEntity->physObjId = (int)PhysObj;
+                    ClientEntity->physObjId = static_cast<int32_t>(reinterpret_cast<uintptr_t>(PhysObj));
                 }
             }
         }
@@ -1752,7 +1752,7 @@ void DynEntCl_WakeUpAroundPlayer(int localClientNum)
                 if (DynEnt_GetEntityProps(EntityDef->type)->usePhysics && !dynEntClient->physObjId)
                 {
                     ClientPose = DynEnt_GetClientPose(dynEntId, drawType);
-                    dynEntClient->physObjId = (int32_t)DynEntCl_CreatePhysObj(EntityDef, &ClientPose->pose);
+                    dynEntClient->physObjId = static_cast<int32_t>(reinterpret_cast<uintptr_t>(DynEntCl_CreatePhysObj(EntityDef, &ClientPose->pose)));
                 }
             }
 
