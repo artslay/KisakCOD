@@ -1829,12 +1829,12 @@ bool __cdecl FX_SpawnModelPhysics(
     visuals.anonymous = FX_GetElemVisuals(elemDef, randomSeed).anonymous;
     if (!*((_DWORD*)visuals.anonymous + 53))
         MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1853, 0, "%s", "visuals.model->physPreset");
-    elem->physObjId = (int)Phys_ObjCreate(
+    elem->physObjId = static_cast<int32_t>(reinterpret_cast<uintptr_t>(Phys_ObjCreate(
         PHYS_WORLD_FX,
         worldOrigin,
         quat,
         velocity,
-        *((const PhysPreset**)visuals.anonymous + 53));
+        *((const PhysPreset**)visuals.anonymous + 53))));
     if (elem->physObjId)
     {
         Phys_ObjSetCollisionFromXModel(visuals.model, PHYS_WORLD_FX, (dxBody*)elem->physObjId);
