@@ -23,7 +23,7 @@ struct HashEntry
     HashEntry_unnamed_type_u u;
 };
 
-struct __declspec(align(128)) scrStringGlob_t
+struct alignas(128) scrStringGlob_t
 {                                       
     HashEntry hashTable[20000];         
     bool inited;                        
