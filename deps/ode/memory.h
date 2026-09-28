@@ -58,5 +58,3 @@ void dFree (void *ptr, size_t size);
 #endif
 
 #endif
-
-#endif
