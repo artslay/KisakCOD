@@ -316,11 +316,11 @@ void __cdecl DB_LoadXFileInternal()
     if (g_trackLoadProgress)
     {
 #ifdef __SWITCH__
-        FILE *file = static_cast<FILE *>(g_load.f);
-        long saved = std::ftell(file);
-        std::fseek(file, 0, SEEK_END);
-        fileSize = static_cast<int32_t>(std::ftell(file));
-        std::fseek(file, saved, SEEK_SET);
+        FILE *switchFile = static_cast<FILE *>(g_load.f);
+        long saved = std::ftell(switchFile);
+        std::fseek(switchFile, 0, SEEK_END);
+        fileSize = static_cast<int32_t>(std::ftell(switchFile));
+        std::fseek(switchFile, saved, SEEK_SET);
 #else
         fileSize = GetFileSize(g_load.f, 0);
 #endif
