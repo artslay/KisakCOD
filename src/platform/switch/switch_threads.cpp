@@ -202,7 +202,14 @@ void __cdecl Sys_NotifyDatabase()
 }
 
 void __cdecl Sys_WakeDatabase() {}
-void __cdecl Sys_DatabaseCompleted()\n{\n    { std::lock_guard<std::mutex> lock(g_databaseMutex); g_databaseCompleted = true; }\n    g_databaseCv.notify_all();\n}
+void __cdecl Sys_DatabaseCompleted()
+{
+    {
+        std::lock_guard<std::mutex> lock(g_databaseMutex);
+        g_databaseCompleted = true;
+    }
+    g_databaseCv.notify_all();
+}
 void __cdecl Sys_DatabaseCompleted2() { Sys_DatabaseCompleted(); }
 bool __cdecl Sys_IsDatabaseReady() { return true; }
 bool __cdecl Sys_IsDatabaseReady2() { return true; }
