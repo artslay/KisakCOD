@@ -1212,7 +1212,7 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
             v8 = *(_DWORD *)&v73[animPartIndex].partIndex;
             v9 = i;
             *reinterpret_cast<uintptr_t *>(&dest[8 * i + 64]) = reinterpret_cast<uintptr_t>(v73[animPartIndex].trans);
-            *(_DWORD *)&dest[8 * v9 + 68] = v8;
+            transPartIndices[v9] = static_cast<uint32_t>(v8);
             PartQuatType = XAnimGetPartTransType(animPartIndex);
             v51[PartQuatType] = i + 1;
         }
@@ -1491,21 +1491,21 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
         v56 = parts->boneCount[5];
         while (animPartIndex < v56)
         {
-            *dataByte++ = dest[8 * animPartIndex + 68];
-            *dataShort = **(_WORD **)&dest[8 * animPartIndex + 64];
+            *dataByte++ = static_cast<uint8_t>(transPartIndices[animPartIndex]);
+            *dataShort = *reinterpret_cast<uint16_t *>(transPtrs[animPartIndex]);
             tableSize = (uint16_t)*dataShort++;
-            *dataInt = *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 4);
-            dataInt[1] = *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 8);
-            dataInt[2] = *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 12);
-            dataInt[3] = *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 16);
-            dataInt[4] = *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 20);
-            dataInt[5] = *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 24);
+            *dataInt = *reinterpret_cast<int32_t *>(transPtrs[animPartIndex] + 4);
+            dataInt[1] = *reinterpret_cast<int32_t *>(transPtrs[animPartIndex] + 8);
+            dataInt[2] = *(_DWORD *)(transPtrs[animPartIndex] + 12);
+            dataInt[3] = *reinterpret_cast<int32_t *>(transPtrs[animPartIndex] + 16);
+            dataInt[4] = *reinterpret_cast<int32_t *>(transPtrs[animPartIndex] + 20);
+            dataInt[5] = *reinterpret_cast<int32_t *>(transPtrs[animPartIndex] + 24);
             v43 = 0;
             while (v43 <= tableSize)
             {
-                *randomDataByte = *(_BYTE *)(3 * v43 + *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 28));
-                randomDataByte[1] = *(_BYTE *)(*(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 28) + 3 * v43 + 1);
-                randomDataByte[2] = *(_BYTE *)(*(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 28) + 3 * v43++ + 2);
+                *randomDataByte = *(_BYTE *)(3 * v43 + *reinterpret_cast<uint32_t *>(transPtrs[animPartIndex] + 28));
+                randomDataByte[1] = *(_BYTE *)(*reinterpret_cast<uint32_t *>(transPtrs[animPartIndex] + 28) + 3 * v43 + 1);
+                randomDataByte[2] = *(_BYTE *)(*reinterpret_cast<uint32_t *>(transPtrs[animPartIndex] + 28) + 3 * v43++ + 2);
                 randomDataByte += 3;
             }
             XAnimEmitFrameIndices(
@@ -1513,28 +1513,28 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
                 &dataByte,
                 &dataShort,
                 &indices,
-                (XAnimDynamicIndices *)(*(_DWORD *)&dest[8 * animPartIndex++ + 64] + 32),
+                reinterpret_cast<XAnimDynamicIndices *>(transPtrs[animPartIndex++] + 32),
                 useSmallIndices);
             dataInt += 6;
         }
         v56 += parts->boneCount[6];
         while (animPartIndex < v56)
         {
-            *dataByte++ = dest[8 * animPartIndex + 68];
-            *dataShort = **(_WORD **)&dest[8 * animPartIndex + 64];
+            *dataByte++ = static_cast<uint8_t>(transPartIndices[animPartIndex]);
+            *dataShort = *reinterpret_cast<uint16_t *>(transPtrs[animPartIndex]);
             tableSize = (uint16_t)*dataShort++;
-            *dataInt = *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 4);
-            dataInt[1] = *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 8);
-            dataInt[2] = *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 12);
-            dataInt[3] = *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 16);
-            dataInt[4] = *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 20);
-            dataInt[5] = *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 24);
+            *dataInt = *reinterpret_cast<int32_t *>(transPtrs[animPartIndex] + 4);
+            dataInt[1] = *reinterpret_cast<int32_t *>(transPtrs[animPartIndex] + 8);
+            dataInt[2] = *(_DWORD *)(transPtrs[animPartIndex] + 12);
+            dataInt[3] = *reinterpret_cast<int32_t *>(transPtrs[animPartIndex] + 16);
+            dataInt[4] = *reinterpret_cast<int32_t *>(transPtrs[animPartIndex] + 20);
+            dataInt[5] = *reinterpret_cast<int32_t *>(transPtrs[animPartIndex] + 24);
             v43 = 0;
             while (v43 <= tableSize)
             {
-                *(_WORD *)randomDataShort = *(_WORD *)(6 * v43 + *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 28));
-                *((_WORD *)randomDataShort + 1) = *(_WORD *)(*(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 28) + 6 * v43 + 2);
-                *((_WORD *)randomDataShort + 2) = *(_WORD *)(*(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 28)
+                *(_WORD *)randomDataShort = *(_WORD *)(6 * v43 + *reinterpret_cast<uint32_t *>(transPtrs[animPartIndex] + 28));
+                *((_WORD *)randomDataShort + 1) = *(_WORD *)(*reinterpret_cast<uint32_t *>(transPtrs[animPartIndex] + 28) + 6 * v43 + 2);
+                *((_WORD *)randomDataShort + 2) = *(_WORD *)(*reinterpret_cast<uint32_t *>(transPtrs[animPartIndex] + 28)
                     + 6 * v43++
                     + 4);
                 randomDataShort += 6;
@@ -1551,10 +1551,10 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
         v56 += parts->boneCount[7];
         while (animPartIndex < v56)
         {
-            *dataByte = dest[8 * animPartIndex + 68];
-            *dataInt = *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 4);
-            dataInt[1] = *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex + 64] + 8);
-            dataInt[2] = *(_DWORD *)(*(_DWORD *)&dest[8 * animPartIndex++ + 64] + 12);
+            *dataByte = static_cast<uint8_t>(transPartIndices[animPartIndex]);
+            *dataInt = *reinterpret_cast<int32_t *>(transPtrs[animPartIndex] + 4);
+            dataInt[1] = *reinterpret_cast<int32_t *>(transPtrs[animPartIndex] + 8);
+            dataInt[2] = *(_DWORD *)(transPtrs[animPartIndex++] + 12);
             ++dataByte;
             dataInt += 3;
         }
