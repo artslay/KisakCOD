@@ -1081,3 +1081,311 @@ int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags)
 #endif
 
 #endif
+
+// Restored upstream asset type names required by DB registry.
+const char *g_assetNames[ASSET_TYPE_COUNT] = // SP/MP same
+{
+  "xmodelpieces",
+  "physpreset",
+  "xanim",
+  "xmodel",
+  "material",
+  "techset",
+  "image",
+  "sound",
+  "sndcurve",
+  "loaded_sound",
+  "col_map_sp",
+  "col_map_mp",
+  "com_map",
+  "game_map_sp",
+  "game_map_mp",
+  "map_ents",
+  "gfx_map",
+  "lightdef",
+  "ui_map",
+  "font",
+  "menufile",
+  "menu",
+  "localize",
+  "weapon",
+  "snddriverglobals",
+  "fx",
+  "impactfx",
+  "aitype",
+  "mptype",
+  "character",
+  "xmodelalias",
+  "rawfile",
+  "stringtable"
+};
+
+// Restored upstream DB registry implementations required by the Switch build.
+void __cdecl DB_RemoveClipMap(XAssetHeader ass)
+{
+    CM_Unload();
+}
+
+
+
+void __cdecl DB_RemoveComWorld(XAssetHeader ass)
+{
+    Com_UnloadWorld();
+}
+
+
+
+void __cdecl DB_RemoveGfxWorld(XAssetHeader ass)
+{
+    R_UnloadWorld();
+}
+
+
+
+XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *name)
+{
+    const char *XAssetName; // eax
+    uint32_t assetEntryIndex; // [esp+4h] [ebp-8h]
+    XAssetEntryPoolEntry *assetEntry; // [esp+8h] [ebp-4h]
+
+    for (assetEntryIndex = db_hashTable[DB_HashForName(name, type)];
+        assetEntryIndex;
+        assetEntryIndex = assetEntry->entry.nextHash)
+    {
+        assetEntry = &g_assetEntryPool[assetEntryIndex];
+        if (assetEntry->entry.asset.type == type)
+        {
+            XAssetName = DB_GetXAssetName(&assetEntry->entry.asset);
+            if (!I_stricmp(XAssetName, name))
+                return &g_assetEntryPool[assetEntryIndex];
+        }
+    }
+    return 0;
+}
+
+
+
+uint32_t __cdecl DB_HashForName(const char *name, XAssetType type)
+{
+    int32_t c; // [esp+8h] [ebp-4h]
+    int32_t out_val = (int)type;
+
+    while (1)
+    {
+        c = tolower(*name);
+        if (c == '\\')
+            c = '/';
+        if (!c)
+            break;
+        out_val = c + 31 * out_val;
+        ++name;
+    }
+    return out_val % 0x8000u;
+}
+
+
+
+XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
+{
+    XAsset asset; // [esp+Ch] [ebp-Ch] BYREF
+    XAssetEntry *newEntry; // [esp+14h] [ebp-4h]
+
+    asset.header = DB_FindXAssetDefaultHeaderInternal(type);
+    if (!asset.header.data)
+    {
+        Sys_UnlockWrite(&db_hashCritSect);
+        if (type == ASSET_TYPE_CLIPMAP || type == ASSET_TYPE_CLIPMAP_PVS)
+            Com_Error(
+                ERR_DROP,
+                "Couldn't find the bsp for this map.  Please build the fast file associated with %s and try again.",
+                name);
+        else
+            Com_Error(
+                ERR_DROP,
+                "Could not load default asset '%s' for asset type '%s'.\nTried to load asset '%s'.",
+                g_defaultAssetName[type],
+                g_assetNames[type],
+                name);
+    }
+    asset.type = type;
+    ++g_defaultAssetCount;
+    newEntry = (XAssetEntry *)DB_AllocXAssetEntry(type, 0);
+    DB_CloneXAssetInternal(&asset, &newEntry->asset);
+    if (type == ASSET_TYPE_SOUND)
+    {
+        newEntry->asset.header.sound->count = 0;
+        newEntry->asset.header.sound->head = NULL;
+    }
+    newEntry->nextHash = db_hashTable[DB_HashForName(name, type)];
+    db_hashTable[DB_HashForName(name, type)] = ((char *)newEntry - (char *)g_assetEntryPool) >> 4;
+    DB_SetXAssetName(&newEntry->asset, SL_ConvertToString(SL_GetString(name, 4)));
+    newEntry->inuse = 1;
+    return newEntry;
+}
+
+
+
+void __cdecl DB_CloneXAssetInternal(const XAsset *from, XAsset *to)
+{
+    uint32_t size; // [esp+0h] [ebp-4h]
+
+    iassert(from->type == to->type);
+    size = DB_GetXAssetTypeSize(from->type);
+    iassert(size <= sizeof(XAssetSize));
+    memcpy(to->header.data, from->header.data, size);
+}
+
+
+
+XAssetHeader __cdecl DB_FindXAssetDefaultHeaderInternal(XAssetType type)
+{
+    const char *XAssetName; // eax
+    uint32_t assetEntryIndex; // [esp+8h] [ebp-Ch]
+    const char *name; // [esp+Ch] [ebp-8h]
+    XAssetEntryPoolEntry *assetEntry; // [esp+10h] [ebp-4h]
+
+    name = g_defaultAssetName[type];
+    for (assetEntryIndex = db_hashTable[DB_HashForName(name, type)]; ; assetEntryIndex = assetEntry->entry.nextHash)
+    {
+        if (!assetEntryIndex)
+            return 0;
+        assetEntry = &g_assetEntryPool[assetEntryIndex];
+        if (assetEntry->entry.asset.type == type)
+        {
+            XAssetName = DB_GetXAssetName(&assetEntry->entry.asset);
+            if (!I_stricmp(XAssetName, name))
+                break;
+        }
+    }
+    while (assetEntry->entry.nextOverride)
+        assetEntry = &g_assetEntryPool[assetEntry->entry.nextOverride];
+    return assetEntry->entry.asset.header;
+}
+
+
+
+void __cdecl DB_FreeXAssetEntry(XAssetEntryPoolEntry *assetEntry)
+{
+    XAssetEntryPoolEntry *oldFreeHead; // [esp+4h] [ebp-4h]
+
+    DB_FreeXAssetHeader(assetEntry->entry.asset.type, assetEntry->entry.asset.header);
+    oldFreeHead = g_freeAssetEntryHead;
+    g_freeAssetEntryHead = assetEntry;
+    assetEntry->next = oldFreeHead;
+}
+
+
+
+void __cdecl DB_CloneXAssetEntry(const XAssetEntry *from, XAssetEntry *to)
+{
+    iassert(from->asset.type == to->asset.type);
+    DB_DynamicCloneXAsset(to->asset.header, from->asset.header, to->asset.type, to->zoneIndex == 0);
+    DB_CloneXAssetInternal(&from->asset, &to->asset);
+    to->zoneIndex = from->zoneIndex;
+}
+
+
+
+void __cdecl DB_DynamicCloneXAsset(XAssetHeader from, XAssetHeader to, XAssetType type, int32_t fromDefault)
+{
+    if (DB_DynamicCloneXAssetHandler[type])
+        DB_DynamicCloneXAssetHandler[type](from, to, fromDefault);
+}
+
+
+
+void __cdecl DB_LoadZone_f()
+{
+    char *v0; // eax
+
+    v0 = (char *)Cmd_Argv(1);
+    I_strncpyz(g_debugZoneName, v0, 64);
+    DB_UpdateDebugZone();
+}
+
+
+
+int32_t __cdecl DB_GetAllXAssetOfType(XAssetType type, XAssetHeader* assets, int32_t maxCount)
+{
+    if (IsFastFileLoad())
+        return DB_GetAllXAssetOfType_FastFile(type, assets, maxCount);
+    else
+        return DB_GetAllXAssetOfType_LoadObj(type, assets, maxCount);
+}
+
+
+
+int32_t __cdecl DB_GetAllXAssetOfType_FastFile(XAssetType type, XAssetHeader *assets, int32_t maxCount)
+{
+    uint32_t hash; // [esp+4h] [ebp-10h]
+    uint32_t assetEntryIndex; // [esp+8h] [ebp-Ch]
+    int32_t assetCount; // [esp+Ch] [ebp-8h]
+    XAssetEntryPoolEntry *assetEntry; // [esp+10h] [ebp-4h]
+
+    assetCount = 0;
+    InterlockedIncrement(&db_hashCritSect.readCount);
+    while (db_hashCritSect.writeCount)
+        NET_Sleep(0);
+    for (hash = 0; hash < 0x8000; ++hash)
+    {
+        for (assetEntryIndex = db_hashTable[hash]; assetEntryIndex; assetEntryIndex = assetEntry->entry.nextHash)
+        {
+            assetEntry = &g_assetEntryPool[assetEntryIndex];
+            if (assetEntry->entry.asset.type == type)
+            {
+                if (assets)
+                {
+                    if (assetCount >= maxCount)
+                        MyAssertHandler(".\\database\\db_registry.cpp", 2877, 0, "%s", "assetCount < maxCount");
+                    assets[assetCount] = assetEntry->entry.asset.header;
+                }
+                ++assetCount;
+            }
+        }
+    }
+    if (db_hashCritSect.readCount <= 0)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/threads_interlock.h",
+            76,
+            0,
+            "%s",
+            "critSect->readCount > 0");
+    InterlockedDecrement(&db_hashCritSect.readCount);
+    return assetCount;
+}
+
+
+
+void __cdecl DB_EnumXAssets(
+    XAssetType type,
+    void(__cdecl* func)(XAssetHeader, void*),
+    void* inData,
+    bool includeOverride)
+{
+    if (IsFastFileLoad())
+        DB_EnumXAssets_FastFile(type, func, inData, includeOverride);
+    else
+        DB_EnumXAssets_LoadObj(type, (void(*)(void *, void *))func, inData);
+}
+
+
+
+void __cdecl DB_SyncXAssets()
+{
+    if (!Sys_IsMainThread())
+        MyAssertHandler(".\\database\\db_registry.cpp", 3386, 0, "%s", "Sys_IsMainThread()");
+    R_BeginRemoteScreenUpdate();
+    Sys_SyncDatabase();
+    R_EndRemoteScreenUpdate();
+    DB_PostLoadXZone();
+}
+
+
+
+void __cdecl DB_InitPoolHeader(XAssetType type)
+{
+    if (DB_XAssetPool[type])
+        DB_InitPoolHeaderHandler[type](DB_XAssetPool[type], g_poolSize[type]);
+}
+
+
