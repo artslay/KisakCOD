@@ -184,8 +184,23 @@ void __cdecl Sys_SyncDatabase()
     g_databasePending = false;
 }
 
-void __cdecl Sys_WaitStartDatabase()\n{\n    std::unique_lock<std::mutex> lock(g_databaseMutex);\n    g_databaseCv.wait(lock, [] { return g_databaseRequested; });\n    g_databaseRequested = false;\n}
-void __cdecl Sys_NotifyDatabase()\n{\n    { std::lock_guard<std::mutex> lock(g_databaseMutex); g_databaseRequested = true; g_databasePending = true; }\n    g_databaseCv.notify_one();\n}
+void __cdecl Sys_WaitStartDatabase()
+{
+    std::unique_lock<std::mutex> lock(g_databaseMutex);
+    g_databaseCv.wait(lock, [] { return g_databaseRequested; });
+    g_databaseRequested = false;
+}
+
+void __cdecl Sys_NotifyDatabase()
+{
+    {
+        std::lock_guard<std::mutex> lock(g_databaseMutex);
+        g_databaseRequested = true;
+        g_databasePending = true;
+    }
+    g_databaseCv.notify_one();
+}
+
 void __cdecl Sys_WakeDatabase() {}
 void __cdecl Sys_DatabaseCompleted()\n{\n    { std::lock_guard<std::mutex> lock(g_databaseMutex); g_databaseCompleted = true; }\n    g_databaseCv.notify_all();\n}
 void __cdecl Sys_DatabaseCompleted2() { Sys_DatabaseCompleted(); }
