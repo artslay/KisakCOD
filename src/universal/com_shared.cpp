@@ -157,13 +157,13 @@ int __cdecl Com_HashKey(const char *string, int maxlen)
 
 int __cdecl Com_RealTime(qtime_s *qtime)
 {
-    __int64 t; // [esp+0h] [ebp-10h] BYREF
+    time_t t; // [esp+0h] [ebp-10h] BYREF
     tm *tms; // [esp+Ch] [ebp-4h]
 
-    t = _time64(0);
+    t = time(nullptr);
     if (!qtime)
-        return t;
-    tms = _localtime64(&t);
+        return static_cast<int>(t);
+    tms = localtime(&t);
     if (tms)
     {
         qtime->tm_sec = tms->tm_sec;
@@ -176,7 +176,7 @@ int __cdecl Com_RealTime(qtime_s *qtime)
         qtime->tm_yday = tms->tm_yday;
         qtime->tm_isdst = tms->tm_isdst;
     }
-    return t;
+    return static_cast<int>(t);
 }
 
 static void __cdecl Com_Prefetch(const char *s, signed int bytes)
