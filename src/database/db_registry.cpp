@@ -903,7 +903,11 @@ void __cdecl  DB_Thread(uint32_t threadContext)
 #ifdef __llvm__ 
         __builtin_debugtrap();
 #else
+#ifdef __SWITCH__
+        __builtin_trap();
+#else
         __debugbreak();
+#endif
 #endif
         Com_ErrorAbort();
     }
