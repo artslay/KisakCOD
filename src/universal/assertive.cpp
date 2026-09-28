@@ -532,6 +532,14 @@ int __cdecl LoadMapFiles(char* msg)
 
 char g_module[MAX_PATH];
 
+#ifdef __SWITCH__
+static int __cdecl DoStackTrace(char* msg, int nIgnore)
+{
+    (void)msg;
+    (void)nIgnore;
+    return 0;
+}
+#else
 #include <intrin.h>
 
 // KISAKX64
@@ -563,6 +571,8 @@ int __cdecl DoStackTrace(char* msg, int nIgnore)
     }
     return LoadMapFiles(msg);
 }
+
+#endif
 
 void __cdecl BuildAssertMessage(const char* expr, const char* filename, int line, int type, int skipLevels, char* message)
 {
