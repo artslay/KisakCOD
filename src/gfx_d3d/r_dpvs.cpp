@@ -232,7 +232,7 @@ void __cdecl R_AddAllSceneEntSurfacesCamera(const GfxViewInfo *viewInfo)
             {
                 sceneEnt = &scene.sceneDObj[sceneEntIndex];
                 iassert(sceneEnt->cull.state >= CULL_STATE_BOUNDED);
-                cachedLightingHandle = (uint16_t *)LongNoSwap((uint32_t)sceneEnt->info.cachedLightingHandle);
+                cachedLightingHandle = sceneEnt->info.cachedLightingHandle;
                 lightingHandle = R_AllocModelLighting_Box(
                     viewInfo,
                     sceneEnt->lightingOrigin,
@@ -1624,7 +1624,7 @@ void __cdecl R_AddCellDynBrushSurfacesInFrustumCmd(const DpvsDynamicCellCmd *dat
 
 void __cdecl R_CullDynBrushInCell(uint32_t cellIndex, const DpvsPlane *planes, int planeCount)
 {
-    unsigned long v4; // eax
+    unsigned int v4; // eax
     int v5; // [esp+4h] [ebp-34h]
     const DpvsPlane *v6; // [esp+8h] [ebp-30h]
     int v7; // [esp+Ch] [ebp-2Ch]
