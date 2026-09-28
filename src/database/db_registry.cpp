@@ -244,6 +244,9 @@ static void __cdecl DB_LoadZone_f();
 static void __cdecl  DB_Thread(uint32_t threadContext);
 static void DB_TryLoadXFile();
 static int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags);
+static void __cdecl DB_RemoveLoadedSound(XAssetHeader header);
+void __cdecl Material_DirtyTechniqueSetOverrides();
+void __cdecl Material_ClearShaderUploadList();
 static void __cdecl DB_BuildOSPath(const char *zoneName, uint32_t size, char *filename)
 {
 #ifdef __SWITCH__
