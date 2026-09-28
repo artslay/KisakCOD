@@ -1533,11 +1533,9 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
             v43 = 0;
             while (v43 <= tableSize)
             {
-                *(_WORD *)randomDataShort = *(_WORD *)(6 * v43 + *reinterpret_cast<uint32_t *>(transPtrs[animPartIndex] + 28));
-                *((_WORD *)randomDataShort + 1) = *(_WORD *)(*reinterpret_cast<uint32_t *>(transPtrs[animPartIndex] + 28) + 6 * v43 + 2);
-                *((_WORD *)randomDataShort + 2) = *(_WORD *)(*reinterpret_cast<uint32_t *>(transPtrs[animPartIndex] + 28)
-                    + 6 * v43++
-                    + 4);
+                *(_WORD *)randomDataShort = transPtrs[animPartIndex]->u.frames.frames._2[v43][0];
+                *((_WORD *)randomDataShort + 1) = transPtrs[animPartIndex]->u.frames.frames._2[v43][1];
+                *((_WORD *)randomDataShort + 2) = transPtrs[animPartIndex]->u.frames.frames._2[v43++][2];
                 randomDataShort += 6;
             }
             XAnimEmitFrameIndices(
