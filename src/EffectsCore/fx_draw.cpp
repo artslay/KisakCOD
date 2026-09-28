@@ -925,7 +925,11 @@ void __cdecl FX_DrawNonSpriteElems(FxSystem *system)
 
 void __cdecl FX_BeginIteratingOverEffects_Cooperative(FxSystem *system)
 {
+#ifdef __SWITCH__
+    long iteratorCount; // Switch long matches volatile long FxSystem::iteratorCount
+#else
     volatile int32_t iteratorCount; // [esp+0h] [ebp-Ch]
+#endif
 
     if (system->isArchiving)
         MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 479, 0, "%s", "!system->isArchiving");
