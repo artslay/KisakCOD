@@ -94,9 +94,6 @@ enum : uint32_t
     D3DPOOL_DEFAULT = 0,
     D3DZB_FALSE = 0,
     D3DZB_TRUE = 1,
-    D3DTEXF_NONE = 0,
-    D3DTEXF_POINT = 1,
-    D3DTEXF_LINEAR = 2,
 };
 
 #define KISAK_D3D_STATE(name) constexpr uint32_t name = __LINE__
