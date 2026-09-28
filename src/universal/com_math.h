@@ -458,6 +458,10 @@ void __cdecl ClosestApproachOfTwoLines(
     float* s,
     float* t);
 
+#ifndef __forceinline
+#define __forceinline inline __attribute__((always_inline))
+#endif
+
 // KISAK ADDITION: pray that the optimizer doesn't shit the bed
 __forceinline static float COERCE_FLOAT(unsigned val) {
     union {
