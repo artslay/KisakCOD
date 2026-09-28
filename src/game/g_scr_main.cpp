@@ -675,12 +675,17 @@ void __cdecl GScr_SetScriptsForPathNode(pathnode_t *loadNode, void *data)
             {
                 animscript = SL_ConvertToString(loadNode->constant.animscript);
                 iassert(animscript);
-                loadNode->constant.animscriptfunc = (int)Hunk_FindDataForFile(1, animscript);
+                loadNode->constant.animscriptfunc =
+                    static_cast<int>(reinterpret_cast<uintptr_t>(Hunk_FindDataForFile(1, animscript)));
                 if (!loadNode->constant.animscriptfunc)
                 {
                     Com_sprintf(filename, 64, "animscripts/traverse/%s", animscript);
-                    loadNode->constant.animscriptfunc = (int)GScr_SetScriptAndLabel(functions, filename, "main", 1);
-                    Hunk_SetDataForFile(1, animscript, (void*)loadNode->constant.animscriptfunc, GScr_AnimscriptAlloc);
+                    loadNode->constant.animscriptfunc = GScr_SetScriptAndLabel(functions, filename, "main", 1);
+                    Hunk_SetDataForFile(
+                        1,
+                        animscript,
+                        reinterpret_cast<void *>(static_cast<uintptr_t>(loadNode->constant.animscriptfunc)),
+                        GScr_AnimscriptAlloc);
                 }
                 if (!loadNode->constant.animscriptfunc)
                 {
@@ -4561,7 +4566,7 @@ void __cdecl GScr_SetCursorHint(scr_entref_t entref)
                 break;
             Com_Printf(CON_CHANNEL_PARSERSCRIPT, "%s\n", *v8++);
         //} while ((int)v8 < (int)&functions[9].actionFunc);
-        } while ((int)v8 < (uintptr_t)&hintStrings[4]);
+        } while (v8 < &hintStrings[4]);
         v9 = va("%s is not a valid hint type. See above for list of valid hint types\n", v4);
         Scr_Error(v9);
     }
@@ -10004,7 +10009,7 @@ void GScr_OpenFile()
     int Remote; // r3
     int v11; // r31
     unsigned char *v12; // r3
-    void *v13; // r5
+    int v13; // r5
     const char *v14; // r10
     const char *v15; // r11
     int v16; // r8
@@ -10014,7 +10019,7 @@ void GScr_OpenFile()
     const char *v20; // r11
     int v21; // r8
     const char *v22; // r3
-    void *v23[20]; // [sp+50h] [-50h] BYREF
+    int v23[20]; // [sp+50h] [-50h] BYREF
 
     if (Scr_GetNumParam() > 1)
     {
@@ -10026,7 +10031,8 @@ void GScr_OpenFile()
         {
             ++openScriptIOFileHandles;
             ++v2;
-            if ((int)openScriptIOFileHandles >= (int)level.openScriptIOFileBuffers)
+            if (v2 >= static_cast<int>(sizeof(level.openScriptIOFileHandles) /
+                                         sizeof(level.openScriptIOFileHandles[0])))
                 goto LABEL_7;
         }
         v4 = v2;
@@ -10058,8 +10064,8 @@ void GScr_OpenFile()
                 v12 = (unsigned char *)Z_VirtualAlloc(Remote + 1, "GScr_OpenFile", 10);
                 v13 = v23[0];
                 level.openScriptIOFileBuffers[v4] = v12;
-                FS_Read(v12, v11, (int)v13);
-                FS_FCloseFile((int)v23[0]);
+                FS_Read(v12, v11, v13);
+                FS_FCloseFile(v23[0]);
                 level.openScriptIOFileBuffers[v4][v11] = 0;
                 Com_BeginParseSession(String);
                 Com_SetCSV(1);
@@ -11170,7 +11176,11 @@ void __cdecl GScr_SetScriptsAndAnimsForEntities(ScriptFunctions *functions)
                                 Com_Error(ERR_DROP, "Could not find label '%s' in script '%s'", "main", filename);
                         }
 
-                        Hunk_SetDataForFile(1, animscript, (void*)func, GScr_AnimscriptAlloc);
+                        Hunk_SetDataForFile(
+                            1,
+                            animscript,
+                            reinterpret_cast<void *>(static_cast<uintptr_t>(func)),
+                            GScr_AnimscriptAlloc);
                     }
                 }
             }

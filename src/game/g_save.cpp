@@ -603,7 +603,8 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
     case SF_ENTITY:
         if (*(unsigned int *)v3)
         {
-            v4 = (*(unsigned int *)v3 - (int)g_entities) / 628 + 1;
+            v4 = static_cast<unsigned int>(
+                *reinterpret_cast<gentity_s **>(v3) - g_entities + 1);
             if (v4 > 0x880)
                 Com_Error(ERR_DROP, "WriteField1: entity out of range (%i)", v4);
 
@@ -633,7 +634,8 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
     case SF_CLIENT:
         if (*(unsigned int *)v3)
         {
-            v7 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.clients) / 46104 + 1;
+            v7 = static_cast<unsigned int>(
+                *reinterpret_cast<gclient_s **>(v3) - level.clients + 1);
             if (v7 >= 2)
                 Com_Error(ERR_DROP, "WriteField1: client out of range (%i)", v7);
             *(int *)v3 = v7;
@@ -646,7 +648,8 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
     case SF_ACTOR:
         if (*(unsigned int *)v3)
         {
-            v8 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.actors) / 7824 + 1;
+            v8 = static_cast<unsigned int>(
+                *reinterpret_cast<actor_s **>(v3) - level.actors + 1);
             if (v8 > 0x20)
                 Com_Error(ERR_DROP, "WriteField1: actor out of range (%i)", v8);
             *(int *)v3 = v8;
@@ -659,7 +662,8 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
     case SF_SENTIENT:
         if (*(unsigned int *)v3)
         {
-            v9 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.sentients) / 116 + 1;
+            v9 = static_cast<unsigned int>(
+                *reinterpret_cast<sentient_s **>(v3) - level.sentients + 1);
             if (v9 >= 0x22)
                 Com_Error(ERR_DROP, "WriteField1: sentient out of range (%i)", v9);
             *(int *)v3 = v9;
@@ -688,7 +692,8 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
     case SF_VEHICLE:
         if (*(unsigned int *)v3)
         {
-            v11 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.vehicles) / 824 + 1;
+            v11 = static_cast<unsigned int>(
+                *reinterpret_cast<scr_vehicle_s **>(v3) - level.vehicles + 1);
             if (v11 > 0x40)
                 Com_Error(ERR_DROP, "WriteField1: vehicle out of range (%i)", v11);
             *(int *)v3 = v11;
@@ -701,7 +706,8 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
     case SF_TURRETINFO:
         if (*(unsigned int *)v3)
         {
-            v12 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.turrets) / 188 + 1;
+            v12 = static_cast<unsigned int>(
+                *reinterpret_cast<TurretInfo **>(v3) - level.turrets + 1);
             if (v12 > 0x20)
                 Com_Error(ERR_DROP, "WriteField1: turret out of range (%i)", v12);
             *(int *)v3 = v12;
@@ -1612,7 +1618,7 @@ void __cdecl G_LoadModelPrecacheList(SaveGame *save)
         else
             v4 = 0;
         *modelMap++ = v4;
-    } while ((int)modelMap < (int)&level.priorityNodeBias);
+    } while (modelMap < &level.modelMap[512]);
 }
 
 void __cdecl G_ClearConfigstrings(int iFirst, int iCount)
@@ -1745,7 +1751,7 @@ void __cdecl G_SaveWeaponCue(SaveGame *save)
             v4 = 0;
         SaveMemory_SaveWrite(&v4, 4, save);
         ++droppedWeaponCue;
-    } while ((int)droppedWeaponCue < (int)&level.changelevel);
+    } while (droppedWeaponCue < &level.droppedWeaponCue[32]);
 }
 
 void __cdecl G_LoadWeaponCue(SaveGame *save)

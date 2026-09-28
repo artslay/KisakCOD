@@ -70,7 +70,9 @@ struct scrVarPub_t // sizeof=0x2007C
     int totalObjectRefCount;
     volatile uint32_t totalVectorRefCount;
 };
+#ifndef __SWITCH__
 static_assert(sizeof(scrVarPub_t) == 0x2007C);
+#endif
 
 struct PrecacheEntry // sizeof=0x8
 {                                       // ...

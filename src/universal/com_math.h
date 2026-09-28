@@ -12,7 +12,7 @@
 #define MAX_11BIT_FLT 0.99951172f // not a real name
 
 #define CLAMP(x, low, high) ((x) < (low) ? (low) : ((x) > (high) ? (high) : (x)))
-#define IS_NAN(x) _isnan(x)
+#define IS_NAN(x) std::isnan(x)
 
 static const float MPH_TO_INCHES_PER_SEC = 17.6f;
 

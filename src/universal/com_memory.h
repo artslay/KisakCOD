@@ -46,6 +46,10 @@ void Hunk_CheckTempMemoryHighClear();
 
 HunkUser* __cdecl Hunk_UserCreate(int32_t maxSize, const char* name, bool fixed, bool tempMem, int32_t type);
 void* __cdecl Hunk_UserAlloc(HunkUser* user, uint32_t size, int32_t alignment);
+int __cdecl Hunk_SetMarkLow();
+void __cdecl Hunk_ClearToMarkLow(int mark);
+void __cdecl Hunk_ResetDebugMem();
+char* __cdecl Hunk_SetDataForFile(int32_t type, const char* name, void* data, void* (__cdecl* alloc)(int));
 void* __cdecl Hunk_UserAllocAlignStrict(HunkUser* user, uint32_t size);
 void __cdecl Hunk_UserSetPos(HunkUser* user, uint8_t* pos);
 void __cdecl Hunk_UserReset(HunkUser* user);
