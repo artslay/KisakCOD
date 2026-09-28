@@ -54,6 +54,7 @@ void __cdecl Hunk_FreeDebugMem(void* ptr);
 void __cdecl Hunk_InitDebugMemory();
 void __cdecl Hunk_ShutdownDebugMemory();
 void Hunk_Clear();
+int32_t __cdecl Hunk_Used();
 char* __cdecl Hunk_SetDataForFile(int32_t type, const char* name, void* data, void* (__cdecl* alloc)(int));
 void* __cdecl Hunk_UserAllocAlignStrict(HunkUser* user, uint32_t size);
 void __cdecl Hunk_UserSetPos(HunkUser* user, uint8_t* pos);
