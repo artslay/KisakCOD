@@ -448,7 +448,7 @@ void __cdecl SaveMemory_CreateHeader(
     save->header.health = v43;
     save->header.skill = sv_gameskill->current.integer;
     Com_RealTime(&save->header.time);
-    save->header.bodySize = (int32_t)MemFile_CopySegments(&save->memFile, 0, 0);
+    save->header.bodySize = save->memFile.bufferSize;
     save->isWrittenToDevice = 0;
 }
 
