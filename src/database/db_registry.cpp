@@ -14,7 +14,7 @@ extern FILE *FS_SwitchOpenRootFile(const char *path);
 #include <win32/win_net.h>
 #endif
 #include <qcommon/threads.h>
-#include <win32/win_local.h>
+#include <win32/win_local.h>\n#ifdef __SWITCH__\nextern void __cdecl NET_Sleep(int msec);\n#endif
 #include <qcommon/com_bsp.h>
 #include <gfx_d3d/r_init.h>
 #ifndef __SWITCH__
@@ -136,6 +136,125 @@ struct XZoneInfoInternal
     int32_t flags;
 };
 
+char g_zoneNameList[2080];
+XAssetPool<XModelPieces, POOLSIZE_XMODELPIECES> g_XModelPiecesPool;
+XAssetPool<PhysPreset, POOLSIZE_PHYSPRESET> g_PhysPresetPool;
+XAssetPool<XAnimParts, POOLSIZE_XANIMPARTS> g_XAnimPartsPool;
+XAssetPool<XModel, POOLSIZE_XMODEL> g_XModelPool;
+XAssetPool<Material, POOLSIZE_MATERIAL> g_MaterialPool;
+XAssetPool<MaterialTechniqueSet, POOLSIZE_TECHNIQUE_SET> g_MaterialTechniqueSetPool;
+XAssetPool<GfxImage, POOLSIZE_IMAGE> g_GfxImagePool;
+XAssetPool<snd_alias_list_t, POOLSIZE_SOUND> g_SoundPool;
+XAssetPool<SndCurve, POOLSIZE_SOUND_CURVE> g_SndCurvePool;
+XAssetPool<LoadedSound, POOLSIZE_LOADED_SOUND> g_LoadedSoundPool;
+XAssetPool<MapEnts, POOLSIZE_MAP_ENTS> g_MapEntsPool;
+XAssetPool<GfxLightDef, POOLSIZE_LIGHT_DEF> g_GfxLightDefPool;
+XAssetPool<Font_s, POOLSIZE_FONT> g_FontPool;
+XAssetPool<MenuList, POOLSIZE_MENULIST> g_MenuListPool;
+XAssetPool<menuDef_t, POOLSIZE_MENU> g_MenuPool;
+XAssetPool<LocalizeEntry, POOLSIZE_LOCALIZE_ENTRY> g_LocalizeEntryPool;
+XAssetPool<WeaponDef, POOLSIZE_WEAPON> g_WeaponDefPool;
+XAssetPool<FxEffectDef, POOLSIZE_FX> g_FxEffectDefPool;
+XAssetPool<FxImpactTable, POOLSIZE_IMPACT_FX> g_FxImpactTablePool;
+XAssetPool<RawFile, POOLSIZE_RAWFILE> g_RawFilePool;
+XAssetPool<StringTable, POOLSIZE_STRINGTABLE> g_StringTablePool;
+
+fileData_s *com_fileDataHashTable[1024];
+
+template <typename T>
+static void __cdecl DB_InitPool(void *arg, int32_t size)
+{
+    T *pool = static_cast<T *>(arg);
+    if (size <= 0)
+        return;
+    pool->freeHead = &pool->entries[0];
+    for (int32_t i = 0; i < size - 1; ++i)
+        pool->entries[i].next = &pool->entries[i + 1];
+    pool->entries[size - 1].next = NULL;
+}
+
+void(__cdecl *DB_InitPoolHeaderHandler[ASSET_TYPE_COUNT])(void *, int) =
+{
+  DB_InitPool<XAssetPool<XModelPieces, POOLSIZE_XMODELPIECES>>,
+  DB_InitPool<XAssetPool<PhysPreset, POOLSIZE_PHYSPRESET>>,
+  DB_InitPool<XAssetPool<XAnimParts, POOLSIZE_XANIMPARTS>>,
+  DB_InitPool<XAssetPool<XModel, POOLSIZE_XMODEL>>,
+  DB_InitPool<XAssetPool<Material, POOLSIZE_MATERIAL>>,
+  DB_InitPool<XAssetPool<MaterialTechniqueSet, POOLSIZE_TECHNIQUE_SET>>,
+  DB_InitPool<XAssetPool<GfxImage, POOLSIZE_IMAGE>>,
+  DB_InitPool<XAssetPool<snd_alias_list_t, POOLSIZE_SOUND>>,
+  DB_InitPool<XAssetPool<SndCurve, POOLSIZE_SOUND_CURVE>>,
+  DB_InitPool<XAssetPool<LoadedSound, POOLSIZE_LOADED_SOUND>>,
+  &DB_InitSingleton,
+  &DB_InitSingleton,
+  &DB_InitSingleton,
+  &DB_InitSingleton,
+  &DB_InitSingleton,
+  DB_InitPool<XAssetPool<MapEnts, POOLSIZE_MAP_ENTS>>,
+  &DB_InitSingleton,
+  DB_InitPool<XAssetPool<GfxLightDef, POOLSIZE_LIGHT_DEF>>,
+  NULL,
+  DB_InitPool<XAssetPool<Font_s, POOLSIZE_FONT>>,
+  DB_InitPool<XAssetPool<MenuList, POOLSIZE_MENULIST>>,
+  DB_InitPool<XAssetPool<menuDef_t, POOLSIZE_MENU>>,
+  DB_InitPool<XAssetPool<LocalizeEntry, POOLSIZE_LOCALIZE_ENTRY>>,
+  DB_InitPool<XAssetPool<WeaponDef, POOLSIZE_WEAPON>>,
+  NULL,
+  DB_InitPool<XAssetPool<FxEffectDef, POOLSIZE_FX>>,
+  DB_InitPool<XAssetPool<FxImpactTable, POOLSIZE_IMPACT_FX>>,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  DB_InitPool<XAssetPool<RawFile, POOLSIZE_RAWFILE>>,
+  DB_InitPool<XAssetPool<StringTable, POOLSIZE_STRINGTABLE>>,
+};
+
+void *DB_XAssetPool[ASSET_TYPE_COUNT] =
+{
+  &g_XModelPiecesPool,
+  &g_PhysPresetPool,
+  &g_XAnimPartsPool,
+  &g_XModelPool,
+  &g_MaterialPool,
+  &g_MaterialTechniqueSetPool,
+  &g_GfxImagePool,
+  &g_SoundPool,
+  &g_SndCurvePool,
+  &g_LoadedSoundPool,
+  &cm,
+  &cm,
+  &comWorld,
+#ifdef KISAK_MP
+  NULL,
+  &gameWorldMp,
+#elif KISAK_SP
+  &gameWorldSp,
+  NULL,
+#else
+  NULL,
+  NULL,
+#endif
+  &g_MapEntsPool,
+  &s_world,
+  &g_GfxLightDefPool,
+  NULL,
+  &g_FontPool,
+  &g_MenuListPool,
+  &g_MenuPool,
+  &g_LocalizeEntryPool,
+  &g_WeaponDefPool,
+  NULL,
+  &g_FxEffectDefPool,
+  &g_FxImpactTablePool,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  &g_RawFilePool,
+  &g_StringTablePool
+};
+
 uint32_t volatile g_mainThreadBlocked;
 XAssetEntryPoolEntry *g_freeAssetEntryHead;
 uint16_t db_hashTable[32768];
@@ -235,7 +354,44 @@ static XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *ne
 static void __cdecl DB_FreeXAssetEntry(XAssetEntryPoolEntry *assetEntry);
 static void __cdecl DB_FreeXAssetHeader(XAssetType type, XAssetHeader header);
 static void __cdecl DB_CloneXAssetEntry(const XAssetEntry *from, XAssetEntry *to);
-static void __cdecl DB_DynamicCloneXAsset(XAssetHeader from, XAssetHeader to, XAssetType type, int32_t fromDefault);
+static void(__cdecl *DB_DynamicCloneXAssetHandler[ASSET_TYPE_COUNT])(XAssetHeader, XAssetHeader, int) =
+{
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    DB_DynamicCloneMenu,
+    NULL,
+    (void(*)(XAssetHeader, XAssetHeader, int))KISAK_NULLSUB,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+};
+
+void __cdecl DB_DynamicCloneXAsset(XAssetHeader from, XAssetHeader to, XAssetType type, int32_t fromDefault);
 static void __cdecl DB_DelayedCloneXAsset(XAssetEntry *newEntry);
 static bool __cdecl DB_OverrideAsset(uint32_t newZoneIndex, uint32_t existingZoneIndex);
 static void __cdecl DB_GetXAsset(XAssetType type, XAssetHeader header);
@@ -247,6 +403,8 @@ static void __cdecl DB_LoadZone_f();
 static void __cdecl  DB_Thread(uint32_t threadContext);
 static void DB_TryLoadXFile();
 static int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags);
+static int32_t __cdecl DB_GetAllXAssetOfType_LoadObj(XAssetType type, XAssetHeader *assets, int32_t maxCount);
+static void __cdecl DB_EnumXAssets_LoadObj(XAssetType type, void(*func)(void*, void*), void *inData);
 static void __cdecl DB_RemoveLoadedSound(XAssetHeader header);
 void __cdecl DB_RemoveXAsset(XAsset *asset);
 void __cdecl DB_SyncExternalAssets();
