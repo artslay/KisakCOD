@@ -41,7 +41,8 @@ CPP_SOURCES := $(shell find src -type f -name '*.cpp' \
     ! -path 'src/physics/ode/collision_trimesh*.cpp' \
     ! -name 'stack.cpp' \
     ! -name 'obstack.cpp' \
-    ! -name 'testing.cpp' )
+    ! -name 'testing.cpp' \
+    ! -name 'scr_yacc.cpp' )
 
 C_SOURCES := $(shell find src -type f -name '*.c' \
     ! -path 'src/gfx_d3d/*' \
