@@ -133,7 +133,7 @@ bool __cdecl DynEntPieces_SpawnPhysicsModel(
         angularVelocity[2] = dynEntPieces_angularVelocity->current.vector[2];
         velocity[2] = velocity[2] + model->physPreset->piecesUpwardVelocity;
         Sys_EnterCriticalSection(CRITSECT_PHYSICS);
-        physObjId = (int)DynEntPieces_SpawnPhysObj(
+        physObjId = static_cast<int32_t>(reinterpret_cast<uintptr_t>(DynEntPieces_SpawnPhysObj(
             model->name,
             mins,
             maxs,
@@ -141,7 +141,7 @@ bool __cdecl DynEntPieces_SpawnPhysicsModel(
             quat,
             velocity,
             angularVelocity,
-            model->physPreset);
+            model->physPreset)));
         Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
         if (physObjId)
         {
