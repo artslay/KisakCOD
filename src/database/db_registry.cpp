@@ -32,6 +32,7 @@ extern void __cdecl NET_Sleep(int msec);
 #include <qcommon/cmd.h>
 #include <universal/physicalmemory.h>
 #include <gfx_d3d/rb_shade.h>
+#include <gfx_d3d/r_dvars.h>
 #include <gfx_d3d/r_staticmodelcache.h>
 #ifndef __SWITCH__
 #include <win32/win_localize.h>
@@ -2480,4 +2481,49 @@ void __cdecl Load_StringTableAsset(XAssetHeader *stringTable)
 void __cdecl Mark_StringTableAsset(StringTable *stringTable)
 {
     DB_GetXAsset(ASSET_TYPE_STRINGTABLE, (XAssetHeader)stringTable);
+}
+
+
+/* Water asset picmip path restored from upstream r_water.cpp. */
+void __cdecl Load_PicmipWater(water_t **waterRef)
+{
+    int v5;
+    int v6;
+    int m;
+    int srcIndex;
+    int downsample;
+    int n;
+    int dstIndex;
+
+    if ((*waterRef)->M >> r_picmip_water->current.integer < 4)
+        v6 = 4;
+    else
+        v6 = (*waterRef)->M >> r_picmip_water->current.integer;
+
+    if ((*waterRef)->N >> r_picmip_water->current.integer < 4)
+        v5 = 4;
+    else
+        v5 = (*waterRef)->N >> r_picmip_water->current.integer;
+
+    if (v6 != (*waterRef)->M || v5 != (*waterRef)->N)
+    {
+        iassert((*waterRef)->M == (*waterRef)->N);
+        downsample = (*waterRef)->M / v6;
+        (*waterRef)->M = v6;
+        (*waterRef)->N = v5;
+        srcIndex = 0;
+        dstIndex = 0;
+
+        for (m = 0; m < v6; ++m)
+        {
+            for (n = 0; n < v5; ++n)
+            {
+                const complex_s *src = (*waterRef)->H0;
+                (*waterRef)->H0[dstIndex].real = src[srcIndex].real;
+                (*waterRef)->H0[dstIndex++].imag = src[srcIndex].imag;
+                srcIndex += downsample;
+            }
+            srcIndex += v6 * downsample * (downsample - 1);
+        }
+    }
 }
