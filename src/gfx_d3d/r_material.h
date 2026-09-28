@@ -960,6 +960,8 @@ void __cdecl R_MaterialList_f();
 int __cdecl R_GetMaterialMemory(Material *material);
 
 void __cdecl Material_PreventOverrideTechniqueGeneration();
+void __cdecl Material_OriginalRemapTechniqueSet(MaterialTechniqueSet *techSet);
+
 
 void __cdecl Material_UpdatePicmipAll();
 void __cdecl R_Cmd_ReloadMaterialTextures();
