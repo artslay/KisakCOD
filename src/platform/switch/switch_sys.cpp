@@ -154,18 +154,18 @@ char *__cdecl Sys_DefaultInstallPath()
 BOOL __cdecl Sys_RemoveDirTree(const char *path)
 {
     if (!path || !*path)
-        return FALSE;
+        return 0;
 
     struct stat st {};
     if (stat(path, &st) != 0)
-        return FALSE;
+        return 0;
 
     if (!S_ISDIR(st.st_mode))
-        return std::remove(path) == 0 ? TRUE : FALSE;
+        return std::remove(path) == 0 ? 1 : 0;
 
     DIR *dir = opendir(path);
     if (!dir)
-        return FALSE;
+        return 0;
 
     bool ok = true;
     while (dirent *entry = readdir(dir))
@@ -207,9 +207,9 @@ BOOL __cdecl Sys_RemoveDirTree(const char *path)
     closedir(dir);
 
     if (!ok)
-        return FALSE;
+        return 0;
 
-    return rmdir(path) == 0 ? TRUE : FALSE;
+    return rmdir(path) == 0 ? 1 : 0;
 }
 
 bool __cdecl IN_IsForegroundWindow()
