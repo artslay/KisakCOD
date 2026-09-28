@@ -1209,7 +1209,7 @@ void  Scr_DumpScriptVariables(bool spreadsheet,
 	if (scrVarDebugPub
 		&& (scrVarPub.developer || !spreadsheet && !fileName && !functionName && !lineSort && !functionSummary && !minCount))
 	{
-		infoArray = (VariableDebugInfo*)Z_TryVirtualAlloc(1572864, "Scr_DumpScriptVariables", 0);
+		infoArray = (VariableDebugInfo*)Z_TryVirtualAllocInternal(1572864);
 		if (infoArray)
 		{
 			num = 0;
@@ -2064,12 +2064,12 @@ void  Scr_EvalPlus(VariableValue* value1, VariableValue* value2)
 		break;
 	case VAR_VECTOR:
 		v11 = Scr_AllocVector();
-		*v11 = *(float*)value1->u.intValue + *(float*)value2->u.intValue;
-		v11[1] = *(float*)(value1->u.intValue + 4) + *(float*)(value2->u.intValue + 4);
-		v11[2] = *(float*)(value1->u.intValue + 8) + *(float*)(value2->u.intValue + 8);
+		*v11 = value1->u.vectorValue[0] + value2->u.vectorValue[0];
+		v11[1] = value1->u.vectorValue[1] + value2->u.vectorValue[1];
+		v11[2] = value1->u.vectorValue[2] + value2->u.vectorValue[2];
 		RemoveRefToVector(value1->u.vectorValue);
 		RemoveRefToVector(value2->u.vectorValue);
-		value1->u.intValue = (int)v11;
+		value1->u.vectorValue = v11;
 		break;
 	case VAR_FLOAT:
 		value1->u.floatValue = value1->u.floatValue + value2->u.floatValue;
@@ -2096,12 +2096,12 @@ void  Scr_EvalMinus(VariableValue* value1, VariableValue* value2)
 	{
 	case VAR_VECTOR:
 		tempVector = Scr_AllocVector();
-		*tempVector = *(float*)value1->u.intValue - *(float*)value2->u.intValue;
-		tempVector[1] = *(float*)(value1->u.intValue + 4) - *(float*)(value2->u.intValue + 4);
-		tempVector[2] = *(float*)(value1->u.intValue + 8) - *(float*)(value2->u.intValue + 8);
+		*tempVector = value1->u.vectorValue[0] - value2->u.vectorValue[0];
+		tempVector[1] = value1->u.vectorValue[1] - value2->u.vectorValue[1];
+		tempVector[2] = value1->u.vectorValue[2] - value2->u.vectorValue[2];
 		RemoveRefToVector(value1->u.vectorValue);
 		RemoveRefToVector(value2->u.vectorValue);
-		value1->u.intValue = (int)tempVector;
+		value1->u.vectorValue = tempVector;
 		break;
 	case VAR_FLOAT:
 		value1->u.floatValue = value1->u.floatValue - value2->u.floatValue;
@@ -2126,12 +2126,12 @@ void  Scr_EvalMultiply(VariableValue* value1, VariableValue* value2)
 	{
 	case VAR_VECTOR:
 		tempVector = Scr_AllocVector();
-		*tempVector = *(float*)value1->u.intValue * *(float*)value2->u.intValue;
-		tempVector[1] = *(float*)(value1->u.intValue + 4) * *(float*)(value2->u.intValue + 4);
-		tempVector[2] = *(float*)(value1->u.intValue + 8) * *(float*)(value2->u.intValue + 8);
+		*tempVector = value1->u.vectorValue[0] * value2->u.vectorValue[0];
+		tempVector[1] = value1->u.vectorValue[1] * value2->u.vectorValue[1];
+		tempVector[2] = value1->u.vectorValue[2] * value2->u.vectorValue[2];
 		RemoveRefToVector(value1->u.vectorValue);
 		RemoveRefToVector(value2->u.vectorValue);
-		value1->u.intValue = (int)tempVector;
+		value1->u.vectorValue = tempVector;
 		break;
 	case VAR_FLOAT:
 		value1->u.floatValue = value1->u.floatValue * value2->u.floatValue;
@@ -2158,26 +2158,26 @@ void  Scr_EvalDivide(VariableValue* value1, VariableValue* value2)
 	{
 	case VAR_VECTOR:
 		tempVector = Scr_AllocVector();
-		if (*(float*)value2->u.intValue == 0.0
-			|| *(float*)(value2->u.intValue + 4) == 0.0
-			|| *(float*)(value2->u.intValue + 8) == 0.0)
+		if (value2->u.vectorValue[0] == 0.0f
+			|| value2->u.vectorValue[1] == 0.0f
+			|| value2->u.vectorValue[2] == 0.0f)
 		{
 			*tempVector = 0.0;
 			tempVector[1] = 0.0;
 			tempVector[2] = 0.0;
 			RemoveRefToVector(value1->u.vectorValue);
 			RemoveRefToVector(value2->u.vectorValue);
-			value1->u.intValue = (int)tempVector;
+			value1->u.vectorValue = tempVector;
 			Scr_Error("divide by 0");
 		}
 		else
 		{
-			*tempVector = *(float*)value1->u.intValue / *(float*)value2->u.intValue;
-			tempVector[1] = *(float*)(value1->u.intValue + 4) / *(float*)(value2->u.intValue + 4);
-			tempVector[2] = *(float*)(value1->u.intValue + 8) / *(float*)(value2->u.intValue + 8);
+			*tempVector = value1->u.vectorValue[0] / value2->u.vectorValue[0];
+			tempVector[1] = value1->u.vectorValue[1] / value2->u.vectorValue[1];
+			tempVector[2] = value1->u.vectorValue[2] / value2->u.vectorValue[2];
 			RemoveRefToVector(value1->u.vectorValue);
 			RemoveRefToVector(value2->u.vectorValue);
-			value1->u.intValue = (int)tempVector;
+			value1->u.vectorValue = tempVector;
 		}
 		break;
 	case VAR_FLOAT:
@@ -2392,7 +2392,7 @@ void Scr_DumpScriptThreads(void)
 	}
 	if (num)
 	{
-		infoArray = (ThreadDebugInfo*)Z_TryVirtualAlloc(140 * num, "Scr_DumpScriptThreads", 0);
+		infoArray = (ThreadDebugInfo*)Z_TryVirtualAllocInternal(140 * num);
 		if (infoArray)
 		{
 			num = 0;
