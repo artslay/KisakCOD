@@ -46,9 +46,10 @@ char *__cdecl Sys_GetClipboardData()
     return nullptr;
 }
 
-void __cdecl Sys_SetClipboardData(const char *text)
+int __cdecl Sys_SetClipboardData(const char *text)
 {
     (void)text;
+    return 0;
 }
 
 void __cdecl Sys_Print(const char *msg)

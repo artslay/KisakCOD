@@ -66,7 +66,7 @@
 
 #ifdef __SWITCH__
 char *Sys_GetClipboardData();
-void Sys_SetClipboardData(const char *text);
+int Sys_SetClipboardData(const char *text);
 #endif
 #ifndef __declspec
 #define __declspec(x)
