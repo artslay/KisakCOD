@@ -1618,7 +1618,11 @@ const FxEffectDef *__cdecl FX_Convert(const FxEditorEffectDef *editorEffect, voi
                     if (!*((_DWORD *)elemVisual->anonymous + 53))
                     {
                         v2 = FX_RegisterPhysPreset("default");
+#ifdef __SWITCH__
+                        reinterpret_cast<PhysPreset **>(elemVisual->anonymous)[53] = v2;
+#else
                         *((_DWORD *)elemVisual->anonymous + 53) = (_DWORD)v2;
+#endif
                         Com_PrintError(
                             CON_CHANNEL_PHYS,
                             "ERROR: no physics preset specified for the FX model [%s]\n",
