@@ -37,7 +37,8 @@ CPP_SOURCES := $(shell find src -type f -name '*.cpp' \
     ! -name 'threads.cpp' \
     ! -name 'timing.cpp' \
     ! -name 'profile.cpp' \
-    ! -path 'src/physics/ode/array.cpp' )
+    ! -path 'src/physics/ode/array.cpp' \
+    ! -path 'src/physics/ode/collision_trimesh*.cpp' )
 
 C_SOURCES := $(shell find src -type f -name '*.c' \
     ! -path 'src/gfx_d3d/*' \
