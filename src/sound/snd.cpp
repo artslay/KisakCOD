@@ -9,6 +9,7 @@
 #include <universal/q_parse.h>
 #include <client/client.h>
 #include <universal/profile.h>
+#include <win32/win_local.h>
 
 #ifdef KISAK_MP
 #include <cgame_mp/cg_local_mp.h>
@@ -4543,7 +4544,7 @@ int SND_FindPlaybackId(const snd_alias_t *sndEnt, const char *aliasName)
     LABEL_18:
         p_alias0 += 35;
         ++v4;
-        if ((int)p_alias0 >= (int)&g_sndPhysics.info[4].org[2])
+        if (reinterpret_cast<uintptr_t>(p_alias0) >= reinterpret_cast<uintptr_t>(&g_sndPhysics.info[4].org[2]))
             return SND_PLAYBACKID_NOTPLAYED;
     }
     if (!*p_alias0 || I_stricmp((*p_alias0)->aliasName, aliasName))
