@@ -1122,9 +1122,15 @@ const FxEffectDef *__cdecl FX_LoadFailed(const char *name)
     baseBytesNeeded = fx_load.defaultEffect->totalSize - (v5 - fx_load.defaultEffect->name);
     effectDef = (byte *)FX_AllocMem(fx_load.defaultEffect->totalSize - (v5 - (fx_load.defaultEffect->name + 1)) + strlen(name));
     memcpy(effectDef, (uint8_t *)fx_load.defaultEffect, baseBytesNeeded);
+#ifdef __SWITCH__
+    FxEffectDef *switchEffectDef = reinterpret_cast<FxEffectDef *>(effectDef);
+    switchEffectDef->name = reinterpret_cast<const char *>(&effectDef[baseBytesNeeded]);
+    v3 = reinterpret_cast<_BYTE *>(const_cast<char *>(switchEffectDef->name));
+#else
     *(_DWORD *)effectDef = (_DWORD)&effectDef[baseBytesNeeded];
-    v4 = name;
     v3 = *(_BYTE **)effectDef;
+#endif
+    v4 = name;
     do
     {
         v2 = *v4;
@@ -1147,7 +1153,7 @@ const FxEffectDef *__cdecl FX_Load(const char *name)
     const FxEffectDef *v5; // [esp+10h] [ebp-10B54h]
     FxEditorEffectDef edEffectDef; // [esp+14h] [ebp-10B50h] BYREF
 
-    strcpy_s(edEffectDef.name, name);
+    Com_sprintf(edEffectDef.name, sizeof(edEffectDef.name), "%s", name);
     if (FX_LoadEditorEffect(name, &edEffectDef)
         && (v5 = FX_Convert(&edEffectDef, &FX_AllocMem)) != 0)
     {
