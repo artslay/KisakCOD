@@ -4,7 +4,6 @@
 #include <universal/assertive.h>
 #include <qcommon/qcommon.h>
 
-#include <Windows.h>
 #include "threads.h"
 #include <xanim/xanim.h>
 #include <mutex>
