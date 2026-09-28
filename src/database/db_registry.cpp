@@ -2055,9 +2055,9 @@ XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
 
 XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry, int32_t allowOverride)
 {
-    int32_t firstChar;
+    int32_t v2;
     const char *XAssetName;
-    XAssetEntryPoolEntry *existingEntry = NULL;
+    XAssetEntryPoolEntry *existingEntry;
     uint32_t hash;
     uint32_t existingEntryIndex;
     XAssetEntryPoolEntry *overrideAssetEntry;
@@ -2070,13 +2070,14 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     XAssetSize assetSize;
 
     name = DB_GetXAssetName(&newEntry->entry.asset);
-    firstChar = *name;
-    isStubAsset = firstChar == ',';
-    if (firstChar == ',')
+    v2 = *name;
+    isStubAsset = v2 == ',';
+    if (v2 == ',')
         ++name;
-
     type = newEntry->entry.asset.type;
     hash = DB_HashForName(name, type);
+    existingEntry = NULL;
+
     for (existingEntryIndex = db_hashTable[hash]; existingEntryIndex; existingEntryIndex = existingEntry->entry.nextHash)
     {
         existingEntry = &g_assetEntryPool[existingEntryIndex];
@@ -2119,6 +2120,7 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     if (existingEntry->entry.zoneIndex)
     {
         iassert(existingEntry->entry.zoneIndex != newEntry->entry.zoneIndex);
+
         if (!*g_defaultAssetName[type] && type != ASSET_TYPE_RAWFILE && type != ASSET_TYPE_MAP_ENTS)
         {
             Sys_UnlockWrite(&db_hashCritSect);
@@ -2140,10 +2142,13 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
                 if (DB_OverrideAsset(newEntry->entry.zoneIndex, overrideAssetEntry->entry.zoneIndex))
                     break;
             }
+
             newEntry->entry.nextOverride = *pOverrideAssetEntryIndex;
             *pOverrideAssetEntryIndex = static_cast<uint16_t>(newEntry - g_assetEntryPool);
             return existingEntry;
         }
+
+        goto LABEL_46;
     }
 
     iassert(g_defaultAssetName[type][0]);
@@ -2152,12 +2157,43 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
 
     if (!allowOverride)
     {
-        DB_DelayedCloneXAsset(&newEntry->entry);
+    LABEL_46:
+        if (allowOverride)
+        {
+            if (!existingEntry->entry.zoneIndex)
+                MyAssertHandler(
+                    ".\\database\\db_registry.cpp",
+                    3096,
+                    0,
+                    "%s",
+                    "existingEntry->zoneIndex");
+
+            if (existingEntry->entry.inuse)
+            {
+                varXAsset = &existingEntry->entry.asset;
+                Mark_XAsset();
+            }
+
+            newEntry->entry.nextOverride = existingEntry->entry.nextOverride;
+            existingEntry->entry.nextOverride = static_cast<uint16_t>(newEntry - g_assetEntryPool);
+            asset.header.xmodelPieces = reinterpret_cast<XModelPieces *>(&assetSize);
+            asset.type = type;
+            DB_CloneXAssetInternal(&existingEntry->entry.asset, &asset);
+
+            zoneIndex = existingEntry->entry.zoneIndex;
+            DB_CloneXAssetEntry(&newEntry->entry, &existingEntry->entry);
+            DB_CloneXAssetInternal(&asset, &newEntry->entry.asset);
+            newEntry->entry.zoneIndex = zoneIndex;
+        }
+        else
+        {
+            DB_DelayedCloneXAsset(&newEntry->entry);
+        }
+
         return existingEntry;
     }
 
-    if (!existingEntry->entry.zoneIndex)
-        MyAssertHandler(".\\database\\db_registry.cpp", 3096, 0, "%s", "existingEntry->zoneIndex");
+    --g_defaultAssetCount;
 
     if (existingEntry->entry.inuse)
     {
@@ -2165,16 +2201,7 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         Mark_XAsset();
     }
 
-    newEntry->entry.nextOverride = existingEntry->entry.nextOverride;
-    existingEntry->entry.nextOverride = static_cast<uint16_t>(newEntry - g_assetEntryPool);
-
-    asset.header.xmodelPieces = reinterpret_cast<XModelPieces *>(&assetSize);
-    asset.type = type;
-    DB_CloneXAssetInternal(&existingEntry->entry.asset, &asset);
-
-    zoneIndex = existingEntry->entry.zoneIndex;
     DB_CloneXAssetEntry(&newEntry->entry, &existingEntry->entry);
-    DB_CloneXAssetInternal(&asset, &newEntry->entry.asset);
-    newEntry->entry.zoneIndex = zoneIndex;
+    DB_FreeXAssetEntry(newEntry);
     return existingEntry;
 }
