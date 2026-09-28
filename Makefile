@@ -14,7 +14,7 @@ CPPFLAGS    := -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BL
                -I$(DEVKITPRO)/libnx/include -I$(MESA_SDK)/include
 CXXFLAGS    := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP
 CFLAGS      := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -MMD -MP
-LDFLAGS     := $(ARCH) -L$(MESA_SDK)/lib -specs=$(DEVKITPRO)/libnx/switch.specs -Wl,--gc-sections
+LDFLAGS     := $(ARCH) -L$(MESA_SDK)/lib -L$(DEVKITPRO)/libnx/lib -specs=$(DEVKITPRO)/libnx/switch.specs -Wl,--gc-sections
 LIBS        := -lGL -lEGL -lglapi -lnx -lm
 
 include $(DEVKITPRO)/libnx/switch_rules
