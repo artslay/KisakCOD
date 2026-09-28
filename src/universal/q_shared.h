@@ -54,11 +54,6 @@
 #endif
 
 #ifdef __SWITCH__
-char *__cdecl Sys_GetClipboardData();
-void __cdecl Sys_SetClipboardData(const char *text);
-#endif
-
-#ifdef __SWITCH__
 #ifndef __cdecl
 #define __cdecl
 #ifndef __thiscall
@@ -67,6 +62,11 @@ void __cdecl Sys_SetClipboardData(const char *text);
 #endif
 #ifndef __stdcall
 #define __stdcall
+#endif
+
+#ifdef __SWITCH__
+char *Sys_GetClipboardData();
+void Sys_SetClipboardData(const char *text);
 #endif
 #ifndef __declspec
 #define __declspec(x)
