@@ -41,6 +41,16 @@ void __cdecl Sys_LeaveCriticalSection(int section)
 
 bool __cdecl Sys_IsRemoteDebugClient() { return false; }
 
+char *__cdecl Sys_GetClipboardData()
+{
+    return nullptr;
+}
+
+void __cdecl Sys_SetClipboardData(const char *text)
+{
+    (void)text;
+}
+
 void __cdecl Sys_Print(const char *msg)
 {
     if (msg) std::fputs(msg, stdout);
