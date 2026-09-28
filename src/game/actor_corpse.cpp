@@ -3,6 +3,7 @@
 #endif
 
 #include <universal/q_shared.h>
+#include <cstdint>
 #include "actor_corpse.h"
 
 #include <xanim/xanim.h>
@@ -43,7 +44,8 @@ int __cdecl G_GetActorCorpseIndex(gentity_s *ent)
     {
         p_entnum += 8;
         ++result;
-        if ((int)p_entnum >= (int)&g_scr_data.actorBackup)
+        if (reinterpret_cast<std::uintptr_t>(p_entnum) >=
+            reinterpret_cast<std::uintptr_t>(&g_scr_data.actorBackup))
         {
             if (!alwaysfails)
                 MyAssertHandler(
@@ -336,7 +338,8 @@ void __cdecl G_PruneLoadedCorpses()
         }
         p_entnum += 8;
         ++v3;
-    } while ((int)p_entnum < (int)&g_scr_data.actorBackup);
+    } while (reinterpret_cast<std::uintptr_t>(p_entnum) <
+             reinterpret_cast<std::uintptr_t>(&g_scr_data.actorBackup));
     if (v2 > 6)
     {
         ent = G_Find(0, offsetof(gentity_s, classname), scr_const.player);
