@@ -526,8 +526,20 @@ void __cdecl DObjArchive(DObj_s *obj)
     obj->models = NULL;
     DObjFree(obj);
 
+#ifdef __SWITCH__
+    obj->tree = savedObj.tree;
+    obj->numModels = savedObj.numModels;
+    obj->entnum = savedObj.entnum;
+    obj->ignoreCollision = savedObj.ignoreCollision;
+    obj->hidePartBits[0] = savedObj.hidePartBits[0];
+    obj->hidePartBits[1] = savedObj.hidePartBits[1];
+    obj->hidePartBits[2] = savedObj.hidePartBits[2];
+    obj->hidePartBits[3] = savedObj.hidePartBits[3];
+    obj->models = savedObj.models;
+#else
     static_assert((sizeof(DObj_s) - sizeof(obj->models)) == 96);
     memcpy(obj, &savedObj, sizeof(DObj_s) - sizeof(obj->models));
+#endif
 }
 
 void __cdecl DObjUnarchive(DObj_s *obj)
@@ -537,7 +549,19 @@ void __cdecl DObjUnarchive(DObj_s *obj)
     uint32_t modelIndex; // [esp+74h] [ebp-104h]
     DObjModel_s dobjModels[32]; // [esp+78h] [ebp-100h] BYREF
 
+#ifdef __SWITCH__
+    savedObj.models = obj->models;
+    savedObj.ignoreCollision = obj->ignoreCollision;
+    savedObj.numModels = obj->numModels;
+    savedObj.entnum = obj->entnum;
+    savedObj.tree = obj->tree;
+    savedObj.hidePartBits[0] = obj->hidePartBits[0];
+    savedObj.hidePartBits[1] = obj->hidePartBits[1];
+    savedObj.hidePartBits[2] = obj->hidePartBits[2];
+    savedObj.hidePartBits[3] = obj->hidePartBits[3];
+#else
     memcpy(&savedObj, obj, sizeof(savedObj));
+#endif
     for (modelIndex = 0; modelIndex < savedObj.numModels; ++modelIndex)
     {
         model = &dobjModels[modelIndex];
