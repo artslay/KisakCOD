@@ -1,12 +1,12 @@
 #include <universal/q_shared.h>
 #include "physicalmemory.h"
 
-#include <Windows.h>
+#include <cstdlib>
+
 #include "assertive.h"
 #include <qcommon/mem_track.h>
 #include "q_shared.h"
 #include <qcommon/qcommon.h>
-#include <win32/win_local.h>
 
 PhysicalMemory g_mem;
 int g_overAllocatedSize;
@@ -15,7 +15,7 @@ void __cdecl PMem_Init()
 {
     uint8_t *memory; // [esp+0h] [ebp-4h]
 
-    memory = (uint8_t *)VirtualAlloc(0, 0x8000000u, 0x1000u, 4u);
+    memory = static_cast<uint8_t *>(std::malloc(0x8000000u));
     PMem_InitPhysicalMemory(&g_mem, memory, 0x8000000u);
 }
 
