@@ -436,6 +436,8 @@ struct DynEntityServer // sizeof=0x24
     int32_t health;
 };
 
+XAssetList g_varXAssetList{};
+
 void *varint;
 void *varuint;
 GfxVertex *varGfxVertex;
@@ -1418,7 +1420,7 @@ void __cdecl Load_XAnimPartsPtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varXAnimPartsPtr)
     {
-        value = (uint32_t)*varXAnimPartsPtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varXAnimPartsPtr));
         if (value == -1 || value == -2)
         {
             *varXAnimPartsPtr = (XAnimParts *)AllocLoad_FxElemVisStateSample();
@@ -1530,7 +1532,7 @@ void __cdecl Load_MssSound(bool atStreamStart)
     DB_PushStreamPos(0);
     if (varMssSound->data)
     {
-        value = (uint32_t)varMssSound->data;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(varMssSound->data));
         if (value < 0xFFFFFFFE)
         {
             DB_ConvertOffsetToAlias((uint32_t*)&varMssSound->data);
@@ -1572,7 +1574,7 @@ void __cdecl Load_LoadedSoundPtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varLoadedSoundPtr)
     {
-        value = (uint32_t)*varLoadedSoundPtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varLoadedSoundPtr));
         if (value == -1 || value == -2)
         {
             *varLoadedSoundPtr = (LoadedSound *)AllocLoad_FxElemVisStateSample();
@@ -1640,7 +1642,7 @@ void __cdecl Load_SndCurvePtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varSndCurvePtr)
     {
-        value = (uint32_t)*varSndCurvePtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varSndCurvePtr));
         if (value == -1 || value == -2)
         {
             *varSndCurvePtr = (SndCurve *)AllocLoad_FxElemVisStateSample();
@@ -1756,7 +1758,7 @@ void __cdecl Load_snd_alias_list_ptr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varsnd_alias_list_ptr)
     {
-        value = (uint32_t)*varsnd_alias_list_ptr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varsnd_alias_list_ptr));
         if (value == -1 || value == -2)
         {
             *varsnd_alias_list_ptr = (snd_alias_list_t*)AllocLoad_FxElemVisStateSample();
@@ -2186,7 +2188,7 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varGfxImagePtr)
     {
-        value = (uint32_t)*varGfxImagePtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varGfxImagePtr));
         if (value == -1 || value == -2)
         {
             *varGfxImagePtr = (GfxImage *)AllocLoad_FxElemVisStateSample();
@@ -2359,7 +2361,7 @@ void __cdecl Load_MaterialArgumentDef(bool atStreamStart)
         {
             if (varMaterialArgumentDef->codeSampler == -1)
             {
-                varMaterialArgumentDef->codeSampler = (MaterialTextureSource)(uint32_t)AllocLoad_FxElemVisStateSample();
+                varMaterialArgumentDef->codeSampler = (MaterialTextureSource)static_cast<uint32_t>(reinterpret_cast<uintptr_t>(AllocLoad_FxElemVisStateSample()));
                 varfloat = (float *)varMaterialArgumentDef->codeSampler;
                 Load_floatArray(1, 4);
             }
@@ -2591,7 +2593,7 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varMaterialTechniqueSetPtr)
     {
-        value = (uint32_t)*varMaterialTechniqueSetPtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varMaterialTechniqueSetPtr));
         if (value == -1 || value == -2)
         {
             *varMaterialTechniqueSetPtr = (MaterialTechniqueSet *)AllocLoad_FxElemVisStateSample();
@@ -2672,7 +2674,7 @@ void __cdecl Load_MaterialHandle(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varMaterialHandle)
     {
-        value = (uint32_t)*varMaterialHandle;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varMaterialHandle));
         if (value == -1 || value == -2)
         {
             *varMaterialHandle = (Material *)AllocLoad_FxElemVisStateSample();
@@ -2817,7 +2819,7 @@ void __cdecl Load_GfxLightDefPtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varGfxLightDefPtr)
     {
-        value = (uint32_t)*varGfxLightDefPtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varGfxLightDefPtr));
         if (value == -1 || value == -2)
         {
             *varGfxLightDefPtr = (GfxLightDef *)AllocLoad_FxElemVisStateSample();
@@ -2982,7 +2984,7 @@ void __cdecl Load_PhysPresetPtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varPhysPresetPtr)
     {
-        value = (uint32_t)*varPhysPresetPtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varPhysPresetPtr));
         if (value == -1 || value == -2)
         {
             *varPhysPresetPtr = (PhysPreset *)AllocLoad_FxElemVisStateSample();
@@ -3311,7 +3313,7 @@ void __cdecl Load_XModelPtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varXModelPtr)
     {
-        value = (uint32_t)*varXModelPtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varXModelPtr));
         if (value == -1 || value == -2)
         {
             *varXModelPtr = (XModel *)AllocLoad_FxElemVisStateSample();
@@ -3718,7 +3720,7 @@ void __cdecl Load_GameWorldSpPtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varGameWorldSpPtr)
     {
-        value = (uint32_t)*varGameWorldSpPtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varGameWorldSpPtr));
         if (value == -1 || value == -2)
         {
             *varGameWorldSpPtr = (GameWorldSp *)AllocLoad_FxElemVisStateSample();
@@ -3749,7 +3751,7 @@ void __cdecl Load_GameWorldMpPtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varGameWorldMpPtr)
     {
-        value = (uint32_t)*varGameWorldMpPtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varGameWorldMpPtr));
         if (value == -1 || value == -2)
         {
             *varGameWorldMpPtr = (GameWorldMp *)AllocLoad_FxElemVisStateSample();
@@ -3814,7 +3816,7 @@ void __cdecl Load_FxEffectDefHandle(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varFxEffectDefHandle)
     {
-        value = (uint32_t)*varFxEffectDefHandle;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varFxEffectDefHandle));
         if (value == -1 || value == -2)
         {
             *varFxEffectDefHandle = (const FxEffectDef *)AllocLoad_FxElemVisStateSample();
@@ -4266,7 +4268,7 @@ void __cdecl Load_MapEntsPtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varMapEntsPtr)
     {
-        value = (uint32_t)*varMapEntsPtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varMapEntsPtr));
         if (value == -1 || value == -2)
         {
             *varMapEntsPtr = (MapEnts *)AllocLoad_FxElemVisStateSample();
@@ -4737,7 +4739,7 @@ void __cdecl Load_clipMap_ptr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varclipMap_ptr)
     {
-        value = (uint32_t)*varclipMap_ptr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varclipMap_ptr));
         if (value == -1 || value == -2)
         {
             *varclipMap_ptr = (clipMap_t *)AllocLoad_FxElemVisStateSample();
@@ -4856,7 +4858,7 @@ void __cdecl Load_ComWorldPtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varComWorldPtr)
     {
-        value = (uint32_t)*varComWorldPtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varComWorldPtr));
         if (value == -1 || value == -2)
         {
             *varComWorldPtr = (ComWorld *)AllocLoad_FxElemVisStateSample();
@@ -5238,7 +5240,7 @@ void __cdecl Load_menuDef_ptr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varmenuDef_ptr)
     {
-        value = (uint32_t)*varmenuDef_ptr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varmenuDef_ptr));
         if (value == -1 || value == -2)
         {
             *varmenuDef_ptr = (menuDef_t *)AllocLoad_FxElemVisStateSample();
@@ -5299,7 +5301,7 @@ void __cdecl Load_MenuListPtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varMenuListPtr)
     {
-        value = (uint32_t)*varMenuListPtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varMenuListPtr));
         if (value == -1 || value == -2)
         {
             *varMenuListPtr = (MenuList *)AllocLoad_FxElemVisStateSample();
@@ -5464,7 +5466,7 @@ void __cdecl Load_LocalizeEntryPtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varLocalizeEntryPtr)
     {
-        value = (uint32_t)*varLocalizeEntryPtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varLocalizeEntryPtr));
         if (value == -1 || value == -2)
         {
             *varLocalizeEntryPtr = (LocalizeEntry *)AllocLoad_FxElemVisStateSample();
@@ -5543,7 +5545,7 @@ void __cdecl Load_FxImpactTablePtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varFxImpactTablePtr)
     {
-        value = (uint32_t)*varFxImpactTablePtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varFxImpactTablePtr));
         if (value == -1 || value == -2)
         {
             *varFxImpactTablePtr = (FxImpactTable *)AllocLoad_FxElemVisStateSample();
@@ -5873,7 +5875,7 @@ void __cdecl Load_WeaponDefPtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varWeaponDefPtr)
     {
-        value = (uint32_t)*varWeaponDefPtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varWeaponDefPtr));
         if (value == -1 || value == -2)
         {
             *varWeaponDefPtr = (WeaponDef *)AllocLoad_FxElemVisStateSample();
@@ -6092,7 +6094,7 @@ void __cdecl Load_RawFilePtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varRawFilePtr)
     {
-        value = (uint32_t)*varRawFilePtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varRawFilePtr));
         if (value == -1 || value == -2)
         {
             *varRawFilePtr = (RawFile *)AllocLoad_FxElemVisStateSample();
@@ -6993,7 +6995,7 @@ void __cdecl Load_GfxWorldPtr(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varGfxWorldPtr)
     {
-        value = (uint32_t)*varGfxWorldPtr;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varGfxWorldPtr));
         if (value == -1 || value == -2)
         {
             *varGfxWorldPtr = (GfxWorld *)AllocLoad_FxElemVisStateSample();
@@ -7131,7 +7133,7 @@ void __cdecl Load_FontHandle(bool atStreamStart)
     DB_PushStreamPos(0);
     if (*varFontHandle)
     {
-        value = (uint32_t)*varFontHandle;
+        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varFontHandle));
         if (value == -1 || value == -2)
         {
             *varFontHandle = (Font_s *)AllocLoad_FxElemVisStateSample();
@@ -7574,44 +7576,3 @@ void Load_XAssetListCustom()
     DB_PopStreamPos();
 #endif
 }
-
-void __cdecl Load_XAssetArrayCustom(int32_t count)
-{
-#ifdef __SWITCH__
-    struct SerializedXAsset
-    {
-        uint32_t type;
-        uint32_t header;
-    };
-
-    XAsset *var = varXAsset;
-    for (int32_t i = 0; i < count; ++i)
-    {
-        SerializedXAsset serialized{};
-        DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
-
-        varXAsset = var;
-        memset(varXAsset, 0, sizeof(*varXAsset));
-        varXAsset->type = static_cast<XAssetType>(serialized.type);
-        memcpy(&varXAsset->header, &serialized.header, sizeof(serialized.header));
-        varXAssetHeader = &varXAsset->header;
-
-        Load_XAssetHeader(0);
-        ++var;
-    }
-#else
-    XAsset *var;
-    int32_t i;
-
-    Load_Stream(1, (uint8_t *)varXAsset, 8 * count);
-    var = varXAsset;
-    for (i = 0; i < count; ++i)
-    {
-        varXAsset = var;
-        Load_XAsset(0);
-        ++var;
-    }
-#endif
-}
-
-
