@@ -104,9 +104,6 @@ void __cdecl Sys_NormalExit() {}
 void __cdecl Sys_OpenURL(const char *, int) {}
 void NET_RestartDebug() {}
 
-{
-    Sys_Error("Out of memory: %s:%d", filename, line);
-}
 void __cdecl Sys_NoFreeFilesError() { Sys_Error("Filesystem is full"); }
 
 #endif
