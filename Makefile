@@ -75,11 +75,13 @@ $(TARGET).elf: $(OBJECTS)
 
 $(BUILD)/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	@printf '  CXX %s\\n' "$(notdir $<)"
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+	@printf '  CC  %s\\n' "$(notdir $<)"
+	@$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 -include $(OBJECTS:.o=.d)
 
