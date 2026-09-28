@@ -960,6 +960,7 @@ void __cdecl R_MaterialList_f();
 int __cdecl R_GetMaterialMemory(Material *material);
 
 void __cdecl Material_PreventOverrideTechniqueGeneration();
+void __cdecl Material_OverrideTechniqueSets();
 void __cdecl Material_OriginalRemapTechniqueSet(MaterialTechniqueSet *techSet);
 void __cdecl Material_DirtyTechniqueSetOverrides();
 void __cdecl Material_ClearShaderUploadList();
@@ -1003,3 +1004,5 @@ MaterialTechniqueSet *__cdecl Material_FindTechniqueSet_LoadObj(
 void __cdecl Material_GetInfo(Material *handle, MaterialInfo *matInfo);
 
 Material *__cdecl Material_Duplicate(Material *mtlCopy, char *name);
+
+void __cdecl Material_Sort();
