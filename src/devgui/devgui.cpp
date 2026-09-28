@@ -6,6 +6,7 @@
 #include <ui/keycodes.h>
 #include <client/client.h>
 #include <cgame/cg_local.h>
+#include <cstring>
 
 #ifdef KISAK_MP
 #include <client_mp/client_mp.h>
@@ -480,7 +481,12 @@ void __cdecl DevGui_FreeMenu_r(uint16_t handle)
             DevGui_FreeMenu_r(menu->menus[0].child.menu);
         }
         DevGui_FreeMenu_r(menu->menus[0].nextSibling);
+#ifdef __SWITCH__
+        uintptr_t nextFreeMenu = reinterpret_cast<uintptr_t>(devguiGlob.nextFreeMenu);
+        memcpy(menu->menus[0].label, &nextFreeMenu, sizeof(nextFreeMenu));
+#else
         *(uint32_t*)menu->menus[0].label = (uint32_t)devguiGlob.nextFreeMenu;
+#endif
         devguiGlob.nextFreeMenu = (DevMenuItem *)menu;
     }
 }
@@ -1185,8 +1191,19 @@ void __cdecl DevGui_Init()
     screen_xPad = RETURN_ZERO32();
     screen_yPad = RETURN_ZERO32();
     for (menuIndex = 0; menuIndex < 0x257; ++menuIndex)
+#ifdef __SWITCH__
+    for (menuIndex = 0; menuIndex < 0x257; ++menuIndex)
+    {
+        uintptr_t nextMenu = reinterpret_cast<uintptr_t>(&devguiGlob.menus[menuIndex + 1]);
+        memcpy(devguiGlob.menus[menuIndex].label, &nextMenu, sizeof(nextMenu));
+    }
+    uintptr_t nullMenu = 0;
+    memcpy(devguiGlob.menus[menuIndex].label, &nullMenu, sizeof(nullMenu));
+#else
+    for (menuIndex = 0; menuIndex < 0x257; ++menuIndex)
         *(uint32_t *)devguiGlob.menus[menuIndex].label = (uint32_t)&devguiGlob.menus[menuIndex + 1];
     *(uint32_t *)devguiGlob.menus[menuIndex].label = 0;
+#endif
     devguiGlob.nextFreeMenu = (DevMenuItem *)&devguiGlob;
     devguiGlob.topmostMenu.childType = 0;
     devguiGlob.topmostMenu.childMenuMemory = 0;
