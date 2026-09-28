@@ -837,7 +837,7 @@ void __cdecl FX_UpdateEffectPartialForClass(
     uint16_t elemHandleFirstExisting; // [esp+30h] [ebp-4h]
 
     int32_t unk1;
-    int32_t unk2;
+    const FxIntRange *lifeSpanRange;
 
     if (effect->msecLastUpdate > msecUpdateEnd)
         MyAssertHandler(
@@ -880,9 +880,9 @@ void __cdecl FX_UpdateEffectPartialForClass(
                     elem = FX_PoolFromHandle_Generic<FxElem, 2048>(system->elems, elemHandle);
                     unk1 = (elem->item.msecBegin + effect->randomSeed + 296 * (uint32_t)elem->item.sequence)
                         % 0x1DF;
-                    unk2 = (int)&effect->def->elemDefs[elem->item.defIndex].lifeSpanMsec;
-                    lifeSpan = *(_DWORD*)unk2
-                        + (((*(_DWORD*)(unk2 + 4) + 1) * LOWORD(fx_randomTable[unk1 + 17])) >> 16);
+                    lifeSpanRange = &effect->def->elemDefs[elem->item.defIndex].lifeSpanMsec;
+                    lifeSpan = lifeSpanRange->base
+                        + (((lifeSpanRange->amplitude + 1) * LOWORD(fx_randomTable[unk1 + 17])) >> 16);
                     Com_Printf(
                         CON_CHANNEL_DONT_FILTER,
                         "  elem %i def %i seq %i spawn %i die %i\n",
