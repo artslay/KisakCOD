@@ -594,7 +594,7 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
     if (type == ASSET_TYPE_LOCALIZE_ENTRY || type == ASSET_TYPE_RAWFILE)
         return {};
 
-    XAssetEntryPoolEntry *newEntry = DB_CreateDefaultEntry(type, (char *)name);
+    XAssetEntry *newEntry = DB_CreateDefaultEntry(type, (char *)name);
     return newEntry ? newEntry->entry.asset.header : XAssetHeader{};
 }
 
