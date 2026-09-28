@@ -354,8 +354,8 @@ static void __cdecl DB_CloneXAssetInternal(const XAsset *from, XAsset *to);
 static XAssetHeader __cdecl DB_FindXAssetDefaultHeaderInternal(XAssetType type);
 static void __cdecl PrintWaitedError(XAssetType type, const char *name, int32_t waitedMsec);
 static bool __cdecl DB_GetInitializing();
-static XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header);
-static XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry, int32_t allowOverride);
+XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header);
+XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry, int32_t allowOverride);
 static void __cdecl DB_FreeXAssetEntry(XAssetEntryPoolEntry *assetEntry);
 static void __cdecl DB_FreeXAssetHeader(XAssetType type, XAssetHeader header);
 static void __cdecl DB_CloneXAssetEntry(const XAssetEntry *from, XAssetEntry *to);
@@ -1950,4 +1950,231 @@ void __cdecl DB_UpdateDebugZone()
         DB_LoadXAssets(zoneInfo, 2u, 1);
         CG_VisionSetMyChanges();
     }
+}
+
+
+/* DB Registry core linkage restore. */
+void __cdecl DB_SetInitializing(bool inUse)
+{
+    g_initializing = inUse;
+}
+
+void __cdecl DB_Update()
+{
+    if (!Sys_IsMainThread())
+        MyAssertHandler(".\\database\\db_registry.cpp", 2805, 0, "%s", "Sys_IsMainThread()");
+    if (!Sys_IsDatabaseReady2() && Sys_IsDatabaseReady())
+        DB_PostLoadXZone();
+}
+
+bool __cdecl DB_OverrideAsset(uint32_t newZoneIndex, uint32_t existingZoneIndex)
+{
+    if (!newZoneIndex)
+        MyAssertHandler(".\\database\\db_registry.cpp", 2959, 0, "%s", "newZoneIndex");
+    if (!existingZoneIndex)
+        MyAssertHandler(".\\database\\db_registry.cpp", 2960, 0, "%s", "existingZoneIndex");
+    return g_zones[newZoneIndex].flags >= g_zones[existingZoneIndex].flags;
+}
+
+void __cdecl DB_GetXAsset(XAssetType type, XAssetHeader header)
+{
+    uint32_t assetEntryIndex;
+    XAsset asset;
+    const char *name;
+    XAssetEntry *assetEntry;
+
+    asset.type = type;
+    asset.header = header;
+    name = DB_GetXAssetName(&asset);
+    for (assetEntryIndex = db_hashTable[DB_HashForName(name, type)]; ; assetEntryIndex = assetEntry->nextHash)
+    {
+        if (!assetEntryIndex)
+            MyAssertHandler(".\\database\\db_registry.cpp", 3163, 0, "%s", "assetEntryIndex");
+        assetEntry = &g_assetEntryPool[assetEntryIndex].entry;
+        if (assetEntry->asset.type == type && assetEntry->asset.header.xmodelPieces == header.xmodelPieces)
+            break;
+    }
+    assetEntry->inuse = 1;
+}
+
+static void __cdecl DB_DelayedCloneXAsset(XAssetEntry *newEntry)
+{
+    const char *XAssetTypeName;
+    const char *XAssetName;
+    uint32_t i;
+
+    if (g_sync)
+    {
+        DB_LinkXAssetEntry((XAssetEntryPoolEntry *)newEntry, 1);
+    }
+    else
+    {
+        if (g_copyInfoCount >= 0x800)
+        {
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "g_copyInfo exceeded\\n");
+            for (i = 0; i < 0x800; ++i)
+            {
+                XAssetName = DB_GetXAssetName(&g_copyInfo[i]->asset);
+                XAssetTypeName = DB_GetXAssetTypeName(g_copyInfo[i]->asset.type);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%s: %s\\n", XAssetTypeName, XAssetName);
+            }
+            Sys_Error("g_copyInfo exceeded");
+        }
+        g_copyInfo[g_copyInfoCount++] = newEntry;
+    }
+}
+
+void DB_SyncLostDevice()
+{
+    if (g_isRecoveringLostDevice)
+    {
+        if (g_mayRecoverLostAssets)
+            MyAssertHandler(".\\database\\db_registry.cpp", 2945, 0, "%s", "!g_mayRecoverLostAssets");
+        g_mayRecoverLostAssets = 1;
+        do
+            NET_Sleep(0x19u);
+        while (g_isRecoveringLostDevice);
+        if (g_mayRecoverLostAssets)
+            MyAssertHandler(".\\database\\db_registry.cpp", 2951, 0, "%s", "!g_mayRecoverLostAssets");
+    }
+}
+
+XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
+{
+    XAssetEntryPoolEntry *existingEntry;
+    XAssetEntryPoolEntry newEntry;
+
+    newEntry.entry.asset.type = type;
+    newEntry.entry.asset.header = header;
+    Sys_LockWrite(&db_hashCritSect);
+    existingEntry = DB_LinkXAssetEntry(&newEntry, 0);
+    Sys_UnlockWrite(&db_hashCritSect);
+    DB_SyncLostDevice();
+    return existingEntry->entry.asset.header;
+}
+
+XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry, int32_t allowOverride)
+{
+    int32_t firstChar;
+    const char *XAssetName;
+    XAssetEntryPoolEntry *existingEntry = NULL;
+    uint32_t hash;
+    uint32_t existingEntryIndex;
+    XAssetEntryPoolEntry *overrideAssetEntry;
+    XAsset asset;
+    int32_t isStubAsset;
+    const char *name;
+    uint8_t zoneIndex;
+    XAssetType type;
+    uint16_t *pOverrideAssetEntryIndex;
+    XAssetSize assetSize;
+
+    name = DB_GetXAssetName(&newEntry->entry.asset);
+    firstChar = *name;
+    isStubAsset = firstChar == ',';
+    if (firstChar == ',')
+        ++name;
+
+    type = newEntry->entry.asset.type;
+    hash = DB_HashForName(name, type);
+    for (existingEntryIndex = db_hashTable[hash]; existingEntryIndex; existingEntryIndex = existingEntry->entry.nextHash)
+    {
+        existingEntry = &g_assetEntryPool[existingEntryIndex];
+        if (existingEntry->entry.asset.type == type)
+        {
+            XAssetName = DB_GetXAssetName(&existingEntry->entry.asset);
+            if (!I_stricmp(XAssetName, name))
+                break;
+        }
+    }
+
+    if (allowOverride)
+    {
+        iassert(!isStubAsset);
+    }
+    else
+    {
+        if (isStubAsset)
+        {
+            if (!existingEntryIndex)
+                return (XAssetEntryPoolEntry *)DB_CreateDefaultEntry(type, (char *)name);
+            iassert(existingEntry);
+            return existingEntry;
+        }
+
+        asset.type = newEntry->entry.asset.type;
+        asset.header = newEntry->entry.asset.header;
+        newEntry = DB_AllocXAssetEntry(asset.type, g_zoneIndex);
+        DB_CloneXAssetInternal(&asset, &newEntry->entry.asset);
+    }
+
+    if (!existingEntryIndex)
+    {
+        newEntry->entry.nextHash = db_hashTable[hash];
+        db_hashTable[hash] = static_cast<uint16_t>(newEntry - g_assetEntryPool);
+        return newEntry;
+    }
+
+    iassert(existingEntry);
+    if (existingEntry->entry.zoneIndex)
+    {
+        iassert(existingEntry->entry.zoneIndex != newEntry->entry.zoneIndex);
+        if (!*g_defaultAssetName[type] && type != ASSET_TYPE_RAWFILE && type != ASSET_TYPE_MAP_ENTS)
+        {
+            Sys_UnlockWrite(&db_hashCritSect);
+            Com_Error(
+                ERR_DROP,
+                "Attempting to override asset '%s' from zone '%s' with zone '%s'",
+                name,
+                g_zones[existingEntry->entry.zoneIndex].name,
+                g_zones[newEntry->entry.zoneIndex].name);
+        }
+
+        if (!DB_OverrideAsset(newEntry->entry.zoneIndex, existingEntry->entry.zoneIndex))
+        {
+            for (pOverrideAssetEntryIndex = &existingEntry->entry.nextOverride;
+                *pOverrideAssetEntryIndex;
+                pOverrideAssetEntryIndex = &overrideAssetEntry->entry.nextOverride)
+            {
+                overrideAssetEntry = &g_assetEntryPool[*pOverrideAssetEntryIndex];
+                if (DB_OverrideAsset(newEntry->entry.zoneIndex, overrideAssetEntry->entry.zoneIndex))
+                    break;
+            }
+            newEntry->entry.nextOverride = *pOverrideAssetEntryIndex;
+            *pOverrideAssetEntryIndex = static_cast<uint16_t>(newEntry - g_assetEntryPool);
+            return existingEntry;
+        }
+    }
+
+    iassert(g_defaultAssetName[type][0]);
+    iassert(!existingEntry->entry.nextOverride);
+    iassert(g_defaultAssetCount);
+
+    if (!allowOverride)
+    {
+        DB_DelayedCloneXAsset(&newEntry->entry);
+        return existingEntry;
+    }
+
+    if (!existingEntry->entry.zoneIndex)
+        MyAssertHandler(".\\database\\db_registry.cpp", 3096, 0, "%s", "existingEntry->zoneIndex");
+
+    if (existingEntry->entry.inuse)
+    {
+        varXAsset = &existingEntry->entry.asset;
+        Mark_XAsset();
+    }
+
+    newEntry->entry.nextOverride = existingEntry->entry.nextOverride;
+    existingEntry->entry.nextOverride = static_cast<uint16_t>(newEntry - g_assetEntryPool);
+
+    asset.header.xmodelPieces = reinterpret_cast<XModelPieces *>(&assetSize);
+    asset.type = type;
+    DB_CloneXAssetInternal(&existingEntry->entry.asset, &asset);
+
+    zoneIndex = existingEntry->entry.zoneIndex;
+    DB_CloneXAssetEntry(&newEntry->entry, &existingEntry->entry);
+    DB_CloneXAssetInternal(&asset, &newEntry->entry.asset);
+    newEntry->entry.zoneIndex = zoneIndex;
+    return existingEntry;
 }
