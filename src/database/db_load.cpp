@@ -20,6 +20,17 @@
 #include <gfx_d3d/r_primarylights.h>
 #include <game/g_bsp.h>
 
+#ifdef __SWITCH__
+enum weapPositionAnimNum_t : __int32
+{
+    WEAP_POSITION_ANIM_INVALID = 0
+};
+enum weaponAltModel_t : __int32
+{
+    WEAPON_ALT_MODEL_INVALID = 0
+};
+#endif
+
 // Static Prototypes
 static void Load_byte(bool atStreamStart);
 static void Load_byteArray(bool atStreamStart, int32_t count);
