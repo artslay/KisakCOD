@@ -145,7 +145,7 @@ void __cdecl R_ModelList_f()
 void __cdecl R_GetModelList(XAssetHeader header, XAssetHeader *data)
 {
     //iassert( modelList->count < ARRAY_COUNT( modelList->sorted ) ); // KISAKTODO
-    data[(int)data->xmodelPieces++ + 1] = header;
+    data[static_cast<size_t>(reinterpret_cast<uintptr_t>(data->xmodelPieces++)) + 1] = header;
 }
 
 XModel *__cdecl R_RegisterModel(const char *name)
@@ -338,7 +338,7 @@ int __cdecl R_SkinXModel(
                 startSurfPos = -1;
             *(_DWORD*)surfPos = startSurfPos;
             // @Correctness
-            *((_DWORD*)surfPos + 1) = (_DWORD)xsurf;
+            *reinterpret_cast<uint32_t *>(surfPos + 4) = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(xsurf));
             surfPos[7] = gfxEntIndex;
             surfPos[8] = 0;
             qmemcpy(surfPos + 12, placement, 0x1Cu);
@@ -412,7 +412,7 @@ void __cdecl R_LockSkinnedCache()
         PROF_SCOPED("LockSkinnedCache");
 
         gfxBuf.skinnedCacheLockAddr = (unsigned char *)R_LockVertexBuffer(vb, 0, 0, 0x2000);
-        if (((uint32_t)gfxBuf.skinnedCacheLockAddr & 0xF) != 0)
+        if ((reinterpret_cast<uintptr_t>(gfxBuf.skinnedCacheLockAddr) & 0xF) != 0)
         {
             R_UnlockVertexBuffer(vb);
             gfxBuf.skinnedCacheLockAddr = 0;
