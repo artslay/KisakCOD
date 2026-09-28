@@ -1493,7 +1493,7 @@ void __cdecl DynEntCl_ExplosionEvent(
                         if (!dynEntClient->physObjId)
                         {
                             PhysObj = DynEntCl_CreatePhysObj(dynEntDef, &dynEntPose->pose);
-                            dynEntClient->physObjId = (int)PhysObj;
+                            dynEntClient->physObjId = static_cast<int32_t>(reinterpret_cast<uintptr_t>(PhysObj));
                         }
                         if (dynEntClient->physObjId)
                         {
