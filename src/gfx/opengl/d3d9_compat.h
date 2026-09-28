@@ -23,9 +23,11 @@ struct IDirect3DSwapChain9 { void Release() { delete this; } };
 using _D3DMULTISAMPLE_TYPE = uint32_t;
 enum _D3DTEXTUREFILTERTYPE : uint32_t
 {
-    
     D3DTEXF_ANISOTROPIC = 3,
 };
+constexpr _D3DTEXTUREFILTERTYPE D3DTEXF_NONE = static_cast<_D3DTEXTUREFILTERTYPE>(0);
+constexpr _D3DTEXTUREFILTERTYPE D3DTEXF_POINT = static_cast<_D3DTEXTUREFILTERTYPE>(1);
+constexpr _D3DTEXTUREFILTERTYPE D3DTEXF_LINEAR = static_cast<_D3DTEXTUREFILTERTYPE>(2);
 #ifndef GL_GLEXT_PROTOTYPES
 #define GL_GLEXT_PROTOTYPES 1
 #endif
@@ -35,6 +37,8 @@ enum _D3DTEXTUREFILTERTYPE : uint32_t
 using HRESULT = int32_t;
 using _D3DFORMAT = uint32_t;
 constexpr _D3DFORMAT D3DFMT_X8R8G8B8 = 22;
+constexpr uint32_t D3DLOCK_NOOVERWRITE = 0x1000;
+constexpr uint32_t D3DLOCK_DISCARD = 0x2000;
 struct _D3DDISPLAYMODE { uint32_t Width=0, Height=0; uint32_t RefreshRate=60; _D3DFORMAT Format=D3DFMT_X8R8G8B8; };
 
 constexpr HRESULT S_OK = 0;
@@ -78,6 +82,7 @@ struct D3DVIEWPORT9
     uint32_t X, Y, Width, Height;
     float MinZ, MaxZ;
 };
+using _D3DVIEWPORT9 = D3DVIEWPORT9;
 
 enum : uint32_t
 {
@@ -713,7 +718,7 @@ public:
         return S_OK;
     }
 
-    HRESULT CreateVertexShader(const uint32_t*, IDirect3DVertexShader9 **out)
+    HRESULT CreateVertexShader(const void*, IDirect3DVertexShader9 **out)
     {
         if (!out)
             return E_FAIL;
@@ -742,7 +747,7 @@ void main()
         return S_OK;
     }
 
-    HRESULT CreatePixelShader(const uint32_t*, IDirect3DPixelShader9 **out)
+    HRESULT CreatePixelShader(const void*, IDirect3DPixelShader9 **out)
     {
         if (!out)
             return E_FAIL;
