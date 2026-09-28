@@ -595,7 +595,7 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
         return {};
 
     XAssetEntry *newEntry = DB_CreateDefaultEntry(type, (char *)name);
-    return newEntry ? newEntry->entry.asset.header : XAssetHeader{};
+    return newEntry ? newEntry->asset.header : XAssetHeader{};
 }
 
 bool __cdecl DB_IsXAssetDefault(XAssetType type, const char *name)
