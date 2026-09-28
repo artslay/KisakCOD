@@ -961,6 +961,9 @@ int __cdecl R_GetMaterialMemory(Material *material);
 
 void __cdecl Material_PreventOverrideTechniqueGeneration();
 void __cdecl Material_OriginalRemapTechniqueSet(MaterialTechniqueSet *techSet);
+void __cdecl Material_DirtyTechniqueSetOverrides();
+void __cdecl Material_ClearShaderUploadList();
+bool __cdecl Material_WouldTechniqueSetBeOverridden(const MaterialTechniqueSet *techSet);
 
 
 void __cdecl Material_UpdatePicmipAll();
