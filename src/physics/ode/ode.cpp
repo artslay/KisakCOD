@@ -831,6 +831,7 @@ void ODE_InitJoint(dxWorld* world, dxJoint* joint, dxJointTypeNum typenum)
     joint->tag = 0;
     joint->typenum = dJointTypeNone;
     joint->flags = 0;
+    joint->feedback = 0;
 
     joint->node[0].joint = joint;
     joint->node[0].body = 0;
@@ -1070,7 +1071,6 @@ dBodyID dJointGetBody (dxJoint *joint, int index)
 }
 
 // DEL
-#if 0
 void dJointSetFeedback (dxJoint *joint, dJointFeedback *f)
 {
   dAASSERT (joint);
@@ -1082,7 +1082,6 @@ dJointFeedback *dJointGetFeedback (dxJoint *joint)
   dAASSERT (joint);
   return joint->feedback;
 }
-#endif
 
 int dAreConnected (dBodyID b1, dBodyID b2)
 {
@@ -1540,7 +1539,7 @@ dxWorld* dWorldCreate(PhysWorld worldIndex)
 #if defined(dSINGLE)
     w->stepInfo.global_cfm = 1e-5f;
 #elif defined(dDOUBLE)
-    w->global_cfm = 1e-10;
+    w->stepInfo.global_cfm = 1e-10;
 #else
 #error dSINGLE or dDOUBLE must be defined
 #endif

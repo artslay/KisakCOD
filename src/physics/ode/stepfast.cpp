@@ -682,7 +682,7 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 	int *ofs = (int *) ALLOCA (nj * sizeof (int));
 	for (i = 0, j = 0; j < nj; j++)
 	{	// i=dest, j=src
-		joints[j]->vtable->getInfo1 (joints[j], info + i);
+		jointGetInfo1(joints[j], info + i);
 		dIASSERT (info[i].m >= 0 && info[i].m <= 6 && info[i].nub >= 0 && info[i].nub <= info[i].m);
 		if (info[i].m > 0)
 		{
@@ -723,7 +723,7 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 		hi = (dReal *) ALLOCA (m * sizeof (dReal));
 		findex = (int *) ALLOCA (m * sizeof (int));
 	dSetZero (c, m);
-	dSetValue (cfm, m, world->global_cfm);
+	dSetValue (cfm, m, world->stepInfo.global_cfm);
 	dSetValue (lo, m, -dInfinity);
 	dSetValue (hi, m, dInfinity);
 	for (i = 0; i < m; i++)
@@ -756,7 +756,7 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 	{
 		Jinfo[i].rowskip = 8;
 		Jinfo[i].fps = dRecip (stepsize);
-		Jinfo[i].erp = world->global_erp;
+		Jinfo[i].erp = world->stepInfo.global_erp;
 		Jinfo[i].J1l = J + 2 * 8 * ofs[i];
 		Jinfo[i].J1a = Jinfo[i].J1l + 4;
 		Jinfo[i].J2l = Jinfo[i].J1l + 8 * info[i].m;
@@ -802,24 +802,24 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 			// @@@ check computation of rotational force.
 
 			// compute inertia tensor in global frame
-			dMULTIPLY2_333 (tmp, body->mass.I, body->R);
-			dMULTIPLY0_333 (globalI + b * 12, body->R, tmp);
+			dMULTIPLY2_333 (tmp, body->mass.I, body->info.R);
+			dMULTIPLY0_333 (globalI + b * 12, body->info.R, tmp);
 			// compute inverse inertia tensor in global frame
-			dMULTIPLY2_333 (tmp, body->invI, body->R);
-			dMULTIPLY0_333 (globalInvI + b * 12, body->R, tmp);
+			dMULTIPLY2_333 (tmp, body->invI, body->info.R);
+			dMULTIPLY0_333 (globalInvI + b * 12, body->info.R, tmp);
 
 			for (i = 0; i < 4; i++)
 				body->tacc[i] = saveTacc[b * 4 + i];
 			// compute rotational force
-			dMULTIPLY0_331 (tmp, globalI + b * 12, body->avel);
-			dCROSS (body->tacc, -=, body->avel, tmp);
+			dMULTIPLY0_331 (tmp, globalI + b * 12, body->info.avel);
+			dCROSS (body->tacc, -=, body->info.avel, tmp);
 
 			// add the gravity force to all bodies
 			if ((body->flags & dxBodyNoGravity) == 0)
 			{
-				body->facc[0] = saveFacc[b * 4 + 0] + body->mass.mass * world->gravity[0];
-				body->facc[1] = saveFacc[b * 4 + 1] + body->mass.mass * world->gravity[1];
-				body->facc[2] = saveFacc[b * 4 + 2] + body->mass.mass * world->gravity[2];
+				body->facc[0] = saveFacc[b * 4 + 0] + body->mass.mass * world->stepInfo.gravity[0];
+				body->facc[1] = saveFacc[b * 4 + 1] + body->mass.mass * world->stepInfo.gravity[1];
+				body->facc[2] = saveFacc[b * 4 + 2] + body->mass.mass * world->stepInfo.gravity[2];
 				body->facc[3] = 0;
 			} else {
                                 body->facc[0] = saveFacc[b * 4 + 0];
@@ -881,7 +881,7 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 				GinvIPair[1] = globalInvI + bodyPair[1]->tag * 12;
 			}
 
-			joints[j]->vtable->getInfo2 (joints[j], Jinfo + j);
+			jointGetInfo2(joints[j], &world->stepInfo, Jinfo + j);
 
 			//dInternalStepIslandFast is an exact copy of the old routine with one
 			//modification: the calculated forces are added back to the facc and tacc
@@ -907,11 +907,11 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 			}
 
 			//apply torque
-			dMULTIPLYADD0_331 (body->avel, globalInvI + b * 12, body->tacc);
+			dMULTIPLYADD0_331 (body->info.avel, globalInvI + b * 12, body->tacc);
 
 			//apply force
 			for (i = 0; i < 3; i++)
-				body->lvel[i] += body->invMass * body->facc[i];
+				body->info.lvel[i] += body->invMass * body->facc[i];
 
 			//move It!
 			moveAndRotateBody (body, ministep);

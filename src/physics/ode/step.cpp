@@ -256,9 +256,9 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
   // add the gravity force to all bodies
   for (i=0; i<nb; i++) {
     if ((body[i]->flags & dxBodyNoGravity)==0) {
-      body[i]->facc[0] += body[i]->mass.mass * world->gravity[0];
-      body[i]->facc[1] += body[i]->mass.mass * world->gravity[1];
-      body[i]->facc[2] += body[i]->mass.mass * world->gravity[2];
+      body[i]->facc[0] += body[i]->mass.mass * world->stepInfo.gravity[0];
+      body[i]->facc[1] += body[i]->mass.mass * world->stepInfo.gravity[1];
+      body[i]->facc[2] += body[i]->mass.mass * world->stepInfo.gravity[2];
     }
   }
 
@@ -274,7 +274,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
   dxJoint::Info1 *info = (dxJoint::Info1*) ALLOCA (nj*sizeof(dxJoint::Info1));
   int *ofs = (int*) ALLOCA (nj*sizeof(int));
   for (i=0, j=0; j<nj; j++) {	// i=dest, j=src
-    joint[j]->vtable->getInfo1 (joint[j],info+i);
+    jointGetInfo1(joint[j], info + i);
     dIASSERT (info[i].m >= 0 && info[i].m <= 6 &&
 	      info[i].nub >= 0 && info[i].nub <= info[i].m);
     if (info[i].m > 0) {
@@ -347,7 +347,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
     dReal *hi = (dReal*) ALLOCA (m*sizeof(dReal));
     int *findex = (int*) alloca (m*sizeof(int));
     dSetZero (c,m);
-    dSetValue (cfm,m,world->global_cfm);
+    dSetValue (cfm,m,world->stepInfo.global_cfm);
     dSetValue (lo,m,-dInfinity);
     dSetValue (hi,m, dInfinity);
     for (i=0; i<m; i++) findex[i] = -1;
@@ -362,7 +362,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
     dxJoint::Info2 Jinfo;
     Jinfo.rowskip = nskip;
     Jinfo.fps = dRecip(stepsize);
-    Jinfo.erp = world->global_erp;
+    Jinfo.erp = world->stepInfo.global_erp;
     for (i=0; i<nj; i++) {
       Jinfo.J1l = J + nskip*ofs[i] + 6*joint[i]->node[0].body->tag;
       Jinfo.J1a = Jinfo.J1l + 3;
@@ -379,7 +379,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
       Jinfo.lo = lo + ofs[i];
       Jinfo.hi = hi + ofs[i];
       Jinfo.findex = findex + ofs[i];
-      joint[i]->vtable->getInfo2 (joint[i],&Jinfo);
+      jointGetInfo2(joint[i], &world->stepInfo, &Jinfo);
       // adjust returned findex values for global index numbering
       for (j=0; j<info[i].m; j++) {
 	if (findex[ofs[i] + j] >= 0) findex[ofs[i] + j] += ofs[i];
@@ -568,9 +568,9 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
   // add the gravity force to all bodies
   for (i=0; i<nb; i++) {
     if ((body[i]->flags & dxBodyNoGravity)==0) {
-      body[i]->facc[0] += body[i]->mass.mass * world->gravity[0];
-      body[i]->facc[1] += body[i]->mass.mass * world->gravity[1];
-      body[i]->facc[2] += body[i]->mass.mass * world->gravity[2];
+      body[i]->facc[0] += body[i]->mass.mass * world->stepInfo.gravity[0];
+      body[i]->facc[1] += body[i]->mass.mass * world->stepInfo.gravity[1];
+      body[i]->facc[2] += body[i]->mass.mass * world->stepInfo.gravity[2];
     }
   }
 
@@ -590,7 +590,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
   dxJoint::Info1 *info = (dxJoint::Info1*) ALLOCA (nj*sizeof(dxJoint::Info1));
   int *ofs = (int*) ALLOCA (nj*sizeof(int));
   for (i=0, j=0; j<nj; j++) {	// i=dest, j=src
-    joint[j]->vtable->getInfo1 (joint[j],info+i);
+    jointGetInfo1(joint[j], info + i);
     dIASSERT (info[i].m >= 0 && info[i].m <= 6 &&
 	      info[i].nub >= 0 && info[i].nub <= info[i].m);
     if (info[i].m > 0) {
@@ -636,7 +636,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
     dReal *hi = (dReal*) ALLOCA (m*sizeof(dReal));
     int *findex = (int*) alloca (m*sizeof(int));
     dSetZero (c,m);
-    dSetValue (cfm,m,world->global_cfm);
+    dSetValue (cfm,m,world->stepInfo.global_cfm);
     dSetValue (lo,m,-dInfinity);
     dSetValue (hi,m, dInfinity);
     for (i=0; i<m; i++) findex[i] = -1;
@@ -666,7 +666,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
     dxJoint::Info2 Jinfo;
     Jinfo.rowskip = 8;
     Jinfo.fps = stepsize1;
-    Jinfo.erp = world->global_erp;
+    Jinfo.erp = world->stepInfo.global_erp;
     for (i=0; i<nj; i++) {
       Jinfo.J1l = J + 2*8*ofs[i];
       Jinfo.J1a = Jinfo.J1l + 4;
@@ -677,7 +677,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
       Jinfo.lo = lo + ofs[i];
       Jinfo.hi = hi + ofs[i];
       Jinfo.findex = findex + ofs[i];
-      joint[i]->vtable->getInfo2 (joint[i],&Jinfo);
+      jointGetInfo2(joint[i], &world->stepInfo, &Jinfo);
       // adjust returned findex values for global index numbering
       for (j=0; j<info[i].m; j++) {
 	if (findex[ofs[i] + j] >= 0) findex[ofs[i] + j] += ofs[i];

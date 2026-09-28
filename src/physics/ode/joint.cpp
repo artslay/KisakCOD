@@ -1411,8 +1411,8 @@ static void hinge2Init (dxJointHinge2 *j)
   j->limot1.init (j->world);
   j->limot2.init (j->world);
 
-  j->susp_erp = j->world->global_erp;
-  j->susp_cfm = j->world->global_cfm;
+  j->susp_erp = j->world->stepInfo.global_erp;
+  j->susp_cfm = j->world->stepInfo.global_cfm;
 
   j->flags |= dJOINT_TWOBODIES;
 }
