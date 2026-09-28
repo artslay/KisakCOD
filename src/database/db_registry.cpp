@@ -2205,3 +2205,279 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     DB_FreeXAssetEntry(newEntry);
     return existingEntry;
 }
+
+
+/* Database asset Load/Mark implementations restored from upstream KisakCOD. */
+
+void __cdecl Load_PhysPresetAsset(XAssetHeader *physPreset)
+{
+    physPreset->xmodelPieces = DB_AddXAsset(ASSET_TYPE_PHYSPRESET, (XAssetHeader)physPreset->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_PhysPresetAsset(PhysPreset *physPreset)
+{
+    DB_GetXAsset(ASSET_TYPE_PHYSPRESET, (XAssetHeader)physPreset);
+}
+
+void __cdecl Load_XAnimPartsAsset(XAssetHeader *parts)
+{
+    parts->xmodelPieces = DB_AddXAsset(ASSET_TYPE_XANIMPARTS, (XAssetHeader)parts->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_XAnimPartsAsset(XAnimParts *parts)
+{
+    DB_GetXAsset(ASSET_TYPE_XANIMPARTS, (XAssetHeader)parts);
+}
+
+void __cdecl Load_XModelAsset(XAssetHeader *model)
+{
+    model->xmodelPieces = DB_AddXAsset(ASSET_TYPE_XMODEL, (XAssetHeader)model->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_XModelAsset(XModel *model)
+{
+    DB_GetXAsset(ASSET_TYPE_XMODEL, (XAssetHeader)model);
+}
+
+void __cdecl Load_MaterialAsset(XAssetHeader *material)
+{
+    material->xmodelPieces = DB_AddXAsset(ASSET_TYPE_MATERIAL, (XAssetHeader)material->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_MaterialAsset(Material *material)
+{
+    DB_GetXAsset(ASSET_TYPE_MATERIAL, (XAssetHeader)material);
+}
+
+void __cdecl Load_MaterialTechniqueSetAsset(XAssetHeader *techniqueSet)
+{
+    techniqueSet->xmodelPieces = DB_AddXAsset(ASSET_TYPE_TECHNIQUE_SET, (XAssetHeader)techniqueSet->xmodelPieces).xmodelPieces;
+    Material_OriginalRemapTechniqueSet(techniqueSet->techniqueSet);
+    Material_UploadShaders(techniqueSet->techniqueSet);
+}
+
+void __cdecl Mark_MaterialTechniqueSetAsset(MaterialTechniqueSet *techniqueSet)
+{
+    DB_GetXAsset(ASSET_TYPE_TECHNIQUE_SET, (XAssetHeader)techniqueSet);
+}
+
+void __cdecl Load_GfxImageAsset(XAssetHeader *image)
+{
+    image->xmodelPieces = DB_AddXAsset(ASSET_TYPE_IMAGE, (XAssetHeader)image->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_GfxImageAsset(GfxImage *image)
+{
+    DB_GetXAsset(ASSET_TYPE_IMAGE, (XAssetHeader)image);
+}
+
+void __cdecl Load_snd_alias_list_Asset(XAssetHeader *sound)
+{
+    sound->xmodelPieces = DB_AddXAsset(ASSET_TYPE_SOUND, (XAssetHeader)sound->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_snd_alias_list_Asset(snd_alias_list_t *sound)
+{
+    DB_GetXAsset(ASSET_TYPE_SOUND, (XAssetHeader)sound);
+}
+
+void __cdecl Load_SndCurveAsset(XAssetHeader *sndCurve)
+{
+    sndCurve->xmodelPieces = DB_AddXAsset(ASSET_TYPE_SOUND_CURVE, (XAssetHeader)sndCurve->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_SndCurveAsset(SndCurve *sndCurve)
+{
+    DB_GetXAsset(ASSET_TYPE_SOUND_CURVE, (XAssetHeader)sndCurve);
+}
+
+void __cdecl Load_LoadedSoundAsset(XAssetHeader *loadSnd)
+{
+    loadSnd->xmodelPieces = DB_AddXAsset(ASSET_TYPE_LOADED_SOUND, (XAssetHeader)loadSnd->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_LoadedSoundAsset(LoadedSound *loadSnd)
+{
+    DB_GetXAsset(ASSET_TYPE_LOADED_SOUND, (XAssetHeader)loadSnd);
+}
+
+void __cdecl Load_ClipMapAsset(XAssetHeader *clipMap)
+{
+#ifdef KISAK_MP
+    clipMap->clipMap = DB_AddXAsset(ASSET_TYPE_CLIPMAP_PVS, (XAssetHeader)clipMap->clipMap).clipMap;
+#elif KISAK_SP
+    clipMap->clipMap = DB_AddXAsset(ASSET_TYPE_CLIPMAP, (XAssetHeader)clipMap->clipMap).clipMap;
+#endif
+}
+
+void __cdecl Mark_ClipMapAsset(clipMap_t *clipMap)
+{
+#ifdef KISAK_MP
+    DB_GetXAsset(ASSET_TYPE_CLIPMAP_PVS, (XAssetHeader)clipMap);
+#elif KISAK_SP
+    DB_GetXAsset(ASSET_TYPE_CLIPMAP, (XAssetHeader)clipMap);
+#endif
+}
+
+void __cdecl Load_ComWorldAsset(XAssetHeader *comWorld)
+{
+    comWorld->xmodelPieces = DB_AddXAsset(ASSET_TYPE_COMWORLD, (XAssetHeader)comWorld->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_ComWorldAsset(ComWorld *comWorld)
+{
+    DB_GetXAsset(ASSET_TYPE_COMWORLD, (XAssetHeader)comWorld);
+}
+
+void __cdecl Load_GameWorldSpAsset(XAssetHeader *gameWorldSp)
+{
+    gameWorldSp->xmodelPieces = DB_AddXAsset(ASSET_TYPE_GAMEWORLD_SP, (XAssetHeader)gameWorldSp->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_GameWorldSpAsset(GameWorldSp *gameWorldSp)
+{
+    DB_GetXAsset(ASSET_TYPE_GAMEWORLD_SP, (XAssetHeader)gameWorldSp);
+}
+
+void __cdecl Load_GameWorldMpAsset(XAssetHeader *gameWorldMp)
+{
+    gameWorldMp->xmodelPieces = DB_AddXAsset(ASSET_TYPE_GAMEWORLD_MP, (XAssetHeader)gameWorldMp->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_GameWorldMpAsset(GameWorldMp *gameWorldMp)
+{
+    DB_GetXAsset(ASSET_TYPE_GAMEWORLD_MP, (XAssetHeader)gameWorldMp);
+}
+
+void __cdecl Load_MapEntsAsset(XAssetHeader *mapEnts)
+{
+    mapEnts->xmodelPieces = DB_AddXAsset(ASSET_TYPE_MAP_ENTS, (XAssetHeader)mapEnts->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_MapEntsAsset(MapEnts *mapEnts)
+{
+    DB_GetXAsset(ASSET_TYPE_MAP_ENTS, (XAssetHeader)mapEnts);
+}
+
+void __cdecl Load_GfxWorldAsset(XAssetHeader *gfxWorld)
+{
+    gfxWorld->xmodelPieces = DB_AddXAsset(ASSET_TYPE_GFXWORLD, (XAssetHeader)gfxWorld->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_GfxWorldAsset(GfxWorld *gfxWorld)
+{
+    DB_GetXAsset(ASSET_TYPE_GFXWORLD, (XAssetHeader)gfxWorld);
+}
+
+void __cdecl Load_LightDefAsset(XAssetHeader *lightDef)
+{
+    lightDef->xmodelPieces = DB_AddXAsset(ASSET_TYPE_LIGHT_DEF, (XAssetHeader)lightDef->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_LightDefAsset(GfxLightDef *lightDef)
+{
+    DB_GetXAsset(ASSET_TYPE_LIGHT_DEF, (XAssetHeader)lightDef);
+}
+
+void __cdecl Load_FontAsset(XAssetHeader *font)
+{
+    font->xmodelPieces = DB_AddXAsset(ASSET_TYPE_FONT, (XAssetHeader)font->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_FontAsset(Font_s *font)
+{
+    DB_GetXAsset(ASSET_TYPE_FONT, (XAssetHeader)font);
+}
+
+void __cdecl Load_MenuListAsset(XAssetHeader *menuList)
+{
+    menuList->xmodelPieces = DB_AddXAsset(ASSET_TYPE_MENULIST, (XAssetHeader)menuList->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_MenuListAsset(MenuList *menuList)
+{
+    DB_GetXAsset(ASSET_TYPE_MENULIST, (XAssetHeader)menuList);
+}
+
+void __cdecl Load_MenuAsset(XAssetHeader *menu)
+{
+    XAssetHeader header;
+    int32_t i;
+
+    header.menu = menu->menu;
+    menu->menu = DB_AddXAsset(ASSET_TYPE_MENU, *menu).menu;
+
+    for (i = 0; i < header.menu->itemCount; ++i)
+        header.menu->items[i]->parent = menu->menu;
+}
+
+void __cdecl Mark_MenuAsset(menuDef_t *menu)
+{
+    DB_GetXAsset(ASSET_TYPE_MENU, (XAssetHeader)menu);
+}
+
+void __cdecl Load_LocalizeEntryAsset(XAssetHeader *localize)
+{
+    localize->xmodelPieces = DB_AddXAsset(ASSET_TYPE_LOCALIZE_ENTRY, (XAssetHeader)localize->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_LocalizeEntryAsset(LocalizeEntry *localize)
+{
+    DB_GetXAsset(ASSET_TYPE_LOCALIZE_ENTRY, (XAssetHeader)localize);
+}
+
+void __cdecl Load_WeaponDefAsset(XAssetHeader *weapon)
+{
+    weapon->xmodelPieces = DB_AddXAsset(ASSET_TYPE_WEAPON, (XAssetHeader)weapon->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_WeaponDefAsset(WeaponDef *weapon)
+{
+    DB_GetXAsset(ASSET_TYPE_WEAPON, (XAssetHeader)weapon);
+}
+
+void __cdecl Load_FxEffectDefAsset(XAssetHeader *fx)
+{
+    fx->xmodelPieces = DB_AddXAsset(ASSET_TYPE_FX, (XAssetHeader)fx->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_FxEffectDefAsset(FxEffectDef *fx)
+{
+    DB_GetXAsset(ASSET_TYPE_FX, (XAssetHeader)fx);
+}
+
+void __cdecl Load_FxEffectDefFromName(const char **name)
+{
+    if (*name)
+        *(XAssetHeader *)name = DB_FindXAssetHeader(ASSET_TYPE_FX, *name);
+}
+
+void __cdecl Load_FxImpactTableAsset(XAssetHeader *impactFx)
+{
+    impactFx->xmodelPieces = DB_AddXAsset(ASSET_TYPE_IMPACT_FX, (XAssetHeader)impactFx->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_FxImpactTableAsset(FxImpactTable *impactFx)
+{
+    DB_GetXAsset(ASSET_TYPE_IMPACT_FX, (XAssetHeader)impactFx);
+}
+
+void __cdecl Load_RawFileAsset(XAssetHeader *rawfile)
+{
+    rawfile->xmodelPieces = DB_AddXAsset(ASSET_TYPE_RAWFILE, (XAssetHeader)rawfile->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_RawFileAsset(RawFile *rawfile)
+{
+    DB_GetXAsset(ASSET_TYPE_RAWFILE, (XAssetHeader)rawfile);
+}
+
+void __cdecl Load_StringTableAsset(XAssetHeader *stringTable)
+{
+    stringTable->xmodelPieces = DB_AddXAsset(ASSET_TYPE_STRINGTABLE, (XAssetHeader)stringTable->xmodelPieces).xmodelPieces;
+}
+
+void __cdecl Mark_StringTableAsset(StringTable *stringTable)
+{
+    DB_GetXAsset(ASSET_TYPE_STRINGTABLE, (XAssetHeader)stringTable);
+}
