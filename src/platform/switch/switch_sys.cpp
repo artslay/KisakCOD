@@ -8,6 +8,7 @@
 #include <cstdarg>
 #include <qcommon/qcommon.h>
 #include <qcommon/threads.h>
+#include <win32/win_local.h>
 
 static const auto g_sysStart = std::chrono::steady_clock::now();
 static std::mutex g_sysCritical[32];
@@ -79,7 +80,7 @@ void __cdecl Sys_Error(const char *error, ...)
     va_end(ap);
     std::printf("FATAL: %s\n", message);
     std::fflush(stdout);
-    appletRequestExit();
+    appletRequestExitToSelf();
     std::abort();
 }
 
