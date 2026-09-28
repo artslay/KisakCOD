@@ -102,7 +102,8 @@ void __cdecl Sys_LoadingKeepAlive() {}
 void __cdecl Sys_DestroySplashWindow() {}
 void __cdecl Sys_NormalExit() {}
 void __cdecl Sys_OpenURL(const char *, int) {}
-void __cdecl Sys_OutOfMemErrorInternal(const char *filename, int line)
+void NET_RestartDebug() {}
+
 {
     Sys_Error("Out of memory: %s:%d", filename, line);
 }
