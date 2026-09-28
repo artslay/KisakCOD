@@ -70,6 +70,11 @@ void __cdecl Hunk_AddAsset(XAssetHeader header, _DWORD *data)
     *(XAssetHeader *)(data[2] + 4 * (*data)++) = header;
 }
 
+int32_t __cdecl Hunk_Used()
+{
+    return hunk_high.permanent + hunk_low.permanent;
+}
+
 void Com_TouchMemory()
 {
     int32_t sum; // [esp+4h] [ebp-10h]
