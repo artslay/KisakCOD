@@ -933,7 +933,7 @@ void __cdecl Com_LoadSoundAliasFile(const char *loadspec, const char *loadspecCu
                                 loadspecCurGame,
                                 sourceFile,
                                 (char *)token,
-                                (snd_alias_members_t)(int)ptr[i + 1],
+                                static_cast<snd_alias_members_t>(reinterpret_cast<uintptr_t>(ptr[i + 1])),
                                 isFieldSet,
                                 &alias);
                         if (++i == iColCount)
@@ -978,7 +978,7 @@ void __cdecl Com_LoadSoundAliasFile(const char *loadspec, const char *loadspecCu
                         {
                             if (!I_stricmp(g_pszSndAliasKeyNames[i], token))
                             {
-                                ptr[iColCount + 1] = (const char *)i;
+                                ptr[iColCount + 1] = reinterpret_cast<const char *>(static_cast<uintptr_t>(i));
                                 if (i == 1)
                                 {
                                     bHasName = 1;
