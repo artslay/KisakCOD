@@ -716,7 +716,11 @@ void __cdecl SND_StopChannelAndPlayChainAlias(uint32_t chanId);
 void __cdecl StopChannel(int chanId);
 void __cdecl SND_AddPhysicsSound(snd_alias_list_t *aliasList, float *org);
 double __cdecl SND_GetVolumeNormalized();
+#ifdef __SWITCH__
+void __cdecl SND_SetHWND(void *hwnd);
+#else
 void __cdecl SND_SetHWND(HWND hwnd);
+#endif
 void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData);
 
 #ifdef KISAK_SP
