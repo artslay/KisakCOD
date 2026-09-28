@@ -14,7 +14,10 @@ extern FILE *FS_SwitchOpenRootFile(const char *path);
 #include <win32/win_net.h>
 #endif
 #include <qcommon/threads.h>
-#include <win32/win_local.h>\n#ifdef __SWITCH__\nextern void __cdecl NET_Sleep(int msec);\n#endif
+#include <win32/win_local.h>
+#ifdef __SWITCH__
+extern void __cdecl NET_Sleep(int msec);
+#endif
 #include <qcommon/com_bsp.h>
 #include <gfx_d3d/r_init.h>
 #ifndef __SWITCH__
