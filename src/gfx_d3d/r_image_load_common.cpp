@@ -5,7 +5,6 @@
 #include "r_init.h"
 
 #ifdef __SWITCH__
-#include <glad/glad.h>
 #include <algorithm>
 #endif
 
