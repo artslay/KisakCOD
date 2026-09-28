@@ -18,6 +18,7 @@
 #include "physicalmemory.h"
 
 #include <cstdint>
+#include <cstdlib>
 struct HunkUser
 {
     HunkUser *current;
@@ -70,10 +71,6 @@ void __cdecl Hunk_AddAsset(XAssetHeader header, _DWORD *data)
     *(XAssetHeader *)(data[2] + 4 * (*data)++) = header;
 }
 
-int32_t __cdecl Hunk_Used()
-{
-    return hunk_high.permanent + hunk_low.permanent;
-}
 
 void Com_TouchMemory()
 {
@@ -158,22 +155,35 @@ void* __cdecl Z_VirtualReserve(int32_t size)
 
     if (size <= 0)
         MyAssertHandler(".\\universal\\com_memory.cpp", 150, 0, "%s\n\t(size) = %i", "(size > 0)", size);
+#ifdef __SWITCH__
+    buf = std::malloc(static_cast<size_t>(size));
+#else
     buf = VirtualAlloc(0, size, 0x2000u, 4u);
+#endif
     if (!buf)
         MyAssertHandler(".\\universal\\com_memory.cpp", 208, 0, "%s", "buf");
-    return (uint32_t*)buf;
+    return buf;
 }
 
 void __cdecl Z_VirtualDecommitInternal(void* ptr, int32_t size)
 {
     if (size < 0)
         MyAssertHandler(".\\universal\\com_memory.cpp", 325, 0, "%s\n\t(size) = %i", "(size >= 0)", size);
+#ifdef __SWITCH__
+    (void)ptr;
+    (void)size;
+#else
     VirtualFree(ptr, size, 0x4000u);
+#endif
 }
 
 void __cdecl Z_VirtualFreeInternal(void* ptr)
 {
+#ifdef __SWITCH__
+    std::free(ptr);
+#else
     VirtualFree(ptr, 0, 0x8000u);
+#endif
 }
 
 void* __cdecl Z_TryVirtualAllocInternal(int32_t size)
@@ -190,7 +200,11 @@ void* __cdecl Z_TryVirtualAllocInternal(int32_t size)
 bool __cdecl Z_TryVirtualCommitInternal(void* ptr, int32_t size)
 {
     iassert(size >= 0);
+#ifdef __SWITCH__
+    return ptr != nullptr;
+#else
     return VirtualAlloc(ptr, size, 0x1000u, 4u) != 0;
+#endif
 }
 
 void __cdecl Z_VirtualCommitInternal(void* ptr, int32_t size)
@@ -546,7 +560,7 @@ uint32_t* __cdecl Hunk_AllocateTempMemoryHigh(int32_t size, const char* name)
         Com_Error(ERR_DROP, "Hunk_AllocateTempMemoryHigh: failed on %i bytes (total %i MB, low %i MB, high %i MB)", size, s_hunkTotal / 0x100000, hunk_low.temp / 0x100000, hunk_high.temp / 0x100000);
     }
     buf = (uintptr_t)&s_hunkData[s_hunkTotal - hunk_high.temp];
-    if ((((_BYTE)s_hunkTotal + (_BYTE)s_hunkData - LOBYTE(hunk_high.temp)) & 0xF) != 0)
+    if ((buf & 0xF) != 0)
         MyAssertHandler(".\\universal\\com_memory.cpp", 2074, 0, "%s", "!(((psize_int)buf) & 15)");
     if (endBuf != (uint8_t*)(buf & ~uintptr_t(0xFFF)))
         Z_VirtualCommit(
@@ -655,7 +669,7 @@ uint32_t* __cdecl Hunk_AllocateTempMemory(int32_t size, const char* name)
     }
     hdr = (hunkHeader_t*)buf;
     bufa = buf + 16;
-    if (((uint8_t)bufa & 0xF) != 0)
+    if ((reinterpret_cast<uintptr_t>(bufa) & 0xF) != 0)
         MyAssertHandler(".\\universal\\com_memory.cpp", 2303, 0, "%s", "!(((psize_int)buf) & 15)");
     commitSize = ((uintptr_t)&s_hunkData[hunk_low.temp + 4095] & ~uintptr_t(0xFFF)) - (uintptr_t)beginBuf;
     if (commitSize)
