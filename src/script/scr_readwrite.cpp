@@ -331,7 +331,7 @@ void __cdecl WriteStack(const VariableStackBuffer *stackBuf, MemoryFile *memFile
             v8 = v5 - 1;
             v9 = *(VariableUnion **)(buf + 1);
             buf += 5;
-            DoSaveEntryInternal(v7, v9, memFile);
+            DoSaveEntryInternal(v7, reinterpret_cast<uintptr_t>(v9), memFile);
             v5 = v8;
         } while (v8);
     }
@@ -417,7 +417,7 @@ void __cdecl Scr_DoLoadEntryInternal(VariableValue *value, MemoryFile *memFile)
             value->u.intValue = (unsigned __int16)Scr_ReadString(memFile);
             break;
         case VAR_VECTOR:
-            value->u.intValue = (int)Scr_ReadVec3(memFile);
+            value->u.vectorValue = Scr_ReadVec3(memFile);
             break;
         case VAR_FLOAT:
             value->u.floatValue = MemFile_ReadFloat(memFile);
@@ -429,10 +429,10 @@ void __cdecl Scr_DoLoadEntryInternal(VariableValue *value, MemoryFile *memFile)
             break;
         case VAR_CODEPOS:
         case VAR_FUNCTION:
-            value->u.intValue = (int)Scr_ReadCodepos(memFile);
+            value->u.codePosValue = Scr_ReadCodepos(memFile);
             break;
         case VAR_STACK:
-            value->u.intValue = (int)Scr_ReadStack(memFile);
+            value->u.stackValue = Scr_ReadStack(memFile);
             break;
         default:
             if (!alwaysfails)
@@ -1459,10 +1459,10 @@ void __cdecl AddSaveEntryInternal(unsigned int type, const VariableStackBuffer *
 {
     if (type == VAR_POINTER)
     {
-        if (u && !scrVarPub.saveIdMap[(unsigned int)u])
+        if (u && !scrVarPub.saveIdMap[static_cast<uint32_t>(reinterpret_cast<uintptr_t>(u))])
         {
-            scrVarPub.saveIdMap[(unsigned int)u] = ++scrVarPub.savecount;
-            *(unsigned __int16 *)((char *)scrVarPub.saveIdMapRev + __ROL4__(scrVarPub.savecount, 1)) = (unsigned __int16)u;
+            scrVarPub.saveIdMap[static_cast<uint32_t>(reinterpret_cast<uintptr_t>(u))] = ++scrVarPub.savecount;
+            *(unsigned __int16 *)((char *)scrVarPub.saveIdMapRev + __ROL4__(scrVarPub.savecount, 1)) = static_cast<uint16_t>(reinterpret_cast<uintptr_t>(u));
         }
     }
     else if (type == VAR_STACK)
@@ -1790,7 +1790,7 @@ void __cdecl DoSaveObjectInfo(unsigned int parentId, MemoryFile *memFile)
             w = v14->w;
             v18[0].u.intValue = v14->u.u.intValue;
             v18[0].type = (Vartype_t)(w.type & 0x1F);
-            DoSaveEntry(v18, (VariableValue *)((unsigned int)w.status >> 8), v9, memFile);
+            DoSaveEntry(v18, static_cast<uintptr_t>((w.status >> 8)), v9, memFile);
         }
         v17 = MemFile_GetUsedSize(memFile);
         //ProfMem_End(v17);
@@ -1897,7 +1897,7 @@ void __cdecl AddSaveStack(const VariableStackBuffer *stackBuf)
             buf += 5;
             if (v4 == VAR_POINTER)
             {
-                AddSaveObject((unsigned int)v6);
+                AddSaveObject(static_cast<uint32_t>(reinterpret_cast<uintptr_t>(v6)));
             }
             else if (v4 == VAR_STACK)
             {
@@ -1914,7 +1914,7 @@ void __cdecl AddSaveEntry(unsigned int type, const VariableStackBuffer *u)
 {
     if (type == VAR_POINTER)
     {
-        AddSaveObject((unsigned int)u);
+        AddSaveObject(static_cast<uint32_t>(reinterpret_cast<uintptr_t>(u)));
     }
     else if (type == VAR_STACK)
     {
@@ -1958,7 +1958,7 @@ void __cdecl Scr_SavePre(int sys)
     v6 = v4->w.type & VAR_MASK;
     if (v6 == VAR_POINTER)
     {
-        AddSaveObject((unsigned int)stackValue);
+        AddSaveObject(static_cast<uint32_t>(reinterpret_cast<uintptr_t>(stackValue)));
     }
     else if (v6 == VAR_STACK)
     {

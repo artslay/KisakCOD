@@ -951,7 +951,7 @@ void __cdecl Profile_Begin(int index)
     p->write.start[p->write.nesting].value[0] = qpc.QuadPart;
 }
 
-int __cdecl Profile_AddScriptName(char *profileName)
+int __cdecl Profile_AddScriptName(const char *profileName)
 {
     char *name; // [esp+0h] [ebp-8h]
     uint32_t i; // [esp+4h] [ebp-4h]

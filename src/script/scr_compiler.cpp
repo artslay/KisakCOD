@@ -2,6 +2,7 @@
 // (GPL v3.0) (Thanks)
 
 #include <universal/q_shared.h>
+#include <cstddef>
 #include "scr_compiler.h"
 #include "scr_main.h"
 #include "scr_debugger.h"
@@ -2178,7 +2179,7 @@ void __cdecl EmitIfElseStatement(
     sval_u *elseStatBlock)
 {
     unsigned int checksum; // [esp+0h] [ebp-24h]
-    char *offset; // [esp+4h] [ebp-20h]
+    ptrdiff_t offset; // [esp+4h] [ebp-20h]
     char *nextPos1; // [esp+8h] [ebp-1Ch]
     unsigned __int8 *pos1; // [esp+Ch] [ebp-18h]
     scr_block_s *childBlocks[2]; // [esp+10h] [ebp-14h] BYREF

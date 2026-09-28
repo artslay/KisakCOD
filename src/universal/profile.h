@@ -1405,7 +1405,7 @@ inline void __cdecl Profile_EndScripts(uint32_t profileFlags) {}
 inline void __cdecl Profile_EndScript(int profileIndex) {}
 inline void __cdecl Profile_BeginScripts(uint32_t profileFlags) {}
 inline void __cdecl Profile_BeginScript(int profileIndex) {}
-inline int __cdecl Profile_AddScriptName(char *profileName) { return 0; }
+inline int __cdecl Profile_AddScriptName(const char *profileName) { return 0; }
 inline void __cdecl Profile_ResetCountersForContext(int profileContext, int system) {}
 inline const char *__cdecl Profile_MissingEnd() { return ""; }
 
@@ -1435,7 +1435,7 @@ void __cdecl Profile_EndScripts(uint32_t profileFlags);
 void __cdecl Profile_EndScript(int profileIndex);
 void __cdecl Profile_BeginScripts(uint32_t profileFlags);
 void __cdecl Profile_BeginScript(int profileIndex);
-int __cdecl Profile_AddScriptName(char *profileName);
+int __cdecl Profile_AddScriptName(const char *profileName);
 void __cdecl Profile_ResetCountersForContext(int profileContext, int system);
 const char *__cdecl Profile_MissingEnd();
 
