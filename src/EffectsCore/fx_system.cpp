@@ -321,7 +321,7 @@ void __cdecl FX_RunGarbageCollection_FreeSpotLight(FxSystem *system, uint16_t ef
     }
 }
 
-void __cdecl FX_FreePool_Generic_FxTrail_(FxTrail *item, volatile long *firstFreeIndex, FxPool<FxTrail> *pool)
+void __cdecl FX_FreePool_Generic_FxTrail_(FxTrail *item, volatile int32_t *firstFreeIndex, FxPool<FxTrail> *pool)
 {
     volatile uint32_t freedIndex; // [esp+4h] [ebp-4h]
 
@@ -405,9 +405,9 @@ void __cdecl FX_SpawnEffect_AllocTrails(FxSystem *system, FxEffect *effect)
 }
 
 FxPool<FxTrail>* __cdecl FX_AllocPool_Generic_FxTrail_(
-    volatile long* firstFreeIndex,
+    volatile int32_t* firstFreeIndex,
     FxPool<FxTrail>* pool,
-    volatile long* activeCount)
+    volatile int32_t* activeCount)
 {
     FxPool<FxTrail>* item; // [esp+0h] [ebp-8h]
     uint32_t itemIndex; // [esp+4h] [ebp-4h]
@@ -445,9 +445,9 @@ FxPool<FxTrail>* __cdecl FX_AllocPool_Generic_FxTrail_(
 }
 
 FxPool<FxTrailElem>* __cdecl FX_AllocPool_Generic_FxTrailElem_(
-    volatile long * firstFreeIndex,
+    volatile int32_t * firstFreeIndex,
     FxPool<FxTrailElem>* pool,
-    volatile long * activeCount)
+    volatile int32_t * activeCount)
 {
     FxPool<FxTrailElem>* item; // [esp+0h] [ebp-8h]
     uint32_t itemIndex; // [esp+4h] [ebp-4h]
@@ -485,9 +485,9 @@ FxPool<FxTrailElem>* __cdecl FX_AllocPool_Generic_FxTrailElem_(
 }
 
 FxPool<FxElem>* __cdecl FX_AllocPool_Generic_FxElem_(
-    volatile long* firstFreeIndex,
+    volatile int32_t* firstFreeIndex,
     FxPool<FxElem>* pool,
-    volatile long * activeCount)
+    volatile int32_t * activeCount)
 {
     FxPool<FxElem>* item; // [esp+0h] [ebp-8h]
     uint32_t itemIndex; // [esp+4h] [ebp-4h]
@@ -523,7 +523,7 @@ FxPool<FxElem>* __cdecl FX_AllocPool_Generic_FxElem_(
     }
 }
 
-void __cdecl FX_FreePool_Generic_FxElem_(FxElem* item, volatile long* firstFreeIndex, FxPool<FxElem>* pool)
+void __cdecl FX_FreePool_Generic_FxElem_(FxElem* item, volatile int32_t* firstFreeIndex, FxPool<FxElem>* pool)
 {
     volatile uint32_t freedIndex; // [esp+4h] [ebp-4h]
 
@@ -550,7 +550,7 @@ void __cdecl FX_FreePool_Generic_FxElem_(FxElem* item, volatile long* firstFreeI
 
 void __cdecl FX_FreePool_Generic_FxTrailElem_(
     FxTrailElem* item,
-    volatile long* firstFreeIndex,
+    volatile int32_t* firstFreeIndex,
     FxPool<FxTrailElem>* pool)
 {
     volatile uint32_t freedIndex; // [esp+4h] [ebp-4h]
@@ -601,7 +601,7 @@ FxEffect* __cdecl FX_SpawnEffect(
     uint16_t owner,
     uint32_t markEntnum)
 {
-    volatile long* Destination; // [esp+Ch] [ebp-34h]
+    volatile int32_t* Destination; // [esp+Ch] [ebp-34h]
     uint16_t effectHandle; // [esp+1Ch] [ebp-24h]
     int32_t allocIndex; // [esp+20h] [ebp-20h]
     FxEffect* ownerEffect; // [esp+28h] [ebp-18h]
@@ -1015,7 +1015,7 @@ void __cdecl FX_PlayBoltedEffect(
 }
 void __cdecl FX_RetriggerEffect(int32_t localClientNum, FxEffect* effect, int32_t msecBegin)
 {
-    volatile long* Destination; // [esp+1Ch] [ebp-54h]
+    volatile int32_t* Destination; // [esp+1Ch] [ebp-54h]
     volatile LONG Comperand; // [esp+20h] [ebp-50h]
     uint16_t lastOldTrailElemHandle[8]; // [esp+34h] [ebp-3Ch] BYREF
     int32_t trailCount; // [esp+44h] [ebp-2Ch] BYREF
