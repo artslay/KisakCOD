@@ -5,6 +5,7 @@
 #include <universal/com_files.h>
 
 void *(__cdecl *physAlloc)(int);
+static const char *s_physPresetSndAliasPrefix = "";
 
 cspField_t physPresetFields[10] =
 {
@@ -28,7 +29,7 @@ struct PhysPresetLite // LWSS add custom struct to adhere to the above field off
     int isFrictionInfinity; // 12
     float bulletForceScale; // 16
     float explosiveForceScale; // 20
-    const char *sndAliasPrefix; // 24
+    uint32_t sndAliasPrefix; // 24
     float piecesSpreadFraction; // 28
     float piecesUpwardVelocity; // 32
     bool tempDefaultToCylinder; // 36
@@ -51,11 +52,13 @@ void __cdecl PhysPreset_Strcpy(uint8_t *member, const char *keyValue)
             v2 = *v4;
             *v3++ = *v4++;
         } while (v2);
-        *(_DWORD *)member = (_DWORD)buf;
+        s_physPresetSndAliasPrefix = buf;
+        *reinterpret_cast<uint32_t *>(member) = 0;
     }
     else
     {
-        *(_DWORD *)member = (_DWORD)"";
+        s_physPresetSndAliasPrefix = "";
+        *reinterpret_cast<uint32_t *>(member) = 0;
     }
 }
 
@@ -91,7 +94,8 @@ PhysPreset *__cdecl PhysPresetLoadFile(const char *name, void *(__cdecl *Alloc)(
                     if (Info_Validate(buffer))
                     {
                         memset(&pStruct, 0, sizeof(pStruct));
-                        pStruct.sndAliasPrefix = "";
+                        pStruct.sndAliasPrefix = 0;
+                        s_physPresetSndAliasPrefix = "";
                         physAlloc = Alloc;
                         if (ParseConfigStringToStruct((unsigned char*)&pStruct, physPresetFields, 10, buffer, 0, 0, PhysPreset_Strcpy))
                         {
@@ -111,7 +115,7 @@ PhysPreset *__cdecl PhysPresetLoadFile(const char *name, void *(__cdecl *Alloc)(
 
                             physPreset->bulletForceScale = pStruct.bulletForceScale;
                             physPreset->explosiveForceScale = pStruct.explosiveForceScale;
-                            physPreset->sndAliasPrefix = pStruct.sndAliasPrefix;
+                            physPreset->sndAliasPrefix = s_physPresetSndAliasPrefix;
                             physPreset->piecesSpreadFraction = pStruct.piecesSpreadFraction;
                             physPreset->piecesUpwardVelocity = pStruct.piecesUpwardVelocity;
                             physPreset->tempDefaultToCylinder = pStruct.tempDefaultToCylinder;

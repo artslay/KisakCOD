@@ -929,7 +929,7 @@ void __cdecl Phys_ObjAddGeomBrush(PhysWorld worldIndex, dxBody *id, const cbrush
         MyAssertHandler(".\\physics\\phys_ode.cpp", 798, 0, "%s", "id");
     body = id;
     geomState.type = PHYS_GEOM_BRUSH;
-    geomState.u.cylinderState.direction = (int)brush;
+    geomState.u.brushState.u.brush = brush;
     geomState.u.cylinderState.radius = physMass->momentsOfInertia[0];
     geomState.u.cylinderState.halfHeight = physMass->momentsOfInertia[1];
     geomState.u.brushState.momentsOfInertia[2] = physMass->momentsOfInertia[2];
@@ -1213,7 +1213,7 @@ void __cdecl Phys_ObjAddForce(PhysWorld worldIndex, dxBody *id, float *worldPos,
     dBodyEnable(id);
     userData = (PhysObjUserData *)dBodyGetData(id);
     odeWorld = ODE_BodyGetWorld(id);
-    userData->timeLastAsleep = (int)physGlob.space[51 * Phys_IndexFromODEWorld(odeWorld) - 152];
+    userData->timeLastAsleep = physGlob.worldData[Phys_IndexFromODEWorld(odeWorld)].timeLastUpdate;
 }
 
 int __cdecl Phys_IndexFromODEWorld(dxWorld *world)

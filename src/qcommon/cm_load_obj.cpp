@@ -54,6 +54,20 @@ struct DiskCollAabbTree // sizeof=0x20
     DiskCollAabbTree_u u;
 };
 
+static HunkUser *s_cmLoadTempUser = nullptr;
+
+static void CM_LoadTempMemoryReset(HunkUser *user)
+{
+    s_cmLoadTempUser = user;
+    Hunk_UserReset(user);
+}
+
+static uint8_t *CM_LoadTempMalloc(uint32_t size)
+{
+    iassert(s_cmLoadTempUser);
+    return static_cast<uint8_t *>(Hunk_UserAlloc(s_cmLoadTempUser, size, 32));
+}
+
 struct dbrush_t // sizeof=0x4
 {
     __int16 numSides;
@@ -803,8 +817,8 @@ void __cdecl CMod_LoadBrushRelated(uint32_t version, bool usePvs)
         CMod_LoadLeafs_Version14(usePvs);
     CMod_LoadSubmodels();
     user = Hunk_UserCreate(0x400000, "CMod_LoadBrushRelated", 1, 0, 26);
-    TempMemoryReset(user);
-    cm.leafbrushNodes = (cLeafBrushNode_s*)(TempMalloc(0) - 20);
+    CM_LoadTempMemoryReset(user);
+    cm.leafbrushNodes = reinterpret_cast<cLeafBrushNode_s *>(CM_LoadTempMalloc(0) - 20);
     if (version > 0xE)
         CMod_LoadLeafBrushNodes();
     else
@@ -812,12 +826,13 @@ void __cdecl CMod_LoadBrushRelated(uint32_t version, bool usePvs)
     CMod_LoadSubmodelBrushNodes();
     CM_InitBoxHull();
     ++cm.leafbrushNodes;
-    leafbrushNodesCount = (TempMalloc(0) - (char*)cm.leafbrushNodes) / 20;
+    leafbrushNodesCount = (CM_LoadTempMalloc(0) - reinterpret_cast<uint8_t *>(cm.leafbrushNodes)) / 20;
     cm.leafbrushNodesCount = leafbrushNodesCount + 1;
     leafbrushNodes = (cLeafBrushNode_s*)CM_Hunk_Alloc(20 * (leafbrushNodesCount + 1), "CMod_LoadBrushRelated", 26);
     memcpy(&leafbrushNodes[1].axis, &cm.leafbrushNodes->axis, 20 * leafbrushNodesCount);
     cm.leafbrushNodes = leafbrushNodes;
     Hunk_UserDestroy(user);
+    s_cmLoadTempUser = nullptr;
 }
 
 uint32_t CMod_LoadSubmodels()
@@ -979,9 +994,9 @@ void __cdecl CMod_PartionLeafBrushes(uint16_t *leafBrushes, int numLeafBrushes, 
     }
 }
 
-uint32_t __cdecl CM_Hunk_AllocateTempMemoryHigh(int size, const char *name)
+uint8_t *__cdecl CM_Hunk_AllocateTempMemoryHigh(int size, const char *name)
 {
-    return Hunk_AllocateTempMemoryHigh(size, name);
+    return reinterpret_cast<uint8_t *>(Hunk_AllocateTempMemoryHigh(size, name));
 }
 
 cLeafBrushNode_s *__cdecl CMod_PartionLeafBrushes_r(
@@ -1150,7 +1165,7 @@ cLeafBrushNode_s *__cdecl CMod_AllocLeafBrushNode()
 {
     cLeafBrushNode_s *result; // eax
 
-    result = (cLeafBrushNode_s*)TempMalloc(0x14u);
+    result = reinterpret_cast<cLeafBrushNode_s *>(CM_LoadTempMalloc(0x14u));
     result->axis = 0;
     result->leafBrushCount = 0;
     result->contents = 0;

@@ -2,6 +2,18 @@
 #include "cmd.h"
 
 #include <universal/assertive.h>
+
+#ifdef __SWITCH__
+#include <cerrno>
+static int Kisak_fopen_s(FILE **file, const char *filename, const char *mode)
+{
+    if (!file)
+        return EINVAL;
+    *file = fopen(filename, mode);
+    return *file ? 0 : errno;
+}
+#define fopen_s Kisak_fopen_s
+#endif
 #include <universal/q_parse.h>
 
 #include "qcommon.h"
