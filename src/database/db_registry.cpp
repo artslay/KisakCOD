@@ -1560,7 +1560,7 @@ static XAssetHeader __cdecl node1_(void *pool)
     return (XAssetHeader)pool;
 }
 
-static static void __cdecl DB_FreeXAssetHeader_StringTable_(void *arg, XAssetHeader header);
+static void __cdecl DB_FreeXAssetHeader_StringTable_(void *arg, XAssetHeader header);
 void __cdecl R_EnumMaterials(void(__cdecl *func)(Material *, void *), void *data);
 void __cdecl R_EnumTechniqueSets(void(__cdecl *func)(MaterialTechniqueSet *, void *), void *data);
 void __cdecl R_EnumImages(void(__cdecl *func)(GfxImage *, void *), void *data);
@@ -1749,14 +1749,14 @@ static void __cdecl DB_DynamicCloneMenu(XAssetHeader from, XAssetHeader to, int3
     windowDef_t *fromWindow;
 
     to.xmodelPieces[6].pieces = from.xmodelPieces[6].pieces;
-    for (int32_t toIndex = 0; toIndex < (int)to.xmodelPieces[13].pieces; ++toIndex)
+    for (int32_t toIndex = 0; toIndex < (int)(uintptr_t)to.xmodelPieces[13].pieces; ++toIndex)
     {
-        toWindow = *reinterpret_cast<windowDef_t **>(reinterpret_cast<uintptr_t>(to.xmodelPieces[23].numpieces) + sizeof(windowDef_t *) * static_cast<uintptr_t>(toIndex));
+        toWindow = *reinterpret_cast<windowDef_t **>(static_cast<uintptr_t>(static_cast<uint32_t>(to.xmodelPieces[23].numpieces)) + sizeof(windowDef_t *) * static_cast<uintptr_t>(toIndex));
         if (toWindow->name)
         {
-            for (int32_t fromIndex = 0; fromIndex < (int)from.xmodelPieces[13].pieces; ++fromIndex)
+            for (int32_t fromIndex = 0; fromIndex < (int)(uintptr_t)from.xmodelPieces[13].pieces; ++fromIndex)
             {
-                fromWindow = *reinterpret_cast<windowDef_t **>(reinterpret_cast<uintptr_t>(from.xmodelPieces[23].numpieces) + sizeof(windowDef_t *) * static_cast<uintptr_t>(fromIndex));
+                fromWindow = *reinterpret_cast<windowDef_t **>(static_cast<uintptr_t>(static_cast<uint32_t>(from.xmodelPieces[23].numpieces)) + sizeof(windowDef_t *) * static_cast<uintptr_t>(fromIndex));
                 if (fromWindow->name && !strcmp(fromWindow->name, toWindow->name))
                 {
                     toWindow->dynamicFlags[0] = fromWindow->dynamicFlags[0];
