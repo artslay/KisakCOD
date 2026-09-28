@@ -29,8 +29,8 @@ void __cdecl FX_Restore(int32_t clientIndex, MemoryFile *memFile)
     FX_FixupEffectDefHandles((FxSystem *)p, &table);
     MemFile_ReadData(memFile, 4, (uint8_t *)&v2);
     v4 = v2;
-    relocationDistance = (int)p - v2;
-    FX_RelocateSystem((FxSystem *)p, (int)p - v2);
+    relocationDistance = static_cast<int32_t>(reinterpret_cast<uintptr_t>(p) - static_cast<uintptr_t>(static_cast<uint32_t>(v2)));
+    FX_RelocateSystem((FxSystem *)p, relocationDistance);
     FX_RestorePhysicsData((FxSystem *)p, memFile);
     *((_BYTE *)p + 2526) = 0;
 }
@@ -86,7 +86,7 @@ void __cdecl FX_FixupEffectDefHandles(FxSystem *system, FxEffectDefTable *table)
     for (activeIndex = system->firstActiveEffect; activeIndex != system->firstNewEffect; ++activeIndex)
     {
         effect = FX_EffectFromHandle(system, system->allEffectHandles[activeIndex & 0x3FF]);
-        effectDef = FX_FindEffectDefInTable(table, (uint32_t)effect->def);
+        effectDef = FX_FindEffectDefInTable(table, static_cast<uint32_t>(reinterpret_cast<uintptr_t>(effect->def)));
         if (!effectDef)
             MyAssertHandler(".\\EffectsCore\\fx_archive.cpp", 139, 0, "%s", "effectDef");
         effect->def = effectDef;
@@ -152,7 +152,7 @@ void __cdecl FX_RestorePhysicsData(FxSystem *system, MemoryFile *memFile)
             elemHandleNext = elem->item.nextElemHandleInEffect;
             if (elemDef->elemType == 5 && (elemDef->flags & 0x8000000) != 0)
             {
-                elem->item.physObjId = (int)Phys_ObjLoad(PHYS_WORLD_FX, memFile);
+                elem->item.physObjId = static_cast<int32_t>(reinterpret_cast<uintptr_t>(Phys_ObjLoad(PHYS_WORLD_FX, memFile)));
                 visuals = FX_GetElemVisuals(
                     elemDef,
                     (296 * elem->item.sequence + elem->item.msecBegin + (uint32_t)effect->randomSeed) % 0x1DF).model;
