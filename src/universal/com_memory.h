@@ -88,3 +88,5 @@ const char* CopyString(const char* in);
 const char* CopyString(char* in);
 void __cdecl ReplaceString(const char** str, const char* in);
 void FreeString(const char* str);
+
+void* __cdecl Hunk_FindDataForFile(int type, const char* name);
