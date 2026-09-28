@@ -1089,8 +1089,8 @@ int __cdecl PC_ExpandBuiltinDefine(
     char v6; // [esp+47h] [ebp-21h]
     token_s *v7; // [esp+4Ch] [ebp-1Ch]
     script_s *scriptstack; // [esp+50h] [ebp-18h]
-    __int64 t; // [esp+58h] [ebp-10h] BYREF
-    char *curtime; // [esp+60h] [ebp-8h]
+    time_t t; // [esp+58h] [ebp-10h] BYREF
+    const char *curtime; // [esp+60h] [ebp-8h]
     token_s *token; // [esp+64h] [ebp-4h]
 
     token = PC_CopyToken(deftoken);
@@ -1118,22 +1118,20 @@ int __cdecl PC_ExpandBuiltinDefine(
         token->type = 4;
         goto LABEL_8;
     case 3:
-        t = _time64(0);
-        curtime = _ctime64(&t);
+        t = time(nullptr);
+        curtime = ctime(&t);
         strcpy(token->string, "\"");
         strncat(token->string, curtime + 4, 7u);
         strncat(&token->string[7], curtime + 20, 4u);
         strcat(token->string, "\"");
-        free(curtime);
         token->type = 4;
         goto LABEL_8;
     case 4:
-        t = _time64(0);
-        curtime = _ctime64(&t);
+        t = time(nullptr);
+        curtime = ctime(&t);
         strcpy(token->string, "\"");
         strncat(token->string, curtime + 11, 8u);
         strcat(token->string, "\"");
-        free(curtime);
         token->type = 4;
     LABEL_8:
         token->subtype = strlen(token->string);
@@ -1823,56 +1821,47 @@ int __cdecl PC_AddDefine(source_s *source, char *string)
 
 define_s *__cdecl PC_CopyDefine(source_s *source, define_s *define)
 {
-    char v2; // dl
-    _BYTE *v4; // [esp+8h] [ebp-28h]
-    char *name; // [esp+Ch] [ebp-24h]
-    uint32_t *newdefine; // [esp+20h] [ebp-10h]
-    token_s *newtoken; // [esp+24h] [ebp-Ch]
-    token_s *newtokena; // [esp+24h] [ebp-Ch]
-    token_s *token; // [esp+28h] [ebp-8h]
-    token_s *tokena; // [esp+28h] [ebp-8h]
-    token_s *lasttoken; // [esp+2Ch] [ebp-4h]
-    token_s *lasttokena; // [esp+2Ch] [ebp-4h]
+    (void)source;
 
-    newdefine = GetMemory(strlen(define->name) + 33);
-    *newdefine = (uint32_t)(newdefine + 8);
-    name = define->name;
-    v4 = (_BYTE *)*newdefine;
-    do
+    const size_t nameLen = strlen(define->name) + 1;
+    define_s *newdefine = reinterpret_cast<define_s *>(GetMemory(sizeof(define_s) + nameLen));
+    char *name = reinterpret_cast<char *>(newdefine + 1);
+
+    newdefine->name = name;
+    I_strncpyz(name, define->name, nameLen);
+    newdefine->flags = define->flags;
+    newdefine->builtin = define->builtin;
+    newdefine->numparms = define->numparms;
+    newdefine->next = nullptr;
+    newdefine->hashnext = nullptr;
+    newdefine->parms = nullptr;
+    newdefine->tokens = nullptr;
+
+    token_s *lasttoken = nullptr;
+    for (token_s *token = define->tokens; token; token = token->next)
     {
-        v2 = *name;
-        *v4++ = *name++;
-    } while (v2);
-    newdefine[1] = define->flags;
-    newdefine[2] = define->builtin;
-    newdefine[3] = define->numparms;
-    newdefine[6] = 0;
-    newdefine[7] = 0;
-    newdefine[5] = 0;
-    lasttoken = 0;
-    for (token = define->tokens; token; token = token->next)
-    {
-        newtoken = PC_CopyToken(token);
-        newtoken->next = 0;
+        token_s *newtoken = PC_CopyToken(token);
+        newtoken->next = nullptr;
         if (lasttoken)
             lasttoken->next = newtoken;
         else
-            newdefine[5] = (uint32_t)newtoken;
+            newdefine->tokens = newtoken;
         lasttoken = newtoken;
     }
-    newdefine[4] = 0;
-    lasttokena = 0;
-    for (tokena = define->parms; tokena; tokena = tokena->next)
+
+    token_s *lastparam = nullptr;
+    for (token_s *param = define->parms; param; param = param->next)
     {
-        newtokena = PC_CopyToken(tokena);
-        newtokena->next = 0;
-        if (lasttokena)
-            lasttokena->next = newtokena;
+        token_s *newparam = PC_CopyToken(param);
+        newparam->next = nullptr;
+        if (lastparam)
+            lastparam->next = newparam;
         else
-            newdefine[4] = (uint32_t)newtokena;
-        lasttokena = newtokena;
+            newdefine->parms = newparam;
+        lastparam = newparam;
     }
-    return (define_s *)newdefine;
+
+    return newdefine;
 }
 
 define_s *globaldefines;
@@ -4434,7 +4423,7 @@ void __cdecl free_expression(statement_s *statement)
         {
             entry = statement->entries[entryNum];
             if (entry->type == 1 && entry->data.op == OP_MULTIPLY)
-                Z_Free((char *)entry->data.operand.internals.intVal, 34);
+                Z_Free((char *)entry->data.operand.internals.string, 34);
             Z_Free((char *)entry, 34);
             statement->entries[entryNum] = 0;
         }
@@ -4535,8 +4524,9 @@ void __cdecl Statement_AddStringOperand(statement_s *statement, char *str)
     entry = (expressionEntry *)Z_Malloc(12, "Statement_AddStringOperand", 34);
     entry->type = 1;
     entry->data.op = OP_MULTIPLY;
-    entry->data.operand.internals.intVal = (int)Z_Malloc(strlen(str) + 1, "Statement_AddStringOperand", 34);
-    I_strncpyz((char *)entry->data.operand.internals.intVal, str, strlen(str) + 1);
+    entry->data.operand.internals.string =
+        reinterpret_cast<char *>(Z_Malloc(strlen(str) + 1, "Statement_AddStringOperand", 34));
+    I_strncpyz(const_cast<char *>(entry->data.operand.internals.string), str, strlen(str) + 1);
     Statement_AddEntry(statement, entry);
 }
 
