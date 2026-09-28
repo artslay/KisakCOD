@@ -638,20 +638,20 @@ LABEL_6:
                     *(&v11 + 4 * v21) = *i;
                     *(&planeIndex + 4 * v21) = v15;
                     v14[4 * v21 - 1] = v14[4 * v20 - 1] + 1;
-                    v14[4 * v21++] = (uint32_t)&v11 + 4 * v20; // KISAKTODO: sus cast
+                    v14[4 * v21++] = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&v11) + 4 * v20); // KISAKTODO: sus cast
                     if (v15 == v19)
                         break;
                 }
             }
         }
         v9 = &v11 + 4 * v21 - 4;
-        if ((int)v9[1] != v19) // KISAKTODO: sus cast
+        if (static_cast<int>(reinterpret_cast<uintptr_t>(v9[1])) != v19) // KISAKTODO: sus cast
             MyAssertHandler("..\\common\\brush_edges.cpp", 318, 1, "%s", "node->plane == goalPlane");
-        *resultCycleCount = (int)(v9[2]->xyz + 1);
+        *resultCycleCount = static_cast<int>(reinterpret_cast<uintptr_t>(v9[2]->xyz + 1));
         v16 = v9[2];
         while (v9)
         {
-            resultCycle[(uint32_t)v16] = *v9;
+            resultCycle[static_cast<uint32_t>(reinterpret_cast<uintptr_t>(v16))] = *v9;
             v16 = (v16 - 1);
             v9 = &v9[3];
         }
@@ -862,7 +862,7 @@ int32_t __cdecl NumberOfUniquePoints(const SimplePlaneIntersection **pts, int32_
         for (j = 0; j < v4 && !VecNCompareCustomEpsilon(pts[i]->xyz, (const float*)v3[j], 0.0099999998f, 3); ++j) // KISAKTODO: more sus casts
             ;
         if (j == v4)
-            v3[v4++] = (uint32_t)pts[i];
+            v3[v4++] = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(pts[i]));
     }
     return v4;
 }
