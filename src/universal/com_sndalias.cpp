@@ -119,13 +119,13 @@ void __cdecl Com_InitSoundDevGuiGraphs()
 void __cdecl Com_VolumeFalloffCurveGraphEventCallback(const DevGraph *graph, DevEventType event, int i)
 {
     char string[8196]; // [esp+14h] [ebp-2030h] BYREF
-    int data; // [esp+2018h] [ebp-2Ch]
+    int32_t data; // [esp+2018h] [ebp-2Ch]
     char dest[32]; // [esp+201Ch] [ebp-28h] BYREF
     //int i; // [esp+2040h] [ebp-4h]
 
     if (!graph)
         MyAssertHandler(".\\universal\\com_sndalias.cpp", 213, 0, "%s", "graph");
-    data = (int)graph->data;
+    data = static_cast<int32_t>(reinterpret_cast<uintptr_t>(graph->data));
     if (data <= 0 || data >= 16)
         MyAssertHandler(
             ".\\universal\\com_sndalias.cpp",
@@ -173,7 +173,7 @@ void __cdecl Com_GetGraphList(XAssetHeader header, int *data)
             graph->knots = (float (*)[2]) & header.xmodelPieces->pieces;
             graph->knotCount = &header.xmodelPieces->numpieces;
             graph->eventCallback = Com_VolumeFalloffCurveGraphEventCallback;
-            graph->data = (void *)index;
+            graph->data = reinterpret_cast<void *>(static_cast<uintptr_t>(index));
             graph->disableEditingEndPoints = 1;
             DevGui_AddGraph(devguiPath, graph);
             ++*count;
