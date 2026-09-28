@@ -1308,7 +1308,7 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
 
         while (animPartIndex < v56)
         {
-            tableSize = **(uint16_t **)&dest[8 * animPartIndex + 64];
+            tableSize = reinterpret_cast<XAnimPartTrans *>(transPtrs[animPartIndex])->size;
             ++dataShortCount;
             if (useSmallIndices)
             {
