@@ -25,7 +25,7 @@ void __cdecl Profile_EndScripts(uint32_t) {}
 void __cdecl Profile_EndScript(int) {}
 void __cdecl Profile_BeginScripts(uint32_t) {}
 void __cdecl Profile_BeginScript(int) {}
-int __cdecl Profile_AddScriptName(char *) { return 0; }
+int __cdecl Profile_AddScriptName(const char *) { return 0; }
 void __cdecl Profile_ResetCountersForContext(int, int) {}
 const char *__cdecl Profile_MissingEnd() { return ""; }
 void __cdecl Profile_Begin(int) {}
