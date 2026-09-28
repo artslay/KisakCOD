@@ -176,7 +176,7 @@ void SL_ShutdownSystem(uint32_t user)
 			if (((uint8_t)user & refStr->user) == 0)
 				break;
 
-			refStr->data = ((uint8_t)(~(BYTE)user & HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
+			refStr->data = ((uint8_t)(~(uint8_t)user & HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
 
 			scrStringGlob.nextFreeEntry = 0;
 			SL_RemoveRefToString(scrStringGlob.hashTable[hash].u.prev);
@@ -216,7 +216,7 @@ void SL_TransferSystem(uint32_t from, uint32_t to)
 			RefString* refStr = GetRefString(scrStringGlob.hashTable[hash].u.prev);
 			if (((uint8_t)from & refStr->user) != 0)
 			{
-				refStr->data = ((uint8_t)(~(BYTE)from & HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
+				refStr->data = ((uint8_t)(~(uint8_t)from & HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
 				refStr->data = ((uint8_t)(to | HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
 			}
 		}

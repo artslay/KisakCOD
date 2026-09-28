@@ -36,6 +36,19 @@
 
 #include <setjmp.h>
 
+#ifdef KISAK_SWITCH
+#include <chrono>
+static inline uint64_t Kisak_ProfileClock()
+{
+    return static_cast<uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count());
+}
+#else
+static inline uint64_t Kisak_ProfileClock()
+{
+    return Kisak_ProfileClock();
+}
+#endif
+
 
 void Log(char const *format, ...)
 {
@@ -183,8 +196,8 @@ int __cdecl Scr_GetFunctionHandle(const char* filename, const char* name)
             "pos.type == VAR_CODE::pos || pos.type == VAR_DEVELOPER_CODE::pos");
     if (!Scr_IsInOpcodeMemory(v3.u.codePosValue))
         return 0;
-    result = v3.u.intValue - (uint32_t)scrVarPub.programBuffer;
-    if ((const char*)v3.u.intValue == scrVarPub.programBuffer)
+    result = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(v3.u.codePosValue) - reinterpret_cast<uintptr_t>(scrVarPub.programBuffer));
+    if (v3.u.codePosValue == scrVarPub.programBuffer)
         MyAssertHandler(".\\script\\scr_main.cpp", 106, 0, "%s", "result");
     return result;
 }
@@ -1464,7 +1477,7 @@ void __cdecl VM_TrimStack(uint32_t startLocalId, VariableStackBuffer* stackValue
                     Scr_SetThreadNotifyName(startLocalId, 0);
                     stackValue->pos = 0;
                     tempValue.type = VAR_STACK;
-                    tempValue.u.intValue = (int)stackValue;
+                    tempValue.u.stackValue = stackValue;
                     NewVariable = GetNewVariable(startLocalId, 0x18001u);
                     SetNewVariableValue(NewVariable, &tempValue);
                 }
@@ -2537,7 +2550,7 @@ SafeSetVariableFieldCached0:
                         Scr_DumpScriptVariablesDefault();
                         Scr_Error("exceeded maximum number of script variables");
                     }
-                    Sys_Error("exceeded maximum number of script variables");
+                    Com_Error(ERR_FATAL, "exceeded maximum number of script variables");
                 }
                 fs.top->type = VAR_CODEPOS;
             }
@@ -2629,9 +2642,9 @@ CallBuiltIn:
             }
             scrVmPub.top = fs.top;
             builtInTime = scrVmDebugPub.builtInTime;
-            time = __rdtsc();
+            time = Kisak_ProfileClock();
             ((void (*)(void))scrCompilePub.func_table[builtinIndex])();
-            timeSpent = __rdtsc() - time;
+            timeSpent = Kisak_ProfileClock() - time;
             scrVmDebugPub.builtInTime = timeSpent + builtInTime;
             scrVmDebugPub.func_table[builtinIndex].prof += timeSpent;
             ++scrVmDebugPub.func_table[builtinIndex].usage;
@@ -2677,9 +2690,9 @@ CallBuiltinMethod:
                     scrVmPub.top = fs.top - 1;
                 }
                 builtInTime = scrVmDebugPub.builtInTime;
-                time = __rdtsc();
+                time = Kisak_ProfileClock();
                 ((void (*)(scr_entref_t))scrCompilePub.func_table[builtinIndex])(entref);
-                timeSpent = __rdtsc() - time;
+                timeSpent = Kisak_ProfileClock() - time;
                 scrVmDebugPub.builtInTime = timeSpent + builtInTime;
                 scrVmDebugPub.func_table[builtinIndex].prof += timeSpent;
                 ++scrVmDebugPub.func_table[builtinIndex].usage;
@@ -3031,7 +3044,7 @@ function_call:
                     Scr_DumpScriptVariablesDefault();
                     Scr_Error("exceeded maximum number of script variables");
                 }
-                Sys_Error("exceeded maximum number of script variables");
+                Com_Error(ERR_FATAL, "exceeded maximum number of script variables");
             }
             if ((uint32_t)(Sys_Milliseconds() - scrVmGlob.starttime) >= INFINITE_LOOP_TIMEOUT)
             {
@@ -3537,10 +3550,10 @@ uint32_t __cdecl VM_Execute(uint32_t localId, const char *pos, uint32_t paramcou
         if (scrVarPub.bScriptProfile)
         {
             scrVmDebugPub.builtInTime = 0;
-            time = __rdtsc();
+            time = Kisak_ProfileClock();
             localIda = VM_ExecuteInternal();
             if (!scrVmPub.function_count)
-                Scr_AddProfileTime(pos, __rdtsc() - time, scrVmDebugPub.builtInTime);
+                Scr_AddProfileTime(pos, Kisak_ProfileClock() - time, scrVmDebugPub.builtInTime);
         }
         else
         {
@@ -3961,7 +3974,7 @@ BOOL Scr_ErrorInternal()
             longjmp(g_script_error[g_script_error_level], -1); // KISAKTRYCATCH
         }
     error_2:
-        Sys_Error("%s", scrVarPub.error_message);
+        Com_Error(ERR_FATAL, "%s", scrVarPub.error_message);
     }
 
     if (scrVmPub.terminal_error)
@@ -4248,7 +4261,7 @@ void IncInParam()
     }
     Scr_ClearOutParams();
     if (scrVmPub.top == scrVmPub.maxstack)
-        Sys_Error("Internal script stack overflow");
+        Com_Error(ERR_FATAL, "Internal script stack overflow");
     ++scrVmPub.top;
     ++scrVmPub.inparamcount;
     if ((scrVmPub.top < (VariableValue*)&scrVmGlob || scrVmPub.top > &scrVmGlob.eval_stack[1])
@@ -4365,7 +4378,7 @@ void __cdecl Scr_AddVector(const float* value)
 {
     IncInParam();
     scrVmPub.top->type = VAR_VECTOR;
-    scrVmPub.top->u.intValue = (int)Scr_AllocVector(value);
+    scrVmPub.top->u.vectorValue = Scr_AllocVector(value);
 }
 
 void __cdecl Scr_MakeArray()
@@ -4661,14 +4674,14 @@ void __cdecl VM_Resume(uint32_t timeId)
         if (scrVarPub.bScriptProfile)
         {
             scrVmDebugPub.builtInTime = 0;
-            time = __rdtsc();
+            time = Kisak_ProfileClock();
             pos = fs.pos;
             //v2 = VM_Execute_0();
             //v2 = VM_ExecuteInternal(stack.pos, stack.localId, stack.localVarCount, stack.top, stack.startTop);
             v2 = VM_ExecuteInternal();
             RemoveRefToObject(v2);
             RemoveRefToValue(scrVmPub.stack[1].type, scrVmPub.stack[1].u);
-            Scr_AddProfileTime(pos, __rdtsc() - time, scrVmDebugPub.builtInTime);
+            Scr_AddProfileTime(pos, Kisak_ProfileClock() - time, scrVmDebugPub.builtInTime);
         }
         else
         {
@@ -5104,7 +5117,7 @@ uint32_t Scr_GetFunc(uint32_t index)
                     0,
                     "%s",
                     "Scr_IsInOpcodeMemory( value->u.codePosValue )");
-            return value->u.intValue - (uint32_t)scrVarPub.programBuffer;
+            return static_cast<uint32_t>(reinterpret_cast<uintptr_t>(value->u.codePosValue) - reinterpret_cast<uintptr_t>(scrVarPub.programBuffer));
         }
         scrVarPub.error_index = index + 1;
         Scr_Error(va("type %s is not a function", var_typename[value->type]));
@@ -5154,9 +5167,9 @@ XAnim_s * Scr_GetAnimTree(uint32_t index)
         {
             if (v3->u.intValue <= scrAnimPub.xanim_num[1])
             {
-                v5 = (VariableUnion *)(4 * v3->u.intValue);
-                if (*(uint32_t *)((char *)&scrAnimPub.xanim_num[-128] + (_DWORD)v5))
-                    return *(XAnim_s **)((char *)&scrAnimPub.xanim_num[-128] + (_DWORD)v5);
+                XAnim_s *anims = scrAnimPub.xanim_lookup[1][v3->u.intValue].anims;
+                if (anims)
+                    return anims;
             }
             scrVarPub.error_message = "bad anim tree";
         }
