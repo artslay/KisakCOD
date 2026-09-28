@@ -86,7 +86,7 @@ void __cdecl Sys_Error(const char *error, ...)
 
 void __cdecl Sys_Quit()
 {
-    appletRequestExit();
+    appletRequestExitToSelf();
     std::exit(0);
 }
 
