@@ -247,6 +247,27 @@ static int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags
 static void __cdecl DB_RemoveLoadedSound(XAssetHeader header);
 void __cdecl Material_DirtyTechniqueSetOverrides();
 void __cdecl Material_ClearShaderUploadList();
+static void __cdecl DB_RemoveLoadedSound(XAssetHeader header)
+{
+    if (header.loadSnd && header.loadSnd->sound.data)
+        Z_Free(header.loadSnd->sound.data, 15);
+}
+
+static void __cdecl DB_BuildOSPath_Mod(const char *zoneName, uint32_t size, char *filename)
+{
+#ifdef __SWITCH__
+    if (fs_gameDirVar && fs_gameDirVar->current.string[0])
+        Com_sprintf(filename, size, "%s/%s.ff", fs_gameDirVar->current.string, zoneName);
+    else
+        Com_sprintf(filename, size, "zone/english/%s.ff", zoneName);
+#else
+    char *v3;
+    const char *string = fs_gameDirVar->current.string;
+    v3 = Sys_DefaultInstallPath();
+    Com_sprintf(filename, size, "%s\\%s\\%s.ff", v3, string, zoneName);
+#endif
+}
+
 static void __cdecl DB_BuildOSPath(const char *zoneName, uint32_t size, char *filename)
 {
 #ifdef __SWITCH__
