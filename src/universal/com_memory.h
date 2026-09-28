@@ -49,9 +49,6 @@ void* __cdecl Hunk_UserAlloc(HunkUser* user, uint32_t size, int32_t alignment);
 int __cdecl Hunk_SetMarkLow();
 void __cdecl Hunk_ClearToMarkLow(int mark);
 void __cdecl Hunk_ResetDebugMem();
-void __cdecl Hunk_InitDebugMemory();
-void __cdecl Hunk_ShutdownDebugMemory();
-void Hunk_Clear();
 char* __cdecl Hunk_SetDataForFile(int32_t type, const char* name, void* data, void* (__cdecl* alloc)(int));
 void* __cdecl Hunk_UserAllocAlignStrict(HunkUser* user, uint32_t size);
 void __cdecl Hunk_UserSetPos(HunkUser* user, uint8_t* pos);
@@ -62,7 +59,6 @@ char* __cdecl Hunk_CopyString(HunkUser* user, const char* in);
 int32_t __cdecl LargeLocalBegin(int32_t size);
 uint32_t __cdecl LargeLocalRoundSize(int32_t size);
 void __cdecl LargeLocalEnd(int32_t startPos);
-void __cdecl LargeLocalReset();
 uint8_t* __cdecl LargeLocalGetBuf(int32_t startPos);
 
 
@@ -91,7 +87,6 @@ bool __cdecl Z_TryVirtualCommitInternal(void* ptr, int size);
 void __cdecl Z_VirtualCommitInternal(void* ptr, int size);
 void __cdecl Z_VirtualFree(void* ptr);
 void __cdecl Z_Free(void* ptr, int type);
-void* __cdecl Z_Malloc(int32_t size, const char* name, int32_t type);
 
 const char* CopyString(const char* in);
 const char* CopyString(char* in);

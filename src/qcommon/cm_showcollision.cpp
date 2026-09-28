@@ -662,6 +662,11 @@ int __cdecl BoxOnPlaneSide(const float *emins, const float *emaxs, const cplane_
         if (!alwaysfails)
             MyAssertHandler(".\\universal\\com_math.cpp", 3473, 1, "BoxOnPlaneSide: invalid signbits for plane");
 
+        __debugbreak();
+        __debugbreak();
+        __debugbreak();
+        __debugbreak();
+        __debugbreak();
         break;
     }
     

@@ -57,9 +57,6 @@
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(a) (sizeof(a) / sizeof((a)[0]))
 #endif
-#ifndef CPUSTRING
-#define CPUSTRING "switch-aarch64"
-#endif
 #ifndef sprintf_s
 #define sprintf_s snprintf
 #endif
