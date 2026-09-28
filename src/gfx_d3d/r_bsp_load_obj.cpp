@@ -716,7 +716,7 @@ void __cdecl R_CopyLightmap(
     }
 }
 
-void __cdecl R_CopyLightDefAttenuationImage(GfxLightDef *def, _DWORD *anonymousConfig)
+void __cdecl R_CopyLightDefAttenuationImage(GfxLightDef *def, LightDefCopyConfig anonymousConfig->dest)
 {
     int endCount; // [esp+30h] [ebp-7Ch]
     uint8_t *dstPixel; // [esp+38h] [ebp-74h]
@@ -729,9 +729,9 @@ void __cdecl R_CopyLightDefAttenuationImage(GfxLightDef *def, _DWORD *anonymousC
 
     Image_GetRawPixels((char*)def->attenuation.image->name, &rawImage);
     iassert( rawImage.width == def->attenuation.image->width );
-    dstPixel = (unsigned char*)(*anonymousConfig + anonymousConfig[1] * (4 * def->lmapLookupStart - 4));
+    dstPixel = (unsigned char*)(anonymousConfig->dest + anonymousConfig->zoom * (4 * def->lmapLookupStart - 4));
     srcPixel = rawImage.pixels;
-    if (anonymousConfig[1] == 1)
+    if (anonymousConfig->zoom == 1)
     {
         *dstPixel = (rawImage.pixels->a << 24) | rawImage.pixels->b | (rawImage.pixels->g << 8) | (rawImage.pixels->r << 16);
         dstPixela = dstPixel + 4;
@@ -748,52 +748,52 @@ void __cdecl R_CopyLightDefAttenuationImage(GfxLightDef *def, _DWORD *anonymousC
     }
     else
     {
-        endCount = anonymousConfig[1] + (anonymousConfig[1] >> 1);
+        endCount = anonymousConfig->zoom + (anonymousConfig->zoom >> 1);
         for (iter = 0; iter < endCount; ++iter)
         {
             *dstPixel = (srcPixel->a << 24) | srcPixel->b | (srcPixel->g << 8) | (srcPixel->r << 16);
             dstPixel += 4;
         }
-        if ((anonymousConfig[1] & (anonymousConfig[1] - 1)) != 0)
+        if ((anonymousConfig->zoom & (anonymousConfig->zoom - 1)) != 0)
             MyAssertHandler(
                 ".\\r_light_load_obj.cpp",
                 172,
                 0,
                 "%s\n\t(cfg->zoom) = %i",
                 "((((cfg->zoom) & ((cfg->zoom) - 1)) == 0))",
-                anonymousConfig[1]);
+                anonymousConfig->zoom);
         lerp = 1;
         do
         {
             do
             {
-                lerpedPixel.r = (anonymousConfig[1] + lerp * srcPixel[1].r + (2 * anonymousConfig[1] - lerp) * srcPixel->r)
+                lerpedPixel.r = (anonymousConfig->zoom + lerp * srcPixel[1].r + (2 * anonymousConfig->zoom - lerp) * srcPixel->r)
                     / (2
-                        * anonymousConfig[1]);
-                lerpedPixel.g = (anonymousConfig[1] + lerp * srcPixel[1].g + (2 * anonymousConfig[1] - lerp) * srcPixel->g)
+                        * anonymousConfig->zoom);
+                lerpedPixel.g = (anonymousConfig->zoom + lerp * srcPixel[1].g + (2 * anonymousConfig->zoom - lerp) * srcPixel->g)
                     / (2
-                        * anonymousConfig[1]);
-                lerpedPixel.b = (anonymousConfig[1] + lerp * srcPixel[1].b + (2 * anonymousConfig[1] - lerp) * srcPixel->b)
+                        * anonymousConfig->zoom);
+                lerpedPixel.b = (anonymousConfig->zoom + lerp * srcPixel[1].b + (2 * anonymousConfig->zoom - lerp) * srcPixel->b)
                     / (2
-                        * anonymousConfig[1]);
-                lerpedPixel.a = (anonymousConfig[1] + lerp * srcPixel[1].a + (2 * anonymousConfig[1] - lerp) * srcPixel->a)
+                        * anonymousConfig->zoom);
+                lerpedPixel.a = (anonymousConfig->zoom + lerp * srcPixel[1].a + (2 * anonymousConfig->zoom - lerp) * srcPixel->a)
                     / (2
-                        * anonymousConfig[1]);
+                        * anonymousConfig->zoom);
                 *dstPixel = (lerpedPixel.a << 24) | lerpedPixel.b | (lerpedPixel.g << 8) | (lerpedPixel.r << 16);
                 dstPixel += 4;
                 lerp += 2;
-            } while (lerp <= 2 * anonymousConfig[1]);
+            } while (lerp <= 2 * anonymousConfig->zoom);
             lerp = 1;
             ++srcPixel;
         } while (srcPixel != &rawImage.pixels[rawImage.width - 1]);
-        if ((int)((int)&dstPixel[-(int)*anonymousConfig] >> 2) != ((int)(anonymousConfig[1] * (def->lmapLookupStart + rawImage.width + 1) - endCount)))
+        if (static_cast<int>((dstPixel - anonymousConfig->dest) / 4) != (anonymousConfig->zoom * (def->lmapLookupStart + rawImage.width + 1) - endCount))
             MyAssertHandler(
                 ".\\r_light_load_obj.cpp",
                 193,
                 1,
                 "(dstPixel - cfg->dest) / 4u == (def->lmapLookupStart + rawImage.width + 1) * cfg->zoom - endCount\n\t%i, %i",
-                (int)&dstPixel[-(int)*anonymousConfig] >> 2,
-                anonymousConfig[1] * (def->lmapLookupStart + rawImage.width + 1) - endCount);
+                static_cast<int>((dstPixel - anonymousConfig->dest) / 4),
+                anonymousConfig->zoom * (def->lmapLookupStart + rawImage.width + 1) - endCount);
         for (iter = 0; iter < endCount; ++iter)
         {
             *dstPixel = (srcPixel->a << 24) | srcPixel->b | (srcPixel->g << 8) | (srcPixel->r << 16);
@@ -853,14 +853,14 @@ void __cdecl R_LoadLightmaps(GfxBspLoad *load)
         oldLmapBaseIndex = 0;
         while (oldLmapBaseIndex < oldLmapCount)
         {
-            if (newLmapIndex && groupInfo[newLmapIndex].wideCount > *(&height + 2 * newLmapIndex))
+            if (newLmapIndex && groupInfo[newLmapIndex].wideCount > groupInfo[newLmapIndex - 1].wideCount)
                 MyAssertHandler(
                     ".\\r_bsp_load_obj.cpp",
                     722,
                     0,
                     "%s",
                     "newLmapIndex == 0 || groupInfo[newLmapIndex].wideCount <= groupInfo[newLmapIndex - 1].wideCount");
-            if (newLmapIndex && groupInfo[newLmapIndex].highCount > (int)(&buf_p)[2 * newLmapIndex])
+            if (newLmapIndex && groupInfo[newLmapIndex].highCount > groupInfo[newLmapIndex - 1].highCount)
                 MyAssertHandler(
                     ".\\r_bsp_load_obj.cpp",
                     723,
@@ -1167,10 +1167,10 @@ void __cdecl R_MaterialUsage(Material *material, uint32_t firstVertex, int verte
             if (firstVertex == vertUsage->index)
                 return;
         }
-        v4 = (uint32_t *)Z_Malloc(8, "R_MaterialUsage", 0);
-        *v4 = firstVertex;
-        v4[1] = (uint32_t)materialUsage->verts;
-        materialUsage->verts = (VertUsage*)v4;
+        v4 = (VertUsage *)Z_Malloc(sizeof(VertUsage), "R_MaterialUsage", 0);
+        v4->index = firstVertex;
+        v4->next = materialUsage->verts;
+        materialUsage->verts = v4;
         materialUsage->memory += 44 * vertexCount;
     }
 }
@@ -1828,7 +1828,7 @@ uint32_t R_LoadPortals()
     for (cellIndex = 0; cellIndex < s_world.dpvsPlanes.cellCount; ++cellIndex)
     {
         if (s_world.cells[cellIndex].portalCount)
-            v1 = &out[(int)s_world.cells[cellIndex].portals / 68];
+            v1 = &out[reinterpret_cast<uintptr_t>(s_world.cells[cellIndex].portals) / 68];
         else
             v1 = 0;
         s_world.cells[cellIndex].portals = v1;
@@ -2126,7 +2126,7 @@ uint32_t R_SortSurfaces()
         result = 48 * surfIndexb;
         if (!s_world.dpvs.surfaces[surfIndexb].material->techniqueSet)
             break;
-        result = (uint)Material_GetTechnique(s_world.dpvs.surfaces[surfIndexb].material, TECHNIQUE_LIT_BEGIN);
+        result = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(Material_GetTechnique(s_world.dpvs.surfaces[surfIndexb].material, TECHNIQUE_LIT_BEGIN)));
         if (!result)
             break;
         result = s_world.dpvs.surfaces[surfIndexb].material->info.sortKey;
@@ -2143,10 +2143,10 @@ uint32_t R_SortSurfaces()
     s_world.dpvs.emissiveSurfsBegin = surfIndexb;
     while (surfIndexb < surfaceCounta)
     {
-        result = (uint)s_world.dpvs.surfaces;
+        result = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(s_world.dpvs.surfaces));
         if (!s_world.dpvs.surfaces[surfIndexb].material->techniqueSet)
             break;
-        result = (uint)Material_GetTechnique(s_world.dpvs.surfaces[surfIndexb].material, TECHNIQUE_EMISSIVE);
+        result = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(Material_GetTechnique(s_world.dpvs.surfaces[surfIndexb].material, TECHNIQUE_EMISSIVE)));
         if (!result)
             break;
         result = ++surfIndexb;
