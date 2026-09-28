@@ -1,6 +1,8 @@
 #include <universal/q_shared.h>
 #include "assertive.h"
+#ifndef __SWITCH__
 #include <win32/win_local.h>
+#endif
 #include <cstdarg>
 
 enum AssertOccurance : __int32
@@ -15,6 +17,47 @@ char assertMessage[4096];
 int lastAssertType;
 
 void(__cdecl* AssertCallback)(const char*);
+
+#ifdef __SWITCH__
+
+bool CopyMessageToClipboard()
+{
+    return false;
+}
+
+char __cdecl AssertNotify(int type, AssertOccurance occurance)
+{
+    (void)type;
+    (void)occurance;
+    if (AssertCallback)
+        AssertCallback(assertMessage);
+    return 0;
+}
+
+void __cdecl BuildAssertMessage(const char* expr, const char* filename, int line, int type, int skipLevels, char* messageOut)
+{
+    (void)type;
+    (void)skipLevels;
+    if (!messageOut)
+        return;
+    snprintf(
+        messageOut,
+        4096,
+        "Build: %s\\nExpression:\\n    %s\\n\\nFile:    %s\\nLine:    %d\\n\\n",
+        Dvar_GetString("version"),
+        expr ? expr : "<unknown>",
+        filename ? filename : "<unknown>",
+        line);
+}
+
+int __cdecl DoStackTrace(char* msg, int nIgnore)
+{
+    (void)msg;
+    (void)nIgnore;
+    return 0;
+}
+
+#else
 
 BOOL CopyMessageToClipboard()
 {
@@ -653,6 +696,8 @@ void __cdecl FixWindowsDesktop()
 }
 
 bool __cdecl QuitOnError();
+#endif
+
 void MyAssertHandler(const char *filename, int line, int type, const char *fmt, ...)
 {
 #ifdef KISAK_PURE
