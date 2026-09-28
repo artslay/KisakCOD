@@ -45,7 +45,7 @@ static inline uint64_t Kisak_ProfileClock()
 #else
 static inline uint64_t Kisak_ProfileClock()
 {
-    return Kisak_ProfileClock();
+    return __rdtsc();
 }
 #endif
 
