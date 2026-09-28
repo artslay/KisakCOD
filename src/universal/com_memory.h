@@ -20,6 +20,14 @@ union XAssetHeader;
 
 struct HunkUser;
 
+struct fileData_s
+{
+    void* data;
+    fileData_s* next;
+    uint8_t type;
+    char name[1];
+};
+
 class LargeLocal
 {
 public:
@@ -43,6 +51,8 @@ void __cdecl Hunk_ClearTempMemory();
 void Hunk_ClearTempMemoryHigh();
 void Hunk_CheckTempMemoryClear();
 void Hunk_CheckTempMemoryHighClear();
+int __cdecl Hunk_HideTempMemory();
+void __cdecl Hunk_ShowTempMemory(int mark);
 
 HunkUser* __cdecl Hunk_UserCreate(int32_t maxSize, const char* name, bool fixed, bool tempMem, int32_t type);
 void* __cdecl Hunk_UserAlloc(HunkUser* user, uint32_t size, int32_t alignment);
@@ -53,6 +63,8 @@ void* Hunk_AllocDebugMem(uint32_t size, const char* name = nullptr);
 void __cdecl Hunk_FreeDebugMem(void* ptr = nullptr);
 void __cdecl Hunk_InitDebugMemory();
 void __cdecl Hunk_ShutdownDebugMemory();
+void Hunk_ClearData();
+void __cdecl Hunk_ClearDataFor(fileData_s** pFileData, uint8_t* low, uint8_t* high);
 void Hunk_Clear();
 int32_t __cdecl Hunk_Used();
 char* __cdecl Hunk_SetDataForFile(int32_t type, const char* name, void* data, void* (__cdecl* alloc)(int));
@@ -72,6 +84,7 @@ uint8_t* __cdecl LargeLocalGetBuf(int32_t startPos);
 void __cdecl Hunk_AddAsset(XAssetHeader header, _DWORD *data);
 
 void Com_TouchMemory();
+void __cdecl Com_Meminfo_f();
 
 uint8_t* __cdecl Hunk_AllocXAnimPrecache(uint32_t size);
 uint8_t* __cdecl Hunk_AllocPhysPresetPrecache(uint32_t size);
@@ -86,13 +99,15 @@ uint8_t* __cdecl Hunk_AllocLowAlign(uint32_t size, int32_t alignment, const char
 // LWSS: Note that the Z_ prefix comes from the fact that it uses the "Zone" memory pool.
 // There are a few memory pools of fixed size that allocations come from.
 void* __cdecl Z_VirtualReserve(int size);
+void __cdecl Z_VirtualDecommit(void* ptr, int size);
 char* __cdecl Z_VirtualAlloc(int size, const char* name, int type);
 char* __cdecl Z_TryVirtualAlloc(int32_t size, const char* name, int32_t type);
 void __cdecl Z_VirtualDecommitInternal(void* ptr, int size);
-void* __cdecl Z_VirtualFreeInternal(void* ptr);
+void __cdecl Z_VirtualFreeInternal(void* ptr);
 void* __cdecl Z_TryVirtualAllocInternal(int size);
 bool __cdecl Z_TryVirtualCommitInternal(void* ptr, int size);
 void __cdecl Z_VirtualCommitInternal(void* ptr, int size);
+void __cdecl Z_VirtualCommit(void* ptr, int size);
 void __cdecl Z_VirtualFree(void* ptr);
 void __cdecl Z_Free(void* ptr, int type);
 void* __cdecl Z_Malloc(int32_t size, const char* name, int32_t type);
@@ -109,3 +124,4 @@ void __cdecl ReplaceString(const char** str, const char* in);
 void FreeString(const char* str);
 
 void* __cdecl Hunk_FindDataForFile(int type, const char* name);
+void* __cdecl Hunk_FindDataForFileInternal(int type, const char* name, int hash);
