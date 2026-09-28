@@ -1305,7 +1305,9 @@ void __thiscall Scr_ScriptWatch::SortHitBreakpointsTop()
     if (Sys_IsRemoteDebugClient())
     {
         scrDebuggerGlob.gainFocusTime = Sys_Milliseconds() + 500;
+#ifndef __SWITCH__
         SetForegroundWindow(g_wv.hWnd);
+#endif
     }
     scrDebuggerGlob.atBreakpoint = 1;
     hitBreakpoint = 0;
