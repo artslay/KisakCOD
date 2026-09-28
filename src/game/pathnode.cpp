@@ -2381,16 +2381,16 @@ void __cdecl Path_DisconnectPath(pathnode_t *node, pathlink_s *link)
     {
         v5 = node->constant.Links;
         wLinkCount = node->dynamic.wLinkCount;
-        v7 = (unsigned int)&v5[wLinkCount];
-        if (v7 > (unsigned int)link)
+        pathlink_s *endLink = &v5[wLinkCount];
+        if (endLink > link)
         {
-            v8 = (int)((unsigned __int64)(715827883LL * ((char *)link - (char *)v5)) >> 32) >> 1;
+            const int linkIndex = static_cast<int>(link - v5);
             v9 = va(
                 "node: %d, %d (%d) %d (%d)",
                 node - gameWorldSp.path.nodes,
                 wLinkCount,
-                *(unsigned __int16 *)(v7 + 4),
-                v8 + (v8 >> 31),
+                endLink->nodeNum,
+                linkIndex,
                 link->nodeNum);
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
