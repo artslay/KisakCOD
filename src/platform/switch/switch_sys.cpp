@@ -90,6 +90,11 @@ void __cdecl Sys_Quit()
     std::exit(0);
 }
 
+void __cdecl Sys_OutOfMemErrorInternal(const char *filename, int line)
+{
+    Sys_Error("Out of memory: %s:%d", filename ? filename : "?", line);
+}
+
 void __cdecl Sys_Init()
 {
     s_cpuCount = std::thread::hardware_concurrency();
