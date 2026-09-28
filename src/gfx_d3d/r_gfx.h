@@ -1,5 +1,7 @@
 #pragma once
 
+#include <universal/q_shared.h>
+
 #ifdef __SWITCH__
 #include <gfx/opengl/d3d9_compat.h>
 #else
