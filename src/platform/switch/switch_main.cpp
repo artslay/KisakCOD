@@ -6,6 +6,7 @@
 #include <universal/com_files.h>
 #include <universal/profile.h>
 #include <universal/timing.h>
+#include <win32/win_local.h>
 
 extern void Com_InitParse();
 extern void Dvar_Init();
