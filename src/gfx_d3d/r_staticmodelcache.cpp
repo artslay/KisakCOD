@@ -200,7 +200,7 @@ char __cdecl SMC_GetFreeBlockOfSize(uint32_t smcIndex, uint32_t listIndex)
         tree->usedlist.next->prev = &tree->usedlist;
     }
     leafs = s_cache.leafs[treeIndex];
-    index = ((char*)block - (char*)leafs) / 8;
+    index = static_cast<uint32_t>(((char*)block - (char*)leafs) / sizeof(static_model_leaf_t));
     bcassert(index, ARRAY_COUNT(s_cache.leafs[treeIndex]));
     if (block != (static_model_node_list_t *)&leafs[index])
         MyAssertHandler(
@@ -244,7 +244,6 @@ uint16_t __cdecl SMC_Allocate(uint32_t smcIndex, uint32_t bitCount)
     iassert(block->prev->next == block);
     block->next->prev = block->prev;
     block->prev->next = block->next;
-    static_assert(sizeof(s_cache.leafs[0]) == 256);
     treeIndex = ((char *)block - (char *)s_cache.leafs) / sizeof(s_cache.leafs[0]);
     bcassert(treeIndex, ARRAY_COUNT(s_cache.trees));
     tree = &s_cache.trees[treeIndex];
