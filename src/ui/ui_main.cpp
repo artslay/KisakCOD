@@ -1553,20 +1553,17 @@ void __cdecl UI_ReplaceConversions(
                         "%s\n\t(argIndex) = %i",
                         "(argIndex < 9)",
                         v15);
-                v16 = 4 * (v15 + 1);
-                if (!*(int *)((char *)&arguments->argCount + v16))
+                const char *argument = arguments->args[v15];
+                if (!argument)
                     MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\ui\\ui_main.cpp", 2731, 0, "%s", "arguments->args[argIndex]");
-                v17 = *(unsigned __int8 **)((char *)&arguments->argCount + v16);
-                while (*v17++)
-                    ;
-                v19 = &v17[-*(int *)((char *)&arguments->argCount + v16)];
+                v17 = reinterpret_cast<unsigned __int8 *>(const_cast<char *>(argument));
+                v21 = static_cast<int>(strlen(argument));
                 v20 = 0;
-                v21 = (int)(v19 - 1);
                 if (v21 > 0)
                 {
                     do
                     {
-                        v22 = *(_BYTE *)(*(int *)((char *)&arguments->argCount + v16) + v20++);
+                        v22 = static_cast<unsigned char>(argument[v20++]);
                         outputString[v12++] = v22;
                     } while (v20 < v21);
                 }
@@ -2615,16 +2612,10 @@ void __cdecl UI_DrawConnectScreen()
 
 char *__cdecl UI_ReplaceConversionString(const char *sourceString, const char *replaceString)
 {
-    int v2[2]; // r10
     ConversionArguments v4; // [sp+50h] [-440h] BYREF
     char v5[1032]; // [sp+80h] [-410h] BYREF
 
-    v2[1] = 0;
-    v2[0] = (int)replaceString;
-    *(_QWORD *)&v4.args[1] = *(_QWORD *)v2;
-    *(_QWORD *)&v4.args[3] = *(_QWORD *)v2;
-    *(_QWORD *)&v4.args[5] = *(_QWORD *)v2;
-    *(_QWORD *)&v4.args[7] = *(_QWORD *)v2;
+    v4 = {};
     v4.args[0] = replaceString;
     v4.argCount = 1;
     UI_ReplaceConversions(sourceString, &v4, v5, 1024);
