@@ -1190,7 +1190,6 @@ void __cdecl DevGui_Init()
     DevGui_RegisterDvars();
     screen_xPad = RETURN_ZERO32();
     screen_yPad = RETURN_ZERO32();
-    for (menuIndex = 0; menuIndex < 0x257; ++menuIndex)
 #ifdef __SWITCH__
     for (menuIndex = 0; menuIndex < 0x257; ++menuIndex)
     {
