@@ -337,7 +337,7 @@ const char *__cdecl Dvar_EnumToString(const dvar_s *dvar)
             dvar->current.integer);
     }
     if (dvar->domain.enumeration.stringCount)
-        return *(const char **)(dvar->domain.enumeration.strings[dvar->current.integer]);
+        return dvar->domain.enumeration.strings[dvar->current.integer];
     else
         return "";
 }
@@ -380,7 +380,7 @@ const char *__cdecl Dvar_IndexStringToEnumString(const dvar_s *dvar, const char 
     }
     enumIndex = atoi(indexString);
     if (enumIndex >= 0 && enumIndex < dvar->domain.enumeration.stringCount)
-        return *(const char **)(dvar->domain.enumeration.strings[enumIndex]);
+        return dvar->domain.enumeration.strings[enumIndex];
     else
         return "";
 }
@@ -432,7 +432,7 @@ const char *__cdecl Dvar_ValueToString(const dvar_s *dvar, DvarValue value)
                 "(value.integer >= 0 && value.integer < dvar->domain.enumeration.stringCount || value.integer == 0)",
                 value.integer);
         if (dvar->domain.enumeration.stringCount)
-            result = *(const char **)(dvar->domain.enumeration.strings[value.integer]);
+            result = dvar->domain.enumeration.strings[value.integer];
         else
             result = "";
         break;
@@ -636,7 +636,7 @@ const char *__cdecl Dvar_DomainToString_Internal(
                     outBufferEnd - outBufferWalk,
                     "\n  %2i: %s",
                     stringIndex,
-                    *(const char **)(domain.enumeration.strings[stringIndex]));
+                    domain.enumeration.strings[stringIndex]);
                 if (charsWrittena < 0)
                     break;
                 if (outLineCount)
