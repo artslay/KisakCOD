@@ -44,6 +44,8 @@ for geometry objects
 
 #include <new>
 
+void __cdecl ODE_GeomGetAAContainedBox(dxGeomTransform *geom, float *mins, float *maxs);
+
 //****************************************************************************
 // helper functions for dCollide()ing a space with another geom
 
