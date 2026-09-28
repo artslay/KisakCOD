@@ -8,7 +8,6 @@
 #include "scr_parser.h"
 #include "scr_evaluate.h"
 #include "scr_vm.h"
-#include <game_mp/g_public_mp.h>
 #include "scr_animtree.h"
 #include <universal/profile.h>
 #include "scr_parsetree.h"
@@ -176,7 +175,7 @@ void __cdecl EmitCanonicalStringConst(unsigned int stringValue)
 
 int __cdecl Scr_FindLocalVarIndex(unsigned int name, sval_u sourcePos, bool create, scr_block_s *block)
 {
-    char *v5; // eax
+    const char *v5; // eax
     int i; // [esp+4h] [ebp-4h]
 
     if (scrCompilePub.developer_statement == 3)
@@ -333,8 +332,8 @@ void __cdecl EmitGetFloat(float value, sval_u sourcePos)
 
 void __cdecl EmitCodepos(const char *pos)
 {
-    scrCompileGlob.codePos = (unsigned char*)TempMallocAlignStrict(4u);
-    *(unsigned int*)scrCompileGlob.codePos = (unsigned int)pos;
+    scrCompileGlob.codePos = (unsigned char*)TempMallocAlignStrict(sizeof(const char *));
+    *(const char **)scrCompileGlob.codePos = pos;
 }
 
 void __cdecl EmitGetInteger(int value, sval_u sourcePos)
@@ -518,7 +517,7 @@ void __cdecl EmitCallBuiltinOpcode(int param_count, sval_u sourcePos)
         EmitByte(param_count);
 }
 
-int __cdecl AddFunction(int func, const char *name)
+int __cdecl AddFunction(uintptr_t func, const char *name)
 {
     int i; // [esp+0h] [ebp-4h]
 
@@ -590,7 +589,7 @@ void __cdecl EmitFunction(sval_u func, sval_u sourcePos)
     unsigned int Variable; // eax
     unsigned int valueId; // [esp+1Ch] [ebp-3Ch]
     VariableValue pos; // [esp+20h] [ebp-38h]
-    HashEntry_unnamed_type_u filename; // [esp+28h] [ebp-30h]
+    unsigned int filename; // [esp+28h] [ebp-30h]
     unsigned int posId; // [esp+2Ch] [ebp-2Ch]
     unsigned int threadId; // [esp+30h] [ebp-28h]
     int scope; // [esp+38h] [ebp-20h]
@@ -628,12 +627,12 @@ void __cdecl EmitFunction(sval_u func, sval_u sourcePos)
     if (func.node[0].type != 21)
         MyAssertHandler(".\\script\\scr_compiler.cpp", 1712, 0, "%s", "func.node[0].type == ENUM_far_function");
     scope = 1;
-    v2 = SL_ConvertToString(func.node[1].stringValue);
-    filename.prev = Scr_CreateCanonicalFilename(v2).prev;
+    v2 = (char *)SL_ConvertToString(func.node[1].stringValue);
+    filename = Scr_CreateCanonicalFilename(v2);
     Scr_CompileRemoveRefToString(func.node[1].stringValue);
-    Variable = FindVariable(scrCompilePub.loadedscripts, filename.prev);
+    Variable = FindVariable(scrCompilePub.loadedscripts, filename);
     value = Scr_EvalVariable(Variable);
-    fileId = AddFilePrecache(filename.prev, sourcePos.stringValue, 0);
+    fileId = AddFilePrecache(filename, sourcePos.stringValue, 0);
     if (value.type)
     {
         threadPtr = FindVariable(fileId, func.node[2].idValue);
@@ -685,7 +684,7 @@ void __cdecl EmitFunction(sval_u func, sval_u sourcePos)
             count.u.intValue = 0;
         }
         valueId = GetNewVariable(threadId, count.u.intValue + 2);
-        value.u.intValue = (int)scrCompileGlob.codePos;
+        value.u.pointerValue = reinterpret_cast<uintptr_t>(scrCompileGlob.codePos);
         if (scrCompilePub.developer_statement)
         {
             if (!scrVarPub.developer_script)
@@ -854,7 +853,7 @@ void __cdecl EmitCall(sval_u func_name, sval_u params, bool bStatement, scr_bloc
         {
             value = Scr_EvalVariable(funcId);
             type = Scr_GetUncacheType(value.type);
-            func = (void(*)())value.u.intValue;
+            func = (void(*)())value.u.pointerValue;
         }
         else
         {
@@ -862,7 +861,7 @@ void __cdecl EmitCall(sval_u func_name, sval_u params, bool bStatement, scr_bloc
             func = Scr_GetFunction(&pName, &type);
             funcId = GetNewVariable(scrCompilePub.builtinFunc, name);
             value.type = Scr_GetCacheType(type);
-            value.u.intValue = (int)func;
+            value.u.pointerValue = reinterpret_cast<uintptr_t>(func);
             SetVariableValue(funcId, &value);
         }
     }
@@ -881,7 +880,7 @@ void __cdecl EmitCall(sval_u func_name, sval_u params, bool bStatement, scr_bloc
             {
                 Scr_CompileRemoveRefToString(name);
                 EmitCallBuiltinOpcode(param_count, sourcePos);
-                v4 = AddFunction((int)func, pName);
+                v4 = AddFunction(reinterpret_cast<uintptr_t>(func), pName);
                 EmitShort(v4);
                 AddExpressionListOpcodePos(params);
                 if (bStatement)
@@ -983,7 +982,7 @@ void __cdecl EmitMethod(
         {
             value = Scr_EvalVariable(methId);
             type = Scr_GetUncacheType(value.type);
-            meth = (void(*)(scr_entref_t))value.u.intValue;
+            meth = (void(*)(scr_entref_t))value.u.pointerValue;
         }
         else
         {
@@ -991,7 +990,7 @@ void __cdecl EmitMethod(
             meth = Scr_GetMethod(&pName, &type);
             methId = GetNewVariable(scrCompilePub.builtinMeth, name);
             value.type = Scr_GetCacheType(type);
-            value.u.intValue = (int)meth;
+            value.u.pointerValue = reinterpret_cast<uintptr_t>(meth);
             SetVariableValue(methId, &value);
         }
     }
@@ -1011,7 +1010,7 @@ void __cdecl EmitMethod(
             {
                 Scr_CompileRemoveRefToString(name);
                 EmitCallBuiltinMethodOpcode(param_count, sourcePos);
-                v6 = AddFunction((int)meth, pName);
+                v6 = AddFunction(reinterpret_cast<uintptr_t>(meth), pName);
                 EmitShort(v6);
                 AddOpcodePos(methodSourcePos.stringValue, 0);
                 AddExpressionListOpcodePos(params);
@@ -1168,9 +1167,9 @@ void __cdecl EmitFieldVariable(sval_u expr, sval_u field, sval_u sourcePos, scr_
 void __cdecl EmitObject(sval_u expr, sval_u sourcePos)
 {
     signed int ObjectType; // [esp+0h] [ebp-18h]
-    const char *classnum; // [esp+4h] [ebp-14h]
+    int classnum; // [esp+4h] [ebp-14h]
     char *s; // [esp+Ch] [ebp-Ch]
-    const char *entnum; // [esp+10h] [ebp-8h]
+    int entnum; // [esp+10h] [ebp-8h]
     unsigned int idValue; // [esp+14h] [ebp-4h]
 
     if (scrCompilePub.script_loading)
@@ -1205,15 +1204,15 @@ void __cdecl EmitObject(sval_u expr, sval_u sourcePos)
         CompileError(sourcePos.stringValue, "argument expressions not supported in statements");
         return;
     }
-    classnum = (const char*)Scr_GetClassnumForCharId(*s);
-    if ((int)classnum < 0)
+    classnum = Scr_GetClassnumForCharId(*s);
+    if (classnum < 0)
         goto LABEL_17;
-    entnum = (const char*)atoi(s + 1); // KISAKTODO: seems wrong
+    entnum = atoi(s + 1); // KISAKTODO: seems wrong
     if (!entnum && s[1] != 48)
         goto LABEL_17;
     EmitOpcode(OP_object, 1, 0);
-    EmitCodepos(classnum);
-    EmitCodepos(entnum);
+    EmitCodepos(reinterpret_cast<const char *>(static_cast<uintptr_t>(classnum)));
+    EmitCodepos(reinterpret_cast<const char *>(static_cast<uintptr_t>(entnum)));
 }
 
 void __cdecl EmitVariableExpression(sval_u expr, scr_block_s *block)
@@ -1312,7 +1311,7 @@ void __cdecl Scr_CreateVector(VariableCompileValue *constValue, VariableValue *v
         }
     }
     value->type = VAR_VECTOR;
-    value->u.intValue = (int)Scr_AllocVector(vec);
+    value->u.vectorValue = Scr_AllocVector(vec);
 }
 
 void __cdecl Scr_PushValue(VariableCompileValue *constValue)
@@ -3116,7 +3115,7 @@ void __cdecl EmitBreakpointStatement(sval_u sourcePos)
 
 void __cdecl EmitProfStatement(sval_u profileName, sval_u sourcePos, Opcode_t op)
 {
-    char *v3; // eax
+    const char *v3; // eax
     int profileIndex; // [esp+0h] [ebp-4h]
 
     if (scrVarPub.developer_script)
@@ -3527,8 +3526,8 @@ void __cdecl EmitIncludeList(sval_u val)
 
 unsigned int __cdecl SpecifyThreadPosition(unsigned int threadId, unsigned int name, unsigned int sourcePos, Vartype_t type)
 {
-    char *v4; // eax
-    char *v5; // eax
+    const char *v4; // eax
+    const char *v5; // eax
     char *buf; // [esp-4h] [ebp-1Ch]
     VariableValue pos; // [esp+8h] [ebp-10h] BYREF
     unsigned int posId; // [esp+14h] [ebp-4h]

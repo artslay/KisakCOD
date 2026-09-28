@@ -200,7 +200,7 @@ void __cdecl GScr_LoadConsts()
 }
 
 #elif KISAK_SP
-#include <game/g_scr_main.h>
+extern unsigned int GScr_AllocString(const char *s);
 
 void GScr_LoadConsts()
 {

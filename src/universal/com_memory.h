@@ -93,6 +93,11 @@ void __cdecl Z_VirtualFree(void* ptr);
 void __cdecl Z_Free(void* ptr, int type);
 void* __cdecl Z_Malloc(int32_t size, const char* name, int32_t type);
 char* __cdecl Z_MallocGarbage(int32_t size, const char* name, int32_t type);
+char* __cdecl TempMalloc(uint32_t len);
+void __cdecl TempMemorySetPos(char* pos);
+void __cdecl TempMemoryReset(HunkUser* user);
+char* __cdecl TempMallocAlignStrict(uint32_t len);
+char* __cdecl Z_MallocGarbage(int32_t size, const char* name, int32_t type);
 
 const char* CopyString(const char* in);
 const char* CopyString(char* in);

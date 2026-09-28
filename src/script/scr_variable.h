@@ -126,7 +126,7 @@ union VariableUnion // sizeof=0x4
     uint32_t stringValue;
     const float *vectorValue;
     const char *codePosValue;
-    uint32_t pointerValue;
+    uintptr_t pointerValue;
     VariableStackBuffer *stackValue;
     uint32_t entityOffset;
 };

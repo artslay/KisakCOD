@@ -63,6 +63,12 @@
 #ifndef sprintf_s
 #define sprintf_s snprintf
 #endif
+#ifndef LittleShort
+#define LittleShort(x) (x)
+#endif
+#ifndef LittleLong
+#define LittleLong(x) (x)
+#endif
 #endif
 
 // this is the define for determining if we have an asm version of a C function
