@@ -784,23 +784,6 @@ void __cdecl R_DrawIndexedPrimitive(GfxCmdBufPrimState *state, const GfxDrawPrim
         device = state->device;
         iassert( device );
 
-#ifdef __SWITCH__
-        if (state->pass && state->pass->vertexDecl)
-        {
-            const int declIndex = static_cast<int>(state->prim.vertDeclType);
-            if (declIndex >= 0 && declIndex < 16)
-            {
-                IDirect3DVertexDeclaration9 *decl =
-                    state->pass->vertexDecl->routing.decl[declIndex];
-                if (decl && decl != state->prim.vertexDecl)
-                {
-                    device->SetVertexDeclaration(decl);
-                    state->prim.vertexDecl = decl;
-                }
-            }
-        }
-#endif
-
         RB_TrackDrawPrimCall(triCount);
         do
         {
