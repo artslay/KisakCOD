@@ -948,7 +948,7 @@ void __cdecl RunOp(int localClientNum, OperatorStack *opStack, OperandStack *dat
     case OP_TOSTRING:
         GetOperand(dataStack, &data1);
         operandResult.dataType = VAL_STRING;
-        operandResult.internals.intVal = (int)GetSourceString(data1);
+        operandResult.internals.string = GetSourceString(data1);
         AddOperandToStack(dataStack, &operandResult);
         return;
     case OP_TOFLOAT:
@@ -1036,11 +1036,11 @@ void __cdecl GetDvarStringValue(Operand *source, Operand *result)
                 VariantString = CopyDvarString(dvar->current.string);
             else
                 VariantString = (char *)Dvar_GetVariantString(source->internals.string);
-            result->internals.intVal = (int)VariantString;
+            result->internals.string = VariantString;
         }
         else
         {
-            result->internals.intVal = (int)"";
+            result->internals.string = "";
         }
         if (uiscript_debug->current.integer)
             Com_Printf(CON_CHANNEL_UI, "dvarstring( %s ) = %s\n", source->internals.string, result->internals.string);
@@ -1050,7 +1050,7 @@ void __cdecl GetDvarStringValue(Operand *source, Operand *result)
         NameForValueType = GetNameForValueType(source->dataType);
         Com_PrintError(CON_CHANNEL_UI, "Error: Must use a string as the name of a dvar, not a %s\n", NameForValueType);
         result->dataType = VAL_STRING;
-        result->internals.intVal = (int)"";
+        result->internals.string = "";
     }
 }
 
@@ -1402,7 +1402,7 @@ void __cdecl GetPlayerField(int localClientNum, Operand *source, Operand *result
             else
             {
                 result->dataType = VAL_STRING;
-                result->internals.intVal = (int)CG_GetPlayerOpposingTeamName(localClientNum);
+                result->internals.string = CG_GetPlayerOpposingTeamName(localClientNum);
                 if (uiscript_debug->current.integer)
                     Com_Printf(CON_CHANNEL_UI, "player( %s ) = %s\n", source->internals.string, result->internals.string);
             }
@@ -1410,7 +1410,7 @@ void __cdecl GetPlayerField(int localClientNum, Operand *source, Operand *result
         else
         {
             result->dataType = VAL_STRING;
-            result->internals.intVal = (int)CG_GetPlayerTeamName(localClientNum);
+            result->internals.string = CG_GetPlayerTeamName(localClientNum);
             if (uiscript_debug->current.integer)
                 Com_Printf(CON_CHANNEL_UI, "player( %s ) = %s\n", source->internals.string, result->internals.string);
         }
@@ -1420,7 +1420,7 @@ void __cdecl GetPlayerField(int localClientNum, Operand *source, Operand *result
         NameForValueType = GetNameForValueType(source->dataType);
         Com_PrintError(CON_CHANNEL_UI, "Error: Must use a string as the name of a player field, not a %s\n", NameForValueType);
         result->dataType = VAL_STRING;
-        result->internals.intVal = (int)"";
+        result->internals.string = "";
     }
 }
 
@@ -1474,7 +1474,7 @@ void __cdecl GetFieldForTeam(int localClientNum, team_t team, Operand *fieldName
             else
             {
                 result->dataType = VAL_STRING;
-                result->internals.intVal = (int)CG_GetTeamName(team);
+                result->internals.string = CG_GetTeamName(team);
                 if (uiscript_debug->current.integer)
                     Com_Printf(CON_CHANNEL_UI, "team(%i)( %s ) = %s\n", team, fieldName->internals.string, result->internals.string);
             }
@@ -1496,7 +1496,7 @@ void __cdecl GetFieldForTeam(int localClientNum, team_t team, Operand *fieldName
         NameForValueType = GetNameForValueType(fieldName->dataType);
         Com_PrintError(CON_CHANNEL_UI, "Error: Must use a string as the name of a team parameter, not a %s\n", NameForValueType);
         result->dataType = VAL_STRING;
-        result->internals.intVal = (int)"";
+        result->internals.string = "";
     }
 }
 
@@ -1769,14 +1769,14 @@ void __cdecl GetKeyBinding(int localClientNum, Operand *fieldName, Operand *resu
     {
         UI_GetKeyBindingLocalizedStringSingle(localClientNum, fieldName->internals.string, resultString);
         result->dataType = VAL_STRING;
-        result->internals.intVal = (int)resultString;
+        result->internals.string = resultString;
     }
     else
     {
         NameForValueType = GetNameForValueType(fieldName->dataType);
         Com_PrintError(CON_CHANNEL_UI, "Error: Must use a string as KeyBinding() parameter, not a %s\n", NameForValueType);
         result->dataType = VAL_STRING;
-        result->internals.intVal = (int)"";
+        result->internals.string = "";
     }
 }
 
@@ -2059,7 +2059,7 @@ void __cdecl SecondsToTimeDisplay(int localClientNum, Operand *source, Operand *
         v3 % 1440 / 60,
         v3 % 60);
     result->dataType = VAL_STRING;
-    result->internals.intVal = (int)resultString_0;
+    result->internals.string = resultString_0;
     if (uiscript_debug->current.integer)
         Com_Printf(CON_CHANNEL_UI, "secondsToTime() = %s\n", resultString_0);
 }
@@ -2069,7 +2069,7 @@ void __cdecl SecondsToCountdownDisplay(int localClientNum, int seconds, Operand 
     static char resultString_1[128];
 
     result->dataType = VAL_STRING;
-    result->internals.intVal = (int)resultString_1;
+    result->internals.string = resultString_1;
     if (seconds >= 0)
     {
         _snprintf(resultString_1, 0x80u, "%2i:%02i", seconds / 60, seconds % 60);
@@ -2078,7 +2078,7 @@ void __cdecl SecondsToCountdownDisplay(int localClientNum, int seconds, Operand 
     }
     else
     {
-        result->internals.intVal = (int)"";
+        result->internals.string = "";
     }
 }
 
@@ -2123,17 +2123,17 @@ void __cdecl GetGametypeObjective(int localClientNum, Operand *result)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        result->internals.intVal = (int)CG_GetGametypeDescription(localClientNum);
+        result->internals.string = CG_GetGametypeDescription(localClientNum);
         if (!result->internals.intVal)
-            result->internals.intVal = (int)"";
+            result->internals.string = "";
     }
     else
     {
-        result->internals.intVal = (int)"";
+        result->internals.string = "";
     }
 #elif KISAK_SP
     result->dataType = VAL_STRING;
-    result->internals.intVal = (int)"";
+    result->internals.string = "";
 #endif
 }
 
@@ -2147,22 +2147,22 @@ void __cdecl GetGametypeName(int localClientNum, Operand *result)
     if (CL_GetLocalClientConnectionState(localClientNum) >= CA_LOADING)
     {
         cgs = CG_GetLocalClientStaticGlobals(localClientNum);
-        result->internals.intVal = (int)UI_GetGameTypeDisplayName(cgs->gametype);
+        result->internals.string = UI_GetGameTypeDisplayName(cgs->gametype);
     }
     else if (g_gametype)
     {
-        result->internals.intVal = (int)UI_GetGameTypeDisplayName(g_gametype->current.string);
+        result->internals.string = UI_GetGameTypeDisplayName(g_gametype->current.string);
     }
     else
     {
-        result->internals.intVal = (int)"";
+        result->internals.string = "";
     }
     if (!result->internals.intVal)
-        result->internals.intVal = (int)"";
+        result->internals.string = "";
 
 #elif KISAK_SP
     result->dataType = VAL_STRING;
-    result->internals.intVal = (int)"";
+    result->internals.string = "";
 #endif
 }
 
@@ -2178,11 +2178,11 @@ void __cdecl GetGametypeInternal(int localClientNum, Operand *result)
     else
         result->internals.intVal = g_gametype->current.integer;
     if (!result->internals.intVal)
-        result->internals.intVal = (int)"";
+        result->internals.string = "";
 
 #elif KISAK_SP
     result->dataType = VAL_STRING;
-    result->internals.intVal = (int)"";
+    result->internals.string = "";
 #endif
 }
 
@@ -2319,7 +2319,7 @@ void __cdecl TableLookup(int localClientNum, OperandList *list, Operand *operand
             intVal = GetSourceInt(&list->operands[3]).intVal;
             v8 = GetSourceString(list->operands[2]);
             v4.intVal = GetSourceInt(&list->operands[1]).intVal;
-            operandResult->internals.intVal = (int)StringTable_Lookup(table, v4.intVal, v8, intVal);
+            operandResult->internals.string = StringTable_Lookup(table, v4.intVal, v8, intVal);
             if (uiscript_debug->current.integer)
             {
                 string = operandResult->internals.string;
@@ -2465,7 +2465,7 @@ void __cdecl LocalizeString(OperandList *list, Operand *operandResult)
     }
     string[stringLen] = 0;
     operandResult->dataType = VAL_STRING;
-    operandResult->internals.intVal = (int)SEH_LocalizeTextMessage(string, "ui string", LOCMSG_NOERR);
+    operandResult->internals.string = SEH_LocalizeTextMessage(string, "ui string", LOCMSG_NOERR);
     if (!operandResult->internals.intVal)
         operandResult->internals.intVal = (int)"";
 }
