@@ -47,7 +47,33 @@ void R_GammaCorrect(uint8_t *, int) {}
 void SetGfxConfig(const GfxConfiguration *config) { if (config) gfxCfg = *config; }
 
 void R_InitThreads() { R_InitRenderThread(); }
-void R_ShutdownStreams() {}
+static int g_remoteScreenUpdateNesting = 0;
+
+int __cdecl R_PopRemoteScreenUpdate()
+{
+    const int value = g_remoteScreenUpdateNesting;
+    g_remoteScreenUpdateNesting = 0;
+    return value;
+}
+
+void __cdecl R_PushRemoteScreenUpdate(int nesting)
+{
+    g_remoteScreenUpdateNesting = nesting;
+}
+
+bool __cdecl R_IsInRemoteScreenUpdate()
+{
+    return g_remoteScreenUpdateNesting != 0;
+}
+
+void __cdecl R_SyncRenderThread()
+{
+    if (g_gfxBackend)
+        g_gfxBackend->WaitForGpu();
+}
+
+void __cdecl R_WaitWorkerCmds() {}
+
 void R_ShutdownMaterialUsage() {}
 
 void R_ShutdownDirect3D() {
