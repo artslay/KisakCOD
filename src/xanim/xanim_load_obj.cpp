@@ -1211,7 +1211,7 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
             animPartIndex = boneIndexes[i];
             v8 = *(_DWORD *)&v73[animPartIndex].partIndex;
             v9 = i;
-            *reinterpret_cast<uintptr_t *>(&dest[8 * i + 64]) = reinterpret_cast<uintptr_t>(v73[animPartIndex].trans);
+            transPtrs[i] = reinterpret_cast<uintptr_t>(v73[animPartIndex].trans);
             transPartIndices[v9] = static_cast<uint32_t>(v8);
             PartQuatType = XAnimGetPartTransType(animPartIndex);
             v51[PartQuatType] = i + 1;
@@ -1272,7 +1272,7 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
         v56 += parts->boneCount[PART_TYPE_FULL_QUAT];
         while (animPartIndex < v56)
         {
-            tableSize = *(uint16_t *)v71[2 * animPartIndex];
+            tableSize = v71[animPartIndex].quat->size;
             ++dataShortCount;
             if (useSmallIndices)
             {
@@ -1426,7 +1426,7 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
         v56 += parts->boneCount[1];
         while (animPartIndex < v56)
         {
-            tableSize = *(uint16_t *)v71[2 * animPartIndex];
+            tableSize = v71[animPartIndex].quat->size;
             if (tableSize != (uint16_t)tableSize)
                 MyAssertHandler(
                     (char *)"c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
@@ -1449,7 +1449,7 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
         v56 += parts->boneCount[2];
         while (animPartIndex < v56)
         {
-            tableSize = *(uint16_t *)v71[2 * animPartIndex];
+            tableSize = v71[animPartIndex].quat->size;
             if (tableSize != (uint16_t)tableSize)
                 MyAssertHandler(
                     (char *)"c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
@@ -1459,7 +1459,7 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
                     tableSize,
                     (uint16_t)tableSize);
             *dataShort++ = tableSize;
-            memcpy(randomDataShort, *(unsigned __int8 **)(v71[2 * animPartIndex] + 4), 2 * (4 * tableSize + 4));
+            memcpy(randomDataShort, reinterpret_cast<unsigned __int8 *>(v71[animPartIndex].quat->u.frames.u.frames), 2 * (4 * tableSize + 4));
             randomDataShort += 8 * tableSize + 8;
             XAnimEmitFrameIndices(
                 tableSize,
@@ -1503,9 +1503,9 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
             v43 = 0;
             while (v43 <= tableSize)
             {
-                *randomDataByte = *(_BYTE *)(3 * v43 + *reinterpret_cast<uint32_t *>(transPtrs[animPartIndex] + 28));
-                randomDataByte[1] = *(_BYTE *)(*reinterpret_cast<uint32_t *>(transPtrs[animPartIndex] + 28) + 3 * v43 + 1);
-                randomDataByte[2] = *(_BYTE *)(*reinterpret_cast<uint32_t *>(transPtrs[animPartIndex] + 28) + 3 * v43++ + 2);
+                *randomDataByte = *reinterpret_cast<uint8_t *>(reinterpret_cast<XAnimPartTrans *>(transPtrs[animPartIndex])->u.frames.frames._1[0] + 3 * v43);
+                randomDataByte[1] = *reinterpret_cast<uint8_t *>(reinterpret_cast<XAnimPartTrans *>(transPtrs[animPartIndex])->u.frames.frames._1[0] + 3 * v43 + 1);
+                randomDataByte[2] = *reinterpret_cast<uint8_t *>(reinterpret_cast<XAnimPartTrans *>(transPtrs[animPartIndex])->u.frames.frames._1[0] + 3 * v43++ + 2);
                 randomDataByte += 3;
             }
             XAnimEmitFrameIndices(
@@ -1544,7 +1544,7 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
                 &dataByte,
                 &dataShort,
                 &indices,
-                (XAnimDynamicIndices *)(*(_DWORD *)&dest[8 * animPartIndex++ + 64] + 32),
+                &reinterpret_cast<XAnimPartTrans *>(transPtrs[animPartIndex++])->u.frames.indices,
                 useSmallIndices);
             dataInt += 6;
         }
@@ -1560,7 +1560,7 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
         }
         v56 += parts->boneCount[8];
         while (animPartIndex < v56)
-            *dataByte++ = dest[8 * animPartIndex++ + 68];
+            *dataByte++ = static_cast<uint8_t>(transPartIndices[animPartIndex++]);
 
         iassert(animPartIndex == parts->boneCount[PART_TYPE_ALL]);
 
