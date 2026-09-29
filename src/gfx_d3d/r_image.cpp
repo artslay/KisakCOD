@@ -786,12 +786,15 @@ void __cdecl R_SetPicmip()
 #ifdef __SWITCH__
             // These values are already validated by the picmip calculation.
             // Avoid the shared dvar setter during renderer bootstrap on Switch.
-            r_picmip->current.integer = imageGlobals.picmip;
-            r_picmip->latched.integer = imageGlobals.picmip;
-            r_picmip_bump->current.integer = imageGlobals.picmipBump;
-            r_picmip_bump->latched.integer = imageGlobals.picmipBump;
-            r_picmip_spec->current.integer = imageGlobals.picmipSpec;
-            r_picmip_spec->latched.integer = imageGlobals.picmipSpec;
+            dvar_s *picmip = const_cast<dvar_s *>(r_picmip);
+            dvar_s *picmipBump = const_cast<dvar_s *>(r_picmip_bump);
+            dvar_s *picmipSpec = const_cast<dvar_s *>(r_picmip_spec);
+            picmip->current.integer = imageGlobals.picmip;
+            picmip->latched.integer = imageGlobals.picmip;
+            picmipBump->current.integer = imageGlobals.picmipBump;
+            picmipBump->latched.integer = imageGlobals.picmipBump;
+            picmipSpec->current.integer = imageGlobals.picmipSpec;
+            picmipSpec->latched.integer = imageGlobals.picmipSpec;
 #else
             Dvar_SetInt(r_picmip, imageGlobals.picmip);
             Dvar_SetInt(r_picmip_bump, imageGlobals.picmipBump);
