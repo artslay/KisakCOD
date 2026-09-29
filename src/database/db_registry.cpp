@@ -17,6 +17,7 @@ extern FILE *FS_SwitchOpenRootFile(const char *path);
 #include <win32/win_local.h>
 #ifdef __SWITCH__
 extern void __cdecl NET_Sleep(int msec);
+extern void Switch_LogWrite(const char *msg);
 #endif
 #include <qcommon/com_bsp.h>
 #include <gfx_d3d/r_init.h>
@@ -463,7 +464,7 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
 
             for (size_t i = 0; i < count; ++i)
             {
-                if (requested[i] == '\\r' || requested[i] == '\n')
+                if (requested[i] == '\r' || requested[i] == '\n')
                 {
                     requested[i] = 0;
                     break;
