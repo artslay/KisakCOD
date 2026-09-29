@@ -79,6 +79,7 @@ CPP_SOURCES += src/gfx_d3d/r_cmdbuf.cpp src/gfx_d3d/rb_stats.cpp src/gfx_d3d/rb_
 CPP_SOURCES += src/gfx_d3d/rb_pixelcost.cpp src/gfx_d3d/r_pixelcost_load_obj.cpp src/gfx_d3d/rb_sky.cpp
 CPP_SOURCES += src/gfx_d3d/r_water.cpp src/gfx_d3d/r_water_load_obj.cpp
 CPP_SOURCES += src/gfx_d3d/r_meshdata.cpp src/gfx_d3d/r_draw_method.cpp src/gfx_d3d/r_pretess.cpp
+CPP_SOURCES += src/gfx_d3d/r_draw_material.cpp src/gfx_d3d/r_draw_shadowable_light.cpp src/gfx_d3d/rb_tess.cpp
 CPP_SOURCES += src/gfx_d3d/r_add_cmdbuf.cpp src/gfx_d3d/r_staticmodel.cpp src/gfx_d3d/r_xsurface.cpp src/gfx_d3d/r_reflection_probe_load_obj.cpp
 CPP_SOURCES += src/gfx_d3d/r_light.cpp src/gfx_d3d/r_light_load_obj.cpp src/gfx_d3d/r_primarylights.cpp src/gfx_d3d/r_outdoor.cpp
 
