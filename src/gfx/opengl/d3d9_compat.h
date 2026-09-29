@@ -39,6 +39,24 @@ using _D3DFORMAT = uint32_t;
 constexpr _D3DFORMAT D3DFMT_X8R8G8B8 = 22;
 constexpr uint32_t D3DLOCK_NOOVERWRITE = 0x1000;
 constexpr uint32_t D3DLOCK_DISCARD = 0x2000;
+
+struct _D3DLOCKED_BOX
+{
+    void *pBits = nullptr;
+    int RowPitch = 0;
+    int SlicePitch = 0;
+};
+
+struct _D3DBOX
+{
+    uint32_t Left = 0;
+    uint32_t Top = 0;
+    uint32_t Front = 0;
+    uint32_t Right = 0;
+    uint32_t Bottom = 0;
+    uint32_t Back = 0;
+};
+
 struct _D3DDISPLAYMODE { uint32_t Width=0, Height=0; uint32_t RefreshRate=60; _D3DFORMAT Format=D3DFMT_X8R8G8B8; };
 
 constexpr HRESULT S_OK = 0;
@@ -234,7 +252,79 @@ struct KisakGLTexture
     _D3DFORMAT sourceFormat = D3DFMT_UNKNOWN;
     uint32_t refs = 1;
 
+    std::vector<uint8_t> lockShadow;
+    bool lockShadowActive = false;
+
     void AddRef() { ++refs; }
+
+    HRESULT LockBox(uint32_t level, _D3DLOCKED_BOX *lockedBox, const _D3DBOX *box, uint32_t)
+    {
+        if (!lockedBox || target != GL_TEXTURE_3D || level >= mipLevels)
+            return E_FAIL;
+
+        const uint32_t levelWidth = std::max(1u, width >> level);
+        const uint32_t levelHeight = std::max(1u, height >> level);
+        const uint32_t levelDepth = std::max(1u, depth >> level);
+        const size_t rowPitch = static_cast<size_t>(levelWidth) * 4u;
+        const size_t slicePitch = rowPitch * levelHeight;
+        const size_t totalSize = slicePitch * levelDepth;
+
+        lockShadow.resize(totalSize);
+
+        uint32_t left = 0, top = 0, front = 0;
+        uint32_t right = levelWidth, bottom = levelHeight, back = levelDepth;
+        if (box)
+        {
+            left = std::min(box->Left, levelWidth);
+            top = std::min(box->Top, levelHeight);
+            front = std::min(box->Front, levelDepth);
+            right = std::min(std::max(box->Right, left), levelWidth);
+            bottom = std::min(std::max(box->Bottom, top), levelHeight);
+            back = std::min(std::max(box->Back, front), levelDepth);
+        }
+
+        lockedBox->RowPitch = static_cast<int>(rowPitch);
+        lockedBox->SlicePitch = static_cast<int>(slicePitch);
+        lockedBox->pBits = lockShadow.data()
+            + static_cast<size_t>(front) * slicePitch
+            + static_cast<size_t>(top) * rowPitch
+            + static_cast<size_t>(left) * 4u;
+        (void)right;
+        (void)bottom;
+        (void)back;
+        lockShadowActive = true;
+        return S_OK;
+    }
+
+    HRESULT UnlockBox(uint32_t level)
+    {
+        if (target != GL_TEXTURE_3D || !lockShadowActive || level >= mipLevels)
+            return E_FAIL;
+
+        const uint32_t levelWidth = std::max(1u, width >> level);
+        const uint32_t levelHeight = std::max(1u, height >> level);
+        const uint32_t levelDepth = std::max(1u, depth >> level);
+
+        glBindTexture(GL_TEXTURE_3D, object);
+        glTexSubImage3D(
+            GL_TEXTURE_3D,
+            static_cast<GLint>(level),
+            0, 0, 0,
+            static_cast<GLsizei>(levelWidth),
+            static_cast<GLsizei>(levelHeight),
+            static_cast<GLsizei>(levelDepth),
+            uploadFormat,
+            uploadType,
+            lockShadow.data());
+
+        lockShadowActive = false;
+        return S_OK;
+    }
+
+    HRESULT AddDirtyBox(const _D3DBOX *)
+    {
+        return S_OK;
+    }
 
     void Release()
     {
@@ -984,6 +1074,20 @@ void main()
             (GLsizei)(primitiveCount * 3),
             GL_UNSIGNED_SHORT,
             reinterpret_cast<const void*>(uintptr_t(startIndex * sizeof(uint16_t))));
+        return S_OK;
+    }
+
+    HRESULT UpdateTexture(IDirect3DVolumeTexture9 *source, IDirect3DVolumeTexture9 *destination)
+    {
+        if (!source || !destination || source->target != GL_TEXTURE_3D || destination->target != GL_TEXTURE_3D)
+            return E_FAIL;
+
+        glCopyImageSubData(
+            source->object, GL_TEXTURE_3D, 0, 0, 0, 0,
+            destination->object, GL_TEXTURE_3D, 0, 0, 0, 0,
+            static_cast<GLsizei>(std::min(source->width, destination->width)),
+            static_cast<GLsizei>(std::min(source->height, destination->height)),
+            static_cast<GLsizei>(std::min(source->depth, destination->depth)));
         return S_OK;
     }
 
