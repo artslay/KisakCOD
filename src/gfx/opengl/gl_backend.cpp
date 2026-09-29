@@ -88,6 +88,7 @@ OpenGLBackend::~OpenGLBackend()
 
 #ifdef __SWITCH__
 extern void Switch_LogRaw(const char *msg);
+extern void Switch_LogReleaseScreen();
 #endif
 
 bool OpenGLBackend::Init(const GfxWindowParms* wndParms)
@@ -514,6 +515,8 @@ bool OpenGLBackend::InitContext(const GfxWindowParms* wndParms)
     }
     Switch_LogRaw("[SWITCH GL TRACE] InitContext: after eglChooseConfig\n");
 
+    Switch_LogRaw("[SWITCH GL TRACE] InitContext: releasing libnx console screen before EGL surface\n");
+    Switch_LogReleaseScreen();
     Switch_LogRaw("[SWITCH GL TRACE] InitContext: before eglCreateWindowSurface\n");
     s_surface = eglCreateWindowSurface(
         s_display, config, static_cast<EGLNativeWindowType>(m_window), nullptr);
