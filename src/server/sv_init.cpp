@@ -3,6 +3,8 @@
 #endif
 
 #include <universal/q_shared.h>
+
+extern void Sys_Print(const char *text);
 #include "server.h"
 #include "sv_public.h"
 #include <ui/ui.h>
