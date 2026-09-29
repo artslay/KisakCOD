@@ -1376,9 +1376,22 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Sys_Print("[SWITCH INIT TRACE] before getBuildNumber SP\n");
     const char *switchBuildNumber = getBuildNumber();
     Sys_Print("[SWITCH INIT TRACE] after getBuildNumber SP\n");
-    Sys_Print("[SWITCH INIT TRACE] before va version SP\n");
-    s = va("%s %s build %s %s", "CoD4", "1.0", switchBuildNumber, CPUSTRING);
-    Sys_Print("[SWITCH INIT TRACE] after va version SP\n");
+
+    static char switchVersionString[128];
+    char *versionOut = switchVersionString;
+    const char *prefix = "CoD4 1.0 build ";
+    while (*prefix)
+        *versionOut++ = *prefix++;
+    while (*switchBuildNumber)
+        *versionOut++ = *switchBuildNumber++;
+    *versionOut++ = ' ';
+    const char *cpu = CPUSTRING;
+    while (*cpu)
+        *versionOut++ = *cpu++;
+    *versionOut = '\0';
+
+    Sys_Print("[SWITCH INIT TRACE] after direct version string\n");
+    s = switchVersionString;
 #endif
     Sys_Print("[SWITCH INIT TRACE] before version dvar\n");
     version = Dvar_RegisterString("version", "", DVAR_ROM, "Game version");
