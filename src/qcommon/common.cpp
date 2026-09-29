@@ -1374,8 +1374,11 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Sys_Print("[SWITCH INIT TRACE] after getBuildNumber MP\n");
 #elif KISAK_SP
     Sys_Print("[SWITCH INIT TRACE] before getBuildNumber SP\n");
-    s = va("%s %s build %s %s", "CoD4", "1.0", getBuildNumber(), CPUSTRING);
+    const char *switchBuildNumber = getBuildNumber();
     Sys_Print("[SWITCH INIT TRACE] after getBuildNumber SP\n");
+    Sys_Print("[SWITCH INIT TRACE] before va version SP\n");
+    s = va("%s %s build %s %s", "CoD4", "1.0", switchBuildNumber, CPUSTRING);
+    Sys_Print("[SWITCH INIT TRACE] after va version SP\n");
 #endif
     Sys_Print("[SWITCH INIT TRACE] before version dvar\n");
     version = Dvar_RegisterString("version", "", DVAR_ROM, "Game version");
