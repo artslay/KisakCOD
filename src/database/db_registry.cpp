@@ -443,6 +443,63 @@ static void __cdecl DB_RemoveLoadedSound(XAssetHeader header)
         Z_Free(header.loadSnd->sound.data, 15);
 }
 
+#ifdef __SWITCH__
+static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
+{
+    static char language[64];
+    static bool selected = false;
+
+    if (selected && language[0])
+        return language;
+
+    // Com_InitXAssets() runs before FS_InitFilesystem(), so loc_language may
+    // not exist yet. In that case resolve the language from actual fastfiles.
+    if (loc_language)
+    {
+        const int languageIndex = SEH_GetCurrentLanguage();
+        if (languageIndex >= 0 && languageIndex < 15)
+        {
+            const char *languageName = SEH_GetLanguageName(languageIndex);
+            if (languageName && *languageName)
+            {
+                char path[256];
+                Com_sprintf(path, sizeof(path), "zone/%s/%s.ff", languageName, zoneName);
+                FILE *file = FS_SwitchOpenRootFile(path);
+                if (file)
+                {
+                    fclose(file);
+                    I_strncpyz(language, languageName, sizeof(language));
+                    selected = true;
+                    return language;
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < 15; ++i)
+    {
+        const char *languageName = SEH_GetLanguageName(i);
+        if (!languageName || !*languageName)
+            continue;
+
+        char path[256];
+        Com_sprintf(path, sizeof(path), "zone/%s/%s.ff", languageName, zoneName);
+        FILE *file = FS_SwitchOpenRootFile(path);
+        if (!file)
+            continue;
+
+        fclose(file);
+        I_strncpyz(language, languageName, sizeof(language));
+        Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\\n", language);
+        selected = true;
+        return language;
+    }
+
+    I_strncpyz(language, "english", sizeof(language));
+    return language;
+}
+#endif
+
 static void __cdecl DB_BuildOSPath_Mod(const char *zoneName, uint32_t size, char *filename)
 {
 #ifdef __SWITCH__
@@ -461,10 +518,7 @@ static void __cdecl DB_BuildOSPath_Mod(const char *zoneName, uint32_t size, char
 static void __cdecl DB_BuildOSPath(const char *zoneName, uint32_t size, char *filename)
 {
 #ifdef __SWITCH__
-    const int languageIndex = SEH_GetCurrentLanguage();
-    const char *languageName = SEH_GetLanguageName(languageIndex);
-    if (!languageName || !*languageName)
-        languageName = "english";
+    const char *languageName = DB_GetSwitchZoneLanguage(zoneName);
     Com_sprintf(filename, size, "zone/%s/%s.ff", languageName, zoneName);
 #else
     char *v3;
