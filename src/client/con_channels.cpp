@@ -220,20 +220,16 @@ void __cdecl Con_FilterShowChannel(print_msg_dest_t dest, const char *channelNam
                 if (!Com_BitCheckAssert(pcGlob.filters[dest], channel, 32))
                 {
                     Com_BitSetAssert(pcGlob.filters[dest], channel, 32);
-                    Com_Printf(CON_CHANNEL_DONT_FILTER, "Adding channel: %s\n", pcGlob.openChannels[channel].name);
                     ++count;
                 }
             }
             else if (Com_BitCheckAssert(pcGlob.filters[dest], channel, 32))
             {
                 Com_BitClearAssert(pcGlob.filters[dest], channel, 32);
-                Com_Printf(CON_CHANNEL_DONT_FILTER, "Hiding channel: %s\n", pcGlob.openChannels[channel].name);
                 ++count;
             }
         }
     }
-    if (!count)
-        Com_Printf(CON_CHANNEL_DONT_FILTER, "No channels added or hidden\n");
 }
 
 const char *builtinChannels[25] =
