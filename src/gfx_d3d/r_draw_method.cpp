@@ -14,35 +14,16 @@ GfxDrawMethod gfxDrawMethod;
 
 void __cdecl R_InitDrawMethod()
 {
-#ifdef __SWITCH__
-    Switch_LogRaw("[SWITCH DRAWMETHOD TRACE] enter\n");
-    Switch_LogRaw(r_fullbright ? "[SWITCH DRAWMETHOD TRACE] r_fullbright=valid\n"
-                               : "[SWITCH DRAWMETHOD TRACE] r_fullbright=NULL\n");
-    Switch_LogRaw(r_debugShader ? "[SWITCH DRAWMETHOD TRACE] r_debugShader=valid\n"
-                                : "[SWITCH DRAWMETHOD TRACE] r_debugShader=NULL\n");
-#endif
 
     if (r_fullbright->current.enabled)
     {
-#ifdef __SWITCH__
-        Switch_LogRaw("[SWITCH DRAWMETHOD TRACE] branch FULLBRIGHT\n");
-#endif
         gfxDrawMethod.drawScene = GFX_DRAW_SCENE_FULLBRIGHT;
         gfxDrawMethod.baseTechType = TECHNIQUE_UNLIT;
         gfxDrawMethod.emissiveTechType = TECHNIQUE_UNLIT;
-#ifdef __SWITCH__
-        Switch_LogRaw("[SWITCH DRAWMETHOD TRACE] before R_ForceLitTechType unlit\n");
-#endif
         R_ForceLitTechType(TECHNIQUE_UNLIT);
-#ifdef __SWITCH__
-        Switch_LogRaw("[SWITCH DRAWMETHOD TRACE] after R_ForceLitTechType unlit\n");
-#endif
     }
     else if (r_debugShader->current.integer)
     {
-#ifdef __SWITCH__
-        Switch_LogRaw("[SWITCH DRAWMETHOD TRACE] branch DEBUGSHADER\n");
-#endif
         gfxDrawMethod.drawScene = GFX_DRAW_SCENE_DEBUGSHADER;
         gfxDrawMethod.baseTechType = TECHNIQUE_DEBUG_BUMPMAP;
         gfxDrawMethod.emissiveTechType = TECHNIQUE_DEBUG_BUMPMAP;
@@ -50,19 +31,10 @@ void __cdecl R_InitDrawMethod()
     }
     else
     {
-#ifdef __SWITCH__
-        Switch_LogRaw("[SWITCH DRAWMETHOD TRACE] branch STANDARD\n");
-#endif
         gfxDrawMethod.drawScene = GFX_DRAW_SCENE_STANDARD;
         gfxDrawMethod.baseTechType = TECHNIQUE_LIT_BEGIN;
         gfxDrawMethod.emissiveTechType = TECHNIQUE_EMISSIVE;
-#ifdef __SWITCH__
-        Switch_LogRaw("[SWITCH DRAWMETHOD TRACE] before R_SetDefaultLitTechTypes\n");
-#endif
         R_SetDefaultLitTechTypes();
-#ifdef __SWITCH__
-        Switch_LogRaw("[SWITCH DRAWMETHOD TRACE] after R_SetDefaultLitTechTypes\n");
-#endif
     }
 }
 
