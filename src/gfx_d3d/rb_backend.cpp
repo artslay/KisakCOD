@@ -41,6 +41,11 @@ static inline uint64_t KisakRendererClock()
 {
     return static_cast<uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count());
 }
+#else
+static inline uint64_t KisakRendererClock()
+{
+    return __rdtsc();
+}
 #endif
 
 #include <setjmp.h>
