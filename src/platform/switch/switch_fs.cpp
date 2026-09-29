@@ -54,6 +54,24 @@ static void SwitchPath(char *dst, size_t dstSize, const char *base, const char *
     for (char *p = dst; *p; ++p) if (*p == '\\') *p = '/';
 }
 
+#ifdef __SWITCH__
+bool __cdecl FS_SwitchLanguageHasAssets(int iLanguage)
+{
+    if (iLanguage < 0 || iLanguage >= 15)
+        return false;
+
+    const char *languageName = SEH_GetLanguageName(iLanguage);
+    if (!languageName || !*languageName)
+        return false;
+
+    char path[256];
+    std::snprintf(path, sizeof(path), "%s/zone/%s", kSwitchRoot, languageName);
+
+    struct stat st{};
+    return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
+}
+#endif
+
 static int AllocHandle()
 {
     for (int i = 1; i < 65; ++i)
