@@ -3,7 +3,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cerrno>
 #include <cctype>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -19,7 +18,6 @@
 #include <stringed/stringed_hooks.h>
 
 extern void Sys_Print(const char *text);
-extern void Switch_LogWrite(const char *msg);
 
 const dvar_t *fs_remotePCDirectory = nullptr;
 const dvar_t *fs_remotePCName = nullptr;
@@ -68,44 +66,11 @@ bool __cdecl FS_SwitchLanguageHasAssets(int iLanguage)
     if (!languageName || !*languageName)
         return false;
 
+    char path[256];
+    std::snprintf(path, sizeof(path), "%s/zone/%s", kSwitchRoot, languageName);
+
     struct stat st{};
-
-    // COD4 language data is normally split between:
-    //   zone/<language>/                 localized fastfiles
-    //   main/localized_<language>_iw##.iwd  localized archives
-    // Accept both layouts on Switch, plus the flat root form used by some
-    // extracted game-data packages.
-    char zonePath[256];
-    std::snprintf(zonePath, sizeof(zonePath), "%s/zone/%s", kSwitchRoot, languageName);
-    const bool hasZoneDirectory =
-        stat(zonePath, &st) == 0 && S_ISDIR(st.st_mode);
-
-    char mainPath[256];
-    std::snprintf(mainPath, sizeof(mainPath), "%s/main", kSwitchRoot);
-
-    const char *roots[] = { kSwitchRoot, mainPath };
-    bool hasLocalizedIwd = false;
-
-    for (const char *root : roots)
-    {
-        for (int i = 0; i < 100; ++i)
-        {
-            char iwdPath[256];
-            std::snprintf(iwdPath, sizeof(iwdPath),
-                "%s/localized_%s_iw%02d.iwd", root, languageName, i);
-
-            if (stat(iwdPath, &st) == 0 && S_ISREG(st.st_mode))
-            {
-                hasLocalizedIwd = true;
-                break;
-            }
-        }
-
-        if (hasLocalizedIwd)
-            break;
-    }
-
-    return hasZoneDirectory || hasLocalizedIwd;
+    return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
 }
 #endif
 
@@ -126,40 +91,12 @@ FILE *FS_SwitchOpenFile(const char *path)
 
 FILE *FS_SwitchOpenRootFile(const char *path)
 {
-    if (!path || !*path)
-        return nullptr;
-
-    const char *roots[] =
-    {
-        kSwitchRoot,
-        "sdmc:/switch/KisakCOD_nx/game",
-        "sdmc:/switch/KisakCOD/game",
-    };
-
     char resolved[256];
-
-    for (const char *root : roots)
-    {
-        std::snprintf(resolved, sizeof(resolved), "%s/%s", root, path);
-
-        FILE *file = FS_FileOpenReadBinary(resolved);
-        if (file)
-            return file;
-    }
-
-    std::snprintf(resolved, sizeof(resolved), "%s/%s", kSwitchRoot, path);
-
-    if (std::strstr(path, ".ff"))
-    {
-        char trace[512];
-        std::snprintf(trace, sizeof(trace),
-            "[SWITCH FFOPEN] request=%s resolved=%s errno=%d\\n",
-            path, resolved, errno);
-        Switch_LogWrite(trace);
-    }
-
-    return nullptr;
+    const char *base = fs_basepath ? fs_basepath->current.string : kSwitchRoot;
+    std::snprintf(resolved, sizeof(resolved), "%s/%s", base, path);
+    return FS_FileOpenReadBinary(resolved);
 }
+
 bool __cdecl FS_Initialized() { return fs_searchpaths != nullptr; }
 
 void __cdecl FS_CheckFileSystemStarted()
