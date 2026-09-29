@@ -824,9 +824,21 @@ void __cdecl R_InitImages()
         iassert(imageGlobals.totalMemory.platform[i] == 0);
     }
     R_SetPicmip();
+#ifdef __SWITCH__
+    fprintf(stderr, "[SWITCH IMG] after R_SetPicmip\\n");
+#endif
     R_InitCodeImages();
+#ifdef __SWITCH__
+    fprintf(stderr, "[SWITCH IMG] after R_InitCodeImages\\n");
+#endif
     RB_InitImages();
+#ifdef __SWITCH__
+    fprintf(stderr, "[SWITCH IMG] after RB_InitImages\\n");
+#endif
     R_InitRawImage();
+#ifdef __SWITCH__
+    fprintf(stderr, "[SWITCH IMG] after R_InitRawImage\\n");
+#endif
     rg.waterFloatTime = rg.waterFloatTime + 1.0;
 #ifdef KISAK_RADIANT
     // idb R_InitImages tail: load the editor's case-texture density-visualization images
