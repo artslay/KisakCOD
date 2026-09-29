@@ -570,6 +570,21 @@ static void __cdecl DB_BuildOSPath(const char *zoneName, uint32_t size, char *fi
 {
 #ifdef __SWITCH__
     const char *languageName = DB_GetSwitchZoneLanguage(zoneName);
+
+    // Localization fastfiles must come from the selected language.
+    const bool isLocalizedZone = !strncmp(zoneName, "localized_", 10);
+    if (!isLocalizedZone && I_stricmp(languageName, "english") != 0)
+    {
+        char selectedPath[256];
+        Com_sprintf(selectedPath, sizeof(selectedPath),
+            "zone/%s/%s.ff", languageName, zoneName);
+        FILE *selectedFile = FS_SwitchOpenRootFile(selectedPath);
+        if (!selectedFile)
+            languageName = "english";
+        else
+            fclose(selectedFile);
+    }
+
     Com_sprintf(filename, size, "zone/%s/%s.ff", languageName, zoneName);
 #else
     char *v3;
