@@ -1365,15 +1365,28 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Dvar_SetString(version, s);
     shortversion = Dvar_RegisterString("shortversion", "1.0", DVAR_ROM | DVAR_SERVERINFO, "Short game version");
     Sys_Init();
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after Sys_Init\n");
 #ifdef KISAK_MP
     Netchan_Init(__rdtsc());
 #endif
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before Scr_InitVariables\n");
     Scr_InitVariables();
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after Scr_InitVariables\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before Scr_Init\n");
     Scr_Init();
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after Scr_Init\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before Com_SetScriptSettings\n");
     Com_SetScriptSettings();
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after Com_SetScriptSettings\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before XAnimInit\n");
     XAnimInit();
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after XAnimInit\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before DObjInit\n");
     DObjInit();
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after DObjInit\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before SV_Init\n");
     SV_Init();
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after SV_Init\n");
 #ifdef KISAK_MP
     NET_Init();
 #endif
