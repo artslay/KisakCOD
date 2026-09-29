@@ -889,26 +889,86 @@ void __cdecl DB_UnloadXAssetsMemory(XZone *zone, int32_t sortedIndex)
 
 XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
 {
+    const char *v5;
+    uint32_t startTime = 0;
+    XAssetEntry *assetEntry;
+    XAssetEntry *newEntry;
+
+    iassert(IsFastFileLoad());
+
 #ifdef __SWITCH__
     char trace[256];
     std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] HEADER type=%d name=%s\\n", (int)type, name ? name : "<null>");
     Switch_LogWrite(trace);
 #endif
-    XAssetEntryPoolEntry *assetEntry = DB_FindXAssetEntry(type, name);
-#ifdef __SWITCH__
-    std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] FIND returned=%p\\n", (void *)assetEntry);
-    Switch_LogWrite(trace);
-#endif
+
+    // Match the upstream DB hash access pattern: readers may inspect the table
+    // concurrently, but creation/linking requires the write lock.
+    InterlockedIncrement(&db_hashCritSect.readCount);
+    while (db_hashCritSect.writeCount)
+        std::this_thread::yield();
+
+    XAssetEntryPoolEntry *found = DB_FindXAssetEntry(type, name);
+    assetEntry = found ? &found->entry : nullptr;
+
+    if (db_hashCritSect.readCount <= 0)
+        MyAssertHandler(".\\database\\db_registry.cpp", 0, 0, "%s", "db_hashCritSect.readCount > 0");
+    InterlockedDecrement(&db_hashCritSect.readCount);
+
     if (assetEntry)
     {
-        assetEntry->entry.inuse = 1;
-        return assetEntry->entry.asset.header;
+#ifdef __SWITCH__
+        std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] READ found=%p zone=%u\\n",
+            (void *)assetEntry, assetEntry->zoneIndex);
+        Switch_LogWrite(trace);
+#endif
+        assetEntry->inuse = 1;
+        return assetEntry->asset.header;
+    }
+
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH DBFIND] READ miss, acquiring write lock\\n");
+#endif
+
+    Sys_LockWrite(&db_hashCritSect);
+
+    // Re-check after acquiring the writer lock, matching the upstream double-check.
+    XAssetEntryPoolEntry *existing = DB_FindXAssetEntry(type, name);
+    if (existing)
+    {
+        assetEntry = &existing->entry;
+        assetEntry->inuse = 1;
+        Sys_UnlockWrite(&db_hashCritSect);
+#ifdef __SWITCH__
+        Switch_LogWrite("[SWITCH DBFIND] WRITE recheck found\\n");
+#endif
+        return assetEntry->asset.header;
     }
 
     if (type == ASSET_TYPE_LOCALIZE_ENTRY || type == ASSET_TYPE_RAWFILE)
+    {
+        Sys_UnlockWrite(&db_hashCritSect);
+#ifdef __SWITCH__
+        Switch_LogWrite("[SWITCH DBFIND] missing non-default asset\\n");
+#endif
         return {};
+    }
 
-    XAssetEntry *newEntry = DB_CreateDefaultEntry(type, (char *)name);
+#ifdef __SWITCH__
+    std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] CREATE DEFAULT type=%d name=%s default=%s\\n",
+        (int)type, name ? name : "<null>", g_defaultAssetName[type]);
+    Switch_LogWrite(trace);
+#endif
+
+    newEntry = DB_CreateDefaultEntry(type, (char *)name);
+    Sys_UnlockWrite(&db_hashCritSect);
+
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH DBFIND] CREATE DEFAULT returned\\n");
+#endif
+
+    v5 = g_assetNames[type];
+    (void)v5;
     return newEntry ? newEntry->asset.header : XAssetHeader{};
 }
 
