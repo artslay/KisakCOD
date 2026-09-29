@@ -1,5 +1,6 @@
 #include <universal/q_shared.h>
 #include "rb_logfile.h"
+#include <time.h>
 
 struct $7272244CE635036285CD968BA6FC5DEE // sizeof=0x4
 {                                       // ...
@@ -30,16 +31,16 @@ void RB_CloseLogFile()
 void RB_OpenLogFile()
 {
     const char *v0; // eax
-    __int64 aclock; // [esp+0h] [ebp-10h] BYREF
-    tm *newtime; // [esp+Ch] [ebp-4h]
+    time_t aclock;
+    tm *newtime;
 
     if (!r_logFileGlob.fp)
     {
         r_logFileGlob.fp = fopen("dx.log", "wt");
         if (r_logFileGlob.fp)
         {
-            _time64(&aclock);
-            newtime = _localtime64(&aclock);
+            time(&aclock);
+            newtime = localtime(&aclock);
             v0 = asctime(newtime);
             fprintf(r_logFileGlob.fp, "%s\n", v0);
             fflush(r_logFileGlob.fp);
