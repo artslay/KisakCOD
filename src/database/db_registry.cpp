@@ -435,6 +435,8 @@ void __cdecl DB_ReplaceXAsset(XAssetType type, const char *original, const char 
 void __cdecl DB_CloneXAsset(const XAsset *from, XAsset *to);
 void __cdecl Material_DirtyTechniqueSetOverrides();
 void __cdecl Material_ClearShaderUploadList();
+static void __cdecl DB_BuildOSPath(const char *zoneName, uint32_t size, char *filename);
+
 static void __cdecl DB_RemoveLoadedSound(XAssetHeader header)
 {
     if (header.loadSnd && header.loadSnd->sound.data)
