@@ -541,12 +541,12 @@ Material *__cdecl Material_Register_FastFile(const char *name)
 #ifdef __SWITCH__
     extern void Switch_LogRaw(const char *msg);
     char trace[256];
-    std::snprintf(trace, sizeof(trace), "[SWITCH MATERIAL TRACE] before DB_FindXAssetHeader name=%s\\n", name);
+    std::snprintf(trace, sizeof(trace), "[SWITCH MATERIAL TRACE] before DB_FindXAssetHeader name=%s\n", name);
     Switch_LogRaw(trace);
 #endif
     XAssetHeader header = DB_FindXAssetHeader(ASSET_TYPE_MATERIAL, name);
 #ifdef __SWITCH__
-    std::snprintf(trace, sizeof(trace), "[SWITCH MATERIAL TRACE] after DB_FindXAssetHeader name=%s material=%p\\n", name, (void *)header.material);
+    std::snprintf(trace, sizeof(trace), "[SWITCH MATERIAL TRACE] after DB_FindXAssetHeader name=%s material=%p\n", name, (void *)header.material);
     Switch_LogRaw(trace);
 #endif
     return header.material;
