@@ -114,7 +114,7 @@ all: progress-init $(TARGET).nro progress-done
 $(TARGET).nro: progress-init
 
 $(TARGET).elf: $(OBJECTS)
-	$(CXX) $(LDFLAGS) -o $@ $^ $(LIBS)
+	@$(CXX) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 $(BUILD)/%.o: %.cpp
 	@mkdir -p $(dir $@)
