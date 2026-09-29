@@ -888,7 +888,16 @@ void __cdecl DB_UnloadXAssetsMemory(XZone *zone, int32_t sortedIndex)
 
 XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
 {
+#ifdef __SWITCH__
+    char trace[256];
+    std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] HEADER type=%d name=%s\\n", (int)type, name ? name : "<null>");
+    Switch_LogWrite(trace);
+#endif
     XAssetEntryPoolEntry *assetEntry = DB_FindXAssetEntry(type, name);
+#ifdef __SWITCH__
+    std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] FIND returned=%p\\n", (void *)assetEntry);
+    Switch_LogWrite(trace);
+#endif
     if (assetEntry)
     {
         assetEntry->entry.inuse = 1;
@@ -1449,18 +1458,39 @@ void __cdecl DB_RemoveGfxWorld(XAssetHeader ass)
 XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *name)
 {
 #ifdef __SWITCH__
-    extern void Switch_LogRaw(const char *msg);
     char trace[256];
+    std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] ENTRY hash begin type=%d name=%s\\n", (int)type, name ? name : "<null>");
+    Switch_LogWrite(trace);
 #endif
     const char *XAssetName; // eax
     uint32_t assetEntryIndex; // [esp+4h] [ebp-8h]
     XAssetEntryPoolEntry *assetEntry; // [esp+8h] [ebp-4h]
 
     const uint32_t hash = DB_HashForName(name, type);
+#ifdef __SWITCH__
+    std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] hash=%u head=%u\\n", hash, db_hashTable[hash]);
+    Switch_LogWrite(trace);
+#endif
+    uint32_t iterations = 0;
     for (assetEntryIndex = db_hashTable[hash];
         assetEntryIndex;
         assetEntryIndex = assetEntry->entry.nextHash)
     {
+#ifdef __SWITCH__
+        if (++iterations <= 16)
+        {
+            std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] idx=%u next=%u type=%d\\n",
+                assetEntryIndex, g_assetEntryPool[assetEntryIndex].entry.nextHash,
+                (int)g_assetEntryPool[assetEntryIndex].entry.asset.type);
+            Switch_LogWrite(trace);
+        }
+        else if (iterations == 17)
+        {
+            Switch_LogWrite("[SWITCH DBFIND] more than 16 chain entries -- possible cycle\\n");
+        }
+#endif
+        if (assetEntryIndex >= 0x8000)
+            return 0;
         assetEntry = &g_assetEntryPool[assetEntryIndex];
         if (assetEntry->entry.asset.type == type)
         {
@@ -1469,6 +1499,9 @@ XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *na
                 return &g_assetEntryPool[assetEntryIndex];
         }
     }
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH DBFIND] ENTRY not found\\n");
+#endif
     return 0;
 }
 
