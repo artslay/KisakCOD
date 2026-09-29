@@ -519,11 +519,19 @@
           #define SINTa __w64 signed __int64
           #define UINTa __w64 unsigned __int64
         #else // non-vc.net compiler or /Wp64 turned off
-          #define UINTADDR unsigned __int64
-          #define INTADDR __int64
+          #if defined(__RADSWITCH__)
+            #define UINTADDR unsigned long long
+            #define INTADDR long long
 
-          #define UINTa unsigned __int64
-          #define SINTa signed __int64
+            #define UINTa unsigned long long
+            #define SINTa signed long long
+          #else
+            #define UINTADDR unsigned __int64
+            #define INTADDR __int64
+
+            #define UINTa unsigned __int64
+            #define SINTa signed __int64
+          #endif
         #endif
       #else
         #error Unknown 64-bit processor (see radbase.h)
