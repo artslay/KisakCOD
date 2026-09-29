@@ -528,6 +528,7 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
     I_strncpyz(startupLanguage, "english", sizeof(startupLanguage));
     return startupLanguage;
 }
+#endif
 
 static void __cdecl DB_BuildOSPath_Mod(const char *zoneName, uint32_t size, char *filename)
 {
