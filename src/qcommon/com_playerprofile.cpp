@@ -636,6 +636,14 @@ bool __cdecl Com_HasConfigureFileChanged()
 
 void __cdecl Com_CheckSetRecommended(int localClientNum)
 {
+#ifdef __SWITCH__
+    // The Switch build does not ship the desktop configure_mp.csv hardware table.
+    // Use the fixed Switch renderer configuration instead of triggering the PC auto-config path.
+    (void)localClientNum;
+    if (com_recommendedSet)
+        Dvar_SetBool(com_recommendedSet, 1);
+    return;
+#else
     if (!com_recommendedSet->current.enabled || Com_HasConfigureFileChanged())
     {
         Com_SetRecommended(localClientNum, 0);
@@ -643,6 +651,7 @@ void __cdecl Com_CheckSetRecommended(int localClientNum)
     }
     if (Sys_HasInfoChanged())
         Com_SetRecommended(localClientNum, 0);
+#endif
 }
 
 void __cdecl Com_ChangePlayerProfile(int localClientNum, char *profileName)
