@@ -7,7 +7,7 @@
 TARGET      := kisakcod
 BUILD       := build
 
-ARCH        := -march=armv8-a -mtune=cortex-a57 -mtp=soft
+ARCH        := -march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 MESA_SDK    := $(CURDIR)/mesa-sdk/opt/devkitpro/portlibs/switch
 OPENAL_SDK   := $(DEVKITPRO)/portlibs/switch
 CPPFLAGS    := -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DKISAK_OPENAL -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE \
