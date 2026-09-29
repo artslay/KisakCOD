@@ -1415,19 +1415,28 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 #endif
     {
         SND_InitDriver();
+        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after SND_InitDriver\n");
+        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before R_InitThreads\n");
         R_InitThreads();
+        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after R_InitThreads\n");
         //KISAK_NULLSUB();
+        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before CL_InitRenderer\n");
         CL_InitRenderer();
+        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after CL_InitRenderer\n");
         //KISAK_NULLSUB();
         iassert(!cls.soundStarted);
         cls.soundStarted = 1;
+        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before SND_Init\n");
         SND_Init();
+        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after SND_Init\n");
     }
 
 #ifdef KISAK_SP
     //Sys_LoadingKeepAlive();
     //Live_InitSigninState();
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before SV_InitServerThread\n");
     SV_InitServerThread();
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after SV_InitServerThread\n");
     //ui_skipMainLockout = Dvar_RegisterBool(
     //    "ui_skipMainLockout",
     //    0,
@@ -1445,7 +1454,9 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     //}
 #endif
 
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before COM_PlayIntroMovies\n");
     COM_PlayIntroMovies();
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after COM_PlayIntroMovies\n");
     if (IsFastFileLoad())
     {
         PMem_EndAlloc(comInitAllocName, 1u);
