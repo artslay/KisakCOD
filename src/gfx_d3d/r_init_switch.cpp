@@ -13,6 +13,7 @@
 #include "r_workercmds.h"
 #include "r_draw_method.h"
 #include <gfx/gfx_backend.h>
+#include <database/database.h>
 
 // These are implemented by the shared renderer dvar/command modules.
 extern void __cdecl R_RegisterDvars();
@@ -127,6 +128,56 @@ void R_Hwnd_Resize(HWND__ *, int width, int height) {
     if (g_gfxBackend) g_gfxBackend->SetViewport(0, 0, width, height);
 }
 
+static void R_LoadGraphicsAssets()
+{
+    XZoneInfo zoneInfo[6]{};
+    uint32_t zoneCount = 0;
+
+    zoneInfo[zoneCount].name = gfxCfg.codeFastFileName;
+    zoneInfo[zoneCount].allocFlags = DB_ZONE_CODE;
+    zoneInfo[zoneCount].freeFlags = 0;
+    ++zoneCount;
+
+    if (gfxCfg.localizedCodeFastFileName)
+    {
+        zoneInfo[zoneCount].name = gfxCfg.localizedCodeFastFileName;
+        zoneInfo[zoneCount].allocFlags = DB_ZONE_CODE_LOC;
+        zoneInfo[zoneCount].freeFlags = 0;
+        ++zoneCount;
+    }
+
+    if (gfxCfg.uiFastFileName)
+    {
+        zoneInfo[zoneCount].name = gfxCfg.uiFastFileName;
+        zoneInfo[zoneCount].allocFlags = DB_ZONE_GAME;
+        zoneInfo[zoneCount].freeFlags = 0;
+        ++zoneCount;
+    }
+
+    zoneInfo[zoneCount].name = gfxCfg.commonFastFileName;
+    zoneInfo[zoneCount].allocFlags = DB_ZONE_COMMON;
+    zoneInfo[zoneCount].freeFlags = 0;
+    ++zoneCount;
+
+    if (gfxCfg.localizedCommonFastFileName)
+    {
+        zoneInfo[zoneCount].name = gfxCfg.localizedCommonFastFileName;
+        zoneInfo[zoneCount].allocFlags = DB_ZONE_COMMON_LOC;
+        zoneInfo[zoneCount].freeFlags = 0;
+        ++zoneCount;
+    }
+
+    if (gfxCfg.modFastFileName)
+    {
+        zoneInfo[zoneCount].name = gfxCfg.modFastFileName;
+        zoneInfo[zoneCount].allocFlags = DB_ZONE_MOD;
+        zoneInfo[zoneCount].freeFlags = 0;
+        ++zoneCount;
+    }
+
+    DB_LoadXAssets(zoneInfo, zoneCount, 0);
+}
+
 void R_InitGraphicsApi() {
     Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: before CreateOpenGLBackend\n");
     if (!g_gfxBackend)
@@ -140,6 +191,12 @@ void R_InitGraphicsApi() {
     if (!g_gfxBackend->Init(nullptr))
         R_FatalInitError(g_gfxBackend->GetLastError());
     Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: after backend Init\n");
+
+    // Match the original R_InitHardware bootstrap: queue code_post_gfx, ui and
+    // common fastfiles before R_InitSystems starts resolving default assets.
+    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: before R_LoadGraphicsAssets\n");
+    R_LoadGraphicsAssets();
+    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: after R_LoadGraphicsAssets\n");
 
     if (!dx.device) dx.device = new IDirect3DDevice9;
     vidConfig.sceneWidth = 1280;
