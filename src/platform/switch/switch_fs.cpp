@@ -304,6 +304,12 @@ void __cdecl FS_ResetFiles() { fs_loadStack = 0; }
 void __cdecl FS_FreeMem(char *buffer) { Hunk_FreeTempMemory(buffer); }
 void __cdecl FS_FreeFile(char *buffer) { if (buffer) { --fs_loadStack; FS_FreeMem(buffer); } }
 
+bool __cdecl DB_ModFileExists()
+{
+    // The Switch bootstrap does not load a separate legacy mod fastfile yet.
+    return false;
+}
+
 int __cdecl FS_FileExists(char *file)
 {
     char path[256];
