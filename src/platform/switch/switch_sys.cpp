@@ -127,58 +127,25 @@ int __cdecl Sys_SetClipboardData(const char *text)
     return 0;
 }
 
-#ifdef __SWITCH__
-static inline void Switch_TraceFile(const char *msg)
-{
-    if (!g_switchLogFile || !msg)
-        return;
-
-    const int fd = fileno(g_switchLogFile);
-    if (fd >= 0)
-        (void)write(fd, msg, std::strlen(msg));
-}
-#endif
-
 void __cdecl Sys_Print(const char *msg)
 {
     if (!msg)
         return;
 
-#ifdef __SWITCH__
-    Switch_TraceFile("[SWITCH SYSPRINT] before stdout\\n");
-#endif
     std::fputs(msg, stdout);
     std::fflush(stdout);
-#ifdef __SWITCH__
-    Switch_TraceFile("[SWITCH SYSPRINT] after stdout\\n");
-#endif
 
     if (g_switchLogFile)
     {
-#ifdef __SWITCH__
-        Switch_TraceFile("[SWITCH SYSPRINT] before log fputs\\n");
-#endif
         std::fputs(msg, g_switchLogFile);
-#ifdef __SWITCH__
-        Switch_TraceFile("[SWITCH SYSPRINT] after log fputs\\n");
-        Switch_TraceFile("[SWITCH SYSPRINT] before log fflush\\n");
-#endif
         std::fflush(g_switchLogFile);
-#ifdef __SWITCH__
-        Switch_TraceFile("[SWITCH SYSPRINT] after log fflush\\n");
-#endif
     }
 
 #if !defined(__SWITCH__)
     if (g_switchScreenLog && Sys_IsMainThread())
         consoleUpdate(nullptr);
 #endif
-
-#ifdef __SWITCH__
-    Switch_TraceFile("[SWITCH SYSPRINT] return\\n");
-#endif
 }
-
 sysEvent_t *__cdecl Sys_GetEvent(sysEvent_t *result)
 {
     static sysEvent_t ev = {};
