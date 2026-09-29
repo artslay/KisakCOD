@@ -26,6 +26,7 @@ struct tagRECT
     int32_t right = 0;
     int32_t bottom = 0;
 };
+using RECT = tagRECT;
 struct IDirect3DSwapChain9 { void Release() { delete this; } };
 using _D3DMULTISAMPLE_TYPE = uint32_t;
 enum _D3DTEXTUREFILTERTYPE : uint32_t
@@ -112,6 +113,8 @@ using _D3DVIEWPORT9 = D3DVIEWPORT9;
 
 enum : uint32_t
 {
+    D3DCLEAR_TARGET = 0x1,
+    D3DCLEAR_ZBUFFER = 0x2,
     D3DPT_TRIANGLELIST = 4,
     D3DFILL_SOLID = 3,
     D3DFILL_WIREFRAME = 2,
