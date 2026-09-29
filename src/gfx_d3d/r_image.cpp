@@ -712,11 +712,11 @@ void __cdecl R_SetPicmip()
     iassert( dx.device );
     texMemInMegs = R_AvailableTextureMemory();
 #ifdef __SWITCH__
-    Switch_LogRaw("[SWITCH PICMIP RAW] after texture memory\\n");
-#endif
+    // sys_sysMB is not registered by the Switch port. Do not enter the shared
+    // dvar read lock here; use the same 2048 MB budget as the Switch texture budget.
+    sysMemInMegs = texMemInMegs;
+#else
     sysMemInMegs = Dvar_GetInt("sys_sysMB");
-#ifdef __SWITCH__
-    Switch_LogRaw("[SWITCH PICMIP RAW] after sys memory dvar\\n");
 #endif
     iassert( r_reflectionProbeGenerate );
     if (r_reflectionProbeGenerate->current.enabled)
