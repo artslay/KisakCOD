@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cerrno>
 #include <cctype>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -18,6 +19,7 @@
 #include <stringed/stringed_hooks.h>
 
 extern void Sys_Print(const char *text);
+extern void Switch_LogWrite(const char *msg);
 
 const dvar_t *fs_remotePCDirectory = nullptr;
 const dvar_t *fs_remotePCName = nullptr;
@@ -131,7 +133,17 @@ FILE *FS_SwitchOpenRootFile(const char *path)
             : kSwitchRoot;
 
     std::snprintf(resolved, sizeof(resolved), "%s/%s", base, path);
-    return FS_FileOpenReadBinary(resolved);
+
+    FILE *file = FS_FileOpenReadBinary(resolved);
+    if (!file && path && std::strstr(path, ".ff"))
+    {
+        char trace[512];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH FFOPEN] request=%s resolved=%s errno=%d\\n",
+            path, resolved, errno);
+        Switch_LogWrite(trace);
+    }
+    return file;
 }
 
 bool __cdecl FS_Initialized() { return fs_searchpaths != nullptr; }
