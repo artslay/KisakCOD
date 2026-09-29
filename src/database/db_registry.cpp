@@ -545,28 +545,17 @@ static void __cdecl DB_BuildOSPath(const char *zoneName, uint32_t size, char *fi
 {
 #ifdef __SWITCH__
     const char *languageName = DB_GetSwitchZoneLanguage(zoneName);
-    const bool isLocalizedZone = !strncmp(zoneName, "localized_", 10);
 
-    // code_post_gfx, ui and common are base game fastfiles. Their normal
-    // location is zone/english even when russian localization is selected.
-    // Only explicitly localized_* zones use the selected language.
-    const char *loadLanguage =
-        (isLocalizedZone && languageName && *languageName) ? languageName : "english";
-
-    Com_sprintf(filename, size, "zone/%s/%s.ff", loadLanguage, zoneName);
-
-    // Some extracted packages keep localized_* fastfiles directly under zone/.
-    if (isLocalizedZone)
-    {
-        char candidate[256];
-        Com_sprintf(candidate, sizeof(candidate), "zone/%s.ff", zoneName);
-        FILE *file = FS_SwitchOpenRootFile(candidate);
-        if (file)
-        {
-            fclose(file);
-            I_strncpyz(filename, candidate, size);
-        }
-    }
+    // Switch game data uses the selected language directory for the regular
+    // startup fastfiles as well as localized assets:
+    //   zone/russian/code_post_gfx.ff
+    //   zone/russian/ui.ff
+    //   zone/russian/common.ff
+    // Keep the selected language authoritative instead of redirecting to
+    // English.
+    Com_sprintf(filename, size, "zone/%s/%s.ff",
+        (languageName && *languageName) ? languageName : "english",
+        zoneName);
 #else
     char *v3;
     char *Language;
