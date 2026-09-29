@@ -12,6 +12,10 @@
 
 #ifdef __SWITCH__
 extern void Switch_LogWrite(const char *msg);
+extern uint8_t *AllocLoad_raw_byte();
+extern const char *varConstChar;
+extern XAssetHeader *varXAssetHeader;
+extern void __cdecl Load_XAssetHeader(bool atStreamStart);
 #endif
 
 //uint32_t volatile g_loadingAssets      828e3f3c     db_file_load.obj
