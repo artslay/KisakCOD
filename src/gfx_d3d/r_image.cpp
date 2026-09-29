@@ -800,8 +800,17 @@ void __cdecl R_SetPicmip()
             Dvar_SetInt(r_picmip_spec, imageGlobals.picmipSpec);
 #endif
         }
+#ifdef __SWITCH__
+        Switch_LogRaw("[SWITCH PICMIP] before r_specular check\n");
+#endif
         if (!r_specular->current.enabled || !r_rendererInUse->current.integer)
             imageGlobals.picmipSpec = 3;
+#ifdef __SWITCH__
+        Switch_LogRaw("[SWITCH PICMIP] after r_specular check\n");
+#endif
+#ifdef __SWITCH__
+        Switch_LogRaw("[SWITCH PICMIP] before final Com_Printf\n");
+#endif
         Com_Printf(
             CON_CHANNEL_GFX,
             "Using picmip %i on most textures, %i on normal maps, and %i on specular maps\n",
@@ -809,7 +818,7 @@ void __cdecl R_SetPicmip()
             imageGlobals.picmipBump,
             imageGlobals.picmipSpec);
 #ifdef __SWITCH__
-        Com_Printf(CON_CHANNEL_GFX, "[SWITCH PICMIP] after final Com_Printf\n");
+        Switch_LogRaw("[SWITCH PICMIP] after final Com_Printf\n");
 #endif
     }
 }
