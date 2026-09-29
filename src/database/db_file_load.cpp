@@ -136,7 +136,24 @@ void __cdecl DB_LoadXFileData(uint8_t *pos, uint32_t size)
     {
         if (!g_load.stream.avail_in)
             goto LABEL_19;
+#ifdef __SWITCH__
+        Com_Printf(CON_CHANNEL_SYSTEM,
+            "Switch FF inflate begin: in=%u out=%u next_in=%p next_out=%p\\n",
+            static_cast<unsigned>(g_load.stream.avail_in),
+            static_cast<unsigned>(g_load.stream.avail_out),
+            static_cast<const void *>(g_load.stream.next_in),
+            static_cast<void *>(g_load.stream.next_out));
+#endif
         err = DB_AuthLoad_Inflate(&g_load.stream, 2);
+#ifdef __SWITCH__
+        Com_Printf(CON_CHANNEL_SYSTEM,
+            "Switch FF inflate end: ret=%u in=%u out=%u total_in=%lu total_out=%lu\\n",
+            static_cast<unsigned>(err),
+            static_cast<unsigned>(g_load.stream.avail_in),
+            static_cast<unsigned>(g_load.stream.avail_out),
+            static_cast<unsigned long>(g_load.stream.total_in),
+            static_cast<unsigned long>(g_load.stream.total_out));
+#endif
         if (err >= 2)
         {
             KISAK_NULLSUB();
