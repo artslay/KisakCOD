@@ -1047,19 +1047,19 @@ void __cdecl Material_UpdatePicmipSingle(XAssetHeader header)
 void __cdecl Material_UpdatePicmipAll()
 {
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH MATERIAL PICMIP] ENTER\n");
+    Com_Printf(CON_CHANNEL_GFX, "[SWITCH MATERIAL PICMIP] ENTER\n");
 #endif
     R_SyncRenderThread();
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH MATERIAL PICMIP] after R_SyncRenderThread\n");
+    Com_Printf(CON_CHANNEL_GFX, "[SWITCH MATERIAL PICMIP] after R_SyncRenderThread\n");
 #endif
     R_SetPicmip();
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH MATERIAL PICMIP] after R_SetPicmip\n");
+    Com_Printf(CON_CHANNEL_GFX, "[SWITCH MATERIAL PICMIP] after R_SetPicmip\n");
 #endif
     DB_EnumXAssets(ASSET_TYPE_MATERIAL, (void(__cdecl *)(XAssetHeader, void *))Material_UpdatePicmipSingle, 0, 1);
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH MATERIAL PICMIP] EXIT\n");
+    Com_Printf(CON_CHANNEL_GFX, "[SWITCH MATERIAL PICMIP] EXIT\n");
 #endif
 }
 
