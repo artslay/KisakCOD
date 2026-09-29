@@ -196,16 +196,9 @@ void __cdecl SV_Init()
     const char *v0; // r5
     unsigned __int16 v1; // r4
 
-    Sys_Print("[SWITCH SV TRACE] before Memcard_InitializeSystem\n");
     Memcard_InitializeSystem();
-    Sys_Print("[SWITCH SV TRACE] after Memcard_InitializeSystem\n");
-    Sys_Print("[SWITCH SV TRACE] before SaveDevice_Init\n");
     SaveDevice_Init();
-    Sys_Print("[SWITCH SV TRACE] after SaveDevice_Init\n");
-    Sys_Print("[SWITCH SV TRACE] before SV_AddOperatorCommands\n");
     SV_AddOperatorCommands();
-    Sys_Print("[SWITCH SV TRACE] after SV_AddOperatorCommands\n");
-    Sys_Print("[SWITCH SV TRACE] before server dvars\n");
     sv_gameskill = Dvar_RegisterInt("g_gameskill", 1, 0, 3, 0x64u, "Game skill level");
     sv_player_maxhealth = Dvar_RegisterInt("g_player_maxhealth", 100, 10, 2000, 2u, "Maximum player health");
     sv_player_damageMultiplier = Dvar_RegisterFloat("player_damageMultiplier", 1.0, 0.0, 1000.0, 0, 0);
@@ -249,9 +242,7 @@ void __cdecl SV_Init()
         0,
         "Use autosaves as part of demos - will make demo access faster but will cause hitches");
     replay_asserts = Dvar_RegisterBool("replay_asserts", 1, 0, "Enable/Disable replay aborts due to inconsistency");
-    Sys_Print("[SWITCH SV TRACE] before SV_InitDemoSystem\n");
     SV_InitDemoSystem();
-    Sys_Print("[SWITCH SV TRACE] after SV_InitDemoSystem\n");
     nextmap = Dvar_RegisterString("nextmap", "", 0, "Next map to load");
     Dvar_RegisterInt("g_reloading", 0, 0, 4, 0x40u, "True if the game is currently reloading");
     sv_smp = Dvar_RegisterBool("sv_smp", 1, 0, "Enable server multithreading");
@@ -261,7 +252,6 @@ void __cdecl SV_Init()
         1,
         0x1004u,
         "Slow down server frame time to allow good client frame rate with server bound.");
-    Sys_Print("[SWITCH SV TRACE] after server dvars\n");
 }
 
 void __cdecl SV_Shutdown(const char *finalmsg)
