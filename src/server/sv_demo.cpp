@@ -471,19 +471,19 @@ _iobuf *__cdecl SV_DemoOpenFile(const char *fileName)
     const char *v2; // r3
     char v4[288]; // [sp+50h] [-120h] BYREF
 
-    Sys_Print("[SWITCH DEMO TRACE] before Sys_DefaultInstallPath\\n");
+    Sys_Print("[SWITCH DEMO TRACE] before Sys_DefaultInstallPath\n");
     v2 = Sys_DefaultInstallPath();
-    Sys_Print("[SWITCH DEMO TRACE] after Sys_DefaultInstallPath\\n");
+    Sys_Print("[SWITCH DEMO TRACE] after Sys_DefaultInstallPath\n");
     FS_BuildOSPath(v2, "", fileName, v4);
-    Sys_Print("[SWITCH DEMO TRACE] after FS_BuildOSPath\\n");
+    Sys_Print("[SWITCH DEMO TRACE] after FS_BuildOSPath\n");
     if (!FS_CreatePath(v4))
     {
-        Sys_Print("[SWITCH DEMO TRACE] before FS_FileOpenWriteReadBinary\\n");
+        Sys_Print("[SWITCH DEMO TRACE] before FS_FileOpenWriteReadBinary\n");
         _iobuf *file = FS_FileOpenWriteReadBinary(v4);
-        Sys_Print("[SWITCH DEMO TRACE] after FS_FileOpenWriteReadBinary\\n");
+        Sys_Print("[SWITCH DEMO TRACE] after FS_FileOpenWriteReadBinary\n");
         return file;
     }
-    Com_PrintError(CON_CHANNEL_ERROR, "Failed to create path '%s'\\n", v4);
+    Com_PrintError(CON_CHANNEL_ERROR, "Failed to create path '%s'\n", v4);
     return 0;
 }
 
