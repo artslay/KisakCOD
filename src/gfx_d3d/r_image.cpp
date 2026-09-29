@@ -734,25 +734,46 @@ void __cdecl R_SetPicmip()
         else
         {
             Com_Printf(CON_CHANNEL_GFX, "Texture detail is set automatically.\n");
+#ifdef __SWITCH__
+            Switch_LogRaw("[SWITCH PICMIP] before base quality branch\n");
+#endif
             if (texMemInMegs < 0x1C2)
             {
+#ifdef __SWITCH__
+                Switch_LogRaw("[SWITCH PICMIP] base branch: low texture memory\n");
+#endif
                 if (texMemInMegs < 0x12C)
                 {
+#ifdef __SWITCH__
+                    Switch_LogRaw("[SWITCH PICMIP] base branch: very low texture memory\n");
+#endif
                     imageGlobals.picmip = texMemInMegs < 0xC8;
                     imageGlobals.picmipBump = 1;
                 }
                 else
                 {
+#ifdef __SWITCH__
+                    Switch_LogRaw("[SWITCH PICMIP] base branch: medium texture memory\n");
+#endif
                     imageGlobals.picmip = 0;
                     imageGlobals.picmipBump = 0;
                 }
                 imageGlobals.picmipSpec = 1;
+#ifdef __SWITCH__
+                Switch_LogRaw("[SWITCH PICMIP] base branch: low memory assignments done\n");
+#endif
             }
             else
             {
+#ifdef __SWITCH__
+                Switch_LogRaw("[SWITCH PICMIP] base branch: high texture memory\n");
+#endif
                 imageGlobals.picmip = 0;
                 imageGlobals.picmipBump = 0;
                 imageGlobals.picmipSpec = 0;
+#ifdef __SWITCH__
+                Switch_LogRaw("[SWITCH PICMIP] base branch: high memory assignments done\n");
+#endif
             }
 #ifdef __SWITCH__
             Switch_LogRaw("[SWITCH PICMIP] after base quality selection\n");
