@@ -2,6 +2,7 @@
 #include "rb_stats.h"
 #include <qcommon/mem_track.h>
 #include <qcommon/cmd.h>
+#include <cstdio>
 
 
 //struct GfxViewStats *g_viewStats 85b938d0     gfx_d3d : rb_stats.obj
@@ -291,7 +292,7 @@ void __cdecl RB_Stats_SummarizePrimStats(const char *label, const GfxPrimStats *
     if (primStats->primCount)
     {
         //v7 = itoa(primStats->primCount, text, 0xAu);
-        v7 = _itoa(primStats->primCount, text, 0xAu);
+        std::snprintf(text, sizeof(text), "%d", primStats->primCount);\n        v7 = text;
         Com_Printf(CON_CHANNEL_GFX, "|%5s", v7);
     }
     else
@@ -301,7 +302,7 @@ void __cdecl RB_Stats_SummarizePrimStats(const char *label, const GfxPrimStats *
     if (primStats->triCount)
     {
         //v6 = itoa(primStats->triCount, text, 0xAu);
-        v6 = _itoa(primStats->triCount, text, 0xAu);
+        std::snprintf(text, sizeof(text), "%d", primStats->triCount);\n        v6 = text;
         Com_Printf(CON_CHANNEL_GFX, "|%7s", v6);
     }
     else
@@ -311,7 +312,7 @@ void __cdecl RB_Stats_SummarizePrimStats(const char *label, const GfxPrimStats *
     if (primStats->staticIndexCount)
     {
         //v5 = itoa(primStats->staticIndexCount, text, 0xAu);
-        v5 = _itoa(primStats->staticIndexCount, text, 0xAu);
+        std::snprintf(text, sizeof(text), "%d", primStats->staticIndexCount);\n        v5 = text;
         Com_Printf(CON_CHANNEL_GFX, "|%7s", v5);
     }
     else
@@ -321,7 +322,7 @@ void __cdecl RB_Stats_SummarizePrimStats(const char *label, const GfxPrimStats *
     if (primStats->staticVertexCount)
     {
         //v4 = itoa(primStats->staticVertexCount, text, 0xAu);
-        v4 = _itoa(primStats->staticVertexCount, text, 0xAu);
+        std::snprintf(text, sizeof(text), "%d", primStats->staticVertexCount);\n        v4 = text;
         Com_Printf(CON_CHANNEL_GFX, "|%7s", v4);
     }
     else
@@ -331,7 +332,7 @@ void __cdecl RB_Stats_SummarizePrimStats(const char *label, const GfxPrimStats *
     if (primStats->dynamicIndexCount)
     {
         //v3 = itoa(primStats->dynamicIndexCount, text, 0xAu);
-        v3 = _itoa(primStats->dynamicIndexCount, text, 0xAu);
+        std::snprintf(text, sizeof(text), "%d", primStats->dynamicIndexCount);\n        v3 = text;
         Com_Printf(CON_CHANNEL_GFX, "|%7s", v3);
     }
     else
@@ -341,7 +342,7 @@ void __cdecl RB_Stats_SummarizePrimStats(const char *label, const GfxPrimStats *
     if (primStats->dynamicVertexCount)
     {
         //v2 = itoa(primStats->dynamicVertexCount, text, 0xAu);
-        v2 = _itoa(primStats->dynamicVertexCount, text, 0xAu);
+        std::snprintf(text, sizeof(text), "%d", primStats->dynamicVertexCount);\n        v2 = text;
         Com_Printf(CON_CHANNEL_GFX, "|%7s|\n", v2);
     }
     else
@@ -555,4 +556,3 @@ void __cdecl RB_DrawPrimHistogramOverlay()
         ++histogramHistoryIndex;
     }
 }
-
