@@ -825,7 +825,13 @@ void __cdecl R_InitImages()
         iassert(imageGlobals.totalMemory.platform[i] == 0);
     }
     R_SetPicmip();
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH IMAGE INIT] before R_InitCodeImages\n");
+#endif
     R_InitCodeImages();
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH IMAGE INIT] after R_InitCodeImages\n");
+#endif
     RB_InitImages();
     R_InitRawImage();
     rg.waterFloatTime = rg.waterFloatTime + 1.0;
