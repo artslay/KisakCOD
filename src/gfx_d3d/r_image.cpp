@@ -784,21 +784,18 @@ void __cdecl R_SetPicmip()
                         sysMemInMegs);
             }
 #ifdef __SWITCH__
-            Com_Printf(CON_CHANNEL_GFX, "Switch picmip before r_picmip\n");
-#endif
+            // These values are already validated by the picmip calculation.
+            // Avoid the shared dvar setter during renderer bootstrap on Switch.
+            r_picmip->current.integer = imageGlobals.picmip;
+            r_picmip->latched.integer = imageGlobals.picmip;
+            r_picmip_bump->current.integer = imageGlobals.picmipBump;
+            r_picmip_bump->latched.integer = imageGlobals.picmipBump;
+            r_picmip_spec->current.integer = imageGlobals.picmipSpec;
+            r_picmip_spec->latched.integer = imageGlobals.picmipSpec;
+#else
             Dvar_SetInt(r_picmip, imageGlobals.picmip);
-#ifdef __SWITCH__
-            Com_Printf(CON_CHANNEL_GFX, "Switch picmip after r_picmip\n");
-            Com_Printf(CON_CHANNEL_GFX, "Switch picmip before r_picmip_bump\n");
-#endif
             Dvar_SetInt(r_picmip_bump, imageGlobals.picmipBump);
-#ifdef __SWITCH__
-            Com_Printf(CON_CHANNEL_GFX, "Switch picmip after r_picmip_bump\n");
-            Com_Printf(CON_CHANNEL_GFX, "Switch picmip before r_picmip_spec\n");
-#endif
             Dvar_SetInt(r_picmip_spec, imageGlobals.picmipSpec);
-#ifdef __SWITCH__
-            Com_Printf(CON_CHANNEL_GFX, "Switch picmip after r_picmip_spec\n");
 #endif
         }
         if (!r_specular->current.enabled || !r_rendererInUse->current.integer)
