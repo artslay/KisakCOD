@@ -95,7 +95,7 @@ void __cdecl DB_AllocXZoneMemory(
         {
 #ifdef __SWITCH__
             Com_Printf(CON_CHANNEL_SYSTEM,
-                "Switch PMem alloc begin: zone=%s block=%u name=%s size=%u type=%u allocType=%u\\n",
+                "Switch PMem alloc begin: zone=%s block=%u name=%s size=%u type=%u allocType=%u\n",
                 filename,
                 blockIndex,
                 g_block_mem_name[blockIndex],
@@ -106,7 +106,7 @@ void __cdecl DB_AllocXZoneMemory(
             buf = DB_MemAlloc(size, g_block_mem_type[blockIndex], allocType);
 #ifdef __SWITCH__
             Com_Printf(CON_CHANNEL_SYSTEM,
-                "Switch PMem alloc end: block=%u ptr=%p free=%u\\n",
+                "Switch PMem alloc end: block=%u ptr=%p free=%u\n",
                 blockIndex,
                 static_cast<void *>(buf),
                 PMem_GetFreeAmount());
