@@ -1324,7 +1324,9 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Sys_Print("[SWITCH INIT TRACE] before Com_InitHunkMemory\n");
     Com_InitHunkMemory();
     Sys_Print("[SWITCH INIT TRACE] after Com_InitHunkMemory\n");
+    Sys_Print("[SWITCH INIT TRACE] before Hunk_InitDebugMemory\n");
     Hunk_InitDebugMemory();
+    Sys_Print("[SWITCH INIT TRACE] after Hunk_InitDebugMemory\n");
     dvar_modifiedFlags &= ~1u;
     com_codeTimeScale = 1.0;
     // (SP)
@@ -1337,7 +1339,9 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     //    0,
     //    "Time when controller is unused before attract mode is enabled");
     //Live_Init();
+    Sys_Print("[SWITCH INIT TRACE] before ProfLoad_Init\n");
     ProfLoad_Init();
+    Sys_Print("[SWITCH INIT TRACE] after ProfLoad_Init\n");
     if (com_developer->current.integer)
     {
         Cmd_AddCommandInternal("error", Com_Error_f, &Com_Error_f_VAR);
@@ -1356,16 +1360,28 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     version = Dvar_RegisterString("version", "", DVAR_ROM, "Game version");
     Dvar_SetString(version, s);
     shortversion = Dvar_RegisterString("shortversion", "1.0", DVAR_ROM | DVAR_SERVERINFO, "Short game version");
+    Sys_Print("[SWITCH INIT TRACE] before Sys_Init\n");
     Sys_Init();
+    Sys_Print("[SWITCH INIT TRACE] after Sys_Init\n");
 #ifdef KISAK_MP
     Netchan_Init(__rdtsc());
 #endif
+    Sys_Print("[SWITCH INIT TRACE] before Scr_InitVariables\n");
     Scr_InitVariables();
+    Sys_Print("[SWITCH INIT TRACE] after Scr_InitVariables\n");
+    Sys_Print("[SWITCH INIT TRACE] before Scr_Init\n");
     Scr_Init();
+    Sys_Print("[SWITCH INIT TRACE] after Scr_Init\n");
     Com_SetScriptSettings();
+    Sys_Print("[SWITCH INIT TRACE] before XAnimInit\n");
     XAnimInit();
+    Sys_Print("[SWITCH INIT TRACE] after XAnimInit\n");
+    Sys_Print("[SWITCH INIT TRACE] before DObjInit\n");
     DObjInit();
+    Sys_Print("[SWITCH INIT TRACE] after DObjInit\n");
+    Sys_Print("[SWITCH INIT TRACE] before SV_Init\n");
     SV_Init();
+    Sys_Print("[SWITCH INIT TRACE] after SV_Init\n");
 #ifdef KISAK_MP
     NET_Init();
 #endif
@@ -1383,8 +1399,12 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
             CL_Init(localClientNum);
     }
 #elif KISAK_SP
+    Sys_Print("[SWITCH INIT TRACE] before CL_InitOnceForAllClients\n");
     CL_InitOnceForAllClients();
+    Sys_Print("[SWITCH INIT TRACE] after CL_InitOnceForAllClients\n");
+    Sys_Print("[SWITCH INIT TRACE] before CL_Init\n");
     CL_Init(0);
+    Sys_Print("[SWITCH INIT TRACE] after CL_Init\n");
 #endif
     com_frameTime = Sys_Milliseconds();
     Com_StartupVariable(0);
@@ -1393,10 +1413,16 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     if (!com_dedicated->current.integer)
 #endif
     {
+        Sys_Print("[SWITCH INIT TRACE] before SND_InitDriver\n");
         SND_InitDriver();
+        Sys_Print("[SWITCH INIT TRACE] after SND_InitDriver\n");
+        Sys_Print("[SWITCH INIT TRACE] before R_InitThreads\n");
         R_InitThreads();
+        Sys_Print("[SWITCH INIT TRACE] after R_InitThreads\n");
         //KISAK_NULLSUB();
+        Sys_Print("[SWITCH INIT TRACE] before CL_InitRenderer\n");
         CL_InitRenderer();
+        Sys_Print("[SWITCH INIT TRACE] after CL_InitRenderer\n");
         //KISAK_NULLSUB();
         iassert(!cls.soundStarted);
         cls.soundStarted = 1;
