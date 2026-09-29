@@ -10,25 +10,6 @@ Aimed towards mod developers and COD4 enthusiasts.
 ### Development Blog
 Learn about the Development of KisakCOD here: [https://lwss.github.io/Duty-Of-Kisak/](https://lwss.github.io/Duty-Of-Kisak/)
 
-## Current Requirements
-- Windows OS
-- Visual Studio 2022
-- CMake >= 3.16
-- [DirectX SDK 2010](https://www.microsoft.com/en-us/download/details.aspx?id=6812)
-- Steam with a copy of [Call of Duty 4](https://store.steampowered.com/app/7940/Call_of_Duty_4_Modern_Warfare_2007/)
-
-
-## How to build
-1) Install the above requirements and Clone repo
-2) Open a terminal and run `generate-project.bat`
-3) Open .sln projects that are generated in `build-sp`, `build-mp`, and `build-dedi` respectively. 
-4) Copy COD4 Game files to `bin/(BUILD_TYPE)/*` (Don't try to cherry-pick them, small files like localization.txt are needed)
-5) Copy `deps/binklib/binkw32.dll` as well ^^
-6) Copy all files in `deps/msslib/dlls/*` ^^ 
-7) Copy `deps/steamsdk/steam_api.dll`  ^^
-8) Run the game via Visual Studio play button or just the .exe
-
-
 ```
 Keep in Mind: This is a ~20 year old game with some known exploits. We will try to fix these as we become aware of them.
 However, there is a non-zero chance of some type of binary exploitation when playing online. Use a sandbox (Sandboxie?) for peace of mind. 
@@ -36,12 +17,6 @@ However, there is a non-zero chance of some type of binary exploitation when pla
 
 ## Known Issues
 (Use the **[issues](https://github.com/SwagSoftware/KisakCOD/issues)** section)
-
-## Troubleshooting
-- ***Can't Connect to Dedicated Server*** :
-  -  Check `net_ip` and `net_port`, the server will increment the port if the preferred one isn't available but the client won't sweep upwards.
- - ***DLL Error upon launch*** :
-   - You didn't copy over the necessary runtime DLL's
 
 ## FAQ
 - Can we use AI in this project?
@@ -54,7 +29,3 @@ However, there is a non-zero chance of some type of binary exploitation when pla
 - https://github.com/shiversoftdev/BO3Enhanced - Viewed as reference code for some of the Steam API Auth
 - [RAD Game Tools](https://www.radgametools.com/) for their Bink and Miles Sound System libraries.
 - [ODE Physics](https://www.ode.org/) COD4 uses a modified version of this physics engine.
-
-
-## Discord
-[Join the KisakCOD Discord](https://discord.gg/9uqntRWMA3)
