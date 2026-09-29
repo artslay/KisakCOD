@@ -22,14 +22,11 @@
 #include <algorithm>
 
 #ifdef __SWITCH__
-#include <unistd.h>
-#include <cstring>
+extern void Switch_LogWrite(const char *msg);
 static inline void R_SwitchPicmipTrace(const char *msg)
 {
-    if (msg)
-        (void)::write(STDERR_FILENO, msg, std::strlen(msg));
+    Switch_LogWrite(msg);
 }
-extern void __cdecl Sys_Print(const char *msg);
 #endif
 
 #ifdef __SWITCH__
