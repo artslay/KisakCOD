@@ -20,7 +20,7 @@ const Material *__cdecl R_PixelCost_GetAccumulationMaterial(const Material *mate
 void __cdecl R_PixelCost_BeginSurface(GfxCmdBufContext context);
 void __cdecl R_PixelCost_SetConstant(GfxCmdBufSourceState *source, int cost);
 int __cdecl RB_PixelCost_GetCostForRecordIndex(int recordIndex);
-unsigned __int64 __cdecl R_PixelCost_PackedKeyForMaterial(__int64 material);
+unsigned __int64 __cdecl R_PixelCost_PackedKeyForMaterial(const Material *material, MaterialTechniqueType techType);
 bool __cdecl RB_PixelCost_DoesPrimMatch(unsigned __int64 packedKey);
 void __cdecl RB_PixelCost_ResetPrim(unsigned __int64 packedKey);
 unsigned __int64 RB_PixelCost_BeginTiming();
