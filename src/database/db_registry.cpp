@@ -888,11 +888,6 @@ void __cdecl DB_UnloadXAssetsMemory(XZone *zone, int32_t sortedIndex)
 
 XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
 {
-#ifdef __SWITCH__
-    extern void Switch_LogRaw(const char *msg);
-    char trace[256];
-    Switch_LogRaw(trace);
-#endif
     XAssetEntryPoolEntry *assetEntry = DB_FindXAssetEntry(type, name);
     if (assetEntry)
     {
