@@ -50,16 +50,12 @@ char __cdecl SND_InitDriver()
         if (MSS_Init())
         {
 #ifdef __SWITCH__
-            Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] SND_InitDriver after MSS_Init\n");
 #endif
             MSS_InitChannels();
 #ifdef __SWITCH__
-            Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] SND_InitDriver after MSS_InitChannels\n");
 #endif
             MSS_InitEq();
 #ifdef __SWITCH__
-            Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] SND_InitDriver after MSS_InitEq\n");
-            Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] SND_InitDriver before return 1\n");
 #endif
             return 1;
         }
