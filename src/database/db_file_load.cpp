@@ -261,6 +261,9 @@ void __cdecl DB_LoadXFileInternal()
     char magic[8]; // [esp+48h] [ebp-Ch] BYREF
 
     iassert(g_load.f);
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF open: %s\n", g_load.filename);
+#endif
     DB_ReadXFileStage();
     if (!g_load.outstandingReads)
         Com_Error(ERR_DROP, "Fastfile for zone '%s' is empty.", g_load.filename);
@@ -281,6 +284,10 @@ void __cdecl DB_LoadXFileInternal()
     version = *(uint32_t *)g_load.stream.next_in;
     g_load.stream.next_in += 4;
     g_load.stream.avail_in -= 4;
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF header: %.*s version=%u avail=%u\n",
+        8, magic, version, static_cast<unsigned>(g_load.stream.avail_in));
+#endif
     if (version != 5)
     {
         if (version >= 5)
@@ -299,6 +306,9 @@ void __cdecl DB_LoadXFileInternal()
                 5);
     }
     fileIsSecure = memcmp(magic, "IWffu100", 8u) != 0;
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF inflate init: secure=%d\n", fileIsSecure ? 1 : 0);
+#endif
     err = DB_AuthLoad_InflateInit(&g_load.stream, fileIsSecure);
     failureReason = 0;
     if (fileIsSecure)
