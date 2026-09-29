@@ -125,7 +125,11 @@ FILE *FS_SwitchOpenFile(const char *path)
 FILE *FS_SwitchOpenRootFile(const char *path)
 {
     char resolved[256];
-    const char *base = fs_basepath ? fs_basepath->current.string : kSwitchRoot;
+    const char *base =
+        (fs_basepath && fs_basepath->current.string && fs_basepath->current.string[0])
+            ? fs_basepath->current.string
+            : kSwitchRoot;
+
     std::snprintf(resolved, sizeof(resolved), "%s/%s", base, path);
     return FS_FileOpenReadBinary(resolved);
 }
