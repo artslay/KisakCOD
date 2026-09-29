@@ -1,4 +1,7 @@
 #include <universal/q_shared.h>
+#ifdef __SWITCH__
+#include <thread>
+#endif
 #include "rb_sky.h"
 #include <qcommon/mem_track.h>
 #include "r_init.h"
@@ -129,7 +132,7 @@ uint32_t __cdecl RB_CalcSunSpriteSamples()
         hr = occlusionQuery->GetData(&sampleCount, 4u, 1u);
         if (hr != 1)
             break;
-        Sleep(0);
+        std::this_thread::yield();
     }
     if (hr)
         return 256;
