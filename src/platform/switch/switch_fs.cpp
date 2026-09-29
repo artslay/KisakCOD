@@ -148,40 +148,26 @@ void __cdecl FS_AddLocalizedGameDirectory(char *path, char *dir)
 
 void __cdecl FS_Startup(char *gameName)
 {
-    Sys_Print((char*)"[SWITCH FS TRACE] FS_Startup: begin\n");
     Com_Printf(CON_CHANNEL_FILES, "----- Switch FS_Startup -----\n");
-    Sys_Print((char*)"[SWITCH FS TRACE] before FS_RegisterDvars\n");
     FS_RegisterDvars();
     if (com_logfile)
         Dvar_SetInt((dvar_s*)com_logfile, 0);
-    Sys_Print((char*)"[SWITCH FS TRACE] after FS_RegisterDvars\n");
     FS_AddLocalizedGameDirectory((char*)kSwitchRoot, gameName);
-    Sys_Print((char*)"[SWITCH FS TRACE] after FS_AddLocalizedGameDirectory\n");
     if (fs_basegame && fs_basegame->current.string[0])
     {
-        Sys_Print((char*)"[SWITCH FS TRACE] before fs_basegame directory\n");
         FS_AddLocalizedGameDirectory((char*)kSwitchRoot, (char*)fs_basegame->current.string);
-        Sys_Print((char*)"[SWITCH FS TRACE] after fs_basegame directory\n");
     }
     Com_Printf(CON_CHANNEL_FILES, "Switch game root: %s\n", kSwitchRoot);
-    Sys_Print((char*)"[SWITCH FS TRACE] after root Com_Printf\n");
     Com_Printf(CON_CHANNEL_FILES, "Game directory: %s\n", fs_gamedir);
-    Sys_Print((char*)"[SWITCH FS TRACE] after game directory Com_Printf\n");
     Com_Printf(CON_CHANNEL_FILES, "-----------------------------\n");
-    Sys_Print((char*)"[SWITCH FS TRACE] FS_Startup: end\n");
 }
 
 void __cdecl FS_InitFilesystem()
 {
-    Sys_Print((char*)"[SWITCH FS TRACE] before SEH_InitLanguage\n");
     SEH_InitLanguage();
-    Sys_Print((char*)"[SWITCH FS TRACE] after SEH_InitLanguage\n");
     FS_Startup((char*)"main");
-    Sys_Print((char*)"[SWITCH FS TRACE] after FS_Startup\n");
     SEH_Init_StringEd();
-    Sys_Print((char*)"[SWITCH FS TRACE] after SEH_Init_StringEd\n");
     SEH_UpdateLanguageInfo();
-    Sys_Print((char*)"[SWITCH FS TRACE] after SEH_UpdateLanguageInfo\n");
 }
 
 int __cdecl FS_HashFileName(const char *fname, int hashSize)
