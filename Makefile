@@ -98,14 +98,14 @@ PROGRESS_FILE := $(BUILD)/.compile_count
 PROGRESS_LOCK := $(BUILD)/.compile_count.lock
 
 progress-init:
-\t@mkdir -p $(BUILD)
-\t@printf '0' > $(PROGRESS_FILE)
-\t@rm -rf $(PROGRESS_LOCK)
-\t@printf 'Switch build: 0/%s files compiled\\n' "$(TOTAL_OBJECTS)"
+	@mkdir -p $(BUILD)
+	@printf '0' > $(PROGRESS_FILE)
+	@rm -rf $(PROGRESS_LOCK)
+	@printf 'Switch build: 0/%s files compiled\\n' "$(TOTAL_OBJECTS)"
 
 progress-done: $(TARGET).nro
-\t@done=$(cat $(PROGRESS_FILE) 2>/dev/null || printf '0'); \\
-\tprintf 'Compiled: %s/%s files\\n' "$done" "$(TOTAL_OBJECTS)"
+	@done=$(cat "$(PROGRESS_FILE)" 2>/dev/null || printf '0'); \\
+	printf 'Compiled: %s/%s files\\n' "$done" "$(TOTAL_OBJECTS)"
 
 all: progress-init $(TARGET).nro progress-done
 
