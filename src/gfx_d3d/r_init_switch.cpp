@@ -75,7 +75,11 @@ void R_ShutdownDirect3D() {
 void R_ReleaseForShutdownOrReset() {}
 void R_UnloadWorld() {}
 void R_BeginRegistration(vidConfig_t *out) {
-    if (out) *out = vidConfig;
+    iassert(!rg.registered);
+    R_Init();
+    iassert(rg.registered);
+    if (out)
+        *out = vidConfig;
     s_registered = true;
 }
 void R_Init() {
