@@ -809,7 +809,7 @@ void __cdecl R_SetPicmip()
             imageGlobals.picmipBump,
             imageGlobals.picmipSpec);
 #ifdef __SWITCH__
-        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH PICMIP] after final Com_Printf\n");
+        Com_Printf(CON_CHANNEL_GFX, "[SWITCH PICMIP] after final Com_Printf\n");
 #endif
     }
 }
@@ -826,7 +826,9 @@ void __cdecl R_InitImages()
     {
         iassert(imageGlobals.totalMemory.platform[i] == 0);
     }
+    Com_Printf(CON_CHANNEL_GFX, "[SWITCH IMG] before R_SetPicmip\n");
     R_SetPicmip();
+    Com_Printf(CON_CHANNEL_GFX, "[SWITCH IMG] after R_SetPicmip\n");
     R_InitCodeImages();
     RB_InitImages();
     R_InitRawImage();
