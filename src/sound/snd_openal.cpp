@@ -50,13 +50,7 @@ char __cdecl MSS_Init()
         16,
         snd_outputConfigurationStrings[snd_outputConfiguration->current.integer]);
 
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] before alcOpenDevice\n");
-#endif
     alGlob.device = alcOpenDevice(NULL);
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] after alcOpenDevice device=%p\n", (void *)alGlob.device);
-#endif
     if (!alGlob.device)
     {
         Com_PrintError(CON_CHANNEL_SOUND, "ERROR: Couldn't open OpenAL device\n");
@@ -64,14 +58,7 @@ char __cdecl MSS_Init()
     }
 
     ALCint attrs[] = { ALC_FREQUENCY, hertz, 0 };
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] before alcCreateContext\n");
-#endif
     alGlob.context = alcCreateContext(alGlob.device, attrs);
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] after alcCreateContext context=%p\n", (void *)alGlob.context);
-    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] before alcMakeContextCurrent\n");
-#endif
     if (!alGlob.context || !alcMakeContextCurrent(alGlob.context))
     {
         Com_PrintError(CON_CHANNEL_SOUND, "ERROR: Couldn't create OpenAL context\n");
@@ -83,9 +70,6 @@ char __cdecl MSS_Init()
         return 0;
     }
 
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] after alcMakeContextCurrent\n");
-#endif
 
     // Distance falloff is computed entirely by SND_Attenuate's curve and baked directly
     // into AL_GAIN (see the Phase 4 playback functions); disable OpenAL's own automatic
@@ -110,9 +94,6 @@ char __cdecl MSS_Init()
     alGenAuxiliaryEffectSlots(1, &alGlob.auxSlot);
     alGenEffects(1, &alGlob.reverbEffect);
     alEffecti(alGlob.reverbEffect, AL_EFFECT_TYPE, AL_EFFECT_EAXREVERB);
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] after EFX setup\n");
-#endif
 
     g_snd.Initialized2d = 1;
     g_snd.Initialized3d = 1;
@@ -134,13 +115,7 @@ char __cdecl MSS_Init()
 void MSS_InitChannels()
 {
     int totalChannels = g_snd.max_2D_channels + g_snd.max_3D_channels + g_snd.max_stream_channels;
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] MSS_InitChannels before alGenSources total=%i\n", totalChannels);
-#endif
     alGenSources(totalChannels, alGlob.source);
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] MSS_InitChannels after alGenSources\n");
-#endif
     for (int i = 0; i < totalChannels; ++i)
     {
         if (!alGlob.source[i])
@@ -149,19 +124,10 @@ void MSS_InitChannels()
 
     // Per-channel wet-send gain carrier (see AlLocal::sendFilter's comment in snd_local.h).
     // Allocated once here, params updated in place per-channel by SND_ApplyReverbSend.
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] MSS_InitChannels before alGenFilters\n");
-#endif
     alGenFilters(totalChannels, alGlob.sendFilter);
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] MSS_InitChannels after alGenFilters\n");
-#endif
     for (int i = 0; i < totalChannels; ++i)
         alFilteri(alGlob.sendFilter[i], AL_FILTER_TYPE, AL_FILTER_LOWPASS);
 
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] MSS_InitChannels after alFilteri loop\n");
-#endif
     g_snd.ambient_track = SND_TRACK_AMBIENT_PRIMARY_0;
 }
 
@@ -170,9 +136,6 @@ void MSS_InitChannels()
 // rather than an EFX filter object (Phase 7: no working EQ application on this side).
 void MSS_InitEq()
 {
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] MSS_InitEq enter\n");
-#endif
     alGlob.eqFilter = 0;
 #ifndef KISAK_XBOX
     alGlob.eqLerp = 1.0f;
@@ -194,9 +157,6 @@ void MSS_InitEq()
         }
     }
 
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] MSS_InitEq finished\n");
-#endif
 }
 
 // Mirrors MSS_Startup (AIL_startup). Miles' AIL_startup is a global one-time SDK init with
