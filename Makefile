@@ -9,12 +9,13 @@ BUILD       := build
 
 ARCH        := -march=armv8-a -mtune=cortex-a57 -mtp=soft
 MESA_SDK    := $(CURDIR)/mesa-sdk/opt/devkitpro/portlibs/switch
+OPENAL_SDK   := $(DEVKITPRO)/portlibs/switch
 CPPFLAGS    := -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DKISAK_OPENAL -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE \
                -I$(CURDIR)/src -I$(CURDIR)/src/gfx -I$(CURDIR)/deps \
-               -I$(DEVKITPRO)/libnx/include -I$(MESA_SDK)/include
+               -I$(DEVKITPRO)/libnx/include -I$(MESA_SDK)/include -I$(OPENAL_SDK)/include
 CXXFLAGS    := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP
 CFLAGS      := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -MMD -MP
-LDFLAGS     := $(ARCH) -L$(MESA_SDK)/lib -L$(DEVKITPRO)/libnx/lib -specs=$(DEVKITPRO)/libnx/switch.specs -Wl,--gc-sections
+LDFLAGS     := $(ARCH) -L$(MESA_SDK)/lib -L$(OPENAL_SDK)/lib -L$(DEVKITPRO)/libnx/lib -specs=$(DEVKITPRO)/libnx/switch.specs -Wl,--gc-sections
 LIBS        := -lGL -lEGL -lglapi -lopenal -lnx -lm
 
 include $(DEVKITPRO)/libnx/switch_rules
