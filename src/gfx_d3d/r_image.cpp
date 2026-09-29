@@ -809,8 +809,7 @@ void __cdecl R_SetPicmip()
             imageGlobals.picmipBump,
             imageGlobals.picmipSpec);
 #ifdef __SWITCH__
-        Sys_Print("[SWITCH PICMIP] after final Com_Printf
-");
+        Sys_Print("[SWITCH PICMIP] after final Com_Printf\\n");
 #endif
     }
 }
