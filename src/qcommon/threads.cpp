@@ -973,16 +973,53 @@ int Sys_SpawnServerDemoThread(void(*function)(uint32_t))
 {
     int result; // r3
 
+#ifdef KISAK_SWITCH
+    Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: Sys_SpawnServerDemoThread enter\\n");
+    Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: before save event\\n");
+#endif
+
     g_saveHistoryEvent = CreateEventA(0, 0, 0, 0);
+
+#ifdef KISAK_SWITCH
+    Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: after save event\\n");
+    Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: before done event\\n");
+#endif
+
     g_saveHistoryDoneEvent = CreateEventA(0, 0, 0, 0);
+
+#ifdef KISAK_SWITCH
+    Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: after done event\\n");
+    Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: before Sys_CreateThread\\n");
+#endif
+
     Sys_CreateThread(function, THREAD_CONTEXT_SERVER_DEMO);
     result = (int)threadHandle[THREAD_CONTEXT_SERVER_DEMO];
+
+#ifdef KISAK_SWITCH
+    Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: after Sys_CreateThread\\n");
+#endif
+
     if (threadHandle[THREAD_CONTEXT_SERVER_DEMO])
     {
         //XSetThreadProcessor(threadHandle[11], 2u);
+
+#ifdef KISAK_SWITCH
+        Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: before Sys_ResumeThread\\n");
+#endif
+
         Sys_ResumeThread(THREAD_CONTEXT_SERVER_DEMO);
+
+#ifdef KISAK_SWITCH
+        Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: after Sys_ResumeThread\\n");
+#endif
+
         return 1;
     }
+
+#ifdef KISAK_SWITCH
+    Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: thread handle is null\\n");
+#endif
+
     return result;
 }
 
