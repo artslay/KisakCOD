@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <GL/gl.h>
 #include "binklib/binktextures.h"
 #include "gfx/opengl/d3d9_compat.h"
 

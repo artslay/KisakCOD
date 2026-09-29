@@ -338,10 +338,20 @@
       #define RADASMLINK
       #define PTR4
 
-    #elif defined(__RADLINUX__) || defined(__RADSWITCH__)
+    #elif defined(__RADLINUX__)
 
       #define RADLINK __attribute__((cdecl))
       #define RADEXPLINK __attribute__((cdecl))
+      #define RADEXPFUNC RADDEFFUNC
+      #define RADASMLINK
+      #define PTR4
+
+    #elif defined(__RADSWITCH__)
+
+      // AArch64 Switch uses the normal platform ABI; the legacy cdecl attribute
+      // used by the desktop/x86 build is neither needed nor portable here.
+      #define RADLINK
+      #define RADEXPLINK
       #define RADEXPFUNC RADDEFFUNC
       #define RADASMLINK
       #define PTR4
