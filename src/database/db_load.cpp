@@ -323,7 +323,7 @@ static void Load_GfxWorldPtr(bool atStreamStart);
 static void Load_GlyphArray(bool atStreamStart, int32_t count);
 static void Load_Font(bool atStreamStart);
 static void Load_FontHandle(bool atStreamStart);
-static void Load_XAssetHeader(bool atStreamStart);
+void __cdecl Load_XAssetHeader(bool atStreamStart);
 static void Mark_ScriptString();
 static void Mark_ScriptStringArray(int32_t count);
 static void Mark_XAnimNotifyInfo();
