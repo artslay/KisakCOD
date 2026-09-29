@@ -56,30 +56,10 @@ void SetGfxConfig(const GfxConfiguration *config) { if (config) gfxCfg = *config
 void R_InitThreads() { R_InitRenderThread(); }
 static int g_remoteScreenUpdateNesting = 0;
 
-int __cdecl R_PopRemoteScreenUpdate()
-{
-    const int value = g_remoteScreenUpdateNesting;
-    g_remoteScreenUpdateNesting = 0;
-    return value;
-}
 
-void __cdecl R_PushRemoteScreenUpdate(int nesting)
-{
-    g_remoteScreenUpdateNesting = nesting;
-}
 
-bool __cdecl R_IsInRemoteScreenUpdate()
-{
-    return g_remoteScreenUpdateNesting != 0;
-}
 
-void __cdecl R_SyncRenderThread()
-{
-    if (g_gfxBackend)
-        g_gfxBackend->WaitForGpu();
-}
 
-void __cdecl R_WaitWorkerCmds() {}
 
 void R_ShutdownMaterialUsage() {}
 
@@ -153,7 +133,6 @@ void R_SetShadowmapFormats_DX(uint32_t) {
 }
 uint32_t R_ChooseAdapter() { return 0; }
 void Sys_HideSplashWindow() {}
-void Sys_DestroySplashWindow() {}
 char R_CreateGameWindow(GfxWindowParms *wnd) { return R_InitHardware(wnd); }
 
 char R_InitHardware(const GfxWindowParms *wnd) {
