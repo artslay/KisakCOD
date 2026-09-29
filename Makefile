@@ -64,6 +64,7 @@ CPP_SOURCES += src/gfx_d3d/r_material_override.cpp src/gfx_d3d/rb_uploadshaders.
 CPP_SOURCES += src/gfx_d3d/r_image.cpp src/gfx_d3d/r_image_load_common.cpp src/gfx_d3d/r_image_load_obj.cpp src/gfx_d3d/r_image_utils.cpp src/gfx_d3d/r_image_wavelet.cpp src/gfx_d3d/r_imagedecode.cpp src/gfx_d3d/r_rendertarget.cpp
 CPP_SOURCES += src/gfx_d3d/r_rendercmds.cpp
 CPP_SOURCES += src/gfx_d3d/r_model.cpp src/gfx_d3d/r_scene.cpp src/gfx_d3d/r_dpvs.cpp
+CPP_SOURCES += src/gfx_d3d/r_draw_bsp.cpp src/gfx_d3d/r_draw_lit.cpp src/gfx_d3d/r_draw_staticmodel.cpp src/gfx_d3d/r_draw_xmodel.cpp src/gfx_d3d/r_model_skin.cpp
 CPP_SOURCES += src/gfx_d3d/r_bsp.cpp src/gfx_d3d/r_bsp_load_obj.cpp src/gfx_d3d/r_staticmodelcache.cpp src/gfx_d3d/r_dobj_skin.cpp src/gfx_d3d/r_model_lighting.cpp src/gfx_d3d/r_reflection_probe.cpp
 CPP_SOURCES += src/gfx_d3d/r_model_pose.cpp src/gfx_d3d/r_state_utils.cpp src/gfx_d3d/r_drawsurf.cpp src/gfx_d3d/r_add_bsp.cpp src/gfx_d3d/r_add_staticmodel.cpp
 CPP_SOURCES += src/gfx_d3d/r_dpvs_dynmodel.cpp src/gfx_d3d/r_dpvs_entity.cpp src/gfx_d3d/r_dpvs_sceneent.cpp src/gfx_d3d/r_dpvs_static.cpp
