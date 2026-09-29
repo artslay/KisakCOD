@@ -86,21 +86,43 @@ OpenGLBackend::~OpenGLBackend()
     Shutdown();
 }
 
+#ifdef __SWITCH__
+extern void Switch_LogRaw(const char *msg);
+#endif
+
 bool OpenGLBackend::Init(const GfxWindowParms* wndParms)
 {
     m_lastError.clear();
 
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH GL TRACE] Init: before CreateWindow\n");
+#endif
     if (!CreateWindow(const_cast<GfxWindowParms*>(wndParms)))
         return false;
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH GL TRACE] Init: after CreateWindow\n");
+#endif
 
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH GL TRACE] Init: before InitContext\n");
+#endif
     if (!InitContext(wndParms))
         return false;
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH GL TRACE] Init: after InitContext\n");
+#endif
 
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH GL TRACE] Init: before InitCapabilities\n");
+#endif
     if (!InitCapabilities())
     {
         Shutdown();
         return false;
     }
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH GL TRACE] Init: after InitCapabilities\n");
+#endif
 
     return true;
 }
@@ -442,26 +464,32 @@ bool OpenGLBackend::InitContext(const GfxWindowParms* wndParms)
     (void)wndParms;
 
 #ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH GL TRACE] InitContext: before eglGetDisplay\n");
     s_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (s_display == EGL_NO_DISPLAY)
     {
         m_lastError = "eglGetDisplay failed";
         return false;
     }
+    Switch_LogRaw("[SWITCH GL TRACE] InitContext: after eglGetDisplay\n");
 
     EGLint major = 0;
     EGLint minor = 0;
+    Switch_LogRaw("[SWITCH GL TRACE] InitContext: before eglInitialize\n");
     if (eglInitialize(s_display, &major, &minor) == EGL_FALSE)
     {
         m_lastError = "eglInitialize failed";
         return false;
     }
+    Switch_LogRaw("[SWITCH GL TRACE] InitContext: after eglInitialize\n");
 
+    Switch_LogRaw("[SWITCH GL TRACE] InitContext: before eglBindAPI\n");
     if (eglBindAPI(EGL_OPENGL_API) == EGL_FALSE)
     {
         m_lastError = "eglBindAPI(EGL_OPENGL_API) failed";
         return false;
     }
+    Switch_LogRaw("[SWITCH GL TRACE] InitContext: after eglBindAPI\n");
 
     static const EGLint configAttributes[] =
     {
@@ -477,13 +505,16 @@ bool OpenGLBackend::InitContext(const GfxWindowParms* wndParms)
 
     EGLConfig config = nullptr;
     EGLint numConfigs = 0;
+    Switch_LogRaw("[SWITCH GL TRACE] InitContext: before eglChooseConfig\n");
     if (eglChooseConfig(s_display, configAttributes, &config, 1, &numConfigs) == EGL_FALSE ||
         numConfigs == 0)
     {
         m_lastError = "eglChooseConfig failed";
         return false;
     }
+    Switch_LogRaw("[SWITCH GL TRACE] InitContext: after eglChooseConfig\n");
 
+    Switch_LogRaw("[SWITCH GL TRACE] InitContext: before eglCreateWindowSurface\n");
     s_surface = eglCreateWindowSurface(
         s_display, config, static_cast<EGLNativeWindowType>(m_window), nullptr);
 
@@ -492,6 +523,7 @@ bool OpenGLBackend::InitContext(const GfxWindowParms* wndParms)
         m_lastError = "eglCreateWindowSurface failed";
         return false;
     }
+    Switch_LogRaw("[SWITCH GL TRACE] InitContext: after eglCreateWindowSurface\n");
 
     static const EGLint contextAttributes[] =
     {
@@ -501,6 +533,7 @@ bool OpenGLBackend::InitContext(const GfxWindowParms* wndParms)
         EGL_NONE
     };
 
+    Switch_LogRaw("[SWITCH GL TRACE] InitContext: before eglCreateContext\n");
     s_context = eglCreateContext(
         s_display, config, EGL_NO_CONTEXT, contextAttributes);
 
@@ -509,12 +542,15 @@ bool OpenGLBackend::InitContext(const GfxWindowParms* wndParms)
         m_lastError = "eglCreateContext failed";
         return false;
     }
+    Switch_LogRaw("[SWITCH GL TRACE] InitContext: after eglCreateContext\n");
 
+    Switch_LogRaw("[SWITCH GL TRACE] InitContext: before eglMakeCurrent\n");
     if (eglMakeCurrent(s_display, s_surface, s_surface, s_context) == EGL_FALSE)
     {
         m_lastError = "eglMakeCurrent failed";
         return false;
     }
+    Switch_LogRaw("[SWITCH GL TRACE] InitContext: after eglMakeCurrent\n");
 
     return true;
 #else
