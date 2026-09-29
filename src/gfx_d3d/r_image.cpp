@@ -1,5 +1,6 @@
 #include <universal/q_shared.h>
 #include "r_image.h"
+#include <qcommon/threads.h>
 #include <qcommon/mem_track.h>
 #include <qcommon/qcommon.h>
 #include <universal/com_memory.h>
