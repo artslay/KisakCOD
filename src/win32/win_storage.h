@@ -1,7 +1,13 @@
 #pragma once
 #include <cstdint>
 
-enum StatType : __int32
+#ifdef __SWITCH__
+#ifndef __cdecl
+#define __cdecl
+#endif
+#endif
+
+enum StatType : int32_t
 {                                       // ...
     STAT_TYPE_PRIMARY = 0x1,          // ...
     STAT_TYPE_SECONDARY = 0x2,          // ...
@@ -14,7 +20,7 @@ enum StatType : __int32
 struct StatsData // sizeof=0x2104
 {                                       // ...
     char path[260];
-    unsigned __int8 stats[8192];        // ...
+    uint8_t stats[8192];        // ...
 };
 struct StatsFile_s// sizeof=0x2114
 {                                       // ...
@@ -23,14 +29,14 @@ struct StatsFile_s// sizeof=0x2114
 };
 struct StatsFile // sizeof=0x211C
 {                                       // ...
-    unsigned __int8 magic[4];
+    uint8_t magic[4];
     uint32_t nonce;
     StatsFile_s body; // ...
 };
 
 struct playerStatNetworkData // sizeof=0x2002
 {                                       // ...
-    unsigned __int8 playerStats[8192];  // ...
+    uint8_t playerStats[8192];  // ...
     bool statsFetched;                  // ...
     bool statWriteNeeded;               // ...
 };
@@ -57,11 +63,11 @@ void __cdecl LiveStorage_SetFromLocString(int controllerIndex, const char *dvarN
 void __cdecl LiveStorage_ReadStats();
 void __cdecl LiveStorage_ReadStatsFromDir(char *directory);
 bool __cdecl LiveStorage_DecryptAndCheck(StatsFile *statsFile, const char *statsDir);
-void __cdecl LiveStorage_GetCryptKey(uint32_t nonce, unsigned __int8 *outKey);
-int __cdecl LiveStorage_ChecksumGamerStats(unsigned __int8 *buffer, int len);
+void __cdecl LiveStorage_GetCryptKey(uint32_t nonce, uint8_t *outKey);
+int __cdecl LiveStorage_ChecksumGamerStats(uint8_t *buffer, int len);
 void LiveStorage_NoStatsFound();
-void __cdecl LiveStorage_WriteChecksumToBuffer(unsigned __int8 *buffer, int len);
-bool __cdecl LiveStorage_ReadStatsFile(const char *qpath, unsigned __int8 *buffer, uint32_t lenToRead);
+void __cdecl LiveStorage_WriteChecksumToBuffer(uint8_t *buffer, int len);
+bool __cdecl LiveStorage_ReadStatsFile(const char *qpath, uint8_t *buffer, uint32_t lenToRead);
 void __cdecl LiveStorage_HandleCorruptStats(char *filename);
 playerStatNetworkData *__cdecl LiveStorage_GetStatBuffer();
 bool __cdecl LiveStorage_DoWeHaveStats();
