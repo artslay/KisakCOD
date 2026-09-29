@@ -19,6 +19,13 @@
 #endif
 
 struct HINSTANCE__ {};
+struct tagRECT
+{
+    int32_t left = 0;
+    int32_t top = 0;
+    int32_t right = 0;
+    int32_t bottom = 0;
+};
 struct IDirect3DSwapChain9 { void Release() { delete this; } };
 using _D3DMULTISAMPLE_TYPE = uint32_t;
 enum _D3DTEXTUREFILTERTYPE : uint32_t
@@ -118,6 +125,7 @@ enum : uint32_t
 #define KISAK_D3D_STATE(name) constexpr uint32_t name = __LINE__
 
 KISAK_D3D_STATE(D3DRS_ZENABLE);
+KISAK_D3D_STATE(D3DRS_SCISSORTESTENABLE);
 KISAK_D3D_STATE(D3DRS_FILLMODE);
 KISAK_D3D_STATE(D3DRS_ZWRITEENABLE);
 KISAK_D3D_STATE(D3DRS_ALPHATESTENABLE);
@@ -996,10 +1004,25 @@ void main()
         }
     }
 
+    HRESULT SetScissorRect(const tagRECT *rect)
+    {
+        if (!rect)
+            return E_FAIL;
+        const GLint x = static_cast<GLint>(rect->left);
+        const GLint y = static_cast<GLint>(m_viewportHeight - static_cast<float>(rect->bottom));
+        const GLsizei width = static_cast<GLsizei>(std::max(0, rect->right - rect->left));
+        const GLsizei height = static_cast<GLsizei>(std::max(0, rect->bottom - rect->top));
+        glScissor(x, y, width, height);
+        return S_OK;
+    }
+
     HRESULT SetRenderState(uint32_t state, uint32_t value)
     {
         switch (state)
         {
+        case D3DRS_SCISSORTESTENABLE:
+            if (value) glEnable(GL_SCISSOR_TEST); else glDisable(GL_SCISSOR_TEST);
+            break;
         case D3DRS_ZENABLE:
             if (value) glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST);
             break;
