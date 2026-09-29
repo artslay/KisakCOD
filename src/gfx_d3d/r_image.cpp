@@ -780,6 +780,9 @@ void __cdecl R_SetPicmip()
             Dvar_SetInt(r_picmip, imageGlobals.picmip);
             Dvar_SetInt(r_picmip_bump, imageGlobals.picmipBump);
             Dvar_SetInt(r_picmip_spec, imageGlobals.picmipSpec);
+#ifdef __SWITCH__
+            Com_Printf(CON_CHANNEL_GFX, "Switch picmip dvars applied\n");
+#endif
         }
         if (!r_specular->current.enabled || !r_rendererInUse->current.integer)
             imageGlobals.picmipSpec = 3;
