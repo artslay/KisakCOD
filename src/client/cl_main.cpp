@@ -29,6 +29,9 @@
 #include <universal/profile.h>
 #include <sound/snd_local.h>
 #include <server/server.h>
+#ifdef __SWITCH__
+extern void Switch_LogShutdown();
+#endif
 
 enum MovieToPlayScriptOp : __int32
 {
