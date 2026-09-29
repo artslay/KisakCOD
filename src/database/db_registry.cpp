@@ -447,7 +447,7 @@ static void __cdecl DB_BuildOSPath_Mod(const char *zoneName, uint32_t size, char
     if (fs_gameDirVar && fs_gameDirVar->current.string[0])
         Com_sprintf(filename, size, "%s/%s.ff", fs_gameDirVar->current.string, zoneName);
     else
-        Com_sprintf(filename, size, "zone/english/%s.ff", zoneName);
+        Com_sprintf(filename, size, "zone/russian/%s.ff", zoneName);
 #else
     char *v3;
     const char *string = fs_gameDirVar->current.string;
