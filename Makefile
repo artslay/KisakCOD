@@ -65,6 +65,9 @@ CPP_SOURCES += src/gfx_d3d/r_image.cpp src/gfx_d3d/r_image_load_common.cpp src/g
 CPP_SOURCES += src/gfx_d3d/r_rendercmds.cpp
 CPP_SOURCES += src/gfx_d3d/r_model.cpp src/gfx_d3d/r_scene.cpp src/gfx_d3d/r_dpvs.cpp
 CPP_SOURCES += src/gfx_d3d/r_bsp.cpp src/gfx_d3d/r_bsp_load_obj.cpp src/gfx_d3d/r_staticmodelcache.cpp src/gfx_d3d/r_dobj_skin.cpp src/gfx_d3d/r_model_lighting.cpp src/gfx_d3d/r_reflection_probe.cpp
+CPP_SOURCES += src/gfx_d3d/r_model_pose.cpp src/gfx_d3d/r_state_utils.cpp src/gfx_d3d/r_drawsurf.cpp src/gfx_d3d/r_add_bsp.cpp src/gfx_d3d/r_add_staticmodel.cpp
+CPP_SOURCES += src/gfx_d3d/r_dpvs_dynmodel.cpp src/gfx_d3d/r_dpvs_entity.cpp src/gfx_d3d/r_dpvs_sceneent.cpp src/gfx_d3d/r_dpvs_static.cpp
+CPP_SOURCES += src/gfx_d3d/r_meshdata.cpp src/gfx_d3d/r_draw_method.cpp src/gfx_d3d/r_pretess.cpp
 
 CPP_OBJECTS := $(CPP_SOURCES:%.cpp=$(BUILD)/%.o)
 C_OBJECTS   := $(C_SOURCES:%.c=$(BUILD)/%.o)
