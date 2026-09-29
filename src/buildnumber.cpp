@@ -17,7 +17,22 @@ char *__cdecl getBuildNumber()
 #define ARRAYSIZE(x) (sizeof(x) / sizeof(x[0]))
 #endif
 
-	snprintf(buildnumbuf, ARRAYSIZE(buildnumbuf), "%d %s %s", BUILD_NUMBER, __DATE__, __TIME__);
+    char number[16];
+    unsigned int value = BUILD_NUMBER;
+    unsigned int pos = sizeof(number) - 1;
+    number[pos] = '\0';
+
+    do
+    {
+        number[--pos] = static_cast<char>('0' + (value % 10));
+        value /= 10;
+    } while (value);
+
+    std::memcpy(buildnumbuf, &number[pos], sizeof(number) - pos);
+    std::strcpy(&buildnumbuf[sizeof(number) - pos - 1], " ");
+    std::strcat(buildnumbuf, __DATE__);
+    std::strcat(buildnumbuf, " ");
+    std::strcat(buildnumbuf, __TIME__);
 	return buildnumbuf;
 }
 
