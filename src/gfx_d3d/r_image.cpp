@@ -21,9 +21,6 @@
 #include <algorithm>
 
 #ifdef __SWITCH__
-extern void Switch_LogRaw(const char *msg);
-#endif
-#ifdef __SWITCH__
 static bool R_GLImageFormat(_D3DFORMAT f, GLenum &i, GLenum &u, GLenum &t, bool &compressed)
 {
     compressed = false;
@@ -700,6 +697,12 @@ IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image)
 
 void __cdecl R_SetPicmip()
 {
+#ifdef __SWITCH__
+    Com_Printf(
+        CON_CHANNEL_GFX,
+        "[SWITCH PICMIP] ENTER main=%d\n",
+        Sys_IsMainThread() ? 1 : 0);
+#endif
     uint32_t texMemInMegs; // [esp+0h] [ebp-10h]
     uint32_t sysMemInMegs; // [esp+4h] [ebp-Ch]
     bool cappedPicmip; // [esp+Bh] [ebp-5h]
@@ -735,56 +738,35 @@ void __cdecl R_SetPicmip()
         {
             Com_Printf(CON_CHANNEL_GFX, "Texture detail is set automatically.\n");
 #ifdef __SWITCH__
-            Switch_LogRaw("[SWITCH PICMIP] before base quality branch\n");
+            Com_Printf(
+                CON_CHANNEL_GFX,
+                "[SWITCH PICMIP] after detail log main=%d\n",
+                Sys_IsMainThread() ? 1 : 0);
 #endif
             if (texMemInMegs < 0x1C2)
             {
-#ifdef __SWITCH__
-                Switch_LogRaw("[SWITCH PICMIP] base branch: low texture memory\n");
-#endif
                 if (texMemInMegs < 0x12C)
                 {
-#ifdef __SWITCH__
-                    Switch_LogRaw("[SWITCH PICMIP] base branch: very low texture memory\n");
-#endif
                     imageGlobals.picmip = texMemInMegs < 0xC8;
                     imageGlobals.picmipBump = 1;
                 }
                 else
                 {
-#ifdef __SWITCH__
-                    Switch_LogRaw("[SWITCH PICMIP] base branch: medium texture memory\n");
-#endif
                     imageGlobals.picmip = 0;
                     imageGlobals.picmipBump = 0;
                 }
                 imageGlobals.picmipSpec = 1;
-#ifdef __SWITCH__
-                Switch_LogRaw("[SWITCH PICMIP] base branch: low memory assignments done\n");
-#endif
             }
             else
             {
-#ifdef __SWITCH__
-                Switch_LogRaw("[SWITCH PICMIP] base branch: high texture memory\n");
-#endif
                 imageGlobals.picmip = 0;
                 imageGlobals.picmipBump = 0;
                 imageGlobals.picmipSpec = 0;
-#ifdef __SWITCH__
-                Switch_LogRaw("[SWITCH PICMIP] base branch: high memory assignments done\n");
-#endif
             }
-#ifdef __SWITCH__
-            Switch_LogRaw("[SWITCH PICMIP] after base quality selection\n");
-#endif
             if (sysMemInMegs > 0x180)
                 minPicmip = sysMemInMegs <= 0x280;
             else
                 minPicmip = 2;
-#ifdef __SWITCH__
-            Switch_LogRaw("[SWITCH PICMIP] after minPicmip calculation\n");
-#endif
             if (minPicmip)
             {
                 cappedPicmip = 0;
@@ -808,9 +790,6 @@ void __cdecl R_SetPicmip()
                         CON_CHANNEL_GFX,
                         "Reducing texture detail based on total system memory of %i MB to improve load times.\n",
                         sysMemInMegs);
-#ifdef __SWITCH__
-                Switch_LogRaw("[SWITCH PICMIP] after minPicmip cap block\n");
-#endif
             }
 #ifdef __SWITCH__
             // These values are already validated by the picmip calculation.
@@ -824,9 +803,6 @@ void __cdecl R_SetPicmip()
             picmipBump->latched.integer = imageGlobals.picmipBump;
             picmipSpec->current.integer = imageGlobals.picmipSpec;
             picmipSpec->latched.integer = imageGlobals.picmipSpec;
-#ifdef __SWITCH__
-            Switch_LogRaw("[SWITCH PICMIP] after direct dvar writes\n");
-#endif
 #else
             Dvar_SetInt(r_picmip, imageGlobals.picmip);
             Dvar_SetInt(r_picmip_bump, imageGlobals.picmipBump);
@@ -834,15 +810,18 @@ void __cdecl R_SetPicmip()
 #endif
         }
 #ifdef __SWITCH__
-        Switch_LogRaw("[SWITCH PICMIP] before r_specular check\n");
+        Com_Printf(
+            CON_CHANNEL_GFX,
+            "[SWITCH PICMIP] before specular check main=%d\n",
+            Sys_IsMainThread() ? 1 : 0);
 #endif
         if (!r_specular->current.enabled || !r_rendererInUse->current.integer)
             imageGlobals.picmipSpec = 3;
 #ifdef __SWITCH__
-        Switch_LogRaw("[SWITCH PICMIP] after r_specular check\n");
-#endif
-#ifdef __SWITCH__
-        Switch_LogRaw("[SWITCH PICMIP] before final Com_Printf\n");
+        Com_Printf(
+            CON_CHANNEL_GFX,
+            "[SWITCH PICMIP] after specular check main=%d\n",
+            Sys_IsMainThread() ? 1 : 0);
 #endif
         Com_Printf(
             CON_CHANNEL_GFX,
@@ -850,9 +829,6 @@ void __cdecl R_SetPicmip()
             imageGlobals.picmip,
             imageGlobals.picmipBump,
             imageGlobals.picmipSpec);
-#ifdef __SWITCH__
-        Switch_LogRaw("[SWITCH PICMIP] after final Com_Printf\n");
-#endif
     }
 }
 
