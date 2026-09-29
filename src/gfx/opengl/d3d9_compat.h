@@ -254,6 +254,12 @@ class IDirect3DDevice9;
 using LPDIRECT3DTEXTURE9 = KisakGLTexture*;
 using LPDIRECT3DDEVICE9 = IDirect3DDevice9*;
 
+struct _D3DLOCKED_RECT
+{
+    void *pBits = nullptr;
+    int Pitch = 0;
+};
+
 struct KisakGLTexture
 {
     GLuint object = 0;
@@ -270,6 +276,40 @@ struct KisakGLTexture
     bool lockShadowActive = false;
 
     void AddRef() { ++refs; }
+
+    HRESULT LockRect(uint32_t level, _D3DLOCKED_RECT *lockedRect, const tagRECT *, uint32_t)
+    {
+        if (!lockedRect || target != GL_TEXTURE_2D || level >= mipLevels || !width || !height)
+            return E_FAIL;
+        const uint32_t levelWidth = std::max(1u, width >> level);
+        const uint32_t levelHeight = std::max(1u, height >> level);
+        size_t bytesPerPixel = 4;
+        if (uploadFormat == GL_RED || uploadFormat == GL_ALPHA)
+            bytesPerPixel = 1;
+        else if (uploadFormat == GL_RG)
+            bytesPerPixel = 2;
+        const size_t pitch = static_cast<size_t>(levelWidth) * bytesPerPixel;
+        lockShadow.resize(pitch * static_cast<size_t>(levelHeight));
+        lockedRect->pBits = lockShadow.data();
+        lockedRect->Pitch = static_cast<int>(pitch);
+        lockShadowActive = true;
+        return S_OK;
+    }
+
+    HRESULT UnlockRect(uint32_t level)
+    {
+        if (target != GL_TEXTURE_2D || !lockShadowActive || level >= mipLevels)
+            return E_FAIL;
+        const uint32_t levelWidth = std::max(1u, width >> level);
+        const uint32_t levelHeight = std::max(1u, height >> level);
+        glBindTexture(GL_TEXTURE_2D, object);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexSubImage2D(GL_TEXTURE_2D, static_cast<GLint>(level), 0, 0,
+            static_cast<GLsizei>(levelWidth), static_cast<GLsizei>(levelHeight),
+            uploadFormat, uploadType, lockShadow.data());
+        lockShadowActive = false;
+        return S_OK;
+    }
 
     HRESULT LockBox(uint32_t level, _D3DLOCKED_BOX *lockedBox, const _D3DBOX *box, uint32_t)
     {
@@ -357,12 +397,6 @@ using IDirect3DBaseTexture9 = KisakGLTexture;
 using IDirect3DTexture9 = KisakGLTexture;
 using IDirect3DVolumeTexture9 = KisakGLTexture;
 using IDirect3DCubeTexture9 = KisakGLTexture;
-
-struct _D3DLOCKED_RECT
-{
-    void *pBits = nullptr;
-    int Pitch = 0;
-};
 
 struct IDirect3DSurface9
 {
