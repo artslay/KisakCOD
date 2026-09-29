@@ -905,6 +905,11 @@ void __cdecl CL_InitRenderer()
     g_consoleField.fixedSize = 1;
     StatMon_Reset();
     Con_InitClientAssets();
+#ifdef __SWITCH__
+    // The renderer/EGL context is ready here. Release the startup console and
+    // diagnostic log so the next frame is presented by the game renderer.
+    Switch_LogShutdown();
+#endif
 }
 
 void CL_DevGuiDvar_f()
