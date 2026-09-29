@@ -777,11 +777,22 @@ void __cdecl R_SetPicmip()
                         "Reducing texture detail based on total system memory of %i MB to improve load times.\n",
                         sysMemInMegs);
             }
+#ifdef __SWITCH__
+            Com_Printf(CON_CHANNEL_GFX, "Switch picmip before r_picmip\n");
+#endif
             Dvar_SetInt(r_picmip, imageGlobals.picmip);
+#ifdef __SWITCH__
+            Com_Printf(CON_CHANNEL_GFX, "Switch picmip after r_picmip\n");
+            Com_Printf(CON_CHANNEL_GFX, "Switch picmip before r_picmip_bump\n");
+#endif
             Dvar_SetInt(r_picmip_bump, imageGlobals.picmipBump);
+#ifdef __SWITCH__
+            Com_Printf(CON_CHANNEL_GFX, "Switch picmip after r_picmip_bump\n");
+            Com_Printf(CON_CHANNEL_GFX, "Switch picmip before r_picmip_spec\n");
+#endif
             Dvar_SetInt(r_picmip_spec, imageGlobals.picmipSpec);
 #ifdef __SWITCH__
-            Com_Printf(CON_CHANNEL_GFX, "Switch picmip dvars applied\n");
+            Com_Printf(CON_CHANNEL_GFX, "Switch picmip after r_picmip_spec\n");
 #endif
         }
         if (!r_specular->current.enabled || !r_rendererInUse->current.integer)
