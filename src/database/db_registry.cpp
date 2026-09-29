@@ -454,7 +454,7 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
     // Prefer the game's localization.txt. On the original PC build this file
     // selects the installed language before startup fastfiles are loaded.
     {
-        FILE *localizationFile = FS_SwitchOpenRootFile("localization.txt");
+        FILE *localizationFile = FS_SwitchOpenRootFile("main/localization.txt");
         if (localizationFile)
         {
             char requested[64] = {};
