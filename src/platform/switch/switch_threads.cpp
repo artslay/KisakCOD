@@ -366,9 +366,9 @@ bool Sys_WaitForSaveHistoryDone() { return true; }
 int Sys_SpawnServerDemoThread(void (*function)(uint32_t))
 {
     Sys_Print("[SWITCH THREAD TRACE] active Sys_SpawnServerDemoThread enter\n");
-    int result = Sys_SpawnServerThread(function);
+    Sys_CreateThread((void (__cdecl *)(uint32_t))function, THREAD_CONTEXT_SERVER_DEMO);
     Sys_Print("[SWITCH THREAD TRACE] active Sys_SpawnServerDemoThread leave\n");
-    return result;
+    return threadHandle[THREAD_CONTEXT_SERVER_DEMO] != nullptr ? 1 : 0;
 }
 void Sys_SetSaveHistoryEvent() {}
 void Sys_WaitForSaveHistory() {}
