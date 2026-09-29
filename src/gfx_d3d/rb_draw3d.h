@@ -1,5 +1,9 @@
 #pragma once
+#ifdef __SWITCH__
+#include "gfx/opengl/d3d9_compat.h"
+#else
 #include <d3d9.h>
+#endif
 #include "rb_backend.h"
 
 enum $F8BAC180992631E19A574A0F352E600A : __int32
