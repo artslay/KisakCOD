@@ -50,6 +50,36 @@ static bool g_databaseRequested = false;
 static bool g_databasePending = false;
 static bool g_databaseCompleted = false;
 
+// Cinematic host/thread hand-off events. These are auto-reset events matching the
+// semantics used by the original Win32 implementation.
+static SwitchEvent g_cinematicsThreadOutstandingRequestEvent;
+static SwitchEvent g_cinematicsHostOutstandingRequestEvent;
+
+static bool WaitSwitchEvent(SwitchEvent &event, uint32_t timeoutMsec)
+{
+    std::unique_lock<std::mutex> lock(event.mutex);
+    const bool ready = event.cv.wait_for(
+        lock, std::chrono::milliseconds(timeoutMsec), [&] { return event.signaled; });
+    if (ready)
+        event.signaled = false;
+    return ready;
+}
+
+static void SetSwitchEvent(SwitchEvent &event)
+{
+    {
+        std::lock_guard<std::mutex> lock(event.mutex);
+        event.signaled = true;
+    }
+    event.cv.notify_one();
+}
+
+static void ResetSwitchEvent(SwitchEvent &event)
+{
+    std::lock_guard<std::mutex> lock(event.mutex);
+    event.signaled = false;
+}
+
 
 static uint32_t ThreadId()
 {
@@ -168,6 +198,36 @@ char __cdecl Sys_SpawnCinematicsThread(void (__cdecl *function)(uint32_t))
 {
     Sys_CreateThread(function, THREAD_CONTEXT_CINEMATIC);
     return 1;
+}
+
+bool __cdecl Sys_WaitForCinematicsThreadOutstandingRequestEventTimeout(uint32_t timeoutMsec)
+{
+    return WaitSwitchEvent(g_cinematicsThreadOutstandingRequestEvent, timeoutMsec);
+}
+
+void __cdecl Sys_SetCinematicsThreadOutstandingRequestEvent()
+{
+    SetSwitchEvent(g_cinematicsThreadOutstandingRequestEvent);
+}
+
+void __cdecl Sys_ResetCinematicsThreadOutstandingRequestEvent()
+{
+    ResetSwitchEvent(g_cinematicsThreadOutstandingRequestEvent);
+}
+
+bool __cdecl Sys_WaitForCinematicsHostOutstandingRequestEventTimeout(uint32_t timeoutMsec)
+{
+    return WaitSwitchEvent(g_cinematicsHostOutstandingRequestEvent, timeoutMsec);
+}
+
+void __cdecl Sys_SetCinematicsHostOutstandingRequestEvent()
+{
+    SetSwitchEvent(g_cinematicsHostOutstandingRequestEvent);
+}
+
+void __cdecl Sys_ResetCinematicsHostOutstandingRequestEvent()
+{
+    ResetSwitchEvent(g_cinematicsHostOutstandingRequestEvent);
 }
 
 void __cdecl Sys_ResumeThread(ThreadContext_t) {}
