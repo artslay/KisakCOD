@@ -452,7 +452,7 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
     if (startupLanguage[0])
         return startupLanguage;
 
-    auto setLanguage = [](const char *name, int index) -> const char *
+    auto setLanguage = [&](const char *name, int index) -> const char *
     {
         I_strncpyz(startupLanguage, name, sizeof(startupLanguage));
         if (loc_language)
@@ -498,10 +498,33 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
         if (!languageName || !*languageName)
             continue;
 
-        char zoneDir[256];
-        Com_sprintf(zoneDir, sizeof(zoneDir), "%s/zone/%s", "sdmc:/switch/KisakCOD/game", languageName);
-        struct stat zoneStat{};
-        if (stat(zoneDir, &zoneStat) == 0 && S_ISDIR(zoneStat.st_mode))
+        // Probe actual fastfiles instead of opening the directory itself.
+        // A valid language directory is expected to contain these renderer
+        // bootstrap zones on Switch.
+        const char *startupZones[] =
+        {
+            "code_post_gfx",
+            "ui",
+            "common",
+        };
+
+        bool hasLanguageZone = false;
+        for (const char *startupZone : startupZones)
+        {
+            char zonePath[256];
+            Com_sprintf(zonePath, sizeof(zonePath),
+                "zone/%s/%s.ff", languageName, startupZone);
+
+            FILE *zoneFile = FS_SwitchOpenRootFile(zonePath);
+            if (zoneFile)
+            {
+                fclose(zoneFile);
+                hasLanguageZone = true;
+                break;
+            }
+        }
+
+        if (hasLanguageZone)
             return setLanguage(languageName, i);
 
         // Some extracted COD4 installations keep localization in main as
