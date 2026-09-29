@@ -1,5 +1,7 @@
 #include <universal/q_shared.h>
 #include "r_init.h"
+#include "r_material.h"
+#include "r_fog.h"
 #include "r_state.h"
 #include "r_image.h"
 #include "r_rendercmds.h"
@@ -121,8 +123,13 @@ void R_InitGraphicsApi() {
 }
 void R_InitSystems() {
     R_InitImages();
+    Material_Init();
     R_InitFonts();
+    R_InitLoadWater();
+    R_InitLightDefs();
+    R_ClearFogs();
     R_InitDebug();
+    rg.registered = 1;
 }
 char R_PreCreateWindow() { return 1; }
 void R_StoreDirect3DCaps(uint32_t) {}
