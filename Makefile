@@ -91,6 +91,8 @@ CPP_OBJECTS := $(CPP_SOURCES:%.cpp=$(BUILD)/%.o)
 C_OBJECTS   := $(C_SOURCES:%.c=$(BUILD)/%.o)
 OBJECTS     := $(CPP_OBJECTS) $(C_OBJECTS)
 
+.DEFAULT_GOAL := all
+
 .PHONY: all clean print-sources progress-init progress-done
 
 TOTAL_OBJECTS := $(words $(OBJECTS))
@@ -101,11 +103,11 @@ progress-init:
 	@mkdir -p $(BUILD)
 	@printf '0' > $(PROGRESS_FILE)
 	@rm -rf $(PROGRESS_LOCK)
-	@printf 'Switch build: 0/%s files compiled\\n' "$(TOTAL_OBJECTS)"
+	@printf 'Switch build: 0/%s files compiled\n' "$(TOTAL_OBJECTS)"
 
 progress-done: $(TARGET).nro
 	@done=$$(cat "$(PROGRESS_FILE)" 2>/dev/null || printf '0'); \
-	printf 'Compiled: %s/%s files\\n' "$$done" "$(TOTAL_OBJECTS)"
+	printf 'Compiled: %s/%s files\n' "$$done" "$(TOTAL_OBJECTS)"
 
 all: progress-init $(TARGET).nro progress-done
 
@@ -122,7 +124,7 @@ $(BUILD)/%.o: %.cpp
 	count=$$((count + 1)); \
 	printf '%s' "$$count" > "$(PROGRESS_FILE)"; \
 	rmdir "$(PROGRESS_LOCK)"; \
-	printf '  CXX [%s/%s] %s\\n' "$$count" "$(TOTAL_OBJECTS)" "$(notdir $<)"
+	printf '  CXX [%s/%s] %s\n' "$$count" "$(TOTAL_OBJECTS)" "$(notdir $<)"
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
@@ -132,7 +134,7 @@ $(BUILD)/%.o: %.c
 	count=$$((count + 1)); \
 	printf '%s' "$$count" > "$(PROGRESS_FILE)"; \
 	rmdir "$(PROGRESS_LOCK)"; \
-	printf '  CC  [%s/%s] %s\\n' "$$count" "$(TOTAL_OBJECTS)" "$(notdir $<)"
+	printf '  CC  [%s/%s] %s\n' "$$count" "$(TOTAL_OBJECTS)" "$(notdir $<)"
 
 -include $(OBJECTS:.o=.d)
 
