@@ -8,6 +8,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <cerrno>
 #include <string>
 #include <cstring>
@@ -18,52 +19,69 @@
 
 static const auto g_sysStart = std::chrono::steady_clock::now();
 static std::recursive_mutex g_sysCritical[32];
-static std::recursive_mutex g_switchLogMutex;
 
-static FILE *g_switchLogFile = nullptr;
+static int g_switchLogFd = -1;
 static const char *const kSwitchLogPath = "sdmc:/switch/KisakCOD/kisakcod.log";
 static bool g_switchScreenLog = false;
 
-void Switch_LogInit()
+void Switch_LogWrite(const char *msg)
 {
-    // OpenGL/EGL owns the NWindow directly. Do not initialize libnx's framebuffer
-    // console here, otherwise the console and EGL compete for the same display layer.
-    g_switchScreenLog = false;
-
-    if (g_switchLogFile)
+    if (!msg || !*msg)
         return;
 
-    g_switchLogFile = std::fopen(kSwitchLogPath, "wb");
-    if (!g_switchLogFile)
+    const size_t len = std::strlen(msg);
+
+    // Use POSIX write() instead of stdio/fflush. Multiple engine threads can
+    // emit logs during asynchronous DB loading; stdio locks/flushes here must
+    // never be part of the renderer bootstrap critical path.
+    (void)::write(STDOUT_FILENO, msg, len);
+
+    if (g_switchLogFd >= 0)
     {
-        std::printf("[KisakCOD][LOG] Failed to open %s\n", kSwitchLogPath);
-        std::fflush(stdout);
+        size_t written = 0;
+        while (written < len)
+        {
+            const ssize_t n = ::write(
+                g_switchLogFd,
+                msg + written,
+                len - written);
+            if (n <= 0)
+                break;
+            written += static_cast<size_t>(n);
+        }
+    }
+}
+
+void Switch_LogInit()
+{
+    g_switchScreenLog = false;
+
+    if (g_switchLogFd >= 0)
+        return;
+
+    g_switchLogFd = ::open(
+        kSwitchLogPath,
+        O_WRONLY | O_CREAT | O_TRUNC | O_APPEND,
+        0666);
+
+    if (g_switchLogFd < 0)
+    {
+        const char *msg = "[KisakCOD][LOG] Failed to open sdmc log file\n";
+        (void)::write(STDOUT_FILENO, msg, std::strlen(msg));
         return;
     }
 
-    std::setvbuf(g_switchLogFile, nullptr, _IOLBF, BUFSIZ);
-    std::fprintf(g_switchLogFile, "========================================\n");
-    std::fprintf(g_switchLogFile, "KisakCOD Switch engine log\n");
-    std::fprintf(g_switchLogFile, "Log file: %s\n", kSwitchLogPath);
-    std::fprintf(g_switchLogFile, "========================================\n");
-    std::fflush(g_switchLogFile);
+    static const char header[] =
+        "========================================\n"
+        "KisakCOD Switch engine log\n"
+        "Log file: sdmc:/switch/KisakCOD/kisakcod.log\n"
+        "========================================\n";
+    Switch_LogWrite(header);
 }
 
 void Switch_LogRaw(const char *msg)
 {
-    if (!msg)
-        return;
-
-    std::lock_guard<std::recursive_mutex> lock(g_switchLogMutex);
-
-    std::fputs(msg, stdout);
-    std::fflush(stdout);
-
-    if (g_switchLogFile)
-    {
-        std::fputs(msg, g_switchLogFile);
-        std::fflush(g_switchLogFile);
-    }
+    Switch_LogWrite(msg);
 }
 
 void Switch_LogReleaseScreen()
@@ -75,12 +93,11 @@ void Switch_LogReleaseScreen()
 
 void Switch_LogShutdown()
 {
-    if (!g_switchLogFile)
-        return;
-
-    std::fflush(g_switchLogFile);
-    std::fclose(g_switchLogFile);
-    g_switchLogFile = nullptr;
+    if (g_switchLogFd >= 0)
+    {
+        ::close(g_switchLogFd);
+        g_switchLogFd = -1;
+    }
 
     g_switchScreenLog = false;
 }
@@ -132,25 +149,9 @@ int __cdecl Sys_SetClipboardData(const char *text)
 
 void __cdecl Sys_Print(const char *msg)
 {
-    if (!msg)
-        return;
-
-    std::lock_guard<std::recursive_mutex> lock(g_switchLogMutex);
-
-    std::fputs(msg, stdout);
-    std::fflush(stdout);
-
-    if (g_switchLogFile)
-    {
-        std::fputs(msg, g_switchLogFile);
-        std::fflush(g_switchLogFile);
-    }
-
-#if !defined(__SWITCH__)
-    if (g_switchScreenLog && Sys_IsMainThread())
-        consoleUpdate(nullptr);
-#endif
+    Switch_LogWrite(msg);
 }
+
 sysEvent_t *__cdecl Sys_GetEvent(sysEvent_t *result)
 {
     static sysEvent_t ev = {};
