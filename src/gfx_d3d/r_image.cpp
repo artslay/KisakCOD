@@ -701,9 +701,6 @@ IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image)
 
 void __cdecl R_SetPicmip()
 {
-#ifdef __SWITCH__
-    Switch_LogRaw("[SWITCH PICMIP RAW] enter\n");
-#endif
     uint32_t texMemInMegs; // [esp+0h] [ebp-10h]
     uint32_t sysMemInMegs; // [esp+4h] [ebp-Ch]
     bool cappedPicmip; // [esp+Bh] [ebp-5h]
@@ -762,9 +759,6 @@ void __cdecl R_SetPicmip()
                 minPicmip = sysMemInMegs <= 0x280;
             else
                 minPicmip = 2;
-#ifdef __SWITCH__
-            Switch_LogRaw("[SWITCH PICMIP RAW] before minPicmip block\\n");
-#endif
             if (minPicmip)
             {
                 cappedPicmip = 0;
@@ -792,35 +786,17 @@ void __cdecl R_SetPicmip()
 #ifdef __SWITCH__
             Com_Printf(CON_CHANNEL_GFX, "Switch picmip before r_picmip\n");
 #endif
-#ifdef __SWITCH__
-            Switch_LogRaw("[SWITCH PICMIP RAW] before r_picmip\n");
-#endif
             Dvar_SetInt(r_picmip, imageGlobals.picmip);
-#ifdef __SWITCH__
-            Switch_LogRaw("[SWITCH PICMIP RAW] after r_picmip\n");
-#endif
 #ifdef __SWITCH__
             Com_Printf(CON_CHANNEL_GFX, "Switch picmip after r_picmip\n");
             Com_Printf(CON_CHANNEL_GFX, "Switch picmip before r_picmip_bump\n");
 #endif
-#ifdef __SWITCH__
-            Switch_LogRaw("[SWITCH PICMIP RAW] before r_picmip_bump\n");
-#endif
             Dvar_SetInt(r_picmip_bump, imageGlobals.picmipBump);
-#ifdef __SWITCH__
-            Switch_LogRaw("[SWITCH PICMIP RAW] after r_picmip_bump\n");
-#endif
 #ifdef __SWITCH__
             Com_Printf(CON_CHANNEL_GFX, "Switch picmip after r_picmip_bump\n");
             Com_Printf(CON_CHANNEL_GFX, "Switch picmip before r_picmip_spec\n");
 #endif
-#ifdef __SWITCH__
-            Switch_LogRaw("[SWITCH PICMIP RAW] before r_picmip_spec\n");
-#endif
             Dvar_SetInt(r_picmip_spec, imageGlobals.picmipSpec);
-#ifdef __SWITCH__
-            Switch_LogRaw("[SWITCH PICMIP RAW] after r_picmip_spec\n");
-#endif
 #ifdef __SWITCH__
             Com_Printf(CON_CHANNEL_GFX, "Switch picmip after r_picmip_spec\n");
 #endif
