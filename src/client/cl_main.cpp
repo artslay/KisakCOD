@@ -31,6 +31,7 @@
 #include <server/server.h>
 #ifdef __SWITCH__
 extern void Switch_LogShutdown();
+extern void Switch_LogRaw(const char *msg);
 #endif
 
 enum MovieToPlayScriptOp : __int32
@@ -896,11 +897,11 @@ void __cdecl CL_InitRenderer()
     iassert(!cls.rendererStarted);
     cls.rendererStarted = 1;
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: before R_BeginRegistration\n");
+    Switch_LogRaw("[SWITCH START TRACE] CL_InitRenderer: before R_BeginRegistration\n");
 #endif
     R_BeginRegistration(&cls.vidConfig);
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: after R_BeginRegistration\n");
+    Switch_LogRaw("[SWITCH START TRACE] CL_InitRenderer: after R_BeginRegistration\n");
 #endif
     ScrPlace_SetupUnsafeViewport(&scrPlaceFullUnsafe, 0, 0, cls.vidConfig.displayWidth, cls.vidConfig.displayHeight);
     ScrPlace_SetupViewport(&scrPlaceFull, 0, 0, cls.vidConfig.displayWidth, cls.vidConfig.displayHeight);
@@ -921,7 +922,7 @@ void __cdecl CL_InitRenderer()
 #endif
     cls.consoleFont = R_RegisterFont("fonts/consoleFont", IMAGE_TRACK_UI);
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: after console font\n");
+    Switch_LogRaw("[SWITCH START TRACE] CL_InitRenderer: after console font\n");
 #endif
     g_console_field_width = cls.vidConfig.displayWidth - 40;
     g_consoleField.charHeight = g_console_char_height;
@@ -929,7 +930,7 @@ void __cdecl CL_InitRenderer()
     g_consoleField.fixedSize = 1;
     StatMon_Reset();
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: before Con_InitClientAssets\n");
+    Switch_LogRaw("[SWITCH START TRACE] CL_InitRenderer: before Con_InitClientAssets\n");
 #endif
     Con_InitClientAssets();
 #ifdef __SWITCH__
