@@ -1,4 +1,8 @@
 #include <universal/q_shared.h>
+
+#ifdef __SWITCH__
+extern void Sys_Print(const char *msg);
+#endif
 #include "r_image.h"
 #include <qcommon/mem_track.h>
 #include <qcommon/qcommon.h>
@@ -809,7 +813,7 @@ void __cdecl R_SetPicmip()
             imageGlobals.picmipBump,
             imageGlobals.picmipSpec);
 #ifdef __SWITCH__
-        Sys_Print("[SWITCH PICMIP] after final Com_Printf\\n");
+        Sys_Print("[SWITCH PICMIP] after final Com_Printf\n");
 #endif
     }
 }
