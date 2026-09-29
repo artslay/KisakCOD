@@ -349,7 +349,7 @@ void __cdecl DB_LoadXFileInternal()
     DB_LoadXFileData((uint8_t *)&file, sizeof(XFile));
 #ifdef __SWITCH__
     Com_Printf(CON_CHANNEL_SYSTEM,
-        "Switch FF XFile: size=%u external=%u blocks=%u,%u,%u,%u,%u,%u,%u,%u,%u\\n",
+        "Switch FF XFile: size=%u external=%u blocks=%u,%u,%u,%u,%u,%u,%u,%u,%u\n",
         file.size, file.externalSize,
         file.blockSize[0], file.blockSize[1], file.blockSize[2],
         file.blockSize[3], file.blockSize[4], file.blockSize[5],
@@ -375,21 +375,21 @@ void __cdecl DB_LoadXFileInternal()
         }
     }
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: alloc zone memory\\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: alloc zone memory\n");
 #endif
     DB_AllocXZoneMemory(file.blockSize, g_load.filename, g_load.zoneMem, g_load.allocType);
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: alloc done\\n");
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: init streams\\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: alloc done\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: init streams\n");
 #endif
     DB_InitStreams(g_load.zoneMem);
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: streams done\\n");
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: asset list\\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: streams done\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: asset list\n");
 #endif
     Load_XAssetListCustom();
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: asset list done\\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: asset list done\n");
 #endif
     DB_PushStreamPos(4);
     if (varXAssetList->assets)
