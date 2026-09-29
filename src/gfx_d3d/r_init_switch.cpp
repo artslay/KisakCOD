@@ -175,7 +175,7 @@ static void R_LoadGraphicsAssets()
         XAssetHeader images[256]{};
         const int imageCount = DB_GetAllXAssetOfType_FastFile(ASSET_TYPE_IMAGE, images, 256);
         char trace[256];
-        std::snprintf(trace, sizeof(trace), "[SWITCH IMGDB] imageCount=%d\\n", imageCount);
+        std::snprintf(trace, sizeof(trace), "[SWITCH IMGDB] imageCount=%d\n", imageCount);
         Switch_LogWrite(trace);
         for (int i = 0; i < imageCount && i < 256; ++i)
         {
@@ -319,7 +319,7 @@ void R_Shutdown(int destroyWindow) {
 )
             {
                 std::snprintf(trace, sizeof(trace),
-                    "[SWITCH IMGDB] code image[%d]=%s\\n",
+                    "[SWITCH IMGDB] code image[%d]=%s\n",
                     i, images[i].image->name);
                 Switch_LogWrite(trace);
             }
