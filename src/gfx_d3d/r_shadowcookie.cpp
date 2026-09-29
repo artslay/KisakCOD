@@ -35,10 +35,6 @@ struct ShadowCookieGlob // sizeof=0x8
 
 ShadowCookieGlob shadowCookieGlob;
 
-bool __cdecl R_SortBspShadowReceiverSurfaces(GfxSurface *surface0, GfxSurface *surface1)
-{
-    return surface0 < surface1;
-}
 
 void __cdecl R_EmitShadowCookieSurfs(GfxViewInfo *viewInfo)
 {
