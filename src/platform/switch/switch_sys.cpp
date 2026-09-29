@@ -48,6 +48,21 @@ void Switch_LogInit()
     consoleUpdate(nullptr);
 }
 
+void Switch_LogRaw(const char *msg)
+{
+    if (!msg)
+        return;
+
+    std::fputs(msg, stdout);
+    std::fflush(stdout);
+
+    if (g_switchLogFile)
+    {
+        std::fputs(msg, g_switchLogFile);
+        std::fflush(g_switchLogFile);
+    }
+}
+
 void Switch_LogShutdown()
 {
     if (!g_switchLogFile)
