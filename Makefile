@@ -74,6 +74,7 @@ CPP_SOURCES += src/gfx_d3d/r_debug.cpp src/gfx_d3d/r_debug_alloc.cpp src/gfx_d3d
 CPP_SOURCES += src/gfx_d3d/r_sky.cpp src/gfx_d3d/r_shadowcookie.cpp
 CPP_SOURCES += src/gfx_d3d/r_workercmds.cpp src/gfx_d3d/r_workercmds_common.cpp src/gfx_d3d/r_spotshadow.cpp src/gfx_d3d/r_sunshadow.cpp
 CPP_SOURCES += src/gfx_d3d/rb_fog.cpp src/gfx_d3d/r_fog.cpp src/gfx_d3d/r_draw_sunshadow.cpp
+CPP_SOURCES += src/gfx_d3d/rb_backend.cpp
 CPP_SOURCES += src/gfx_d3d/r_meshdata.cpp src/gfx_d3d/r_draw_method.cpp src/gfx_d3d/r_pretess.cpp
 CPP_SOURCES += src/gfx_d3d/r_add_cmdbuf.cpp src/gfx_d3d/r_staticmodel.cpp src/gfx_d3d/r_xsurface.cpp src/gfx_d3d/r_reflection_probe_load_obj.cpp
 CPP_SOURCES += src/gfx_d3d/r_light.cpp src/gfx_d3d/r_light_load_obj.cpp src/gfx_d3d/r_primarylights.cpp src/gfx_d3d/r_outdoor.cpp
