@@ -99,7 +99,13 @@ void R_SkinXModelCmd(_WORD *data)
                 if (sseStateUsed)
                 {
                     sseStateUsed = false;
-                    _m_empty();
+#if !defined(__SWITCH__)
+    #if !defined(__SWITCH__)
+        #if !defined(__SWITCH__)
+        _m_empty();
+#endif
+#endif
+#endif
                 }
 
                 DObjSkelMat mat0, mat1;
@@ -153,7 +159,7 @@ void R_SkinXModelCmd(_WORD *data)
                 if (skinnedSurf->skinnedCachedOffset >= 0)
                     skinVertNormalOut = &gfxBuf.skinnedCacheNormalsAddr[skinnedSurf->skinnedCachedOffset >> 5];
                 if (skinnedSurf->skinnedVert)
-                    skinVertNormalIn = &gfxBuf.oldSkinnedCacheNormalsAddr[(int)skinnedSurf->skinnedVert >> 5];
+                    skinVertNormalIn = &gfxBuf.oldSkinnedCacheNormalsAddr[static_cast<int>(reinterpret_cast<uintptr_t>(skinnedSurf->skinnedVert) >> 5)];
             }
             R_SkinXSurfaceSkinnedSse(xsurf, &boneSkelMats[boneIndex], skinVertNormalIn, skinVertNormalOut, skinVerticesOut);
         }
