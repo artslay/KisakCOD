@@ -191,6 +191,7 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 	}
 	else
 	{
+#ifndef __SWITCH__
 		if (channel != CON_CHANNEL_LOGFILEONLY
 #ifdef KISAK_MP
             && com_dedicated && !com_dedicated->current.integer
@@ -200,6 +201,7 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 			//iassert( !Con_IsNotifyChannel( channel ) );
 			CL_ConsolePrint(0, channel, msg, 0, 0, 32 * error);
 		}
+#endif
 		if (*msg == 94 && msg[1])
 			msg += 2;
 		if (channel != CON_CHANNEL_LOGFILEONLY
