@@ -179,6 +179,44 @@ void R_SkinXModelCmd(_WORD *data)
     }
 }
 
+#ifdef __SWITCH__
+void __cdecl R_SkinXSurfaceSkinnedSse(
+    const XSurface *xsurf,
+    const DObjSkelMat *boneMatrix,
+    GfxPackedVertexNormal *skinVertNormalIn,
+    GfxPackedVertexNormal *skinVertNormalOut,
+    GfxPackedVertex *skinVerticesOut)
+{
+    iassert(xsurf);
+    iassert(boneMatrix);
+    iassert(skinVerticesOut);
+
+    // The desktop implementation uses SSE/MMX for this entry point. Switch is
+    // AArch64, so use the engine's scalar skinner and preserve the fast-skin
+    // normal-cache contract explicitly.
+    if (skinVertNormalIn)
+        iassert(skinVertNormalOut);
+
+    R_SkinXSurfaceSkinned(xsurf, boneMatrix, skinVerticesOut);
+
+    const int vertCount = xsurf->vertCount;
+    if (skinVertNormalIn)
+    {
+        for (int i = 0; i < vertCount; ++i)
+        {
+            skinVerticesOut[i].normal = skinVertNormalIn[i].normal;
+            skinVerticesOut[i].tangent = skinVertNormalIn[i].tangent;
+            skinVertNormalOut[i] = skinVertNormalIn[i];
+        }
+    }
+    else if (skinVertNormalOut)
+    {
+        for (int i = 0; i < vertCount; ++i)
+            skinVertNormalOut[i] = { skinVerticesOut[i].normal, skinVerticesOut[i].tangent };
+    }
+}
+#endif
+
 
 void __cdecl R_SkinXSurfaceSkinned(
     const XSurface *xsurf,
