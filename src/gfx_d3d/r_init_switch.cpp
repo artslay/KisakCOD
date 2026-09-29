@@ -85,9 +85,19 @@ void R_BeginRegistration(vidConfig_t *out) {
 extern void Switch_LogRaw(const char *msg);
 
 void R_Init() {
+    // Match the original renderer bootstrap order: renderer dvars/commands must
+    // exist before R_InitImages()->R_SetPicmip() accesses them.
+    Switch_LogRaw("[SWITCH RINIT TRACE] before R_Register\n");
+    R_Register();
+    Switch_LogRaw("[SWITCH RINIT TRACE] after R_Register\n");
+
     Switch_LogRaw("[SWITCH RINIT TRACE] before R_InitGlobalStructs\n");
     R_InitGlobalStructs();
     Switch_LogRaw("[SWITCH RINIT TRACE] after R_InitGlobalStructs\n");
+
+    Switch_LogRaw("[SWITCH RINIT TRACE] before R_InitDrawMethod\n");
+    R_InitDrawMethod();
+    Switch_LogRaw("[SWITCH RINIT TRACE] after R_InitDrawMethod\n");
 
     Switch_LogRaw("[SWITCH RINIT TRACE] before R_InitGraphicsApi\n");
     R_InitGraphicsApi();
