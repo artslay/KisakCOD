@@ -152,6 +152,8 @@ void __cdecl FS_Startup(char *gameName)
     Com_Printf(CON_CHANNEL_FILES, "----- Switch FS_Startup -----\n");
     Sys_Print((char*)"[SWITCH FS TRACE] before FS_RegisterDvars\n");
     FS_RegisterDvars();
+    if (com_logfile)
+        Dvar_SetInt((dvar_s*)com_logfile, 0);
     Sys_Print((char*)"[SWITCH FS TRACE] after FS_RegisterDvars\n");
     FS_AddLocalizedGameDirectory((char*)kSwitchRoot, gameName);
     Sys_Print((char*)"[SWITCH FS TRACE] after FS_AddLocalizedGameDirectory\n");
