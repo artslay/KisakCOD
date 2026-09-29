@@ -225,7 +225,10 @@ void R_SetWndParms(GfxWindowParms *wnd) {
     wnd->displayHeight = vidConfig.displayHeight;
     wnd->hz = 60;
 }
-void R_Register() {}
+void R_Register() {
+    R_RegisterDvars();
+    R_RegisterCmds();
+}
 void R_InitGlobalStructs() {
     vidConfig = {};
     gfxMetrics = {};
