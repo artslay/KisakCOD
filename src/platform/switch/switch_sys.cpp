@@ -19,6 +19,40 @@
 static const auto g_sysStart = std::chrono::steady_clock::now();
 static std::mutex g_sysCritical[32];
 
+static FILE *g_switchLogFile = nullptr;
+static const char *const kSwitchLogPath = "sdmc:/switch/KisakCOD/kisakcod.log";
+
+void Switch_LogInit()
+{
+    if (g_switchLogFile)
+        return;
+
+    g_switchLogFile = std::fopen(kSwitchLogPath, "wb");
+    if (!g_switchLogFile)
+    {
+        std::printf("[KisakCOD][LOG] Failed to open %s\n", kSwitchLogPath);
+        std::fflush(stdout);
+        return;
+    }
+
+    std::setvbuf(g_switchLogFile, nullptr, _IOLBF, BUFSIZ);
+    std::fprintf(g_switchLogFile, "========================================\n");
+    std::fprintf(g_switchLogFile, "KisakCOD Switch engine log\n");
+    std::fprintf(g_switchLogFile, "Log file: %s\n", kSwitchLogPath);
+    std::fprintf(g_switchLogFile, "========================================\n");
+    std::fflush(g_switchLogFile);
+}
+
+void Switch_LogShutdown()
+{
+    if (!g_switchLogFile)
+        return;
+
+    std::fflush(g_switchLogFile);
+    std::fclose(g_switchLogFile);
+    g_switchLogFile = nullptr;
+}
+
 SysInfo sys_info = {};
 
 int g_debugClient = 0;
@@ -66,7 +100,17 @@ int __cdecl Sys_SetClipboardData(const char *text)
 
 void __cdecl Sys_Print(const char *msg)
 {
-    if (msg) std::fputs(msg, stdout);
+    if (!msg)
+        return;
+
+    std::fputs(msg, stdout);
+    std::fflush(stdout);
+
+    if (g_switchLogFile)
+    {
+        std::fputs(msg, g_switchLogFile);
+        std::fflush(g_switchLogFile);
+    }
 }
 
 sysEvent_t *__cdecl Sys_GetEvent(sysEvent_t *result)
@@ -89,8 +133,9 @@ void __cdecl Sys_Error(const char *error, ...)
     va_start(ap, error);
     std::vsnprintf(message, sizeof(message), error, ap);
     va_end(ap);
-    std::printf("FATAL: %s\n", message);
-    std::fflush(stdout);
+    char fatalLine[4096];
+    std::snprintf(fatalLine, sizeof(fatalLine), "FATAL: %s\n", message);
+    Sys_Print(fatalLine);
     appletRequestExitToSelf();
     std::abort();
 }
