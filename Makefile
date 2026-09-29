@@ -58,7 +58,7 @@ C_SOURCES := $(shell find src -type f -name '*.c' \
     ! -name 'maketree.c')
 
 # zlib is required by the engine's archive/zip loader.
-C_SOURCES += $(shell find deps/zlib -type f -name '*.c')
+C_SOURCES += $(shell find deps/zlib -type f -name '*.c' ! -name 'maketree.c')
 
 CPP_SOURCES += src/platform/switch/switch_main.cpp src/platform/switch/switch_fs.cpp src/platform/switch/switch_threads.cpp src/platform/switch/switch_timing.cpp src/platform/switch/switch_profile.cpp src/platform/switch/switch_sys.cpp src/platform/switch/switch_live_storage.cpp
 CPP_SOURCES += src/gfx_d3d/r_init_switch.cpp src/gfx_d3d/r_buffers.cpp src/gfx_d3d/r_state.cpp
