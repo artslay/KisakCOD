@@ -128,7 +128,7 @@ static void Load_XAssetListCustom()
 
     char trace[256];
     std::snprintf(trace, sizeof(trace),
-        "[SWITCH XASSETLIST] count=%d assets=%08x\\n",
+        "[SWITCH XASSETLIST] count=%d assets=%08x\n",
         varXAssetList->assetCount, serialized.assets);
     Switch_LogWrite(trace);
 #else
