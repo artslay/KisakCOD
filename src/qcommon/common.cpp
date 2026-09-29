@@ -1290,21 +1290,15 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     if (IsFastFileLoad())
         Com_InitXAssets();
     CL_InitKeyCommands();
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch init: before FS_InitFilesystem\n");
     FS_InitFilesystem();
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch init: after FS_InitFilesystem\n");
     Con_InitChannels();
 #ifdef KISAK_MP
     LiveStorage_Init();
 #endif
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch init: before player profiles\n");
     for (int localClientNum = 0; localClientNum < 1; ++localClientNum)
         Com_StartupConfigs(localClientNum);
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch init: after player profiles\n");
     v1 = CL_ControllerIndexFromClientNum(0);
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch init: before Cbuf_Execute\n");
     Cbuf_Execute(0, v1);
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch init: after Cbuf_Execute\n");
     if ((dvar_modifiedFlags & 0x20) != 0)
         Com_InitDvars();
     com_recommendedSet = Dvar_RegisterBool("com_recommendedSet", 0, DVAR_ARCHIVE, "Use recommended settings");
