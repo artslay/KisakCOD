@@ -159,6 +159,9 @@ void MSS_InitChannels()
     for (int i = 0; i < totalChannels; ++i)
         alFilteri(alGlob.sendFilter[i], AL_FILTER_TYPE, AL_FILTER_LOWPASS);
 
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] MSS_InitChannels after alFilteri loop\n");
+#endif
     g_snd.ambient_track = SND_TRACK_AMBIENT_PRIMARY_0;
 }
 
@@ -167,6 +170,9 @@ void MSS_InitChannels()
 // rather than an EFX filter object (Phase 7: no working EQ application on this side).
 void MSS_InitEq()
 {
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] MSS_InitEq enter\n");
+#endif
     alGlob.eqFilter = 0;
 #ifndef KISAK_XBOX
     alGlob.eqLerp = 1.0f;
@@ -187,6 +193,10 @@ void MSS_InitEq()
             }
         }
     }
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_SOUND, "[SWITCH SOUND TRACE] MSS_InitEq finished\n");
+#endif
 }
 
 // Mirrors MSS_Startup (AIL_startup). Miles' AIL_startup is a global one-time SDK init with
