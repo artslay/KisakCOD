@@ -7,6 +7,12 @@
 TARGET      := kisakcod
 BUILD       := build
 
+# Nintendo Switch application metadata.
+APP_TITLE   := Call of Duty 4
+APP_AUTHOR  := artslay
+APP_VERSION := 1.0.0
+ICON        := icon.jpg
+
 ARCH        := -march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 MESA_SDK    := $(CURDIR)/mesa-sdk/opt/devkitpro/portlibs/switch
 OPENAL_SDK   := $(DEVKITPRO)/portlibs/switch
