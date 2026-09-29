@@ -177,11 +177,11 @@ void __cdecl Sys_CreateThread(void (__cdecl *function)(uint32_t), ThreadContext_
 #endif
     g_threadAlive[context] = true;
     g_threads[context] = std::thread([function, context] {
+        Sys_InitThread(context);
 #ifdef KISAK_SWITCH
         if (context == THREAD_CONTEXT_SERVER_DEMO)
             Sys_Print("[SWITCH THREAD TRACE] active ThreadMain SERVER_DEMO enter\n");
 #endif
-        Sys_InitThread(context);
         function((uint32_t)context);
         g_threadAlive[context] = false;
     });
