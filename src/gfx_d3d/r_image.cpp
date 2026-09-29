@@ -803,7 +803,7 @@ void __cdecl R_SetPicmip()
         if (!r_specular->current.enabled || !r_rendererInUse->current.integer)
             imageGlobals.picmipSpec = 3;
 #ifdef __SWITCH__
-        SwitchTrace("[SWITCH PICMIP] before final Com_Printf\n");
+        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH PICMIP] before final Com_Printf\n");
 #endif
         Com_Printf(
             CON_CHANNEL_GFX,
@@ -812,7 +812,7 @@ void __cdecl R_SetPicmip()
             imageGlobals.picmipBump,
             imageGlobals.picmipSpec);
 #ifdef __SWITCH__
-        SwitchTrace("[SWITCH PICMIP] after final Com_Printf\n");
+        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH PICMIP] after final Com_Printf\n");
 #endif
     }
 }
@@ -830,11 +830,11 @@ void __cdecl R_InitImages()
         iassert(imageGlobals.totalMemory.platform[i] == 0);
     }
 #ifdef __SWITCH__
-    SwitchTrace("[SWITCH IMG] before R_SetPicmip\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH IMG] before R_SetPicmip\n");
 #endif
     R_SetPicmip();
 #ifdef __SWITCH__
-    SwitchTrace("[SWITCH IMG] after R_SetPicmip\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH IMG] after R_SetPicmip\n");
 #endif
     R_InitCodeImages();
 #ifdef __SWITCH__
