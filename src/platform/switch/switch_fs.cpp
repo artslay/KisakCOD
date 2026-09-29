@@ -66,11 +66,44 @@ bool __cdecl FS_SwitchLanguageHasAssets(int iLanguage)
     if (!languageName || !*languageName)
         return false;
 
-    char path[256];
-    std::snprintf(path, sizeof(path), "%s/zone/%s", kSwitchRoot, languageName);
-
     struct stat st{};
-    return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
+
+    // COD4 language data is normally split between:
+    //   zone/<language>/                 localized fastfiles
+    //   main/localized_<language>_iw##.iwd  localized archives
+    // Accept both layouts on Switch, plus the flat root form used by some
+    // extracted game-data packages.
+    char zonePath[256];
+    std::snprintf(zonePath, sizeof(zonePath), "%s/zone/%s", kSwitchRoot, languageName);
+    const bool hasZoneDirectory =
+        stat(zonePath, &st) == 0 && S_ISDIR(st.st_mode);
+
+    char mainPath[256];
+    std::snprintf(mainPath, sizeof(mainPath), "%s/main", kSwitchRoot);
+
+    const char *roots[] = { kSwitchRoot, mainPath };
+    bool hasLocalizedIwd = false;
+
+    for (const char *root : roots)
+    {
+        for (int i = 0; i < 100; ++i)
+        {
+            char iwdPath[256];
+            std::snprintf(iwdPath, sizeof(iwdPath),
+                "%s/localized_%s_iw%02d.iwd", root, languageName, i);
+
+            if (stat(iwdPath, &st) == 0 && S_ISREG(st.st_mode))
+            {
+                hasLocalizedIwd = true;
+                break;
+            }
+        }
+
+        if (hasLocalizedIwd)
+            break;
+    }
+
+    return hasZoneDirectory || hasLocalizedIwd;
 }
 #endif
 
