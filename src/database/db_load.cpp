@@ -57,7 +57,7 @@ static uint8_t *AllocLoad_XBlendInfo();
 static void Load_UnsignedShortArray(bool atStreamStart, int32_t count);
 static void Load_ScriptString(bool atStreamStart);
 static void Load_ScriptStringArray(bool atStreamStart, int32_t count);
-static uint8_t *AllocLoad_raw_byte();
+uint8_t *AllocLoad_raw_byte();
 static void Load_ConstCharArray(bool atStreamStart, int32_t count);
 static void Load_TempString(bool atStreamStart);
 static void Load_TempStringArray(bool atStreamStart, int32_t count);
