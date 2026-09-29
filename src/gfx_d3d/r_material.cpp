@@ -1048,11 +1048,10 @@ void __cdecl Material_UpdatePicmipAll()
 {
 #ifdef __SWITCH__
     Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH MATERIAL PICMIP] ENTER\n");
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH MATERIAL PICMIP] before R_SyncRenderThread\n");
 #endif
     R_SyncRenderThread();
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH MATERIAL PICMIP] before R_SetPicmip\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH MATERIAL PICMIP] after R_SyncRenderThread\n");
 #endif
     R_SetPicmip();
 #ifdef __SWITCH__
