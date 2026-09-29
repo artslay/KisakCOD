@@ -85,17 +85,17 @@ void R_BeginRegistration(vidConfig_t *out) {
 extern void Switch_LogRaw(const char *msg);
 
 void R_Init() {
-    Switch_LogRaw("[SWITCH RINIT TRACE] before R_InitGlobalStructs\\n");
+    Switch_LogRaw("[SWITCH RINIT TRACE] before R_InitGlobalStructs\n");
     R_InitGlobalStructs();
-    Switch_LogRaw("[SWITCH RINIT TRACE] after R_InitGlobalStructs\\n");
+    Switch_LogRaw("[SWITCH RINIT TRACE] after R_InitGlobalStructs\n");
 
-    Switch_LogRaw("[SWITCH RINIT TRACE] before R_InitGraphicsApi\\n");
+    Switch_LogRaw("[SWITCH RINIT TRACE] before R_InitGraphicsApi\n");
     R_InitGraphicsApi();
-    Switch_LogRaw("[SWITCH RINIT TRACE] after R_InitGraphicsApi\\n");
+    Switch_LogRaw("[SWITCH RINIT TRACE] after R_InitGraphicsApi\n");
 
-    Switch_LogRaw("[SWITCH RINIT TRACE] before R_InitSystems\\n");
+    Switch_LogRaw("[SWITCH RINIT TRACE] before R_InitSystems\n");
     R_InitSystems();
-    Switch_LogRaw("[SWITCH RINIT TRACE] after R_InitSystems\\n");
+    Switch_LogRaw("[SWITCH RINIT TRACE] after R_InitSystems\n");
 }
 char R_InitRendererForWindow(HWND) { R_Init(); return 1; }
 HWND R_CreateSwapChains(int, GfxWindowParms *, int) { return nullptr; }
@@ -112,18 +112,18 @@ void R_Hwnd_Resize(HWND__ *, int width, int height) {
 }
 
 void R_InitGraphicsApi() {
-    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: before CreateOpenGLBackend\\n");
+    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: before CreateOpenGLBackend\n");
     if (!g_gfxBackend)
         g_gfxBackend = CreateOpenGLBackend();
-    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: after CreateOpenGLBackend\\n");
+    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: after CreateOpenGLBackend\n");
 
     if (!g_gfxBackend)
         R_FatalInitError("CreateOpenGLBackend failed");
 
-    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: before backend Init\\n");
+    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: before backend Init\n");
     if (!g_gfxBackend->Init(nullptr))
         R_FatalInitError(g_gfxBackend->GetLastError());
-    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: after backend Init\\n");
+    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: after backend Init\n");
 
     if (!dx.device) dx.device = new IDirect3DDevice9;
     vidConfig.sceneWidth = 1280;
