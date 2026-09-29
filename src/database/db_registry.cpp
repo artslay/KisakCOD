@@ -43,6 +43,7 @@ extern void Switch_LogWrite(const char *msg);
 #include <algorithm>
 #ifdef __SWITCH__
 #include <thread>
+#include <sys/stat.h>
 #endif
 
 #include <setjmp.h>
@@ -436,16 +437,111 @@ void __cdecl DB_ReplaceXAsset(XAssetType type, const char *original, const char 
 void __cdecl DB_CloneXAsset(const XAsset *from, XAsset *to);
 void __cdecl Material_DirtyTechniqueSetOverrides();
 void __cdecl Material_ClearShaderUploadList();
+#ifdef __SWITCH__
+static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
+{
+    static char startupLanguage[64];
+
+    if (startupLanguage[0])
+        return startupLanguage;
+
+    auto setLanguage = [&](const char *name, int index) -> const char *
+    {
+        I_strncpyz(startupLanguage, name, sizeof(startupLanguage));
+        if (loc_language)
+            Dvar_SetInt((dvar_s *)loc_language, index);
+        Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\\n", startupLanguage);
+        return startupLanguage;
+    };
+
+    // localization.txt explicitly selects the language when present.
+    {
+        FILE *localizationFile = FS_SwitchOpenRootFile("main/localization.txt");
+        if (localizationFile)
+        {
+            char requested[64] = {};
+            const size_t count = fread(requested, 1, sizeof(requested) - 1, localizationFile);
+            fclose(localizationFile);
+
+            for (size_t i = 0; i < count; ++i)
+            {
+                if (requested[i] == '\r' || requested[i] == '\n')
+                {
+                    requested[i] = 0;
+                    break;
+                }
+            }
+
+            for (int i = 0; i < 15 && requested[0]; ++i)
+            {
+                const char *languageName = SEH_GetLanguageName(i);
+                if (languageName && I_stricmp(requested, languageName) == 0)
+                    return setLanguage(languageName, i);
+            }
+        }
+    }
+
+    // A Switch installation can identify a language by its directory even
+    // when the base startup fastfiles remain in zone/english.
+    for (int i = 1; i < 15; ++i)
+    {
+        const char *languageName = SEH_GetLanguageName(i);
+        if (!languageName || !*languageName)
+            continue;
+
+        char zoneDir[256];
+        Com_sprintf(zoneDir, sizeof(zoneDir),
+            "sdmc:/switch/KisakCOD/game/zone/%s", languageName);
+
+        struct stat zoneStat{};
+        if (stat(zoneDir, &zoneStat) == 0 && S_ISDIR(zoneStat.st_mode))
+            return setLanguage(languageName, i);
+
+        // Support extracted layouts where the language directory itself is
+        // directly under the game root.
+        char rootDir[256];
+        Com_sprintf(rootDir, sizeof(rootDir),
+            "sdmc:/switch/KisakCOD/game/%s", languageName);
+
+        if (stat(rootDir, &zoneStat) == 0 && S_ISDIR(zoneStat))
+            return setLanguage(languageName, i);
+
+        // Some packages store localization in main/localized_<language>_iw##.iwd.
+        for (const char *root : {"main", ""})
+        {
+            for (int iw = 0; iw < 100; ++iw)
+            {
+                char iwdPath[256];
+                if (*root)
+                    Com_sprintf(iwdPath, sizeof(iwdPath),
+                        "%s/localized_%s_iw%02d.iwd", root, languageName, iw);
+                else
+                    Com_sprintf(iwdPath, sizeof(iwdPath),
+                        "localized_%s_iw%02d.iwd", languageName, iw);
+
+                FILE *iwd = FS_SwitchOpenRootFile(iwdPath);
+                if (iwd)
+                {
+                    fclose(iwd);
+                    return setLanguage(languageName, i);
+                }
+            }
+        }
+    }
+
+    return setLanguage("english", 0);
+}
+#endif
+
 static void __cdecl DB_BuildOSPath(const char *zoneName, uint32_t size, char *filename)
 {
 #ifdef __SWITCH__
     const char *languageName = DB_GetSwitchZoneLanguage(zoneName);
     const bool isLocalizedZone = !strncmp(zoneName, "localized_", 10);
 
-    // Standard COD4 game fastfiles (code_post_gfx/ui/common) are normally
-    // stored under zone/english even when a different language is selected.
-    // Some extracted packages instead keep the base fastfiles in the selected
-    // language directory, so probe both layouts before falling back to root.
+    // Prefer the selected language directory when that exact fastfile exists.
+    // Otherwise use the standard English base fastfiles. Russian localization
+    // can live in localized_russian_iw##.iwd independently of these files.
     const char *languages[2] = { languageName, "english" };
     char candidate[256];
 
@@ -469,13 +565,22 @@ static void __cdecl DB_BuildOSPath(const char *zoneName, uint32_t size, char *fi
             return;
         }
 
-        // Localized zones belong to the selected locale. Do not silently
-        // reinterpret another localized zone as the base English zone.
+        Com_sprintf(candidate, sizeof(candidate),
+            "%s/%s.ff", lang, zoneName);
+
+        file = FS_SwitchOpenRootFile(candidate);
+        if (file)
+        {
+            fclose(file);
+            I_strncpyz(filename, candidate, size);
+            return;
+        }
+
         if (isLocalizedZone)
             break;
     }
 
-    // Also accept extracted packages with zone files directly in zone/.
+    // Extracted packages may put fastfiles directly in zone/ or the game root.
     Com_sprintf(candidate, sizeof(candidate), "zone/%s.ff", zoneName);
     FILE *rootFile = FS_SwitchOpenRootFile(candidate);
     if (rootFile)
@@ -485,8 +590,17 @@ static void __cdecl DB_BuildOSPath(const char *zoneName, uint32_t size, char *fi
         return;
     }
 
-    // Preserve the conventional path in the error message when nothing was
-    // found; DB_TryLoadXFileInternal will report the missing file.
+    Com_sprintf(candidate, sizeof(candidate), "%s.ff", zoneName);
+    rootFile = FS_SwitchOpenRootFile(candidate);
+    if (rootFile)
+    {
+        fclose(rootFile);
+        I_strncpyz(filename, candidate, size);
+        return;
+    }
+
+    // Preserve the conventional path so DB_TryLoadXFileInternal prints a useful
+    // missing-zone warning if the asset is genuinely absent.
     Com_sprintf(filename, size, "zone/%s/%s.ff",
         (isLocalizedZone && languageName && *languageName) ? languageName : "english",
         zoneName);
