@@ -203,33 +203,15 @@ void R_InitGraphicsApi() {
     dx.multiSampleQuality = 0;
 }
 void R_InitSystems() {
-#ifdef __SWITCH__
-    fprintf(stderr, "[SWITCH RINIT] before R_InitImages\\n");
-#endif
     R_InitImages();
-#ifdef __SWITCH__
-    fprintf(stderr, "[SWITCH RINIT] after R_InitImages\\n");
-#endif
 
     Material_Init();
-#ifdef __SWITCH__
-    fprintf(stderr, "[SWITCH RINIT] after Material_Init\\n");
-#endif
 
     R_InitFonts();
-#ifdef __SWITCH__
-    fprintf(stderr, "[SWITCH RINIT] after R_InitFonts\\n");
-#endif
 
     R_InitLoadWater();
-#ifdef __SWITCH__
-    fprintf(stderr, "[SWITCH RINIT] after R_InitLoadWater\\n");
-#endif
 
     R_InitLightDefs();
-#ifdef __SWITCH__
-    fprintf(stderr, "[SWITCH RINIT] after R_InitLightDefs\\n");
-#endif
 
     R_ClearFogs();
 
