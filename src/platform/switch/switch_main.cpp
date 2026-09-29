@@ -10,15 +10,20 @@
 
 extern void Com_InitParse();
 extern void Dvar_Init();
+extern void Switch_LogInit();
+extern void Switch_LogShutdown();
 
 static void SwitchBootLog(const char *message)
 {
-    std::printf("[KisakCOD][BOOT] %s\n", message);
+    char line[1024];
+    std::snprintf(line, sizeof(line), "[KisakCOD][BOOT] %s\n", message);
+    Sys_Print(line);
     std::fflush(stdout);
 }
 
 int main()
 {
+    Switch_LogInit();
     SwitchBootLog("========================================");
     SwitchBootLog("KisakCOD Switch SP starting");
     SwitchBootLog("NRO entrypoint reached");
@@ -48,6 +53,7 @@ int main()
         Com_Frame();
 
     SwitchBootLog("Applet loop stopped, shutting down");
+    Switch_LogShutdown();
     Sys_Quit();
     return 0;
 }
