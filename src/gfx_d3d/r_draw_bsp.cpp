@@ -27,33 +27,6 @@ void __cdecl R_SetStreamSource(
         R_ChangeStreamSource(primState, 1u, 0, 0, 0);
 }
 
-void __cdecl R_HW_SetSamplerTexture(IDirect3DDevice9 *device, uint32_t samplerIndex, const GfxTexture *texture)
-{
-    int hr; // [esp+0h] [ebp-4h]
-
-    iassert(texture);
-    iassert(texture->basemap);
-
-    do
-    {
-        if (r_logFile && r_logFile->current.integer)
-            RB_LogPrint("device->SetTexture( samplerIndex, texture->basemap )\n");
-
-        hr = device->SetTexture(samplerIndex, texture->basemap);
-        if (hr < 0)
-        {
-            do
-            {
-                ++g_disableRendering;
-                Com_Error(
-                    ERR_FATAL,
-                    "c:\\trees\\cod3\\src\\gfx_d3d\\r_setstate_d3d.h (%i) device->SetTexture( samplerIndex, texture->basemap ) failed: %s\n",
-                    121,
-                    R_ErrorDescription(hr));
-            } while (alwaysfails);
-        }
-    } while (alwaysfails);
-}
 
 void __cdecl R_SetStreamsForBspSurface(GfxCmdBufPrimState *state, const srfTriangles_t *tris)
 {
