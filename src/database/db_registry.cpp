@@ -4,6 +4,7 @@
 #include <qcommon/files.h>
 #ifdef __SWITCH__
 #include <cstdio>
+#include <sys/stat.h>
 extern FILE *FS_SwitchOpenFile(const char *path);
 extern FILE *FS_SwitchOpenRootFile(const char *path);
 #endif
@@ -450,7 +451,7 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
         I_strncpyz(startupLanguage, name, sizeof(startupLanguage));
         if (loc_language)
             Dvar_SetInt((dvar_s *)loc_language, index);
-        Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\\n", startupLanguage);
+        Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\n", startupLanguage);
         return startupLanguage;
     };
 
