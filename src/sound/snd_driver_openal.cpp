@@ -1095,7 +1095,7 @@ void __cdecl SND_PrintEqParams()
     }
 }
 
-double __cdecl SND_Get2DChannelVolume(int index)
+float __cdecl SND_Get2DChannelVolume(int index)
 {
     iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
 
@@ -1113,7 +1113,7 @@ void __cdecl SND_Set2DChannelVolume(int index, float volume)
     alSourcef(alGlob.source[index], AL_GAIN, volume);
 }
 
-double __cdecl SND_Get3DChannelVolume(int index)
+float __cdecl SND_Get3DChannelVolume(int index)
 {
     iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
 
@@ -1129,7 +1129,7 @@ void __cdecl SND_Set3DChannelVolume(int index, float volume)
     alSourcef(alGlob.source[index], AL_GAIN, volume);
 }
 
-double __cdecl SND_GetStreamChannelVolume(int index)
+float __cdecl SND_GetStreamChannelVolume(int index)
 {
     iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
