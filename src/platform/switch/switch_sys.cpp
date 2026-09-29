@@ -63,6 +63,16 @@ void Switch_LogRaw(const char *msg)
     }
 }
 
+void Switch_LogReleaseScreen()
+{
+    if (!g_switchScreenLog)
+        return;
+
+    consoleUpdate(nullptr);
+    consoleExit(nullptr);
+    g_switchScreenLog = false;
+}
+
 void Switch_LogShutdown()
 {
     if (!g_switchLogFile)
