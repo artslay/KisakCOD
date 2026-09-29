@@ -802,9 +802,6 @@ void __cdecl R_SetPicmip()
         }
         if (!r_specular->current.enabled || !r_rendererInUse->current.integer)
             imageGlobals.picmipSpec = 3;
-#ifdef __SWITCH__
-        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH PICMIP] before final Com_Printf\n");
-#endif
         Com_Printf(
             CON_CHANNEL_GFX,
             "Using picmip %i on most textures, %i on normal maps, and %i on specular maps\n",
