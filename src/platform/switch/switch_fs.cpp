@@ -126,20 +126,39 @@ FILE *FS_SwitchOpenFile(const char *path)
 
 FILE *FS_SwitchOpenRootFile(const char *path)
 {
+    if (!path || !*path)
+        return nullptr;
+
+    const char *roots[] =
+    {
+        kSwitchRoot,
+        "sdmc:/switch/KisakCOD_nx/game",
+        "sdmc:/switch/KisakCOD/game",
+    };
+
     char resolved[256];
-    // Root file access is always relative to the Switch game root.
+
+    for (const char *root : roots)
+    {
+        std::snprintf(resolved, sizeof(resolved), "%s/%s", root, path);
+
+        FILE *file = FS_FileOpenReadBinary(resolved);
+        if (file)
+            return file;
+    }
+
     std::snprintf(resolved, sizeof(resolved), "%s/%s", kSwitchRoot, path);
 
-    FILE *file = FS_FileOpenReadBinary(resolved);
-    if (!file && path && std::strstr(path, ".ff"))
+    if (std::strstr(path, ".ff"))
     {
         char trace[512];
         std::snprintf(trace, sizeof(trace),
-            "[SWITCH FFOPEN] request=%s resolved=%s errno=%d\n",
+            "[SWITCH FFOPEN] request=%s resolved=%s errno=%d\\n",
             path, resolved, errno);
         Switch_LogWrite(trace);
     }
-    return file;
+
+    return nullptr;
 }
 bool __cdecl FS_Initialized() { return fs_searchpaths != nullptr; }
 
