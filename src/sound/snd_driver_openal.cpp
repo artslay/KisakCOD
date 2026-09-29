@@ -939,6 +939,19 @@ void __cdecl SND_SetRoomtype(int roomtype)
     alAuxiliaryEffectSloti(alGlob.auxSlot, AL_EFFECTSLOT_EFFECT, alGlob.reverbEffect);
 }
 
+#ifdef KISAK_SP
+void SND_SetEqLerp(float lerp)
+{
+    if (lerp < 0.0f)
+        lerp = 0.0f;
+    else if (lerp > 1.0f)
+        lerp = 1.0f;
+
+    alGlob.eqLerp = lerp;
+    SND_UpdateEqs();
+}
+#endif
+
 void __cdecl SND_UpdateEqs()
 {
     // Mirrors the Miles loop, but MSS_ApplyEqFilter (snd_al.cpp) is a deliberate no-op
