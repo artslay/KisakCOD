@@ -141,8 +141,10 @@ void __cdecl Sys_Print(const char *msg)
         std::fflush(g_switchLogFile);
     }
 
+#if !defined(__SWITCH__)
     if (g_switchScreenLog && Sys_IsMainThread())
         consoleUpdate(nullptr);
+#endif
 }
 
 sysEvent_t *__cdecl Sys_GetEvent(sysEvent_t *result)
