@@ -45,7 +45,7 @@ volatile int32_t g_totalSize;
 volatile int32_t g_totalExternalBytes;
 int32_t g_trackLoadProgress;
 
-XAssetList g_varXAssetList;
+extern XAssetList g_varXAssetList;
 
 // --- file-local forward declarations (moved out of database.h) ---
 static void __cdecl DB_CancelLoadXFile();
