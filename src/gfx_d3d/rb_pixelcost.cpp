@@ -3,6 +3,18 @@
 #include "rb_sky.h"
 #include <universal/timing.h>
 #include "r_state.h"
+#ifdef __SWITCH__
+#include <chrono>
+static inline uint64_t KisakPixelCostClock()
+{
+    return static_cast<uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count());
+}
+#else
+static inline uint64_t KisakPixelCostClock()
+{
+    return __rdtsc();
+}
+#endif
 
 struct GfxPixelCostKey_s // sizeof=0x8
 {                                       // ...
@@ -258,7 +270,7 @@ unsigned __int64 RB_PixelCost_BeginTiming()
     unsigned __int64 result; // rax
 
     R_HW_FinishGpu();
-    result = __rdtsc();
+    result = KisakPixelCostClock();
     pixelCostGlob.timeBegin = result;
     return result;
 }
@@ -345,7 +357,7 @@ int RB_PixelCost_AccumulateMsec()
 void RB_PixelCost_EndTiming()
 {
     R_HW_FinishGpu();
-    pixelCostGlob.msecElapsed = (float)(__rdtsc() - pixelCostGlob.timeBegin) * msecPerRawTimerTick
+    pixelCostGlob.msecElapsed = (float)(KisakPixelCostClock() - pixelCostGlob.timeBegin) * msecPerRawTimerTick
         - pixelCostGlob.msecOverhead;
     if (pixelCostGlob.msecElapsed < 0.0f)
         pixelCostGlob.msecElapsed = 0.0f;
