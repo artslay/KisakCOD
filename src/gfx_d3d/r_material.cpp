@@ -20,6 +20,13 @@
 #ifdef __SWITCH__
 // The Switch SP bootstrap loads materials from fastfiles. Keep the legacy loose-file
 // material path linkable without pulling D3DX9/HLSL tooling into the Switch target.
+// Fastfile startup never uses the legacy loose-file shader-text preloader.
+// Keep the symbol available for Material_Init() without pulling D3DX9/HLSL tooling
+// into the Switch target.
+void __cdecl Material_PreLoadAllShaderText()
+{
+}
+
 MaterialTechniqueSet *__cdecl Material_FindTechniqueSet_LoadObj(
     const char *name,
     MtlTechSetNotFoundBehavior notFoundBehavior)
