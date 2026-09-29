@@ -1365,28 +1365,15 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Dvar_SetString(version, s);
     shortversion = Dvar_RegisterString("shortversion", "1.0", DVAR_ROM | DVAR_SERVERINFO, "Short game version");
     Sys_Init();
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after Sys_Init\n");
 #ifdef KISAK_MP
     Netchan_Init(__rdtsc());
 #endif
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before Scr_InitVariables\n");
     Scr_InitVariables();
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after Scr_InitVariables\n");
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before Scr_Init\n");
     Scr_Init();
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after Scr_Init\n");
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before Com_SetScriptSettings\n");
     Com_SetScriptSettings();
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after Com_SetScriptSettings\n");
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before XAnimInit\n");
     XAnimInit();
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after XAnimInit\n");
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before DObjInit\n");
     DObjInit();
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after DObjInit\n");
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before SV_Init\n");
     SV_Init();
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after SV_Init\n");
 #ifdef KISAK_MP
     NET_Init();
 #endif
@@ -1415,28 +1402,19 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 #endif
     {
         SND_InitDriver();
-        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after SND_InitDriver\n");
-        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before R_InitThreads\n");
         R_InitThreads();
-        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after R_InitThreads\n");
         //KISAK_NULLSUB();
-        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before CL_InitRenderer\n");
         CL_InitRenderer();
-        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after CL_InitRenderer\n");
         //KISAK_NULLSUB();
         iassert(!cls.soundStarted);
         cls.soundStarted = 1;
-        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before SND_Init\n");
         SND_Init();
-        Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after SND_Init\n");
     }
 
 #ifdef KISAK_SP
     //Sys_LoadingKeepAlive();
     //Live_InitSigninState();
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before SV_InitServerThread\n");
     SV_InitServerThread();
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after SV_InitServerThread\n");
     //ui_skipMainLockout = Dvar_RegisterBool(
     //    "ui_skipMainLockout",
     //    0,
@@ -1454,9 +1432,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     //}
 #endif
 
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] before COM_PlayIntroMovies\n");
     COM_PlayIntroMovies();
-    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] after COM_PlayIntroMovies\n");
     if (IsFastFileLoad())
     {
         PMem_EndAlloc(comInitAllocName, 1u);
