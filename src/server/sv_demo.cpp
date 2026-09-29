@@ -1195,15 +1195,9 @@ void __cdecl SV_InitDemoSystem()
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 2136, 0, "%s", "!g_fileTimeHistory");
     if (g_fileMarkHistory)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 2137, 0, "%s", "!g_fileMarkHistory");
-    Com_Printf(CON_CHANNEL_SERVER, "[SWITCH SV TRACE] before timeHistory.cache\n");
     g_fileTimeHistory = SV_DemoOpenFile("timeHistory.cache");
-    Com_Printf(CON_CHANNEL_SERVER, "[SWITCH SV TRACE] after timeHistory.cache\n");
-    Com_Printf(CON_CHANNEL_SERVER, "[SWITCH SV TRACE] before markHistory.cache\n");
     g_fileMarkHistory = SV_DemoOpenFile("markHistory.cache");
-    Com_Printf(CON_CHANNEL_SERVER, "[SWITCH SV TRACE] after markHistory.cache\n");
-    Com_Printf(CON_CHANNEL_SERVER, "[SWITCH SV TRACE] before server demo thread\n");
     Sys_SpawnServerDemoThread((void(__cdecl *)(unsigned int))SV_SaveHistoryLoop);
-    Com_Printf(CON_CHANNEL_SERVER, "[SWITCH SV TRACE] after server demo thread\n");
 }
 
 server_demo_history_t *__cdecl SV_DemoGetFreeBuffer()
