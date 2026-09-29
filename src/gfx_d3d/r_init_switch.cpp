@@ -14,6 +14,10 @@
 #include "r_draw_method.h"
 #include <gfx/gfx_backend.h>
 #include <database/database.h>
+#ifdef __SWITCH__
+#include <cstdio>
+extern void Switch_LogWrite(const char *msg);
+#endif
 
 // These are implemented by the shared renderer dvar/command modules.
 extern void __cdecl R_RegisterDvars();
@@ -175,12 +179,17 @@ static void R_LoadGraphicsAssets()
         XAssetHeader images[256]{};
         const int imageCount = DB_GetAllXAssetOfType_FastFile(ASSET_TYPE_IMAGE, images, 256);
         char trace[256];
-        std::snprintf(trace, sizeof(trace), "[SWITCH IMGDB] imageCount=%d\n", imageCount);
+
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH IMGDB] imageCount=%d\n", imageCount);
         Switch_LogWrite(trace);
+
         for (int i = 0; i < imageCount && i < 256; ++i)
         {
             if (images[i].image && images[i].image->name &&
-                images[i].image->name[0] == ' {
+                images[i].image->name[0] == '
+
+void R_InitGraphicsApi() {
     if (!g_gfxBackend)
         g_gfxBackend = CreateOpenGLBackend();
 
