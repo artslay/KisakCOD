@@ -194,6 +194,20 @@ void R_MakeDedicated(const GfxConfiguration *config) { SetGfxConfig(config); }
 void R_UpdateGpuSyncType() {}
 int R_IsHiDef() { return 1; }
 
+// r_texturemem.cpp is intentionally excluded from the Switch build because its
+// implementation depends on Windows DirectDraw. The renderer only needs a texture
+// memory budget for picmip selection during startup, so keep a conservative Switch
+// budget here instead of probing nonexistent D3D9/DirectDraw resources.
+uint32_t __cdecl R_AvailableTextureMemory()
+{
+    return 2048;
+}
+
+uint32_t __cdecl R_DetectCurrentTextureMemory()
+{
+    return R_AvailableTextureMemory();
+}
+
 void R_ShutdownStreams() {}
 
 void R_Shutdown(int destroyWindow) {
