@@ -22,6 +22,10 @@
 #include <algorithm>
 
 #ifdef __SWITCH__
+extern void __cdecl Sys_Print(const char *msg);
+#endif
+
+#ifdef __SWITCH__
 static bool R_GLImageFormat(_D3DFORMAT f, GLenum &i, GLenum &u, GLenum &t, bool &compressed)
 {
     compressed = false;
@@ -397,8 +401,7 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
                         mipDepth = image->depth >> mipLevel;
                     else
                         mipDepth = 1;
-                    data += Image_GetCardMemoryAmountForMipLevel(imageFormat, mipWidth, mipHeight, mipDepth);
-                }
+                    data += Image_GetCardMemoryAmountForMipLevel(imageFormat, mipWidth, mipHeight, mipDepth);                }
             }
             iassert(data == &loadDef->data[loadDef->resourceSize]);
         }
@@ -697,7 +700,8 @@ IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image)
 }
 
 void __cdecl R_SetPicmip()
-{#ifdef __SWITCH__
+{
+#ifdef __SWITCH__
     Sys_Print("[SWITCH PICMIP] ENTER\n");
 #endif
     uint32_t texMemInMegs; // [esp+0h] [ebp-10h]
@@ -797,8 +801,7 @@ void __cdecl R_SetPicmip()
                     imageGlobals.picmipSpec = minPicmip;
                     cappedPicmip = 1;
                 }
-                if (cappedPicmip)
-                    Com_Printf(
+                if (cappedPicmip)                    Com_Printf(
                         CON_CHANNEL_GFX,
                         "Reducing texture detail based on total system memory of %i MB to improve load times.\n",
                         sysMemInMegs);
@@ -1198,7 +1201,6 @@ void __cdecl R_RebuildLostImage(XAssetHeader header)
         }
     }
 }
-
 void __cdecl R_ReloadLostImages()
 {
     DB_EnumXAssets(ASSET_TYPE_IMAGE, (void(__cdecl *)(XAssetHeader, void *))R_RebuildLostImage, 0, 1);
