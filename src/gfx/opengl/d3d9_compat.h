@@ -47,6 +47,8 @@ using _D3DFORMAT = uint32_t;
 constexpr _D3DFORMAT D3DFMT_X8R8G8B8 = 22;
 constexpr uint32_t D3DLOCK_NOOVERWRITE = 0x1000;
 constexpr uint32_t D3DLOCK_DISCARD = 0x2000;
+constexpr uint32_t D3DISSUE_BEGIN = 0x1;
+constexpr uint32_t D3DISSUE_END = 0x2;
 
 struct _D3DLOCKED_BOX
 {
