@@ -28,11 +28,11 @@ char *__cdecl getBuildNumber()
         value /= 10;
     } while (value);
 
-    std::memcpy(buildnumbuf, &number[pos], sizeof(number) - pos);
-    std::strcpy(&buildnumbuf[sizeof(number) - pos - 1], " ");
-    std::strcat(buildnumbuf, __DATE__);
-    std::strcat(buildnumbuf, " ");
-    std::strcat(buildnumbuf, __TIME__);
+    memcpy(buildnumbuf, &number[pos], sizeof(number) - pos);
+    strcpy(&buildnumbuf[sizeof(number) - pos - 1], " ");
+    strcat(buildnumbuf, __DATE__);
+    strcat(buildnumbuf, " ");
+    strcat(buildnumbuf, __TIME__);
 	return buildnumbuf;
 }
 
