@@ -138,7 +138,7 @@ void __cdecl DB_LoadXFileData(uint8_t *pos, uint32_t size)
             goto LABEL_19;
 #ifdef __SWITCH__
         Com_Printf(CON_CHANNEL_SYSTEM,
-            "Switch FF inflate begin: in=%u out=%u next_in=%p next_out=%p\\n",
+            "Switch FF inflate begin: in=%u out=%u next_in=%p next_out=%p\n",
             static_cast<unsigned>(g_load.stream.avail_in),
             static_cast<unsigned>(g_load.stream.avail_out),
             static_cast<const void *>(g_load.stream.next_in),
@@ -147,7 +147,7 @@ void __cdecl DB_LoadXFileData(uint8_t *pos, uint32_t size)
         err = DB_AuthLoad_Inflate(&g_load.stream, 2);
 #ifdef __SWITCH__
         Com_Printf(CON_CHANNEL_SYSTEM,
-            "Switch FF inflate end: ret=%u in=%u out=%u total_in=%lu total_out=%lu\\n",
+            "Switch FF inflate end: ret=%u in=%u out=%u total_in=%lu total_out=%lu\n",
             static_cast<unsigned>(err),
             static_cast<unsigned>(g_load.stream.avail_in),
             static_cast<unsigned>(g_load.stream.avail_out),
