@@ -526,28 +526,37 @@ void __cdecl Com_SetRecommended(int localClientNum, int restart)
     char *text; // [esp+27Ch] [ebp-4h] BYREF
 
     Com_Printf(CON_CHANNEL_SYSTEM, "========= autoconfigure\n");
+    Sys_Print("[SWITCH AUTOCONFIG] before Sys_GetInfo\n");
     Sys_GetInfo(&info);
+    Sys_Print("[SWITCH AUTOCONFIG] after Sys_GetInfo\n");
     info.configureGHz = info.configureGHz * 1.02;
     if (info.sysMB >= 128)
         info.sysMB += 8;
     else
         info.sysMB = 128;
+    Sys_Print("[SWITCH AUTOCONFIG] before FS_ReadFile configure_mp.csv\n");
     filesize = FS_ReadFile("configure_mp.csv", (void**)&csv);
+    Sys_Print("[SWITCH AUTOCONFIG] after FS_ReadFile configure_mp.csv\n");
     if (filesize < 0)
         Com_Error(ERR_FATAL, "EXE_ERR_NOT_FOUND");
     text = csv;
+    Sys_Print("[SWITCH AUTOCONFIG] before Com_BeginParseSession\n");
     Com_BeginParseSession("configure_mp.csv");
     Com_SetCSV(1);
+    Sys_Print("[SWITCH AUTOCONFIG] before Com_SetRecommendedCpu\n");
     if (!Com_SetRecommendedCpu(localClientNum, &info, &text))
     {
         Sys_GetInfo(&info);
         Com_Error(ERR_FATAL, "KISAK GHZ %f, %d", info.configureGHz, info.sysMB);
     }
+    Sys_Print("[SWITCH AUTOCONFIG] after Com_SetRecommendedCpu\n");
     if (!Com_SetRecommendedGpu(&info, &text))
         Com_Error(ERR_FATAL, "KISAK GPU %s", info.gpuDescription);
+    Sys_Print("[SWITCH AUTOCONFIG] after Com_SetRecommendedGpu\n");
     Com_EndParseSession();
     checksum = Com_ConfigureChecksum(csv, filesize);
     FS_FreeFile(csv);
+    Sys_Print("[SWITCH AUTOCONFIG] after FS_FreeFile\n");
     Sys_ArchiveInfo(checksum);
     if (restart)
     {
