@@ -894,9 +894,6 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
     Switch_LogRaw(trace);
 #endif
     XAssetEntryPoolEntry *assetEntry = DB_FindXAssetEntry(type, name);
-#ifdef __SWITCH__
-    Switch_LogRaw(trace);
-#endif
     if (assetEntry)
     {
         assetEntry->entry.inuse = 1;
@@ -1465,9 +1462,6 @@ XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *na
     XAssetEntryPoolEntry *assetEntry; // [esp+8h] [ebp-4h]
 
     const uint32_t hash = DB_HashForName(name, type);
-#ifdef __SWITCH__
-    Switch_LogRaw(trace);
-#endif
     for (assetEntryIndex = db_hashTable[hash];
         assetEntryIndex;
         assetEntryIndex = assetEntry->entry.nextHash)
@@ -1507,19 +1501,10 @@ uint32_t __cdecl DB_HashForName(const char *name, XAssetType type)
 
 XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
 {
-#ifdef __SWITCH__
-    extern void Switch_LogRaw(const char *msg);
-    char trace[256];
-        (int)type, name, g_defaultAssetName[type]);
-    Switch_LogRaw(trace);
-#endif
     XAsset asset; // [esp+Ch] [ebp-Ch] BYREF
     XAssetEntry *newEntry; // [esp+14h] [ebp-4h]
 
     asset.header = DB_FindXAssetDefaultHeaderInternal(type);
-#ifdef __SWITCH__
-    Switch_LogRaw(trace);
-#endif
     if (!asset.header.data)
     {
         Sys_UnlockWrite(&db_hashCritSect);
@@ -1539,9 +1524,6 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
     asset.type = type;
     ++g_defaultAssetCount;
     newEntry = (XAssetEntry *)DB_AllocXAssetEntry(type, 0);
-#ifdef __SWITCH__
-    Switch_LogRaw(trace);
-#endif
     DB_CloneXAssetInternal(&asset, &newEntry->asset);
     if (type == ASSET_TYPE_SOUND)
     {
