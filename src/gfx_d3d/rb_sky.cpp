@@ -252,7 +252,7 @@ uint32_t __cdecl RB_HW_ReadOcclusionQuery(IDirect3DQuery9 *query)
         hr = query->GetData(&pixelCount, 4u, 1u);
         if (hr != 1)
             break;
-        Sleep(0);
+        std::this_thread::yield();
     }
     if (hr >= 0)
         return pixelCount;
