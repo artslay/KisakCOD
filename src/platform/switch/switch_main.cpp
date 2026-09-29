@@ -26,6 +26,7 @@ int main()
     Switch_LogInit();
     SwitchBootLog("========================================");
     SwitchBootLog("KisakCOD Switch SP starting");
+    SwitchBootLog("Build marker: 3307e777 picmip-debug");
     SwitchBootLog("NRO entrypoint reached");
     SwitchBootLog("Game data: sdmc:/switch/KisakCOD/game");
     SwitchBootLog("Stage 1/7: initializing main thread");
