@@ -1344,22 +1344,42 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Sys_Print("[SWITCH INIT TRACE] after ProfLoad_Init\n");
     if (com_developer->current.integer)
     {
+        Sys_Print("[SWITCH INIT TRACE] before developer commands\n");
+        Sys_Print("[SWITCH INIT TRACE] before cmd error\n");
         Cmd_AddCommandInternal("error", Com_Error_f, &Com_Error_f_VAR);
+        Sys_Print("[SWITCH INIT TRACE] after cmd error\n");
+        Sys_Print("[SWITCH INIT TRACE] before cmd crash\n");
         Cmd_AddCommandInternal("crash", Com_Crash_f, &Com_Crash_f_VAR);
+        Sys_Print("[SWITCH INIT TRACE] after cmd crash\n");
+        Sys_Print("[SWITCH INIT TRACE] before cmd freeze\n");
         Cmd_AddCommandInternal("freeze", Com_Freeze_f, &Com_Freeze_f_VAR);
+        Sys_Print("[SWITCH INIT TRACE] after cmd freeze\n");
+        Sys_Print("[SWITCH INIT TRACE] before cmd assert\n");
         Cmd_AddCommandInternal("assert", Com_Assert_f, &Com_Assert_f_VAR);
+        Sys_Print("[SWITCH INIT TRACE] after cmd assert\n");
+        Sys_Print("[SWITCH INIT TRACE] after developer commands\n");
     }
+    Sys_Print("[SWITCH INIT TRACE] before cmd quit\n");
     Cmd_AddCommandInternal("quit", Com_Quit_f, &Com_Quit_f_VAR);
+    Sys_Print("[SWITCH INIT TRACE] after cmd quit\n");
+    Sys_Print("[SWITCH INIT TRACE] before cmd writeconfig\n");
     Cmd_AddCommandInternal("writeconfig", Com_WriteConfig_f, &Com_WriteConfig_f_VAR);
+    Sys_Print("[SWITCH INIT TRACE] after cmd writeconfig\n");
+    Sys_Print("[SWITCH INIT TRACE] before cmd writedefaults\n");
     Cmd_AddCommandInternal("writedefaults", Com_WriteDefaults_f, &Com_WriteDefaults_f_VAR);
+    Sys_Print("[SWITCH INIT TRACE] after cmd writedefaults\n");
 #ifdef KISAK_MP
     s = va("%s %s build %s %s", "CoD4 MP", "1.0", getBuildNumber(), CPUSTRING);
 #elif KISAK_SP
     s = va("%s %s build %s %s", "CoD4", "1.0", getBuildNumber(), CPUSTRING);
 #endif
+    Sys_Print("[SWITCH INIT TRACE] before version dvar\n");
     version = Dvar_RegisterString("version", "", DVAR_ROM, "Game version");
+    Sys_Print("[SWITCH INIT TRACE] after version dvar\n");
     Dvar_SetString(version, s);
+    Sys_Print("[SWITCH INIT TRACE] after version value\n");
     shortversion = Dvar_RegisterString("shortversion", "1.0", DVAR_ROM | DVAR_SERVERINFO, "Short game version");
+    Sys_Print("[SWITCH INIT TRACE] after shortversion dvar\n");
     Sys_Print("[SWITCH INIT TRACE] before Sys_Init\n");
     Sys_Init();
     Sys_Print("[SWITCH INIT TRACE] after Sys_Init\n");
