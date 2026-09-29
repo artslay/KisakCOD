@@ -208,8 +208,10 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 		{
 			Sys_Print(msg);
 		}
-		if (channel != CON_CHANNEL_CONSOLEONLY && com_logfile && com_logfile->current.integer)
+	#ifndef __SWITCH__
+	if (channel != CON_CHANNEL_CONSOLEONLY && com_logfile && com_logfile->current.integer)
 			Com_LogPrintMessage(channel, msg);
+#endif
 	}
 
 }
