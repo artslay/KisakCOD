@@ -16,7 +16,6 @@
 
 // These are implemented by the shared renderer dvar/command modules.
 extern void __cdecl R_RegisterDvars();
-extern void __cdecl R_RegisterCmds();
 #include <gfx/opengl/gl_backend.h>
 
 #ifdef __SWITCH__
@@ -34,6 +33,9 @@ int g_disableRendering = 0;
 const dvar_t *r_mode = nullptr;
 const dvar_t *r_displayRefresh = nullptr;
 const dvar_t *r_noborder = nullptr;
+const dvar_t *vid_xpos = nullptr;
+const dvar_t *vid_ypos = nullptr;
+const dvar_t *r_fullscreen = nullptr;
 
 static bool s_registered = false;
 
@@ -231,7 +233,6 @@ void R_SetWndParms(GfxWindowParms *wnd) {
 }
 void R_Register() {
     R_RegisterDvars();
-    R_RegisterCmds();
 }
 void R_InitGlobalStructs() {
     vidConfig = {};
