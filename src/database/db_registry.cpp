@@ -1477,6 +1477,12 @@ XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *na
         assetEntryIndex = assetEntry->entry.nextHash)
     {
 #ifdef __SWITCH__
+        if (assetEntryIndex >= 0x8000)
+        {
+            std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] INVALID idx=%u\\n", assetEntryIndex);
+            Switch_LogWrite(trace);
+            return 0;
+        }
         if (++iterations <= 16)
         {
             std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] idx=%u next=%u type=%d\\n",
@@ -1488,9 +1494,10 @@ XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *na
         {
             Switch_LogWrite("[SWITCH DBFIND] more than 16 chain entries -- possible cycle\\n");
         }
-#endif
+#else
         if (assetEntryIndex >= 0x8000)
             return 0;
+#endif
         assetEntry = &g_assetEntryPool[assetEntryIndex];
         if (assetEntry->entry.asset.type == type)
         {
