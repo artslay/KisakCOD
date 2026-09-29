@@ -1,13 +1,13 @@
 #include <universal/q_shared.h>
+#ifdef __SWITCH__
+#include <unistd.h>
+#endif
 
 #ifdef __SWITCH__
 static inline void SwitchTrace(const char *msg)
 {
     write(2, msg, strlen(msg));
 }
-#endif
-#ifdef __SWITCH__
-#include <unistd.h>
 #endif
 
 #ifdef __SWITCH__
