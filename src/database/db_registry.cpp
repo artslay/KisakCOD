@@ -1510,10 +1510,24 @@ uint32_t __cdecl DB_HashForName(const char *name, XAssetType type)
 
 XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
 {
+#ifdef __SWITCH__
+    extern void Switch_LogRaw(const char *msg);
+    char trace[256];
+    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] CreateDefaultEntry enter type=%i name=%s default=%s\\n",
+        (int)type, name, g_defaultAssetName[type]);
+    Switch_LogRaw(trace);
+#endif
     XAsset asset; // [esp+Ch] [ebp-Ch] BYREF
     XAssetEntry *newEntry; // [esp+14h] [ebp-4h]
 
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH DB TRACE] before DB_FindXAssetDefaultHeaderInternal\\n");
+#endif
     asset.header = DB_FindXAssetDefaultHeaderInternal(type);
+#ifdef __SWITCH__
+    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] after DB_FindXAssetDefaultHeaderInternal header=%p\\n", (void *)asset.header.data);
+    Switch_LogRaw(trace);
+#endif
     if (!asset.header.data)
     {
         Sys_UnlockWrite(&db_hashCritSect);
@@ -1532,8 +1546,19 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
     }
     asset.type = type;
     ++g_defaultAssetCount;
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH DB TRACE] before DB_AllocXAssetEntry\\n");
+#endif
     newEntry = (XAssetEntry *)DB_AllocXAssetEntry(type, 0);
+#ifdef __SWITCH__
+    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] after DB_AllocXAssetEntry entry=%p\\n", (void *)newEntry);
+    Switch_LogRaw(trace);
+    Switch_LogRaw("[SWITCH DB TRACE] before DB_CloneXAssetInternal\\n");
+#endif
     DB_CloneXAssetInternal(&asset, &newEntry->asset);
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH DB TRACE] after DB_CloneXAssetInternal\\n");
+#endif
     if (type == ASSET_TYPE_SOUND)
     {
         newEntry->asset.header.sound->count = 0;
@@ -1541,7 +1566,14 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
     }
     newEntry->nextHash = db_hashTable[DB_HashForName(name, type)];
     db_hashTable[DB_HashForName(name, type)] = ((char *)newEntry - (char *)g_assetEntryPool) >> 4;
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH DB TRACE] before DB_SetXAssetName/SL_GetString\\n");
+#endif
     DB_SetXAssetName(&newEntry->asset, SL_ConvertToString(SL_GetString(name, 4)));
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH DB TRACE] after DB_SetXAssetName/SL_GetString\\n");
+    Switch_LogRaw("[SWITCH DB TRACE] CreateDefaultEntry return\\n");
+#endif
     newEntry->inuse = 1;
     return newEntry;
 }
