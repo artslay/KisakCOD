@@ -69,6 +69,7 @@ CPP_SOURCES += src/gfx_d3d/r_model_pose.cpp src/gfx_d3d/r_state_utils.cpp src/gf
 CPP_SOURCES += src/gfx_d3d/r_dpvs_dynmodel.cpp src/gfx_d3d/r_dpvs_entity.cpp src/gfx_d3d/r_dpvs_sceneent.cpp src/gfx_d3d/r_dpvs_static.cpp
 CPP_SOURCES += src/gfx_d3d/r_meshdata.cpp src/gfx_d3d/r_draw_method.cpp src/gfx_d3d/r_pretess.cpp
 CPP_SOURCES += src/gfx_d3d/r_add_cmdbuf.cpp src/gfx_d3d/r_staticmodel.cpp src/gfx_d3d/r_xsurface.cpp src/gfx_d3d/r_reflection_probe_load_obj.cpp
+CPP_SOURCES += src/gfx_d3d/r_light.cpp src/gfx_d3d/r_light_load_obj.cpp src/gfx_d3d/r_primarylights.cpp src/gfx_d3d/r_outdoor.cpp
 
 CPP_OBJECTS := $(CPP_SOURCES:%.cpp=$(BUILD)/%.o)
 C_OBJECTS   := $(C_SOURCES:%.c=$(BUILD)/%.o)
