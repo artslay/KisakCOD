@@ -1,4 +1,14 @@
 #include <universal/q_shared.h>
+#ifdef __SWITCH__
+#include <unistd.h>
+#endif
+
+#ifdef __SWITCH__
+static inline void SwitchTrace(const char *msg)
+{
+    write(2, msg, strlen(msg));
+}
+#endif
 
 #ifdef __SWITCH__
 extern void Sys_Print(const char *msg);
@@ -806,6 +816,9 @@ void __cdecl R_SetPicmip()
         }
         if (!r_specular->current.enabled || !r_rendererInUse->current.integer)
             imageGlobals.picmipSpec = 3;
+#ifdef __SWITCH__
+        SwitchTrace("[SWITCH PICMIP] before final Com_Printf\n");
+#endif
         Com_Printf(
             CON_CHANNEL_GFX,
             "Using picmip %i on most textures, %i on normal maps, and %i on specular maps\n",
@@ -813,7 +826,7 @@ void __cdecl R_SetPicmip()
             imageGlobals.picmipBump,
             imageGlobals.picmipSpec);
 #ifdef __SWITCH__
-        Sys_Print("[SWITCH PICMIP] after final Com_Printf\n");
+        SwitchTrace("[SWITCH PICMIP] after final Com_Printf\n");
 #endif
     }
 }
@@ -830,9 +843,12 @@ void __cdecl R_InitImages()
     {
         iassert(imageGlobals.totalMemory.platform[i] == 0);
     }
+#ifdef __SWITCH__
+    SwitchTrace("[SWITCH IMG] before R_SetPicmip\n");
+#endif
     R_SetPicmip();
 #ifdef __SWITCH__
-    fprintf(stderr, "[SWITCH IMG] after R_SetPicmip\\n");
+    SwitchTrace("[SWITCH IMG] after R_SetPicmip\n");
 #endif
     R_InitCodeImages();
 #ifdef __SWITCH__
