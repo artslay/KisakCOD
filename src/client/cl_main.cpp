@@ -895,20 +895,46 @@ void __cdecl CL_InitRenderer()
 {
     iassert(!cls.rendererStarted);
     cls.rendererStarted = 1;
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: before R_BeginRegistration\n");
+#endif
     R_BeginRegistration(&cls.vidConfig);
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: after R_BeginRegistration\n");
+#endif
     ScrPlace_SetupUnsafeViewport(&scrPlaceFullUnsafe, 0, 0, cls.vidConfig.displayWidth, cls.vidConfig.displayHeight);
     ScrPlace_SetupViewport(&scrPlaceFull, 0, 0, cls.vidConfig.displayWidth, cls.vidConfig.displayHeight);
     ScrPlace_SetupViewport(scrPlaceView, 0, 0, cls.vidConfig.displayWidth, cls.vidConfig.displayHeight);
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: after viewport setup\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: before white material\n");
+#endif
     cls.whiteMaterial = Material_RegisterHandle("white", IMAGE_TRACK_UI);
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: after white material\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: before console material\n");
+#endif
     cls.consoleMaterial = Material_RegisterHandle("console", IMAGE_TRACK_UI);
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: after console material\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: before console font\n");
+#endif
     cls.consoleFont = R_RegisterFont("fonts/consoleFont", IMAGE_TRACK_UI);
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: after console font\n");
+#endif
     g_console_field_width = cls.vidConfig.displayWidth - 40;
     g_consoleField.charHeight = g_console_char_height;
     g_consoleField.widthInPixels = cls.vidConfig.displayWidth - 40;
     g_consoleField.fixedSize = 1;
     StatMon_Reset();
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: before Con_InitClientAssets\n");
+#endif
     Con_InitClientAssets();
 #ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: after Con_InitClientAssets\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "[SWITCH START TRACE] CL_InitRenderer: before Switch_LogShutdown\n");
     // The renderer/EGL context is ready here. Release the startup console and
     // diagnostic log so the next frame is presented by the game renderer.
     Switch_LogShutdown();
