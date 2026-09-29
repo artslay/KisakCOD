@@ -49,6 +49,12 @@ void *__cdecl R_AllocStaticVertexBuffer(IDirect3DVertexBuffer9 **vb, int sizeInB
     iassert( (sizeInBytes > 0) );
     if (!r_loadForRenderer->current.enabled)
         return 0;
+#ifdef __SWITCH__
+    if (!dx.device)
+    {
+        return 0;
+    }
+#endif
     hr = dx.device->CreateVertexBuffer(sizeInBytes, 8, 0, D3DPOOL_DEFAULT, vb, 0);
     if (hr < 0)
     {
@@ -94,6 +100,12 @@ void *__cdecl R_AllocStaticIndexBuffer(IDirect3DIndexBuffer9 **ib, int sizeInByt
     iassert( (sizeInBytes > 0) );
     if (!r_loadForRenderer->current.enabled)
         return 0;
+#ifdef __SWITCH__
+    if (!dx.device)
+    {
+        return 0;
+    }
+#endif
     //if (((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int, int, uint32_t, IDirect3DIndexBuffer9 **, uint32_t))dx.device->CreateIndexBuffer)(
     //    dx.device,
     //    dx.device,
