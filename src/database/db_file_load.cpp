@@ -83,14 +83,14 @@ int32_t DB_WaitXFileStage()
 
     if (!g_load.f)
         MyAssertHandler(".\\database\\db_file_load.cpp", 278, 0, "%s", "g_load.f");
+#ifdef __SWITCH__
+    // Switch fastfile reads are synchronous. DB_ReadData() already installs
+    // the bytes in zlib's input buffer, so there is no outstanding read to wait for.
+    return g_loadedSize;
+#else
     if (g_load.outstandingReads <= 0)
         MyAssertHandler(".\\database\\db_file_load.cpp", 280, 0, "%s", "g_load.outstandingReads > 0");
     --g_load.outstandingReads;
-#ifdef __SWITCH__
-    g_load.stream.avail_in += g_load.switchLastRead;
-    ++g_loadedSize;
-    return g_loadedSize;
-#else
     SleepEx(0xFFFFFFFF, 1);
     result = InterlockedIncrement(&g_loadedSize);
     g_load.stream.avail_in += 0x40000;
@@ -176,12 +176,15 @@ void DB_ReadXFileStage()
 {
     if (g_load.f)
     {
-        if (g_load.outstandingReads)
-            MyAssertHandler(".\\database\\db_file_load.cpp", 254, 0, "%s", "!g_load.outstandingReads");
 #ifdef __SWITCH__
-        if (!DB_ReadData() && !feof(static_cast<FILE *>(g_load.f)))
+        // Do not prefetch while zlib still owns the current input window.
+        if (!g_load.stream.avail_in &&
+            !DB_ReadData() &&
+            !feof(static_cast<FILE *>(g_load.f)))
             Com_Error(ERR_DROP, "Read error of file '%s'", g_load.filename);
 #else
+        if (g_load.outstandingReads)
+            MyAssertHandler(".\\database\\db_file_load.cpp", 254, 0, "%s", "!g_load.outstandingReads");
         if (!DB_ReadData() && GetLastError() != 38)
             Com_Error(ERR_DROP, "Read error of file '%s'", g_load.filename);
 #endif
@@ -199,22 +202,26 @@ int32_t __cdecl DB_ReadData()
     if (g_load.interrupt)
         g_load.interrupt();
 #ifdef __SWITCH__
-    // Match the original 512-KB circular input buffer. fread() completes the
-    // Switch read synchronously; DB_WaitXFileStage() publishes the bytes to
-    // zlib by increasing avail_in without resetting next_in.
-    fileBuffer = &g_load.compressBufferStart[g_load.switchFileOffset % 0x80000];
+    // Keep one synchronous 256-KB input window. The next read happens only
+    // after zlib has consumed the current input buffer.
+    if (g_load.stream.avail_in)
+        return 1;
+
+    fileBuffer = g_load.compressBufferStart;
     FILE *file = static_cast<FILE *>(g_load.f);
     if (std::fseek(file, static_cast<long>(g_load.switchFileOffset), SEEK_SET) != 0)
         return 0;
 
     g_load.switchLastRead = static_cast<uint32_t>(
         std::fread(fileBuffer, 1, 0x40000, file));
-    g_load.switchFileOffset += 0x40000;
+    g_load.switchFileOffset += g_load.switchLastRead;
 
     if (!g_load.switchLastRead)
         return 0;
 
-    ++g_load.outstandingReads;
+    g_load.stream.next_in = fileBuffer;
+    g_load.stream.avail_in = g_load.switchLastRead;
+    ++g_loadedSize;
     return 1;
 #else
     fileBuffer = &g_load.compressBufferStart[g_load.overlapped.Offset % 0x80000];
@@ -279,16 +286,13 @@ void __cdecl DB_LoadXFileInternal()
     DB_ReadXFileStage();
 #ifdef __SWITCH__
     Switch_LogWrite("[SWITCH DBSTAGE] after ReadXFileStage#1\n");
-#endif
+    if (!g_load.stream.avail_in)
+        Com_Error(ERR_DROP, "Fastfile for zone '%s' is empty.", g_load.filename);
+#else
     if (!g_load.outstandingReads)
         Com_Error(ERR_DROP, "Fastfile for zone '%s' is empty.", g_load.filename);
     DB_WaitXFileStage();
-#ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBSTAGE] after WaitXFileStage#1\n");
-#endif
     DB_ReadXFileStage();
-#ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBSTAGE] after ReadXFileStage#2\n");
 #endif
     if (g_load.stream.avail_in < 8)
         MyAssertHandler(".\\database\\db_file_load.cpp", 598, 0, "%s", "sizeof( magic ) <= g_load.stream.avail_in");
