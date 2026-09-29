@@ -888,7 +888,17 @@ void __cdecl DB_UnloadXAssetsMemory(XZone *zone, int32_t sortedIndex)
 
 XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
 {
+#ifdef __SWITCH__
+    extern void Switch_LogRaw(const char *msg);
+    char trace[256];
+    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] before DB_FindXAssetEntry type=%i name=%s\\n", (int)type, name);
+    Switch_LogRaw(trace);
+#endif
     XAssetEntryPoolEntry *assetEntry = DB_FindXAssetEntry(type, name);
+#ifdef __SWITCH__
+    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] after DB_FindXAssetEntry entry=%p\\n", (void *)assetEntry);
+    Switch_LogRaw(trace);
+#endif
     if (assetEntry)
     {
         assetEntry->entry.inuse = 1;
@@ -1448,11 +1458,20 @@ void __cdecl DB_RemoveGfxWorld(XAssetHeader ass)
 
 XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *name)
 {
+#ifdef __SWITCH__
+    extern void Switch_LogRaw(const char *msg);
+    char trace[256];
+#endif
     const char *XAssetName; // eax
     uint32_t assetEntryIndex; // [esp+4h] [ebp-8h]
     XAssetEntryPoolEntry *assetEntry; // [esp+8h] [ebp-4h]
 
-    for (assetEntryIndex = db_hashTable[DB_HashForName(name, type)];
+    const uint32_t hash = DB_HashForName(name, type);
+#ifdef __SWITCH__
+    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] DB_FindXAssetEntry hash=%u name=%s first=%u\\n", hash, name, db_hashTable[hash]);
+    Switch_LogRaw(trace);
+#endif
+    for (assetEntryIndex = db_hashTable[hash];
         assetEntryIndex;
         assetEntryIndex = assetEntry->entry.nextHash)
     {
