@@ -43,7 +43,8 @@ CPP_SOURCES := $(shell find src -type f -name '*.cpp' \
     ! -name 'stack.cpp' \
     ! -name 'obstack.cpp' \
     ! -name 'testing.cpp' \
-    ! -name 'scr_yacc.cpp' )
+    ! -name 'scr_yacc.cpp' \
+    ! -name 'scr_compiler2.cpp' )
 
 C_SOURCES := $(shell find src -type f -name '*.c' \
     ! -path 'src/gfx_d3d/*' \
@@ -53,7 +54,8 @@ C_SOURCES := $(shell find src -type f -name '*.c' \
     ! -path 'src/groupvoice/*' \
     ! -path 'src/radiant/*' \
     ! -path 'src/*_mp/*' \
-    ! -name '*_mp.c')
+    ! -name '*_mp.c' \
+    ! -name 'maketree.c')
 
 # zlib is required by the engine's archive/zip loader.
 C_SOURCES += $(shell find deps/zlib -type f -name '*.c')
