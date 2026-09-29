@@ -180,7 +180,7 @@ static void R_LoadGraphicsAssets()
         const int imageCount = DB_GetAllXAssetOfType_FastFile(ASSET_TYPE_IMAGE, images, 256);
         char trace[256];
 
-        std::snprintf(trace, sizeof(trace), "[SWITCH IMGDB] imageCount=%d\\n", imageCount);
+        std::snprintf(trace, sizeof(trace), "[SWITCH IMGDB] imageCount=%d\n", imageCount);
         Switch_LogWrite(trace);
 
         for (int i = 0; i < imageCount && i < 256; ++i)
@@ -188,7 +188,7 @@ static void R_LoadGraphicsAssets()
             if (images[i].image && images[i].image->name && images[i].image->name[0] == 36)
             {
                 std::snprintf(trace, sizeof(trace),
-                    "[SWITCH IMGDB] code image[%d]=%s\\n",
+                    "[SWITCH IMGDB] code image[%d]=%s\n",
                     i, images[i].image->name);
                 Switch_LogWrite(trace);
             }
