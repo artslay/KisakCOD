@@ -1046,15 +1046,18 @@ void __cdecl Material_UpdatePicmipSingle(XAssetHeader header)
 void __cdecl Material_UpdatePicmipAll()
 {
 #ifdef __SWITCH__
-    fprintf(stderr, "[SWITCH MATERIAL PICMIP] before R_SyncRenderThread\\n");
+    Sys_Print("[SWITCH MATERIAL PICMIP] before R_SyncRenderThread
+");
 #endif
     R_SyncRenderThread();
 #ifdef __SWITCH__
-    fprintf(stderr, "[SWITCH MATERIAL PICMIP] before R_SetPicmip\\n");
+    Sys_Print("[SWITCH MATERIAL PICMIP] before R_SetPicmip
+");
 #endif
     R_SetPicmip();
 #ifdef __SWITCH__
-    fprintf(stderr, "[SWITCH MATERIAL PICMIP] after R_SetPicmip\\n");
+    Sys_Print("[SWITCH MATERIAL PICMIP] after R_SetPicmip
+");
 #endif
     DB_EnumXAssets(ASSET_TYPE_MATERIAL, (void(__cdecl *)(XAssetHeader, void *))Material_UpdatePicmipSingle, 0, 1);
 }
