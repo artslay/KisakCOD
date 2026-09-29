@@ -547,71 +547,25 @@ static void __cdecl DB_BuildOSPath(const char *zoneName, uint32_t size, char *fi
     const char *languageName = DB_GetSwitchZoneLanguage(zoneName);
     const bool isLocalizedZone = !strncmp(zoneName, "localized_", 10);
 
-    // Prefer the selected language directory when that exact fastfile exists.
-    // Otherwise use the standard English base fastfiles. Russian localization
-    // can live in localized_russian_iw##.iwd independently of these files.
-    const char *languages[2] = { languageName, "english" };
-    char candidate[256];
+    // The selected language directory is authoritative on Switch.
+    // Base renderer fastfiles are also stored under zone/<language>/ in this
+    // game-data layout, so never silently redirect a Russian request to English.
+    Com_sprintf(filename, size, "zone/%s/%s.ff",
+        (languageName && *languageName) ? languageName : "english",
+        zoneName);
 
-    for (int i = 0; i < 2; ++i)
+    // Keep support for localized files stored directly in zone/ as a fallback.
+    if (isLocalizedZone)
     {
-        const char *lang = languages[i];
-        if (!lang || !*lang)
-            continue;
-
-        if (i == 1 && !I_stricmp(lang, languageName))
-            continue;
-
-        Com_sprintf(candidate, sizeof(candidate),
-            "zone/%s/%s.ff", lang, zoneName);
-
+        char candidate[256];
+        Com_sprintf(candidate, sizeof(candidate), "zone/%s.ff", zoneName);
         FILE *file = FS_SwitchOpenRootFile(candidate);
         if (file)
         {
             fclose(file);
             I_strncpyz(filename, candidate, size);
-            return;
         }
-
-        Com_sprintf(candidate, sizeof(candidate),
-            "%s/%s.ff", lang, zoneName);
-
-        file = FS_SwitchOpenRootFile(candidate);
-        if (file)
-        {
-            fclose(file);
-            I_strncpyz(filename, candidate, size);
-            return;
-        }
-
-        if (isLocalizedZone)
-            break;
     }
-
-    // Extracted packages may put fastfiles directly in zone/ or the game root.
-    Com_sprintf(candidate, sizeof(candidate), "zone/%s.ff", zoneName);
-    FILE *rootFile = FS_SwitchOpenRootFile(candidate);
-    if (rootFile)
-    {
-        fclose(rootFile);
-        I_strncpyz(filename, candidate, size);
-        return;
-    }
-
-    Com_sprintf(candidate, sizeof(candidate), "%s.ff", zoneName);
-    rootFile = FS_SwitchOpenRootFile(candidate);
-    if (rootFile)
-    {
-        fclose(rootFile);
-        I_strncpyz(filename, candidate, size);
-        return;
-    }
-
-    // Preserve the conventional path so DB_TryLoadXFileInternal prints a useful
-    // missing-zone warning if the asset is genuinely absent.
-    Com_sprintf(filename, size, "zone/%s/%s.ff",
-        (isLocalizedZone && languageName && *languageName) ? languageName : "english",
-        zoneName);
 #else
     char *v3;
     char *Language;
