@@ -226,7 +226,7 @@ struct scr_anim_s // sizeof=0x4
     }
     scr_anim_s(int i)
     {
-        linkPointer = (const char *)i; // KISAKHACK
+        linkPointer = reinterpret_cast<const char *>(static_cast<uintptr_t>(static_cast<uint32_t>(i))); // KISAKHACK
     }
     // ...
     //$76411D3CC105A18E6E4A61D5A929E310 ___u0; // ...
