@@ -356,12 +356,20 @@ using IDirect3DTexture9 = KisakGLTexture;
 using IDirect3DVolumeTexture9 = KisakGLTexture;
 using IDirect3DCubeTexture9 = KisakGLTexture;
 
+struct _D3DLOCKED_RECT
+{
+    void *pBits = nullptr;
+    int Pitch = 0;
+};
+
 struct IDirect3DSurface9
 {
     KisakGLTexture *texture = nullptr;
     uint32_t level = 0;
     bool defaultFramebuffer = false;
     uint32_t refs = 1;
+    std::vector<uint8_t> lockShadow;
+    bool lockShadowActive = false;
 
     void AddRef()
     {
@@ -370,21 +378,77 @@ struct IDirect3DSurface9
             texture->AddRef();
     }
 
-    void Release()
+    HRESULT Release()
     {
         if (refs > 1)
         {
             --refs;
             if (texture)
                 texture->Release();
-            return;
+            return S_OK;
         }
         if (texture)
             texture->Release();
         delete this;
+        return S_OK;
+    }
+
+    HRESULT LockRect(_D3DLOCKED_RECT *lockedRect, const tagRECT *, uint32_t)
+    {
+        if (!lockedRect || !texture || texture->target != GL_TEXTURE_2D || !texture->width || !texture->height)
+            return E_FAIL;
+
+        const size_t pitch = static_cast<size_t>(texture->width) * 4u;
+        lockShadow.resize(pitch * static_cast<size_t>(texture->height));
+        lockedRect->pBits = lockShadow.data();
+        lockedRect->Pitch = static_cast<int>(pitch);
+        lockShadowActive = true;
+        return S_OK;
+    }
+
+    HRESULT UnlockRect()
+    {
+        if (!texture || !lockShadowActive || texture->target != GL_TEXTURE_2D)
+            return E_FAIL;
+
+        glBindTexture(GL_TEXTURE_2D, texture->object);
+        glTexSubImage2D(
+            GL_TEXTURE_2D,
+            static_cast<GLint>(level),
+            0, 0,
+            static_cast<GLsizei>(texture->width),
+            static_cast<GLsizei>(texture->height),
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            lockShadow.data());
+
+        lockShadowActive = false;
+        return S_OK;
     }
 };
-struct IDirect3DQuery9 { void Release() { delete this; } };
+
+struct IDirect3DQuery9
+{
+    bool issued = false;
+
+    HRESULT Issue(uint32_t)
+    {
+        glFinish();
+        issued = true;
+        return S_OK;
+    }
+
+    HRESULT GetData(void *, uint32_t, uint32_t)
+    {
+        return issued ? S_OK : S_OK;
+    }
+
+    void Release()
+    {
+        delete this;
+    }
+};
+
 struct IDirect3D9 {};
 
 
@@ -398,6 +462,8 @@ class IDirect3DDevice9
     };
 
     GLuint m_fbo = 0;
+    GLuint m_blitReadFbo = 0;
+    GLuint m_blitDrawFbo = 0;
     GLuint m_vao = 0;
     IDirect3DVertexDeclaration9 *m_decl = nullptr;
     StreamBinding m_streams[16];
@@ -618,8 +684,114 @@ public:
             m_depth->Release();
         if (m_fbo)
             glDeleteFramebuffers(1, &m_fbo);
+        if (m_blitReadFbo)
+            glDeleteFramebuffers(1, &m_blitReadFbo);
+        if (m_blitDrawFbo)
+            glDeleteFramebuffers(1, &m_blitDrawFbo);
         if (m_vao)
             glDeleteVertexArrays(1, &m_vao);
+    }
+
+    HRESULT StretchRect(
+        IDirect3DSurface9 *source,
+        const tagRECT *sourceRect,
+        IDirect3DSurface9 *destination,
+        const tagRECT *destinationRect,
+        _D3DTEXTUREFILTERTYPE filter)
+    {
+        if (!source || !destination || !source->texture || !destination->texture)
+            return E_FAIL;
+        if (source->texture->target != GL_TEXTURE_2D || destination->texture->target != GL_TEXTURE_2D)
+            return E_FAIL;
+
+        if (!m_blitReadFbo)
+            glGenFramebuffers(1, &m_blitReadFbo);
+        if (!m_blitDrawFbo)
+            glGenFramebuffers(1, &m_blitDrawFbo);
+
+        const uint32_t srcW = source->texture->width;
+        const uint32_t srcH = source->texture->height;
+        const uint32_t dstW = destination->texture->width;
+        const uint32_t dstH = destination->texture->height;
+
+        tagRECT src = sourceRect ? *sourceRect : tagRECT{0, 0, static_cast<int32_t>(srcW), static_cast<int32_t>(srcH)};
+        tagRECT dst = destinationRect ? *destinationRect : tagRECT{0, 0, static_cast<int32_t>(dstW), static_cast<int32_t>(dstH)};
+
+        const GLint srcX0 = src.left;
+        const GLint srcX1 = src.right;
+        const GLint srcY0 = static_cast<GLint>(srcH - src.bottom);
+        const GLint srcY1 = static_cast<GLint>(srcH - src.top);
+        const GLint dstX0 = dst.left;
+        const GLint dstX1 = dst.right;
+        const GLint dstY0 = static_cast<GLint>(dstH - dst.bottom);
+        const GLint dstY1 = static_cast<GLint>(dstH - dst.top);
+
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, m_blitReadFbo);
+        glFramebufferTexture2D(
+            GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+            GL_TEXTURE_2D, source->texture->object, static_cast<GLint>(source->level));
+
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitDrawFbo);
+        glFramebufferTexture2D(
+            GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+            GL_TEXTURE_2D, destination->texture->object, static_cast<GLint>(destination->level));
+
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+        glBlitFramebuffer(
+            srcX0, srcY0, srcX1, srcY1,
+            dstX0, dstY0, dstX1, dstY1,
+            GL_COLOR_BUFFER_BIT,
+            filter == D3DTEXF_POINT ? GL_NEAREST : GL_LINEAR);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+        return glGetError() == GL_NO_ERROR ? S_OK : E_FAIL;
+    }
+
+    HRESULT CreateOffscreenPlainSurface(
+        uint32_t width, uint32_t height, _D3DFORMAT format, uint32_t, IDirect3DSurface9 **out, void *)
+    {
+        if (!out || !width || !height || format != D3DFMT_X8R8G8B8)
+            return E_FAIL;
+
+        auto *tex = new KisakGLTexture;
+        tex->target = GL_TEXTURE_2D;
+        tex->internalFormat = GL_RGBA8;
+        tex->uploadFormat = GL_RGBA;
+        tex->uploadType = GL_UNSIGNED_BYTE;
+        tex->width = width;
+        tex->height = height;
+        tex->sourceFormat = format;
+
+        glGenTextures(1, &tex->object);
+        glBindTexture(GL_TEXTURE_2D, tex->object);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(
+            GL_TEXTURE_2D, 0, GL_RGBA8,
+            static_cast<GLsizei>(width), static_cast<GLsizei>(height), 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+        auto *surface = new IDirect3DSurface9;
+        surface->texture = tex;
+        surface->level = 0;
+        *out = surface;
+        return S_OK;
+    }
+
+    HRESULT BeginScene()
+    {
+        // D3D9 scene markers have no state transition in the GL renderer.
+        return S_OK;
+    }
+
+    HRESULT EndScene()
+    {
+        // D3D9 scene markers have no state transition in the GL renderer.
+        return S_OK;
     }
 
     HRESULT CreateDepthStencilSurface(
