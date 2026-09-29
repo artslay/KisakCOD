@@ -16,7 +16,7 @@ CPPFLAGS    := -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DKISAK_OPENAL -DCINEMA -D
 CXXFLAGS    := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP
 CFLAGS      := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -MMD -MP
 LDFLAGS     := $(ARCH) -L$(MESA_SDK)/lib -L$(OPENAL_SDK)/lib -L$(DEVKITPRO)/libnx/lib -specs=$(DEVKITPRO)/libnx/switch.specs -Wl,--gc-sections
-LIBS        := -lGL -lEGL -lglapi -lopenal -lnx -lm
+LIBS        := -lGL -lEGL -lglapi -lopenal -lSDL2 -lnx -lm
 
 include $(DEVKITPRO)/libnx/switch_rules
 
@@ -61,7 +61,7 @@ C_SOURCES += $(shell find deps/zlib -type f -name '*.c')
 CPP_SOURCES += src/platform/switch/switch_main.cpp src/platform/switch/switch_fs.cpp src/platform/switch/switch_threads.cpp src/platform/switch/switch_timing.cpp src/platform/switch/switch_profile.cpp src/platform/switch/switch_sys.cpp src/platform/switch/switch_live_storage.cpp
 CPP_SOURCES += src/gfx_d3d/r_init_switch.cpp src/gfx_d3d/r_buffers.cpp src/gfx_d3d/r_state.cpp
 CPP_SOURCES += src/gfx_d3d/r_shade.cpp src/gfx_d3d/rb_shade.cpp src/gfx_d3d/r_material.cpp
-CPP_SOURCES += src/gfx_d3d/r_material_override.cpp src/gfx_d3d/rb_uploadshaders.cpp src/gfx_d3d/r_dvars.cpp
+CPP_SOURCES += src/gfx_d3d/r_material_override.cpp src/gfx_d3d/r_material_switch.cpp src/gfx_d3d/rb_uploadshaders.cpp src/gfx_d3d/r_dvars.cpp
 CPP_SOURCES += src/gfx_d3d/r_image.cpp src/gfx_d3d/r_image_load_common.cpp src/gfx_d3d/r_image_load_obj.cpp src/gfx_d3d/r_image_utils.cpp src/gfx_d3d/r_image_wavelet.cpp src/gfx_d3d/r_imagedecode.cpp src/gfx_d3d/r_rendertarget.cpp
 CPP_SOURCES += src/gfx_d3d/r_rendercmds.cpp src/gfx_d3d/r_font.cpp src/gfx_d3d/r_cinematic.cpp src/gfx_d3d/r_cinematic_switch.cpp src/gfx_d3d/r_devgui.cpp src/gfx_d3d/r_draw_pixelshader.cpp
 CPP_SOURCES += src/gfx_d3d/r_model.cpp src/gfx_d3d/r_scene.cpp src/gfx_d3d/r_dpvs.cpp
@@ -71,8 +71,8 @@ CPP_SOURCES += src/gfx_d3d/r_model_pose.cpp src/gfx_d3d/r_state_utils.cpp src/gf
 CPP_SOURCES += src/gfx_d3d/r_dpvs_dynmodel.cpp src/gfx_d3d/r_dpvs_entity.cpp src/gfx_d3d/r_dpvs_sceneent.cpp src/gfx_d3d/r_dpvs_static.cpp
 CPP_SOURCES += src/gfx_d3d/r_marks.cpp
 CPP_SOURCES += src/gfx_d3d/r_utils.cpp src/gfx_d3d/r_warn.cpp src/gfx_d3d/rb_state.cpp src/gfx_d3d/rb_logfile.cpp
-CPP_SOURCES += src/gfx_d3d/r_debug.cpp src/gfx_d3d/r_debug_alloc.cpp src/gfx_d3d/rb_light.cpp src/gfx_d3d/rb_postfx.cpp src/gfx_d3d/rb_imagefilter.cpp src/gfx_d3d/rb_depthprepass.cpp src/gfx_d3d/rb_showcollision.cpp
-CPP_SOURCES += src/gfx_d3d/r_sky.cpp src/gfx_d3d/r_shadowcookie.cpp
+CPP_SOURCES += src/gfx_d3d/r_debug.cpp src/gfx_d3d/r_debug_alloc.cpp src/gfx_d3d/rb_debug.cpp src/gfx_d3d/rb_light.cpp src/gfx_d3d/rb_postfx.cpp src/gfx_d3d/rb_imagefilter.cpp src/gfx_d3d/rb_depthprepass.cpp src/gfx_d3d/rb_showcollision.cpp
+CPP_SOURCES += src/gfx_d3d/r_sky.cpp src/gfx_d3d/r_shadowcookie.cpp src/gfx_d3d/rb_shadowcookie.cpp src/gfx_d3d/rb_sunshadow.cpp src/gfx_d3d/rb_spotshadow.cpp
 CPP_SOURCES += src/gfx_d3d/r_workercmds.cpp src/gfx_d3d/r_workercmds_common.cpp src/gfx_d3d/r_spotshadow.cpp src/gfx_d3d/r_sunshadow.cpp
 CPP_SOURCES += src/gfx_d3d/rb_fog.cpp src/gfx_d3d/r_fog.cpp src/gfx_d3d/r_draw_sunshadow.cpp
 CPP_SOURCES += src/gfx_d3d/rb_backend.cpp
