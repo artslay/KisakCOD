@@ -479,7 +479,7 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
 
         fclose(file);
         I_strncpyz(startupLanguage, languageName, sizeof(startupLanguage));
-        Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\\n", startupLanguage);
+        Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\n", startupLanguage);
         return startupLanguage;
     }
 
