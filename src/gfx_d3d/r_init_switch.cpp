@@ -34,6 +34,13 @@ static bool s_registered = false;
 void TRACK_r_init() {}
 void R_SyncGpu(int(__cdecl *)(unsigned __int64)) { if (g_gfxBackend) g_gfxBackend->WaitForGpu(); }
 bool R_IsUsingAdaptiveGpuSync() { return false; }
+bool __cdecl RB_IsGpuFenceFinished()
+{
+    if (!dx.flushGpuQuery || !dx.flushGpuQueryIssued)
+        return true;
+    uint32_t data = 0;
+    return dx.flushGpuQuery->GetData(&data, sizeof(data), 1) == S_OK;
+}
 void R_FatalInitError(const char *msg) { Com_Error(ERR_FATAL, "%s", msg ? msg : "renderer init failed"); }
 void R_FatalLockError(HRESULT) { R_FatalInitError("renderer lock failed"); }
 const char *R_ErrorDescription(HRESULT hr) { return hr == S_OK ? "S_OK" : "OpenGL backend error"; }
