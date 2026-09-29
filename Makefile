@@ -101,7 +101,7 @@ OBJECTS     := $(CPP_OBJECTS) $(C_OBJECTS)
 
 .DEFAULT_GOAL := all
 
-.PHONY: all clean print-sources progress-init progress-done
+.PHONY: all clean print-sources progress-init progress-done ALWAYS
 
 TOTAL_OBJECTS := $(words $(OBJECTS))
 PROGRESS_FILE := $(BUILD)/.compile_count
@@ -123,6 +123,11 @@ $(TARGET).nro: progress-init
 
 $(TARGET).elf: $(OBJECTS)
 	@$(CXX) $(LDFLAGS) -o $@ $^ $(LIBS)
+
+# Always rebuild the tiny build-number object so __DATE__/__TIME__ changes on every plain `make`.
+$(BUILD)/src/buildnumber.o: src/buildnumber.cpp ALWAYS
+
+ALWAYS:
 
 $(BUILD)/%.o: %.cpp
 	@mkdir -p $(dir $@)
