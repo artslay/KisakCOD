@@ -34,6 +34,14 @@
 #include "r_staticmodelcache.h"
 #include "rb_uploadshaders.h"
 #include <universal/timing.h>
+#ifdef __SWITCH__
+#include <chrono>
+#include <gfx/gfx_backend.h>
+static inline uint64_t KisakRendererClock()
+{
+    return static_cast<uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count());
+}
+#endif
 
 #include <setjmp.h>
 #ifdef KISAK_SP
@@ -88,7 +96,7 @@ bool __cdecl R_GpuFenceTimeout()
 {
     if (RB_IsGpuFenceFinished())
         return 1;
-    dx.gpuSyncEnd = __rdtsc();
+    dx.gpuSyncEnd = KisakRendererClock();
     return dx.gpuSyncEnd - dx.gpuSyncStart >= dx.gpuSyncDelay;
 }
 
@@ -859,6 +867,10 @@ void __cdecl RB_ClearScreenCmd(GfxRenderCommandExecState *execState)
 
 void __cdecl RB_SetGammaRamp(const GfxGammaRamp *gammaTable)
 {
+#ifdef __SWITCH__
+    // Switch advertises no hardware gamma support (vidConfig.deviceSupportsGamma=false).
+    (void)gammaTable;
+#else
     int colorIndex; // [esp+0h] [ebp-60Ch]
     _D3DGAMMARAMP d3dGammaRamp; // [esp+4h] [ebp-608h] BYREF
 
@@ -872,6 +884,8 @@ void __cdecl RB_SetGammaRamp(const GfxGammaRamp *gammaTable)
         d3dGammaRamp.blue[colorIndex] = gammaTable->entries[colorIndex];
     }
     dx.device->SetGammaRamp(dx.targetWindowIndex, 0, &d3dGammaRamp);
+#endif
+
 }
 
 void __cdecl RB_SaveScreenCmd(GfxRenderCommandExecState *execState)
@@ -2621,7 +2635,13 @@ void __cdecl RB_BeginFrame(const GfxBackEndData *data)
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("dx.device->BeginScene()\n");
+#ifdef __SWITCH__
+            if (g_gfxBackend)
+                g_gfxBackend->BeginScene();
+            hr = S_OK;
+#else
             hr = dx.device->BeginScene();
+#endif
             if (hr < 0)
             {
                 do
@@ -2669,7 +2689,13 @@ GfxIndexBufferState *RB_SwapBuffers()
 
     {
         PROF_SCOPED("Present");
+#ifdef __SWITCH__
+        if (g_gfxBackend)
+            g_gfxBackend->Present();
+        hr = S_OK;
+#else
         hr = dx.windows[dx.targetWindowIndex].swapChain->Present(0, 0, 0, 0, 0);
+#endif
     }
 
 #ifdef KISAK_RADIANT
@@ -2786,16 +2812,16 @@ int RB_AdaptiveGpuSyncFinal()
     }
     else
     {
-        startTime = __rdtsc();
+        startTime = KisakRendererClock();
         while (!RB_IsGpuFenceFinished())
         {
-            if ((__rdtsc() - startTime) < 0)
+            if ((KisakRendererClock() - startTime) < 0)
             {
                 RB_AbandonGpuFence();
                 break;
             }
         }
-        LODWORD(v0) = __rdtsc() - startTime;
+        LODWORD(v0) = KisakRendererClock() - startTime;
         waitedTime = v0;
         if ((v0 & 0x80000000) == 0LL)
         {
@@ -2881,7 +2907,13 @@ void __cdecl RB_CallExecuteRenderCommands()
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("dx.device->EndScene()\n");
             //hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *))dx.device->EndScene)(dx.device, dx.device);
+#ifdef __SWITCH__
+            if (g_gfxBackend)
+                g_gfxBackend->EndScene();
+            hr = S_OK;
+#else
             hr = dx.device->EndScene();
+#endif
             if (hr < 0)
             {
                 do
