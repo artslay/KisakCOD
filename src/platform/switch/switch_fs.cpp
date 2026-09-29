@@ -127,25 +127,20 @@ FILE *FS_SwitchOpenFile(const char *path)
 FILE *FS_SwitchOpenRootFile(const char *path)
 {
     char resolved[256];
-    const char *base =
-        (fs_basepath && fs_basepath->current.string && fs_basepath->current.string[0])
-            ? fs_basepath->current.string
-            : kSwitchRoot;
-
-    std::snprintf(resolved, sizeof(resolved), "%s/%s", base, path);
+    // Root file access is always relative to the Switch game root.
+    std::snprintf(resolved, sizeof(resolved), "%s/%s", kSwitchRoot, path);
 
     FILE *file = FS_FileOpenReadBinary(resolved);
     if (!file && path && std::strstr(path, ".ff"))
     {
         char trace[512];
         std::snprintf(trace, sizeof(trace),
-            "[SWITCH FFOPEN] request=%s resolved=%s errno=%d\\n",
+            "[SWITCH FFOPEN] request=%s resolved=%s errno=%d\n",
             path, resolved, errno);
         Switch_LogWrite(trace);
     }
     return file;
 }
-
 bool __cdecl FS_Initialized() { return fs_searchpaths != nullptr; }
 
 void __cdecl FS_CheckFileSystemStarted()
