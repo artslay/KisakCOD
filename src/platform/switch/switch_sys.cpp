@@ -21,9 +21,13 @@ static std::mutex g_sysCritical[32];
 
 static FILE *g_switchLogFile = nullptr;
 static const char *const kSwitchLogPath = "sdmc:/switch/KisakCOD/kisakcod.log";
+static bool g_switchScreenLog = false;
 
 void Switch_LogInit()
 {
+    consoleInit(nullptr);
+    g_switchScreenLog = true;
+
     if (g_switchLogFile)
         return;
 
@@ -41,6 +45,7 @@ void Switch_LogInit()
     std::fprintf(g_switchLogFile, "Log file: %s\n", kSwitchLogPath);
     std::fprintf(g_switchLogFile, "========================================\n");
     std::fflush(g_switchLogFile);
+    consoleUpdate(nullptr);
 }
 
 void Switch_LogShutdown()
@@ -51,6 +56,13 @@ void Switch_LogShutdown()
     std::fflush(g_switchLogFile);
     std::fclose(g_switchLogFile);
     g_switchLogFile = nullptr;
+
+    if (g_switchScreenLog)
+    {
+        consoleUpdate(nullptr);
+        consoleExit(nullptr);
+        g_switchScreenLog = false;
+    }
 }
 
 SysInfo sys_info = {};
@@ -111,6 +123,9 @@ void __cdecl Sys_Print(const char *msg)
         std::fputs(msg, g_switchLogFile);
         std::fflush(g_switchLogFile);
     }
+
+    if (g_switchScreenLog && Sys_IsMainThread())
+        consoleUpdate(nullptr);
 }
 
 sysEvent_t *__cdecl Sys_GetEvent(sysEvent_t *result)
