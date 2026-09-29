@@ -1369,9 +1369,13 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Cmd_AddCommandInternal("writedefaults", Com_WriteDefaults_f, &Com_WriteDefaults_f_VAR);
     Sys_Print("[SWITCH INIT TRACE] after cmd writedefaults\n");
 #ifdef KISAK_MP
+    Sys_Print("[SWITCH INIT TRACE] before getBuildNumber MP\n");
     s = va("%s %s build %s %s", "CoD4 MP", "1.0", getBuildNumber(), CPUSTRING);
+    Sys_Print("[SWITCH INIT TRACE] after getBuildNumber MP\n");
 #elif KISAK_SP
+    Sys_Print("[SWITCH INIT TRACE] before getBuildNumber SP\n");
     s = va("%s %s build %s %s", "CoD4", "1.0", getBuildNumber(), CPUSTRING);
+    Sys_Print("[SWITCH INIT TRACE] after getBuildNumber SP\n");
 #endif
     Sys_Print("[SWITCH INIT TRACE] before version dvar\n");
     version = Dvar_RegisterString("version", "", DVAR_ROM, "Game version");
