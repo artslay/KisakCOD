@@ -21,6 +21,10 @@
 #include <algorithm>
 
 #ifdef __SWITCH__
+extern void Switch_LogRaw(const char *msg);
+#endif
+
+#ifdef __SWITCH__
 static bool R_GLImageFormat(_D3DFORMAT f, GLenum &i, GLenum &u, GLenum &t, bool &compressed)
 {
     compressed = false;
@@ -697,14 +701,26 @@ IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image)
 
 void __cdecl R_SetPicmip()
 {
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH PICMIP TRACE] enter\n");
+#endif
     uint32_t texMemInMegs; // [esp+0h] [ebp-10h]
     uint32_t sysMemInMegs; // [esp+4h] [ebp-Ch]
     bool cappedPicmip; // [esp+Bh] [ebp-5h]
     int minPicmip; // [esp+Ch] [ebp-4h]
 
     iassert( dx.device );
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH PICMIP TRACE] before R_AvailableTextureMemory\n");
+#endif
     texMemInMegs = R_AvailableTextureMemory();
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH PICMIP TRACE] after R_AvailableTextureMemory\n");
+#endif
     sysMemInMegs = Dvar_GetInt("sys_sysMB");
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH PICMIP TRACE] after Dvar_GetInt sys_sysMB\n");
+#endif
     iassert( r_reflectionProbeGenerate );
     if (r_reflectionProbeGenerate->current.enabled)
     {
@@ -796,15 +812,36 @@ void R_InitRawImage()
 
 void __cdecl R_InitImages()
 {
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH IMG TRACE] before totalMemory asserts\n");
+#endif
     for (int i = 0; i < 2; ++i)
     {
         iassert(imageGlobals.totalMemory.platform[i] == 0);
     }
-
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH IMG TRACE] after totalMemory asserts\n");
+    Switch_LogRaw("[SWITCH IMG TRACE] before R_SetPicmip\n");
+#endif
     R_SetPicmip();
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH IMG TRACE] after R_SetPicmip\n");
+    Switch_LogRaw("[SWITCH IMG TRACE] before R_InitCodeImages\n");
+#endif
     R_InitCodeImages();
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH IMG TRACE] after R_InitCodeImages\n");
+    Switch_LogRaw("[SWITCH IMG TRACE] before RB_InitImages\n");
+#endif
     RB_InitImages();
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH IMG TRACE] after RB_InitImages\n");
+    Switch_LogRaw("[SWITCH IMG TRACE] before R_InitRawImage\n");
+#endif
     R_InitRawImage();
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH IMG TRACE] after R_InitRawImage\n");
+#endif
     rg.waterFloatTime = rg.waterFloatTime + 1.0;
 #ifdef KISAK_RADIANT
     // idb R_InitImages tail: load the editor's case-texture density-visualization images
