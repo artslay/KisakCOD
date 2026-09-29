@@ -91,9 +91,25 @@ CPP_OBJECTS := $(CPP_SOURCES:%.cpp=$(BUILD)/%.o)
 C_OBJECTS   := $(C_SOURCES:%.c=$(BUILD)/%.o)
 OBJECTS     := $(CPP_OBJECTS) $(C_OBJECTS)
 
-.PHONY: all clean print-sources
+.PHONY: all clean print-sources progress-init progress-done
 
-all: $(TARGET).nro
+TOTAL_OBJECTS := $(words $(OBJECTS))
+PROGRESS_FILE := $(BUILD)/.compile_count
+PROGRESS_LOCK := $(BUILD)/.compile_count.lock
+
+progress-init:
+\t@mkdir -p $(BUILD)
+\t@printf '0' > $(PROGRESS_FILE)
+\t@rm -rf $(PROGRESS_LOCK)
+\t@printf 'Switch build: 0/%s files compiled\\n' "$(TOTAL_OBJECTS)"
+
+progress-done: $(TARGET).nro
+\t@done=$(cat $(PROGRESS_FILE) 2>/dev/null || printf '0'); \\
+\tprintf 'Compiled: %s/%s files\\n' "$done" "$(TOTAL_OBJECTS)"
+
+all: progress-init $(TARGET).nro progress-done
+
+$(TARGET).nro: progress-init
 
 $(TARGET).elf: $(OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LIBS)
