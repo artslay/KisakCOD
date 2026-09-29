@@ -17,7 +17,7 @@
 #include <win32/win_local.h>
 
 static const auto g_sysStart = std::chrono::steady_clock::now();
-static std::mutex g_sysCritical[32];
+static std::recursive_mutex g_sysCritical[32];
 
 static FILE *g_switchLogFile = nullptr;
 static const char *const kSwitchLogPath = "sdmc:/switch/KisakCOD/kisakcod.log";
