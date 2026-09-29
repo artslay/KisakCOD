@@ -104,8 +104,8 @@ progress-init:
 	@printf 'Switch build: 0/%s files compiled\\n' "$(TOTAL_OBJECTS)"
 
 progress-done: $(TARGET).nro
-	@done=$(cat "$(PROGRESS_FILE)" 2>/dev/null || printf '0'); \\
-	printf 'Compiled: %s/%s files\\n' "$done" "$(TOTAL_OBJECTS)"
+	@done=$$(cat "$(PROGRESS_FILE)" 2>/dev/null || printf '0'); \
+	printf 'Compiled: %s/%s files\\n' "$$done" "$(TOTAL_OBJECTS)"
 
 all: progress-init $(TARGET).nro progress-done
 
@@ -118,21 +118,21 @@ $(BUILD)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 	@while ! mkdir "$(PROGRESS_LOCK)" 2>/dev/null; do sleep 0.01; done; \
-	count=$(cat "$(PROGRESS_FILE)" 2>/dev/null || printf '0'); \
-	count=$((count + 1)); \
-	printf '%s' "$count" > "$(PROGRESS_FILE)"; \
+	count=$$(cat "$(PROGRESS_FILE)" 2>/dev/null || printf '0'); \
+	count=$$((count + 1)); \
+	printf '%s' "$$count" > "$(PROGRESS_FILE)"; \
 	rmdir "$(PROGRESS_LOCK)"; \
-	printf '  CXX [%s/%s] %s\\n' "$count" "$(TOTAL_OBJECTS)" "$(notdir $<)"
+	printf '  CXX [%s/%s] %s\\n' "$$count" "$(TOTAL_OBJECTS)" "$(notdir $<)"
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
 	@$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 	@while ! mkdir "$(PROGRESS_LOCK)" 2>/dev/null; do sleep 0.01; done; \
-	count=$(cat "$(PROGRESS_FILE)" 2>/dev/null || printf '0'); \
-	count=$((count + 1)); \
-	printf '%s' "$count" > "$(PROGRESS_FILE)"; \
+	count=$$(cat "$(PROGRESS_FILE)" 2>/dev/null || printf '0'); \
+	count=$$((count + 1)); \
+	printf '%s' "$$count" > "$(PROGRESS_FILE)"; \
 	rmdir "$(PROGRESS_LOCK)"; \
-	printf '  CC  [%s/%s] %s\\n' "$count" "$(TOTAL_OBJECTS)" "$(notdir $<)"
+	printf '  CC  [%s/%s] %s\\n' "$$count" "$(TOTAL_OBJECTS)" "$(notdir $<)"
 
 -include $(OBJECTS:.o=.d)
 
