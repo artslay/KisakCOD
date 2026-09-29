@@ -17,6 +17,8 @@
 #include <qcommon/qcommon.h>
 #include <stringed/stringed_hooks.h>
 
+extern void Sys_Print(char *text);
+
 const dvar_t *fs_remotePCDirectory = nullptr;
 const dvar_t *fs_remotePCName = nullptr;
 const dvar_t *fs_homepath = nullptr;
