@@ -447,7 +447,7 @@ static void __cdecl DB_BuildOSPath_Mod(const char *zoneName, uint32_t size, char
     if (fs_gameDirVar && fs_gameDirVar->current.string[0])
         Com_sprintf(filename, size, "%s/%s.ff", fs_gameDirVar->current.string, zoneName);
     else
-        Com_sprintf(filename, size, "zone/russian/%s.ff", zoneName);
+        DB_BuildOSPath(zoneName, size, filename);
 #else
     char *v3;
     const char *string = fs_gameDirVar->current.string;
@@ -459,7 +459,11 @@ static void __cdecl DB_BuildOSPath_Mod(const char *zoneName, uint32_t size, char
 static void __cdecl DB_BuildOSPath(const char *zoneName, uint32_t size, char *filename)
 {
 #ifdef __SWITCH__
-    Com_sprintf(filename, size, "zone/english/%s.ff", zoneName);
+    const int languageIndex = SEH_GetCurrentLanguage();
+    const char *languageName = SEH_GetLanguageName(languageIndex);
+    if (!languageName || !*languageName)
+        languageName = "english";
+    Com_sprintf(filename, size, "zone/%s/%s.ff", languageName, zoneName);
 #else
     char *v3;
     char *Language;
