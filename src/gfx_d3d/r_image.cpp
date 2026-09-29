@@ -1,18 +1,4 @@
 #include <universal/q_shared.h>
-#ifdef __SWITCH__
-#include <unistd.h>
-#endif
-
-#ifdef __SWITCH__
-static inline void SwitchTrace(const char *msg)
-{
-    write(2, msg, strlen(msg));
-}
-#endif
-
-#ifdef __SWITCH__
-extern void Sys_Print(const char *msg);
-#endif
 #include "r_image.h"
 #include <qcommon/mem_track.h>
 #include <qcommon/qcommon.h>
