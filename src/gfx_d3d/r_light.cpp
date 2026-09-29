@@ -454,7 +454,7 @@ int __cdecl R_AllowBspSpotLightShadows(int surfIndex, void *bspLightCallbackAsVo
 {
     if (r_spotLightShadows->current.enabled)
         return R_BoxInPlanes(
-            (const float (*)[4])((uint32_t)bspLightCallbackAsVoid + 4),
+            (const float (*)[4])(reinterpret_cast<uintptr_t>(bspLightCallbackAsVoid) + 4),
             rgp.world->dpvs.surfaces[surfIndex].bounds[0],
             rgp.world->dpvs.surfaces[surfIndex].bounds[1]);
     else
