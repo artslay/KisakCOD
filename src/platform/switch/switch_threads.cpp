@@ -166,34 +166,14 @@ bool __cdecl Sys_WaitForSingleObjectTimeout(void **event, uint32_t msec)
 
 void __cdecl Sys_CreateThread(void (__cdecl *function)(uint32_t), ThreadContext_t context)
 {
-#ifdef KISAK_SWITCH
-    if (context == THREAD_CONTEXT_SERVER_DEMO)
-        Sys_Print("[SWITCH THREAD TRACE] active Sys_CreateThread SERVER_DEMO enter\n");
-#endif
     if (g_threads[context].joinable()) g_threads[context].join();
-#ifdef KISAK_SWITCH
-    if (context == THREAD_CONTEXT_SERVER_DEMO)
-        Sys_Print("[SWITCH THREAD TRACE] active Sys_CreateThread before std::thread\n");
-#endif
     g_threadAlive[context] = true;
     g_threads[context] = std::thread([function, context] {
         Sys_InitThread(context);
-#ifdef KISAK_SWITCH
-        if (context == THREAD_CONTEXT_SERVER_DEMO)
-            Sys_Print("[SWITCH THREAD TRACE] active ThreadMain SERVER_DEMO enter\n");
-#endif
         function((uint32_t)context);
         g_threadAlive[context] = false;
     });
-#ifdef KISAK_SWITCH
-    if (context == THREAD_CONTEXT_SERVER_DEMO)
-        Sys_Print("[SWITCH THREAD TRACE] active Sys_CreateThread after std::thread\n");
-#endif
     threadHandle[context] = reinterpret_cast<HANDLE>(&g_threads[context]);
-#ifdef KISAK_SWITCH
-    if (context == THREAD_CONTEXT_SERVER_DEMO)
-        Sys_Print("[SWITCH THREAD TRACE] active Sys_CreateThread leave\n");
-#endif
 }
 
 char __cdecl Sys_SpawnRenderThread(void (__cdecl *function)(uint32_t))
