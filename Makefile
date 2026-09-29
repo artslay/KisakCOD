@@ -116,13 +116,23 @@ $(TARGET).elf: $(OBJECTS)
 
 $(BUILD)/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	@printf '  CXX %s\\n' "$(notdir $<)"
 	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	@while ! mkdir "$(PROGRESS_LOCK)" 2>/dev/null; do sleep 0.01; done; \
+	count=$(cat "$(PROGRESS_FILE)" 2>/dev/null || printf '0'); \
+	count=$((count + 1)); \
+	printf '%s' "$count" > "$(PROGRESS_FILE)"; \
+	rmdir "$(PROGRESS_LOCK)"; \
+	printf '  CXX [%s/%s] %s\\n' "$count" "$(TOTAL_OBJECTS)" "$(notdir $<)"
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
-	@printf '  CC  %s\\n' "$(notdir $<)"
 	@$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+	@while ! mkdir "$(PROGRESS_LOCK)" 2>/dev/null; do sleep 0.01; done; \
+	count=$(cat "$(PROGRESS_FILE)" 2>/dev/null || printf '0'); \
+	count=$((count + 1)); \
+	printf '%s' "$count" > "$(PROGRESS_FILE)"; \
+	rmdir "$(PROGRESS_LOCK)"; \
+	printf '  CC  [%s/%s] %s\\n' "$count" "$(TOTAL_OBJECTS)" "$(notdir $<)"
 
 -include $(OBJECTS:.o=.d)
 
