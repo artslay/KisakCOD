@@ -180,155 +180,15 @@ static void R_LoadGraphicsAssets()
         const int imageCount = DB_GetAllXAssetOfType_FastFile(ASSET_TYPE_IMAGE, images, 256);
         char trace[256];
 
-        std::snprintf(trace, sizeof(trace),
-            "[SWITCH IMGDB] imageCount=%d\n", imageCount);
+        std::snprintf(trace, sizeof(trace), "[SWITCH IMGDB] imageCount=%d\\n", imageCount);
         Switch_LogWrite(trace);
 
         for (int i = 0; i < imageCount && i < 256; ++i)
         {
-            if (images[i].image && images[i].image->name &&
-                images[i].image->name[0] == '
-
-void R_InitGraphicsApi() {
-    if (!g_gfxBackend)
-        g_gfxBackend = CreateOpenGLBackend();
-
-    if (!g_gfxBackend)
-        R_FatalInitError("CreateOpenGLBackend failed");
-
-    if (!g_gfxBackend->Init(nullptr))
-        R_FatalInitError(g_gfxBackend->GetLastError());
-
-    // Match the original R_InitHardware bootstrap: queue code_post_gfx, ui and
-    // common fastfiles before R_InitSystems starts resolving default assets.
-    R_LoadGraphicsAssets();
-
-    if (!dx.device) dx.device = new IDirect3DDevice9;
-    vidConfig.sceneWidth = 1280;
-    vidConfig.sceneHeight = 720;
-    vidConfig.displayWidth = 1280;
-    vidConfig.displayHeight = 720;
-    vidConfig.displayFrequency = 60;
-    vidConfig.aspectRatioWindow = 1280.0f / 720.0f;
-    vidConfig.aspectRatioScenePixel = 1.0f;
-    vidConfig.aspectRatioDisplayPixel = 1.0f;
-    vidConfig.maxTextureSize = 4096;
-    vidConfig.maxTextureMaps = 16;
-    vidConfig.deviceSupportsGamma = false;
-    dx.depthStencilFormat = D3DFMT_D24S8;
-    dx.multiSampleType = D3DMULTISAMPLE_NONE;
-    dx.multiSampleQuality = 0;
-}
-void R_InitSystems() {
-    R_InitImages();
-
-    Material_Init();
-
-    R_InitFonts();
-
-    R_InitLoadWater();
-
-    R_InitLightDefs();
-
-    R_ClearFogs();
-
-    R_InitDebug();
-
-    rg.registered = 1;
-}
-char R_PreCreateWindow() { return 1; }
-void R_StoreDirect3DCaps(uint32_t) {}
-void R_GetDirect3DCaps(uint32_t, _D3DCAPS9 *) {}
-void R_SetShadowmapFormats_DX(uint32_t) {
-    gfxMetrics.shadowmapFormatPrimary = 0;
-    gfxMetrics.shadowmapFormatSecondary = 0;
-}
-uint32_t R_ChooseAdapter() { return 0; }
-void Sys_HideSplashWindow() {}
-char R_CreateGameWindow(GfxWindowParms *wnd) { return R_InitHardware(wnd); }
-
-char R_InitHardware(const GfxWindowParms *wnd) {
-    if (!g_gfxBackend) R_InitGraphicsApi();
-    if (wnd) {
-        vidConfig.sceneWidth = wnd->sceneWidth;
-        vidConfig.sceneHeight = wnd->sceneHeight;
-        vidConfig.displayWidth = wnd->displayWidth;
-        vidConfig.displayHeight = wnd->displayHeight;
-    }
-    R_InitGamma();
-    R_InitScene();
-    R_InitSystems();
-    return 1;
-}
-void R_StoreWindowSettings(const GfxWindowParms *) {}
-void R_InitGamma() {}
-char R_CreateForInitOrReset() { return 1; }
-
-IDirect3DQuery9 *RB_HW_AllocOcclusionQuery() { return nullptr; }
-char R_CreateDevice(const GfxWindowParms *) { return 1; }
-void R_SetD3DPresentParameters(_D3DPRESENT_PARAMETERS_ *, const GfxWindowParms *) {}
-void R_SetupAntiAliasing(const GfxWindowParms *) {}
-HRESULT R_CreateDeviceInternal(HWND__ *, uint32_t, _D3DPRESENT_PARAMETERS_ *) { return S_OK; }
-int R_GetDeviceType() { return 0; }
-void R_SetWndParms(GfxWindowParms *wnd) {
-    if (!wnd) return;
-    wnd->sceneWidth = vidConfig.sceneWidth;
-    wnd->sceneHeight = vidConfig.sceneHeight;
-    wnd->displayWidth = vidConfig.displayWidth;
-    wnd->displayHeight = vidConfig.displayHeight;
-    wnd->hz = 60;
-}
-void R_Register() {
-    R_RegisterDvars();
-}
-void R_InitGlobalStructs() {
-    vidConfig = {};
-    gfxMetrics = {};
-    gfxMetrics.canMipCubemaps = true;
-    g_disableRendering = 0;
-}
-void R_EndRegistration() {}
-void R_TrackStatistics(trStatistics_t *) {}
-void R_UpdateTeamColors(int, const float *, const float *) {}
-void R_ConfigureRenderer(const GfxConfiguration *config) { SetGfxConfig(config); }
-void R_ComErrorCleanup() {}
-bool R_CheckLostDevice() { return false; }
-void R_MakeDedicated(const GfxConfiguration *config) { SetGfxConfig(config); }
-void R_UpdateGpuSyncType() {}
-int R_IsHiDef() { return 1; }
-
-// r_texturemem.cpp is intentionally excluded from the Switch build because its
-// implementation depends on Windows DirectDraw. The renderer only needs a texture
-// memory budget for picmip selection during startup, so keep a conservative Switch
-// budget here instead of probing nonexistent D3D9/DirectDraw resources.
-uint32_t __cdecl R_AvailableTextureMemory()
-{
-    return 2048;
-}
-
-uint32_t __cdecl R_DetectCurrentTextureMemory()
-{
-    return R_AvailableTextureMemory();
-}
-
-void R_ShutdownStreams() {}
-
-void R_Shutdown(int destroyWindow) {
-    (void)destroyWindow;
-    R_ShutdownStreams();
-    R_ShutdownMaterialUsage();
-    if (s_registered) {
-        R_ShutdownImages();
-        s_registered = false;
-    }
-    R_ShutdownDirect3D();
-}
-
-#endif
-)
+            if (images[i].image && images[i].image->name && images[i].image->name[0] == 36)
             {
                 std::snprintf(trace, sizeof(trace),
-                    "[SWITCH IMGDB] code image[%d]=%s\n",
+                    "[SWITCH IMGDB] code image[%d]=%s\\n",
                     i, images[i].image->name);
                 Switch_LogWrite(trace);
             }
