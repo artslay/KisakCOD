@@ -697,12 +697,8 @@ IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image)
 }
 
 void __cdecl R_SetPicmip()
-{
-#ifdef __SWITCH__
-    Com_Printf(
-        CON_CHANNEL_GFX,
-        "[SWITCH PICMIP] ENTER main=%d\n",
-        Sys_IsMainThread() ? 1 : 0);
+{#ifdef __SWITCH__
+    Sys_Print("[SWITCH PICMIP] ENTER\n");
 #endif
     uint32_t texMemInMegs; // [esp+0h] [ebp-10h]
     uint32_t sysMemInMegs; // [esp+4h] [ebp-Ch]
@@ -710,18 +706,15 @@ void __cdecl R_SetPicmip()
     int minPicmip; // [esp+Ch] [ebp-4h]
 
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_GFX, "[SWITCH PICMIP] before dx.device assert\n");
+    Sys_Print("[SWITCH PICMIP] BEFORE DX ASSERT\n");
 #endif
     iassert( dx.device );
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_GFX, "[SWITCH PICMIP] after dx.device assert\n");
+    Sys_Print("[SWITCH PICMIP] AFTER DX ASSERT\n");
 #endif
     texMemInMegs = R_AvailableTextureMemory();
 #ifdef __SWITCH__
-    Com_Printf(
-        CON_CHANNEL_GFX,
-        "[SWITCH PICMIP] after texture memory query: %u\n",
-        texMemInMegs);
+    Sys_Print("[SWITCH PICMIP] AFTER TEXMEM\n");
 #endif
 #ifdef __SWITCH__
     // sys_sysMB is not registered by the Switch port. Do not enter the shared
@@ -731,16 +724,16 @@ void __cdecl R_SetPicmip()
     sysMemInMegs = Dvar_GetInt("sys_sysMB");
 #endif
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_GFX, "[SWITCH PICMIP] before reflection dvar assert\n");
+    Sys_Print("[SWITCH PICMIP] BEFORE REFLECTION ASSERT\n");
 #endif
     iassert( r_reflectionProbeGenerate );
 #ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_GFX, "[SWITCH PICMIP] after reflection dvar assert\n");
+    Sys_Print("[SWITCH PICMIP] AFTER REFLECTION ASSERT\n");
 #endif
     if (r_reflectionProbeGenerate->current.enabled)
     {
 #ifdef __SWITCH__
-        Com_Printf(CON_CHANNEL_GFX, "[SWITCH PICMIP] reflection dvar enabled\n");
+        Sys_Print("[SWITCH PICMIP] REFLECTION ENABLED\n");
 #endif
         Com_Printf(CON_CHANNEL_GFX, "Picmip is set to lowest quality for generating reflections.\n");
         imageGlobals.picmip = 2;
@@ -760,10 +753,7 @@ void __cdecl R_SetPicmip()
         {
             Com_Printf(CON_CHANNEL_GFX, "Texture detail is set automatically.\n");
 #ifdef __SWITCH__
-            Com_Printf(
-                CON_CHANNEL_GFX,
-                "[SWITCH PICMIP] after detail log main=%d\n",
-                Sys_IsMainThread() ? 1 : 0);
+            Sys_Print("[SWITCH PICMIP] AFTER DETAIL LOG\n");
 #endif
             if (texMemInMegs < 0x1C2)
             {
@@ -832,18 +822,12 @@ void __cdecl R_SetPicmip()
 #endif
         }
 #ifdef __SWITCH__
-        Com_Printf(
-            CON_CHANNEL_GFX,
-            "[SWITCH PICMIP] before specular check main=%d\n",
-            Sys_IsMainThread() ? 1 : 0);
+        Sys_Print("[SWITCH PICMIP] BEFORE SPECULAR CHECK\n");
 #endif
         if (!r_specular->current.enabled || !r_rendererInUse->current.integer)
             imageGlobals.picmipSpec = 3;
 #ifdef __SWITCH__
-        Com_Printf(
-            CON_CHANNEL_GFX,
-            "[SWITCH PICMIP] after specular check main=%d\n",
-            Sys_IsMainThread() ? 1 : 0);
+        Sys_Print("[SWITCH PICMIP] AFTER SPECULAR CHECK\n");
 #endif
         Com_Printf(
             CON_CHANNEL_GFX,

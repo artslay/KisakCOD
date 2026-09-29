@@ -18,6 +18,7 @@
 
 static const auto g_sysStart = std::chrono::steady_clock::now();
 static std::recursive_mutex g_sysCritical[32];
+static std::recursive_mutex g_switchLogMutex;
 
 static FILE *g_switchLogFile = nullptr;
 static const char *const kSwitchLogPath = "sdmc:/switch/KisakCOD/kisakcod.log";
@@ -52,6 +53,8 @@ void Switch_LogRaw(const char *msg)
 {
     if (!msg)
         return;
+
+    std::lock_guard<std::recursive_mutex> lock(g_switchLogMutex);
 
     std::fputs(msg, stdout);
     std::fflush(stdout);
@@ -131,6 +134,8 @@ void __cdecl Sys_Print(const char *msg)
 {
     if (!msg)
         return;
+
+    std::lock_guard<std::recursive_mutex> lock(g_switchLogMutex);
 
     std::fputs(msg, stdout);
     std::fflush(stdout);
