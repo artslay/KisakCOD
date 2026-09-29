@@ -89,30 +89,19 @@ void R_BeginRegistration(vidConfig_t *out) {
         *out = vidConfig;
     s_registered = true;
 }
-extern void Switch_LogRaw(const char *msg);
 
 void R_Init() {
     // Match the original renderer bootstrap order: renderer dvars/commands must
     // exist before R_InitImages()->R_SetPicmip() accesses them.
-    Switch_LogRaw("[SWITCH RINIT TRACE] before R_Register\n");
     R_Register();
-    Switch_LogRaw("[SWITCH RINIT TRACE] after R_Register\n");
 
-    Switch_LogRaw("[SWITCH RINIT TRACE] before R_InitGlobalStructs\n");
     R_InitGlobalStructs();
-    Switch_LogRaw("[SWITCH RINIT TRACE] after R_InitGlobalStructs\n");
 
-    Switch_LogRaw("[SWITCH RINIT TRACE] before R_InitDrawMethod\n");
     R_InitDrawMethod();
-    Switch_LogRaw("[SWITCH RINIT TRACE] after R_InitDrawMethod\n");
 
-    Switch_LogRaw("[SWITCH RINIT TRACE] before R_InitGraphicsApi\n");
     R_InitGraphicsApi();
-    Switch_LogRaw("[SWITCH RINIT TRACE] after R_InitGraphicsApi\n");
 
-    Switch_LogRaw("[SWITCH RINIT TRACE] before R_InitSystems\n");
     R_InitSystems();
-    Switch_LogRaw("[SWITCH RINIT TRACE] after R_InitSystems\n");
 }
 char R_InitRendererForWindow(HWND) { R_Init(); return 1; }
 HWND R_CreateSwapChains(int, GfxWindowParms *, int) { return nullptr; }
@@ -179,24 +168,18 @@ static void R_LoadGraphicsAssets()
 }
 
 void R_InitGraphicsApi() {
-    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: before CreateOpenGLBackend\n");
     if (!g_gfxBackend)
         g_gfxBackend = CreateOpenGLBackend();
-    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: after CreateOpenGLBackend\n");
 
     if (!g_gfxBackend)
         R_FatalInitError("CreateOpenGLBackend failed");
 
-    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: before backend Init\n");
     if (!g_gfxBackend->Init(nullptr))
         R_FatalInitError(g_gfxBackend->GetLastError());
-    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: after backend Init\n");
 
     // Match the original R_InitHardware bootstrap: queue code_post_gfx, ui and
     // common fastfiles before R_InitSystems starts resolving default assets.
-    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: before R_LoadGraphicsAssets\n");
     R_LoadGraphicsAssets();
-    Switch_LogRaw("[SWITCH RINIT TRACE] R_InitGraphicsApi: after R_LoadGraphicsAssets\n");
 
     if (!dx.device) dx.device = new IDirect3DDevice9;
     vidConfig.sceneWidth = 1280;
@@ -215,36 +198,21 @@ void R_InitGraphicsApi() {
     dx.multiSampleQuality = 0;
 }
 void R_InitSystems() {
-    Switch_LogRaw("[SWITCH RSYS TRACE] before R_InitImages\n");
     R_InitImages();
-    Switch_LogRaw("[SWITCH RSYS TRACE] after R_InitImages\n");
 
-    Switch_LogRaw("[SWITCH RSYS TRACE] before Material_Init\n");
     Material_Init();
-    Switch_LogRaw("[SWITCH RSYS TRACE] after Material_Init\n");
 
-    Switch_LogRaw("[SWITCH RSYS TRACE] before R_InitFonts\n");
     R_InitFonts();
-    Switch_LogRaw("[SWITCH RSYS TRACE] after R_InitFonts\n");
 
-    Switch_LogRaw("[SWITCH RSYS TRACE] before R_InitLoadWater\n");
     R_InitLoadWater();
-    Switch_LogRaw("[SWITCH RSYS TRACE] after R_InitLoadWater\n");
 
-    Switch_LogRaw("[SWITCH RSYS TRACE] before R_InitLightDefs\n");
     R_InitLightDefs();
-    Switch_LogRaw("[SWITCH RSYS TRACE] after R_InitLightDefs\n");
 
-    Switch_LogRaw("[SWITCH RSYS TRACE] before R_ClearFogs\n");
     R_ClearFogs();
-    Switch_LogRaw("[SWITCH RSYS TRACE] after R_ClearFogs\n");
 
-    Switch_LogRaw("[SWITCH RSYS TRACE] before R_InitDebug\n");
     R_InitDebug();
-    Switch_LogRaw("[SWITCH RSYS TRACE] after R_InitDebug\n");
 
     rg.registered = 1;
-    Switch_LogRaw("[SWITCH RSYS TRACE] rg.registered=1\n");
 }
 char R_PreCreateWindow() { return 1; }
 void R_StoreDirect3DCaps(uint32_t) {}
