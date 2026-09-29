@@ -136,24 +136,7 @@ void __cdecl DB_LoadXFileData(uint8_t *pos, uint32_t size)
     {
         if (!g_load.stream.avail_in)
             goto LABEL_19;
-#ifdef __SWITCH__
-        Com_Printf(CON_CHANNEL_SYSTEM,
-            "Switch FF inflate begin: in=%u out=%u next_in=%p next_out=%p\n",
-            static_cast<unsigned>(g_load.stream.avail_in),
-            static_cast<unsigned>(g_load.stream.avail_out),
-            static_cast<const void *>(g_load.stream.next_in),
-            static_cast<void *>(g_load.stream.next_out));
-#endif
         err = DB_AuthLoad_Inflate(&g_load.stream, 2);
-#ifdef __SWITCH__
-        Com_Printf(CON_CHANNEL_SYSTEM,
-            "Switch FF inflate end: ret=%u in=%u out=%u total_in=%lu total_out=%lu\n",
-            static_cast<unsigned>(err),
-            static_cast<unsigned>(g_load.stream.avail_in),
-            static_cast<unsigned>(g_load.stream.avail_out),
-            static_cast<unsigned long>(g_load.stream.total_in),
-            static_cast<unsigned long>(g_load.stream.total_out));
-#endif
         if (err >= 2)
         {
             KISAK_NULLSUB();
@@ -285,9 +268,6 @@ void __cdecl DB_LoadXFileInternal()
     char magic[8]; // [esp+48h] [ebp-Ch] BYREF
 
     iassert(g_load.f);
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF open: %s\n", g_load.filename);
-#endif
     DB_ReadXFileStage();
     if (!g_load.outstandingReads)
         Com_Error(ERR_DROP, "Fastfile for zone '%s' is empty.", g_load.filename);
@@ -308,10 +288,6 @@ void __cdecl DB_LoadXFileInternal()
     version = *(uint32_t *)g_load.stream.next_in;
     g_load.stream.next_in += 4;
     g_load.stream.avail_in -= 4;
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF header: %.*s version=%u avail=%u\n",
-        8, magic, version, static_cast<unsigned>(g_load.stream.avail_in));
-#endif
     if (version != 5)
     {
         if (version >= 5)
@@ -330,9 +306,6 @@ void __cdecl DB_LoadXFileInternal()
                 5);
     }
     fileIsSecure = memcmp(magic, "IWffu100", 8u) != 0;
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF inflate init: secure=%d\n", fileIsSecure ? 1 : 0);
-#endif
     err = DB_AuthLoad_InflateInit(&g_load.stream, fileIsSecure);
     failureReason = 0;
     if (fileIsSecure)
@@ -347,14 +320,6 @@ void __cdecl DB_LoadXFileInternal()
     }
     
     DB_LoadXFileData((uint8_t *)&file, sizeof(XFile));
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM,
-        "Switch FF XFile: size=%u external=%u blocks=%u,%u,%u,%u,%u,%u,%u,%u,%u\n",
-        file.size, file.externalSize,
-        file.blockSize[0], file.blockSize[1], file.blockSize[2],
-        file.blockSize[3], file.blockSize[4], file.blockSize[5],
-        file.blockSize[6], file.blockSize[7], file.blockSize[8]);
-#endif
     if (g_trackLoadProgress)
     {
 #ifdef __SWITCH__
@@ -374,23 +339,9 @@ void __cdecl DB_LoadXFileInternal()
             g_loadedExternalBytes = 0;
         }
     }
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: alloc zone memory\n");
-#endif
     DB_AllocXZoneMemory(file.blockSize, g_load.filename, g_load.zoneMem, g_load.allocType);
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: alloc done\n");
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: init streams\n");
-#endif
     DB_InitStreams(g_load.zoneMem);
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: streams done\n");
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: asset list\n");
-#endif
     Load_XAssetListCustom();
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_SYSTEM, "Switch FF stage: asset list done\n");
-#endif
     DB_PushStreamPos(4);
     if (varXAssetList->assets)
     {
