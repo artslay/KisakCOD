@@ -448,37 +448,55 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
 {
     static char startupLanguage[64];
 
-    // Once startup language is resolved, keep all startup fastfiles in the
-    // same language directory. This avoids selecting English merely because
-    // an unlocalized common.ff is present alongside another localization.
     if (startupLanguage[0])
         return startupLanguage;
 
-    // After FS_InitFilesystem() the normal loc_language dvar is authoritative.
-    if (loc_language)
+    // Prefer the game's localization.txt. On the original PC build this file
+    // selects the installed language before startup fastfiles are loaded.
     {
-        const int languageIndex = SEH_GetCurrentLanguage();
-        if (languageIndex >= 0 && languageIndex < 15)
+        FILE *localizationFile = FS_SwitchOpenRootFile("localization.txt");
+        if (localizationFile)
         {
-            const char *languageName = SEH_GetLanguageName(languageIndex);
-            if (languageName && *languageName)
+            char requested[64] = {};
+            const size_t count = fread(requested, 1, sizeof(requested) - 1, localizationFile);
+            fclose(localizationFile);
+
+            for (size_t i = 0; i < count; ++i)
             {
+                if (requested[i] == '\\r' || requested[i] == '\\n')
+                {
+                    requested[i] = 0;
+                    break;
+                }
+            }
+
+            for (int i = 0; i < 15 && requested[0]; ++i)
+            {
+                const char *languageName = SEH_GetLanguageName(i);
+                if (!languageName || I_stricmp(requested, languageName) != 0)
+                    continue;
+
                 I_strncpyz(startupLanguage, languageName, sizeof(startupLanguage));
+                if (loc_language)
+                    Dvar_SetInt((dvar_s *)loc_language, i);
+                Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\\n", startupLanguage);
                 return startupLanguage;
             }
         }
     }
 
-    // Com_InitXAssets() runs before FS_InitFilesystem(), so resolve the
-    // startup language by looking for the localized startup fastfiles first.
-    // These are the files that distinguish the installed locale.
+    // Com_InitXAssets() runs before FS_InitFilesystem(), so loc_language's
+    // default value cannot be used to infer the installed locale. Probe the
+    // localized startup fastfiles instead.
     const char *localeMarkers[] =
     {
         "localized_common",
         "localized_code_post_gfx",
     };
 
-    for (int i = 0; i < 15; ++i)
+    // Prefer non-English localization directories when no explicit
+    // localization.txt selection is available.
+    for (int i = 1; i < 15; ++i)
     {
         const char *languageName = SEH_GetLanguageName(i);
         if (!languageName || !*languageName)
@@ -501,13 +519,15 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
         if (hasLocalizedFastfile)
         {
             I_strncpyz(startupLanguage, languageName, sizeof(startupLanguage));
-            Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\n", startupLanguage);
+            if (loc_language)
+                Dvar_SetInt((dvar_s *)loc_language, i);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\\n", startupLanguage);
             return startupLanguage;
         }
     }
 
-    // Fallback: locate the requested startup zone itself.
-    for (int i = 0; i < 15; ++i)
+    // Finally allow an English-only installation.
+    for (int i = 0; i < 1; ++i)
     {
         const char *languageName = SEH_GetLanguageName(i);
         if (!languageName || !*languageName)
@@ -521,14 +541,15 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
 
         fclose(file);
         I_strncpyz(startupLanguage, languageName, sizeof(startupLanguage));
-        Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\n", startupLanguage);
+        if (loc_language)
+            Dvar_SetInt((dvar_s *)loc_language, i);
+        Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\\n", startupLanguage);
         return startupLanguage;
     }
 
     I_strncpyz(startupLanguage, "english", sizeof(startupLanguage));
     return startupLanguage;
 }
-#endif
 
 static void __cdecl DB_BuildOSPath_Mod(const char *zoneName, uint32_t size, char *filename)
 {
