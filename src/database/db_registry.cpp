@@ -436,177 +436,60 @@ void __cdecl DB_ReplaceXAsset(XAssetType type, const char *original, const char 
 void __cdecl DB_CloneXAsset(const XAsset *from, XAsset *to);
 void __cdecl Material_DirtyTechniqueSetOverrides();
 void __cdecl Material_ClearShaderUploadList();
-static void __cdecl DB_BuildOSPath(const char *zoneName, uint32_t size, char *filename);
-
-static void __cdecl DB_RemoveLoadedSound(XAssetHeader header)
-{
-    if (header.loadSnd && header.loadSnd->sound.data)
-        Z_Free(header.loadSnd->sound.data, 15);
-}
-
-#ifdef __SWITCH__
-static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
-{
-    static char startupLanguage[64];
-
-    if (startupLanguage[0])
-        return startupLanguage;
-
-    auto setLanguage = [&](const char *name, int index) -> const char *
-    {
-        I_strncpyz(startupLanguage, name, sizeof(startupLanguage));
-        if (loc_language)
-            Dvar_SetInt((dvar_s *)loc_language, index);
-        Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\n", startupLanguage);
-        return startupLanguage;
-    };
-
-    // Prefer an explicit language selected by the game's localization.txt.
-    {
-        FILE *localizationFile = FS_SwitchOpenRootFile("main/localization.txt");
-        if (localizationFile)
-        {
-            char requested[64] = {};
-            const size_t count = fread(requested, 1, sizeof(requested) - 1, localizationFile);
-            fclose(localizationFile);
-
-            for (size_t i = 0; i < count; ++i)
-            {
-                if (requested[i] == '\r' || requested[i] == '\n')
-                {
-                    requested[i] = 0;
-                    break;
-                }
-            }
-
-            for (int i = 0; i < 15 && requested[0]; ++i)
-            {
-                const char *languageName = SEH_GetLanguageName(i);
-                if (languageName && I_stricmp(requested, languageName) == 0)
-                    return setLanguage(languageName, i);
-            }
-        }
-    }
-
-    // On Switch, a language may be represented by a zone/<language> directory
-    // containing the regular startup fastfiles (code_post_gfx/ui/common).
-    // This is enough to select the language before the normal filesystem has
-    // been initialized.
-    for (int i = 1; i < 15; ++i)
-    {
-        const char *languageName = SEH_GetLanguageName(i);
-        if (!languageName || !*languageName)
-            continue;
-
-        // Probe actual fastfiles instead of opening the directory itself.
-        // A valid language directory is expected to contain these renderer
-        // bootstrap zones on Switch.
-        const char *startupZones[] =
-        {
-            "code_post_gfx",
-            "ui",
-            "common",
-        };
-
-        bool hasLanguageZone = false;
-        for (const char *startupZone : startupZones)
-        {
-            char zonePath[256];
-            Com_sprintf(zonePath, sizeof(zonePath),
-                "zone/%s/%s.ff", languageName, startupZone);
-
-            FILE *zoneFile = FS_SwitchOpenRootFile(zonePath);
-            if (zoneFile)
-            {
-                fclose(zoneFile);
-                hasLanguageZone = true;
-                break;
-            }
-        }
-
-        if (hasLanguageZone)
-            return setLanguage(languageName, i);
-
-        // Some extracted COD4 installations keep localization in main as
-        // localized_<language>_iw##.iwd archives instead of a language zone.
-        bool hasLocalizedIwd = false;
-        const char *roots[] = { "main", "" };
-        for (const char *root : roots)
-        {
-            for (int iw = 0; iw < 100; ++iw)
-            {
-                char iwdPath[256];
-                if (*root)
-                    Com_sprintf(iwdPath, sizeof(iwdPath),
-                        "%s/localized_%s_iw%02d.iwd", root, languageName, iw);
-                else
-                    Com_sprintf(iwdPath, sizeof(iwdPath),
-                        "localized_%s_iw%02d.iwd", languageName, iw);
-
-                FILE *iwd = FS_SwitchOpenRootFile(iwdPath);
-                if (iwd)
-                {
-                    fclose(iwd);
-                    hasLocalizedIwd = true;
-                    break;
-                }
-            }
-
-            if (hasLocalizedIwd)
-                break;
-        }
-
-        if (hasLocalizedIwd)
-            return setLanguage(languageName, i);
-    }
-
-    // Finally allow an English installation.
-    {
-        const char *languageName = SEH_GetLanguageName(0);
-        if (languageName && *languageName)
-            return setLanguage(languageName, 0);
-    }
-
-    I_strncpyz(startupLanguage, "english", sizeof(startupLanguage));
-    return startupLanguage;
-}
-#endif
-
-static void __cdecl DB_BuildOSPath_Mod(const char *zoneName, uint32_t size, char *filename)
-{
-#ifdef __SWITCH__
-    if (fs_gameDirVar && fs_gameDirVar->current.string[0])
-        Com_sprintf(filename, size, "%s/%s.ff", fs_gameDirVar->current.string, zoneName);
-    else
-        DB_BuildOSPath(zoneName, size, filename);
-#else
-    char *v3;
-    const char *string = fs_gameDirVar->current.string;
-    v3 = Sys_DefaultInstallPath();
-    Com_sprintf(filename, size, "%s\\%s\\%s.ff", v3, string, zoneName);
-#endif
-}
-
 static void __cdecl DB_BuildOSPath(const char *zoneName, uint32_t size, char *filename)
 {
 #ifdef __SWITCH__
     const char *languageName = DB_GetSwitchZoneLanguage(zoneName);
-
-    // Localization fastfiles must come from the selected language.
     const bool isLocalizedZone = !strncmp(zoneName, "localized_", 10);
-    if (!isLocalizedZone && I_stricmp(languageName, "english") != 0)
+
+    // Standard COD4 game fastfiles (code_post_gfx/ui/common) are normally
+    // stored under zone/english even when a different language is selected.
+    // Some extracted packages instead keep the base fastfiles in the selected
+    // language directory, so probe both layouts before falling back to root.
+    const char *languages[2] = { languageName, "english" };
+    char candidate[256];
+
+    for (int i = 0; i < 2; ++i)
     {
-        char selectedPath[256];
-        Com_sprintf(selectedPath, sizeof(selectedPath),
-            "zone/%s/%s.ff", languageName, zoneName);
-        FILE *selectedFile = FS_SwitchOpenRootFile(selectedPath);
-        if (!selectedFile)
-            languageName = "english";
-        else
-            fclose(selectedFile);
+        const char *lang = languages[i];
+        if (!lang || !*lang)
+            continue;
+
+        if (i == 1 && !I_stricmp(lang, languageName))
+            continue;
+
+        Com_sprintf(candidate, sizeof(candidate),
+            "zone/%s/%s.ff", lang, zoneName);
+
+        FILE *file = FS_SwitchOpenRootFile(candidate);
+        if (file)
+        {
+            fclose(file);
+            I_strncpyz(filename, candidate, size);
+            return;
+        }
+
+        // Localized zones belong to the selected locale. Do not silently
+        // reinterpret another localized zone as the base English zone.
+        if (isLocalizedZone)
+            break;
     }
 
-    Com_sprintf(filename, size, "zone/%s/%s.ff", languageName, zoneName);
+    // Also accept extracted packages with zone files directly in zone/.
+    Com_sprintf(candidate, sizeof(candidate), "zone/%s.ff", zoneName);
+    FILE *rootFile = FS_SwitchOpenRootFile(candidate);
+    if (rootFile)
+    {
+        fclose(rootFile);
+        I_strncpyz(filename, candidate, size);
+        return;
+    }
+
+    // Preserve the conventional path in the error message when nothing was
+    // found; DB_TryLoadXFileInternal will report the missing file.
+    Com_sprintf(filename, size, "zone/%s/%s.ff",
+        (isLocalizedZone && languageName && *languageName) ? languageName : "english",
+        zoneName);
 #else
     char *v3;
     char *Language;
