@@ -1307,23 +1307,23 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Com_Printf(CON_CHANNEL_SYSTEM, "Switch init: after Cbuf_Execute\n");
     if ((dvar_modifiedFlags & 0x20) != 0)
         Com_InitDvars();
-    Sys_Print("[SWITCH INIT TRACE] before com_recommendedSet\\n");
+    Sys_Print("[SWITCH INIT TRACE] before com_recommendedSet\n");
     com_recommendedSet = Dvar_RegisterBool("com_recommendedSet", 0, DVAR_ARCHIVE, "Use recommended settings");
-    Sys_Print("[SWITCH INIT TRACE] after com_recommendedSet\\n");
-    Sys_Print("[SWITCH INIT TRACE] before Com_CheckSetRecommended\\n");
+    Sys_Print("[SWITCH INIT TRACE] after com_recommendedSet\n");
+    Sys_Print("[SWITCH INIT TRACE] before Com_CheckSetRecommended\n");
     Com_CheckSetRecommended(0);
-    Sys_Print("[SWITCH INIT TRACE] after Com_CheckSetRecommended\\n");
+    Sys_Print("[SWITCH INIT TRACE] after Com_CheckSetRecommended\n");
     Com_StartupVariable(0);
-    Sys_Print("[SWITCH INIT TRACE] after Com_StartupVariable\\n");
+    Sys_Print("[SWITCH INIT TRACE] after Com_StartupVariable\n");
     if (!IsFastFileLoad())
         SEH_UpdateLanguageInfo();
 #ifdef KISAK_MP
     if (com_dedicated->current.integer)
         CL_InitDedicated();
 #endif
-    Sys_Print("[SWITCH INIT TRACE] before Com_InitHunkMemory\\n");
+    Sys_Print("[SWITCH INIT TRACE] before Com_InitHunkMemory\n");
     Com_InitHunkMemory();
-    Sys_Print("[SWITCH INIT TRACE] after Com_InitHunkMemory\\n");
+    Sys_Print("[SWITCH INIT TRACE] after Com_InitHunkMemory\n");
     Hunk_InitDebugMemory();
     dvar_modifiedFlags &= ~1u;
     com_codeTimeScale = 1.0;
