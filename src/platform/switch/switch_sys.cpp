@@ -25,8 +25,9 @@ static bool g_switchScreenLog = false;
 
 void Switch_LogInit()
 {
-    consoleInit(nullptr);
-    g_switchScreenLog = true;
+    // OpenGL/EGL owns the NWindow directly. Do not initialize libnx's framebuffer
+    // console here, otherwise the console and EGL compete for the same display layer.
+    g_switchScreenLog = false;
 
     if (g_switchLogFile)
         return;
@@ -45,7 +46,6 @@ void Switch_LogInit()
     std::fprintf(g_switchLogFile, "Log file: %s\n", kSwitchLogPath);
     std::fprintf(g_switchLogFile, "========================================\n");
     std::fflush(g_switchLogFile);
-    consoleUpdate(nullptr);
 }
 
 void Switch_LogRaw(const char *msg)
@@ -65,11 +65,8 @@ void Switch_LogRaw(const char *msg)
 
 void Switch_LogReleaseScreen()
 {
-    if (!g_switchScreenLog)
-        return;
-
-    consoleUpdate(nullptr);
-    consoleExit(nullptr);
+    // Kept as a compatibility hook for renderer bring-up. The Switch build no
+    // longer initializes the libnx framebuffer console, so there is nothing to release.
     g_switchScreenLog = false;
 }
 
@@ -82,12 +79,7 @@ void Switch_LogShutdown()
     std::fclose(g_switchLogFile);
     g_switchLogFile = nullptr;
 
-    if (g_switchScreenLog)
-    {
-        consoleUpdate(nullptr);
-        consoleExit(nullptr);
-        g_switchScreenLog = false;
-    }
+    g_switchScreenLog = false;
 }
 
 SysInfo sys_info = {};
