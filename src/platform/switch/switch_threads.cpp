@@ -10,6 +10,8 @@
 #include <atomic>
 #include <setjmp.h>
 
+extern void Sys_Print(const char *text);
+
 static thread_local void *g_switchThreadValues[4] = {};
 void *g_threadValues[THREAD_CONTEXT_COUNT][4] = {};
 DWORD threadId[THREAD_CONTEXT_COUNT] = {};
@@ -166,18 +168,18 @@ void __cdecl Sys_CreateThread(void (__cdecl *function)(uint32_t), ThreadContext_
 {
 #ifdef KISAK_SWITCH
     if (context == THREAD_CONTEXT_SERVER_DEMO)
-        Sys_Print("[SWITCH THREAD TRACE] active Sys_CreateThread SERVER_DEMO enter\\n");
+        Sys_Print("[SWITCH THREAD TRACE] active Sys_CreateThread SERVER_DEMO enter\n");
 #endif
     if (g_threads[context].joinable()) g_threads[context].join();
 #ifdef KISAK_SWITCH
     if (context == THREAD_CONTEXT_SERVER_DEMO)
-        Sys_Print("[SWITCH THREAD TRACE] active Sys_CreateThread before std::thread\\n");
+        Sys_Print("[SWITCH THREAD TRACE] active Sys_CreateThread before std::thread\n");
 #endif
     g_threadAlive[context] = true;
     g_threads[context] = std::thread([function, context] {
 #ifdef KISAK_SWITCH
         if (context == THREAD_CONTEXT_SERVER_DEMO)
-            Sys_Print("[SWITCH THREAD TRACE] active ThreadMain SERVER_DEMO enter\\n");
+            Sys_Print("[SWITCH THREAD TRACE] active ThreadMain SERVER_DEMO enter\n");
 #endif
         Sys_InitThread(context);
         function((uint32_t)context);
@@ -185,12 +187,12 @@ void __cdecl Sys_CreateThread(void (__cdecl *function)(uint32_t), ThreadContext_
     });
 #ifdef KISAK_SWITCH
     if (context == THREAD_CONTEXT_SERVER_DEMO)
-        Sys_Print("[SWITCH THREAD TRACE] active Sys_CreateThread after std::thread\\n");
+        Sys_Print("[SWITCH THREAD TRACE] active Sys_CreateThread after std::thread\n");
 #endif
     threadHandle[context] = reinterpret_cast<HANDLE>(&g_threads[context]);
 #ifdef KISAK_SWITCH
     if (context == THREAD_CONTEXT_SERVER_DEMO)
-        Sys_Print("[SWITCH THREAD TRACE] active Sys_CreateThread leave\\n");
+        Sys_Print("[SWITCH THREAD TRACE] active Sys_CreateThread leave\n");
 #endif
 }
 
@@ -363,9 +365,9 @@ void Sys_SetServerTimeout(int) {}
 bool Sys_WaitForSaveHistoryDone() { return true; }
 int Sys_SpawnServerDemoThread(void (*function)(uint32_t))
 {
-    Sys_Print("[SWITCH THREAD TRACE] active Sys_SpawnServerDemoThread enter\\n");
+    Sys_Print("[SWITCH THREAD TRACE] active Sys_SpawnServerDemoThread enter\n");
     int result = Sys_SpawnServerThread(function);
-    Sys_Print("[SWITCH THREAD TRACE] active Sys_SpawnServerDemoThread leave\\n");
+    Sys_Print("[SWITCH THREAD TRACE] active Sys_SpawnServerDemoThread leave\n");
     return result;
 }
 void Sys_SetSaveHistoryEvent() {}
