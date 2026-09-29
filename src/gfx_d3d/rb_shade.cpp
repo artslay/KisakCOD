@@ -57,41 +57,6 @@ void __cdecl RB_ClearPixelShader()
     gfxCmdBufState.pixelShader = 0;
 }
 
-void __cdecl R_HW_SetPixelShader(IDirect3DDevice9 *device, const MaterialPixelShader *mtlShader)
-{
-    int v2; // eax
-    HRESULT hr; // [esp+4h] [ebp-4h]
-
-    iassert(device);
-
-    do
-    {
-        if (r_logFile && r_logFile->current.integer)
-            RB_LogPrint("device->SetPixelShader( mtlShader ? mtlShader->prog.ps : 0 )\n");
-        if (mtlShader)
-        {
-            v2 = device->SetPixelShader(mtlShader->prog.ps);
-        }
-        else
-        {
-            v2 = device->SetPixelShader(0);
-        }
-        hr = v2;
-        if (v2 < 0)
-        {
-            do
-            {
-                ++g_disableRendering;
-                Com_Error(
-                    ERR_FATAL,
-                    "c:\\trees\\cod3\\src\\gfx_d3d\\r_setstate_d3d.h (%i) device->SetPixelShader( mtlShader ? mtlShader->prog.ps : "
-                    "0 ) failed: %s\n",
-                    454,
-                    R_ErrorDescription(hr));
-            } while (alwaysfails);
-        }
-    } while (alwaysfails);
-}
 
 void __cdecl RB_ClearVertexShader()
 {
@@ -100,40 +65,6 @@ void __cdecl RB_ClearVertexShader()
     gfxCmdBufState.vertexShader = 0;
 }
 
-void __cdecl R_HW_SetVertexShader(IDirect3DDevice9 *device, const MaterialVertexShader *mtlShader)
-{
-    int v2; // eax
-    HRESULT hr; // [esp+4h] [ebp-4h]
-
-    iassert(device);
-    do
-    {
-        if (r_logFile && r_logFile->current.integer)
-            RB_LogPrint("device->SetVertexShader( mtlShader ? mtlShader->prog.vs : 0 )\n");
-        if (mtlShader)
-        {
-            v2 = device->SetVertexShader(mtlShader->prog.vs);
-        }
-        else
-        {
-            v2 = device->SetVertexShader(0);
-        }
-        hr = v2;
-        if (v2 < 0)
-        {
-            do
-            {
-                ++g_disableRendering;
-                Com_Error(
-                    ERR_FATAL,
-                    "c:\\trees\\cod3\\src\\gfx_d3d\\r_setstate_d3d.h (%i) device->SetVertexShader( mtlShader ? mtlShader->prog.vs :"
-                    " 0 ) failed: %s\n",
-                    461,
-                    R_ErrorDescription(hr));
-            } while (alwaysfails);
-        }
-    } while (alwaysfails);
-}
 
 void __cdecl RB_ClearVertexDecl()
 {
