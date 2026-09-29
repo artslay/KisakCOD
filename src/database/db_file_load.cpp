@@ -10,6 +10,10 @@
 #include <gfx_d3d/r_image.h>
 #include <gfx_d3d/r_buffers.h>
 
+#ifdef __SWITCH__
+extern void Switch_LogWrite(const char *msg);
+#endif
+
 //uint32_t volatile g_loadingAssets      828e3f3c     db_file_load.obj
 //int32_t marker_db_file_load  828e3f40     db_file_load.obj
 
@@ -259,6 +263,10 @@ void __cdecl DB_FinishGeometryBlocks(XZoneMemory *zoneMem)
 
 void __cdecl DB_LoadXFileInternal()
 {
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH DBSTAGE] ENTER DB_LoadXFileInternal\n");
+#endif
+
     int32_t err; // [esp+8h] [ebp-4Ch]
     bool fileIsSecure; // [esp+Fh] [ebp-45h]
     uint32_t version; // [esp+10h] [ebp-44h]
@@ -269,10 +277,19 @@ void __cdecl DB_LoadXFileInternal()
 
     iassert(g_load.f);
     DB_ReadXFileStage();
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH DBSTAGE] after ReadXFileStage#1\n");
+#endif
     if (!g_load.outstandingReads)
         Com_Error(ERR_DROP, "Fastfile for zone '%s' is empty.", g_load.filename);
     DB_WaitXFileStage();
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH DBSTAGE] after WaitXFileStage#1\n");
+#endif
     DB_ReadXFileStage();
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH DBSTAGE] after ReadXFileStage#2\n");
+#endif
     if (g_load.stream.avail_in < 8)
         MyAssertHandler(".\\database\\db_file_load.cpp", 598, 0, "%s", "sizeof( magic ) <= g_load.stream.avail_in");
     *(uint32_t *)magic = *(uint32_t *)g_load.stream.next_in;
@@ -307,6 +324,9 @@ void __cdecl DB_LoadXFileInternal()
     }
     fileIsSecure = memcmp(magic, "IWffu100", 8u) != 0;
     err = DB_AuthLoad_InflateInit(&g_load.stream, fileIsSecure);
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH DBSTAGE] after InflateInit\n");
+#endif
     failureReason = 0;
     if (fileIsSecure)
         failureReason = "authenticated file not supported";
@@ -339,23 +359,41 @@ void __cdecl DB_LoadXFileInternal()
             g_loadedExternalBytes = 0;
         }
     }
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH DBSTAGE] before DB_AllocXZoneMemory\n");
+#endif
     DB_AllocXZoneMemory(file.blockSize, g_load.filename, g_load.zoneMem, g_load.allocType);
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH DBSTAGE] after DB_AllocXZoneMemory\n");
+#endif
     DB_InitStreams(g_load.zoneMem);
     Load_XAssetListCustom();
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH DBSTAGE] after Load_XAssetListCustom\n");
+#endif
     DB_PushStreamPos(4);
     if (varXAssetList->assets)
     {
         varXAssetList->assets = AllocLoad_FxElemVisStateSample();
         varXAsset = varXAssetList->assets;
         Load_XAssetArrayCustom(varXAssetList->assetCount);
+#ifdef __SWITCH__
+        Switch_LogWrite("[SWITCH DBSTAGE] after Load_XAssetArrayCustom\n");
+#endif
     }
     DB_PopStreamPos();
     DB_FinishGeometryBlocks(g_load.zoneMem);
     --g_loadingAssets;
     Load_DelayStream();
     DB_LoadDelayedImages();
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH DBSTAGE] after DB_LoadDelayedImages\n");
+#endif
     iassert(g_load.compressBufferStart);
     Com_Printf(CON_CHANNEL_FILES, "Loaded zone '%s'\n", g_load.filename);
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH DBSTAGE] COMPLETE zone\n");
+#endif
 #ifdef KISAK_MP
     if (!g_minimumFastFileLoaded)
         g_minimumFastFileLoaded = I_stricmp("localized_code_post_gfx_mp", g_load.filename) == 0;

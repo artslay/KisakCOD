@@ -164,12 +164,12 @@ static void R_LoadGraphicsAssets()
         ++zoneCount;
     }
 
-    // All renderer bootstrap fastfiles must be fully loaded before R_InitSystems().
-    // R_InitImages()/R_InitCodeImages() access the shared DB asset tables while
-    // resolving built-in images such as $white. Starting UI/common asynchronously
-    // here races those lookups against the database thread.
+    // code_post_gfx must be loaded before R_InitSystems() so renderer defaults exist.
+    // UI/common stay asynchronous; the DB thread will finish them independently.
     if (zoneCount > 0)
-        DB_LoadXAssets(zoneInfo, zoneCount, 1);
+        DB_LoadXAssets(zoneInfo, 1, 1);
+    if (zoneCount > 1)
+        DB_LoadXAssets(zoneInfo + 1, zoneCount - 1, 0);
 }
 
 void R_InitGraphicsApi() {

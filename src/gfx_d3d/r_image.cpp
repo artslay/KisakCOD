@@ -878,19 +878,43 @@ bool __cdecl Image_IsCodeImage(int track)
 
 void R_InitCodeImages()
 {
+#ifdef __SWITCH__
+    R_SwitchPicmipTrace("[SWITCH CODEIMG] ENTER\n");
+#endif
     rgp.whiteImage = Image_Register("$white", TS_FUNCTION, IMAGE_TRACK_MISC);
+#ifdef __SWITCH__
+    R_SwitchPicmipTrace("[SWITCH CODEIMG] after $white\n");
+#endif
     iassert(rgp.whiteImage);
     rgp.blackImage = Image_Register("$black", TS_FUNCTION, IMAGE_TRACK_MISC);
+#ifdef __SWITCH__
+    R_SwitchPicmipTrace("[SWITCH CODEIMG] after $black\n");
+#endif
     iassert(rgp.blackImage);
     rgp.blackImage3D = Image_Register("$black_3d", TS_FUNCTION, IMAGE_TRACK_MISC);
+#ifdef __SWITCH__
+    R_SwitchPicmipTrace("[SWITCH CODEIMG] after $black_3d\n");
+#endif
     iassert(rgp.blackImage3D);
     rgp.blackImageCube = Image_Register("$black_cube", TS_FUNCTION, IMAGE_TRACK_MISC);
+#ifdef __SWITCH__
+    R_SwitchPicmipTrace("[SWITCH CODEIMG] after $black_cube\n");
+#endif
     iassert(rgp.blackImageCube);
     rgp.grayImage = Image_Register("$gray", TS_FUNCTION, IMAGE_TRACK_MISC);
+#ifdef __SWITCH__
+    R_SwitchPicmipTrace("[SWITCH CODEIMG] after $gray\n");
+#endif
     iassert(rgp.grayImage);
     rgp.identityNormalMapImage = Image_Register("$identitynormalmap", TS_FUNCTION, IMAGE_TRACK_MISC);
+#ifdef __SWITCH__
+    R_SwitchPicmipTrace("[SWITCH CODEIMG] after $identitynormalmap\n");
+#endif
     iassert(rgp.identityNormalMapImage);
     rgp.pixelCostColorCodeImage = Image_Register("$pixelcostcolorcode", TS_FUNCTION, IMAGE_TRACK_MISC);
+#ifdef __SWITCH__
+    R_SwitchPicmipTrace("[SWITCH CODEIMG] after $pixelcostcolorcode\n");
+#endif
     iassert(rgp.pixelCostColorCodeImage);
 }
 
