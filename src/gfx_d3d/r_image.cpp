@@ -754,10 +754,16 @@ void __cdecl R_SetPicmip()
                 imageGlobals.picmipBump = 0;
                 imageGlobals.picmipSpec = 0;
             }
+#ifdef __SWITCH__
+            Switch_LogRaw("[SWITCH PICMIP] after base quality selection\n");
+#endif
             if (sysMemInMegs > 0x180)
                 minPicmip = sysMemInMegs <= 0x280;
             else
                 minPicmip = 2;
+#ifdef __SWITCH__
+            Switch_LogRaw("[SWITCH PICMIP] after minPicmip calculation\n");
+#endif
             if (minPicmip)
             {
                 cappedPicmip = 0;
@@ -781,6 +787,9 @@ void __cdecl R_SetPicmip()
                         CON_CHANNEL_GFX,
                         "Reducing texture detail based on total system memory of %i MB to improve load times.\n",
                         sysMemInMegs);
+#ifdef __SWITCH__
+                Switch_LogRaw("[SWITCH PICMIP] after minPicmip cap block\n");
+#endif
             }
 #ifdef __SWITCH__
             // These values are already validated by the picmip calculation.
@@ -794,6 +803,9 @@ void __cdecl R_SetPicmip()
             picmipBump->latched.integer = imageGlobals.picmipBump;
             picmipSpec->current.integer = imageGlobals.picmipSpec;
             picmipSpec->latched.integer = imageGlobals.picmipSpec;
+#ifdef __SWITCH__
+            Switch_LogRaw("[SWITCH PICMIP] after direct dvar writes\n");
+#endif
 #else
             Dvar_SetInt(r_picmip, imageGlobals.picmip);
             Dvar_SetInt(r_picmip_bump, imageGlobals.picmipBump);
