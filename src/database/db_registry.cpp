@@ -446,14 +446,9 @@ static void __cdecl DB_RemoveLoadedSound(XAssetHeader header)
 #ifdef __SWITCH__
 static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
 {
-    static char language[64];
-    static bool selected = false;
+    static char startupLanguage[64];
 
-    if (selected && language[0])
-        return language;
-
-    // Com_InitXAssets() runs before FS_InitFilesystem(), so loc_language may
-    // not exist yet. In that case resolve the language from actual fastfiles.
+    // After FS_InitFilesystem() the normal loc_language dvar is authoritative.
     if (loc_language)
     {
         const int languageIndex = SEH_GetCurrentLanguage();
@@ -461,20 +456,14 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
         {
             const char *languageName = SEH_GetLanguageName(languageIndex);
             if (languageName && *languageName)
-            {
-                char path[256];
-                Com_sprintf(path, sizeof(path), "zone/%s/%s.ff", languageName, zoneName);
-                FILE *file = FS_SwitchOpenRootFile(path);
-                if (file)
-                {
-                    fclose(file);
-                    I_strncpyz(language, languageName, sizeof(language));
-                    selected = true;
-                    return language;
-                }
-            }
+                return languageName;
         }
     }
+
+    // Com_InitXAssets() runs before FS_InitFilesystem(), so resolve the
+    // startup language by probing the actual fastfiles on the SD card.
+    if (startupLanguage[0])
+        return startupLanguage;
 
     for (int i = 0; i < 15; ++i)
     {
@@ -489,16 +478,14 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
             continue;
 
         fclose(file);
-        I_strncpyz(language, languageName, sizeof(language));
-        Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\\n", language);
-        selected = true;
-        return language;
+        I_strncpyz(startupLanguage, languageName, sizeof(startupLanguage));
+        Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\\n", startupLanguage);
+        return startupLanguage;
     }
 
-    I_strncpyz(language, "english", sizeof(language));
-    return language;
+    I_strncpyz(startupLanguage, "english", sizeof(startupLanguage));
+    return startupLanguage;
 }
-#endif
 
 static void __cdecl DB_BuildOSPath_Mod(const char *zoneName, uint32_t size, char *filename)
 {
