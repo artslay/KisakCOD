@@ -1,6 +1,16 @@
 #include <universal/q_shared.h>
 
 #ifdef __SWITCH__
+static inline void SwitchTrace(const char *msg)
+{
+    write(2, msg, strlen(msg));
+}
+#endif
+#ifdef __SWITCH__
+#include <unistd.h>
+#endif
+
+#ifdef __SWITCH__
 extern void Sys_Print(const char *msg);
 #endif
 #include <universal/surfaceflags.h>
@@ -1050,17 +1060,21 @@ void __cdecl Material_UpdatePicmipSingle(XAssetHeader header)
 void __cdecl Material_UpdatePicmipAll()
 {
 #ifdef __SWITCH__
-    Sys_Print("[SWITCH MATERIAL PICMIP] before R_SyncRenderThread\n");
+    SwitchTrace("[SWITCH MATERIAL PICMIP] ENTER\n");
+    SwitchTrace("[SWITCH MATERIAL PICMIP] before R_SyncRenderThread\n");
 #endif
     R_SyncRenderThread();
 #ifdef __SWITCH__
-    Sys_Print("[SWITCH MATERIAL PICMIP] before R_SetPicmip\n");
+    SwitchTrace("[SWITCH MATERIAL PICMIP] before R_SetPicmip\n");
 #endif
     R_SetPicmip();
 #ifdef __SWITCH__
-    Sys_Print("[SWITCH MATERIAL PICMIP] after R_SetPicmip\n");
+    SwitchTrace("[SWITCH MATERIAL PICMIP] after R_SetPicmip\n");
 #endif
     DB_EnumXAssets(ASSET_TYPE_MATERIAL, (void(__cdecl *)(XAssetHeader, void *))Material_UpdatePicmipSingle, 0, 1);
+#ifdef __SWITCH__
+    SwitchTrace("[SWITCH MATERIAL PICMIP] EXIT\n");
+#endif
 }
 
 Material *__cdecl Material_Find(const char *name)
