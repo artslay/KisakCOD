@@ -566,9 +566,9 @@ int __cdecl SEH_StringEd_SetLanguageStrings(uint32_t iLanguage)
 
 void __cdecl SEH_UpdateLanguageInfo()
 {
-    int iNumLanguages; // [esp+0h] [ebp-8h]
-    int i; // [esp+4h] [ebp-4h]
-    int ia; // [esp+4h] [ebp-4h]
+    int iNumLanguages; // [esp+0h-8h]
+    int i; // [esp+4h-4h]
+    int ia; // [esp+4h-4h]
 
     if (!loc_language)
         MyAssertHandler(".\\stringed\\stringed_hooks.cpp", 172, 0, "%s", "loc_language");
@@ -590,6 +590,29 @@ void __cdecl SEH_UpdateLanguageInfo()
     }
     if (iNumLanguages < 1)
         Com_PrintError(CON_CHANNEL_SYSTEM, "ERROR: No languages available because no localized assets were found\n");
+
+#ifdef __SWITCH__
+    // Switch loads localization from fastfiles. The PC-only localizedstrings
+    // file pass is not applicable here, so select an installed language based
+    // on the available zone/<language> directory.
+    if (loc_language->current.integer >= 0 &&
+        loc_language->current.integer < 15 &&
+        g_languages[loc_language->current.integer].bPresent)
+        return;
+
+    for (ia = 0; ia < 15; ++ia)
+    {
+        if (g_languages[ia].bPresent)
+        {
+            Dvar_SetInt(loc_language, ia);
+            SEH_UpdateCurrentLanguage();
+            return;
+        }
+    }
+
+    Dvar_SetInt(loc_language, 0);
+    SEH_UpdateCurrentLanguage();
+#else
     if (!SEH_StringEd_SetLanguageStrings(loc_language->current.unsignedInt))
     {
         for (ia = 0; ia < 15; ++ia)
@@ -602,4 +625,5 @@ void __cdecl SEH_UpdateLanguageInfo()
         Dvar_SetInt(loc_language, 0);
         SEH_UpdateCurrentLanguage();
     }
+#endif
 }
