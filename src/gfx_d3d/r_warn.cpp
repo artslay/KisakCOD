@@ -54,7 +54,7 @@ void R_WarnOncePerFrame(GfxWarningType warnType, ...)
 {
     char message[1028]; // [esp+0h] [ebp-410h] BYREF
     float frameRate; // [esp+408h] [ebp-8h]
-    char *vargs; // [esp+40Ch] [ebp-4h]
+    va_list vargs; // AArch64: variadic argument list copy
     va_list va; // [esp+41Ch] [ebp+Ch] BYREF
 
     va_start(va, warnType);
@@ -64,8 +64,8 @@ void R_WarnOncePerFrame(GfxWarningType warnType, ...)
     {
         s_warnCount[warnType] = rg.frontEndFrameCount + (int)(frameRate * r_warningRepeatDelay->current.value);
         va_copy(vargs, va);
-        _vsnprintf(message, 0x400u, s_warnFormat[warnType], va);
-        vargs = 0;
+        _vsnprintf(message, 0x400u, s_warnFormat[warnType], vargs);
+        va_end(vargs);
         Com_PrintWarning(CON_CHANNEL_GFX, "%s\n", message);
     }
 }
