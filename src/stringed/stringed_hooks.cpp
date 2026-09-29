@@ -514,9 +514,18 @@ void __cdecl SEH_Shutdown_StringEd()
     SE_ShutDown();
 }
 
+#ifdef __SWITCH__
+extern bool __cdecl FS_SwitchLanguageHasAssets(int iLanguage);
+#endif
+
 int __cdecl FS_LanguageHasAssets(int iLanguage)
 {
     searchpath_s *pSearch; // [esp+0h] [ebp-4h]
+
+#ifdef __SWITCH__
+    if (FS_SwitchLanguageHasAssets(iLanguage))
+        return 1;
+#endif
 
     for (pSearch = fs_searchpaths; pSearch; pSearch = pSearch->next)
     {
