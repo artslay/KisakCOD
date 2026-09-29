@@ -17,22 +17,33 @@ char *__cdecl getBuildNumber()
 #define ARRAYSIZE(x) (sizeof(x) / sizeof(x[0]))
 #endif
 
-    char number[16];
+    char digits[16];
     unsigned int value = BUILD_NUMBER;
-    unsigned int pos = sizeof(number) - 1;
-    number[pos] = '\0';
+    int digitCount = 0;
+    char *out = buildnumbuf;
 
     do
     {
-        number[--pos] = static_cast<char>('0' + (value % 10));
+        digits[digitCount++] = static_cast<char>('0' + (value % 10));
         value /= 10;
     } while (value);
 
-    memcpy(buildnumbuf, &number[pos], sizeof(number) - pos);
-    strcpy(&buildnumbuf[sizeof(number) - pos - 1], " ");
-    strcat(buildnumbuf, __DATE__);
-    strcat(buildnumbuf, " ");
-    strcat(buildnumbuf, __TIME__);
+    while (digitCount > 0)
+        *out++ = digits[--digitCount];
+
+    *out++ = ' ';
+
+    const char *date = __DATE__;
+    while (*date)
+        *out++ = *date++;
+
+    *out++ = ' ';
+
+    const char *buildTime = __TIME__;
+    while (*buildTime)
+        *out++ = *buildTime++;
+
+    *out = '\0';
 	return buildnumbuf;
 }
 
