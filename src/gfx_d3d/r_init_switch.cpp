@@ -164,12 +164,11 @@ static void R_LoadGraphicsAssets()
         ++zoneCount;
     }
 
-    // code_post_gfx must be loaded before R_InitSystems() so renderer defaults exist.
-    // UI/common stay asynchronous; the DB thread will finish them independently.
+    // Complete all renderer bootstrap fastfiles before R_InitSystems().
+    // The renderer registers built-in images immediately afterwards, so the
+    // database must no longer be mutating its XAsset tables concurrently.
     if (zoneCount > 0)
-        DB_LoadXAssets(zoneInfo, 1, 1);
-    if (zoneCount > 1)
-        DB_LoadXAssets(zoneInfo + 1, zoneCount - 1, 0);
+        DB_LoadXAssets(zoneInfo, zoneCount, 1);
 }
 
 void R_InitGraphicsApi() {
