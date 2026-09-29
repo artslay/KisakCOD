@@ -711,7 +711,13 @@ void __cdecl R_SetPicmip()
 
     iassert( dx.device );
     texMemInMegs = R_AvailableTextureMemory();
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH PICMIP RAW] after texture memory\\n");
+#endif
     sysMemInMegs = Dvar_GetInt("sys_sysMB");
+#ifdef __SWITCH__
+    Switch_LogRaw("[SWITCH PICMIP RAW] after sys memory dvar\\n");
+#endif
     iassert( r_reflectionProbeGenerate );
     if (r_reflectionProbeGenerate->current.enabled)
     {
@@ -756,6 +762,9 @@ void __cdecl R_SetPicmip()
                 minPicmip = sysMemInMegs <= 0x280;
             else
                 minPicmip = 2;
+#ifdef __SWITCH__
+            Switch_LogRaw("[SWITCH PICMIP RAW] before minPicmip block\\n");
+#endif
             if (minPicmip)
             {
                 cappedPicmip = 0;
