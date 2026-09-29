@@ -127,7 +127,7 @@ void __cdecl R_PixelCost_BeginSurface(GfxCmdBufContext context)
 
     if (pixelCostMode == GFX_PIXEL_COST_MODE_MEASURE_COST)
     {
-        packedKey = R_PixelCost_PackedKeyForMaterial(*(_QWORD *)&context.state->material);
+        packedKey = R_PixelCost_PackedKeyForMaterial(context.state->material, context.state->techType);
         if (!RB_PixelCost_DoesPrimMatch(packedKey))
             RB_PixelCost_ResetPrim(packedKey);
         ++pixelCostGlob.expectedCount;
@@ -136,7 +136,7 @@ void __cdecl R_PixelCost_BeginSurface(GfxCmdBufContext context)
     }
     else if (pixelCostMode == GFX_PIXEL_COST_MODE_MEASURE_MSEC)
     {
-        packedKeya = R_PixelCost_PackedKeyForMaterial(*(_QWORD *)&context.state->material);
+        packedKeya = R_PixelCost_PackedKeyForMaterial(context.state->material, context.state->techType);
         if (!RB_PixelCost_DoesPrimMatch(packedKeya))
             RB_PixelCost_ResetPrim(packedKeya);
         ++pixelCostGlob.expectedCount;
@@ -238,17 +238,26 @@ int __cdecl RB_PixelCost_GetCostForRecordIndex(int recordIndex)
     }
 }
 
-unsigned __int64 __cdecl R_PixelCost_PackedKeyForMaterial(__int64 material)
+unsigned __int64 __cdecl R_PixelCost_PackedKeyForMaterial(const Material *material, MaterialTechniqueType techType)
 {
+    uintptr_t value;
     iassert( material );
-    return material;
+    value = reinterpret_cast<uintptr_t>(material);
+#ifdef __SWITCH__
+    value ^= value >> 33;
+    value *= 0xFF51AFD7ED558CCDULL;
+    value ^= value >> 33;
+    value ^= static_cast<uint64_t>(static_cast<uint32_t>(techType)) * 0x9E3779B97F4A7C15ULL;
+    value ^= value >> 33;
+    return static_cast<unsigned __int64>(value);
+#else
+    return __PAIR64__(techType, static_cast<uint32_t>(value));
+#endif
 }
 
 bool __cdecl RB_PixelCost_DoesPrimMatch(unsigned __int64 packedKey)
 {
-    return __PAIR64__(
-        pixelCostGlob.records[pixelCostGlob.recordCount].key.mtl.techType,
-        pixelCostGlob.records[pixelCostGlob.recordCount].key.mtl.material) == packedKey;
+    return pixelCostGlob.records[pixelCostGlob.recordCount].key.packed == packedKey;
 }
 
 void __cdecl RB_PixelCost_ResetPrim(unsigned __int64 packedKey)
