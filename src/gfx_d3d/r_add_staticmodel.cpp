@@ -146,7 +146,7 @@ void __cdecl R_AddDelayedStaticModelDrawSurf(
     uint32_t count)
 {
     R_WritePrimDrawSurfInt(delayedCmdBuf, count);
-    R_WritePrimDrawSurfInt(delayedCmdBuf, (uint32_t)xsurf);
+    R_WritePrimDrawSurfInt(delayedCmdBuf, static_cast<uint32_t>(reinterpret_cast<uintptr_t>(xsurf)));
     R_WritePrimDrawSurfData(delayedCmdBuf, list, (count + 1) >> 1);
 }
 
