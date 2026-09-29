@@ -150,7 +150,9 @@ void R_SkinXModelCmd(_WORD *data)
             if (!sseStateUsed)
             {
                 sseStateUsed = true;
+#if !defined(__SWITCH__)
                 _m_empty();
+#endif
             }
         
             GfxPackedVertexNormal *skinVertNormalIn = 0, *skinVertNormalOut = 0;
@@ -170,7 +172,11 @@ void R_SkinXModelCmd(_WORD *data)
     }
 
     if (sseStateUsed)
+    {
+#if !defined(__SWITCH__)
         _m_empty();
+#endif
+    }
 }
 
 
