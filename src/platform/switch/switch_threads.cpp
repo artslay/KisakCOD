@@ -362,17 +362,33 @@ void Sys_SleepServer() { std::this_thread::yield(); }
 bool Sys_WaitServer() { return true; }
 void Sys_Sleep(uint32_t msec) { std::this_thread::sleep_for(std::chrono::milliseconds(msec)); }
 void Sys_SetServerTimeout(int) {}
-bool Sys_WaitForSaveHistoryDone() { return true; }
+bool Sys_WaitForSaveHistoryDone()
+{
+    return Sys_WaitForSingleObjectTimeout(&g_saveHistoryDoneEvent, 2000);
+}
+
 int Sys_SpawnServerDemoThread(void (*function)(uint32_t))
 {
-    Sys_Print("[SWITCH THREAD TRACE] active Sys_SpawnServerDemoThread enter\n");
+    Sys_CreateEvent(false, false, &g_saveHistoryEvent);
+    Sys_CreateEvent(false, false, &g_saveHistoryDoneEvent);
     Sys_CreateThread((void (__cdecl *)(uint32_t))function, THREAD_CONTEXT_SERVER_DEMO);
-    Sys_Print("[SWITCH THREAD TRACE] active Sys_SpawnServerDemoThread leave\n");
     return threadHandle[THREAD_CONTEXT_SERVER_DEMO] != nullptr ? 1 : 0;
 }
-void Sys_SetSaveHistoryEvent() {}
-void Sys_WaitForSaveHistory() {}
-void Sys_SetSaveHistoryDoneEvent() {}
+
+void Sys_SetSaveHistoryEvent()
+{
+    Sys_SetEvent(&g_saveHistoryEvent);
+}
+
+void Sys_WaitForSaveHistory()
+{
+    Sys_WaitForSingleObject(&g_saveHistoryEvent);
+}
+
+void Sys_SetSaveHistoryDoneEvent()
+{
+    Sys_SetEvent(&g_saveHistoryDoneEvent);
+}
 #endif
 
 void Sys_EndLoadThreadPriorities() {}
