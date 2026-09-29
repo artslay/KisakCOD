@@ -16,6 +16,10 @@
 #endif
 #include <gfx_d3d/rb_backend.h>
 
+#ifdef KISAK_SWITCH
+extern void Sys_Print(const char *text);
+#endif
+
 uint32_t Win_InitThreads();
 
 
@@ -170,7 +174,19 @@ void __cdecl Sys_CreateThread(void(__cdecl* function)(uint32_t), ThreadContext_t
 {
     iassert( threadFunc[threadContext] == NULL );
     iassert(threadContext < THREAD_CONTEXT_COUNT);
+
+#ifdef KISAK_SWITCH
+    if (threadContext == THREAD_CONTEXT_SERVER_DEMO)
+        Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: Sys_CreateThread enter\n");
+#endif
+
     threadFunc[threadContext] = function;
+
+#ifdef KISAK_SWITCH
+    if (threadContext == THREAD_CONTEXT_SERVER_DEMO)
+        Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: before CreateThread\n");
+#endif
+
     threadHandle[threadContext] = CreateThread(
         0,
         0,
@@ -178,7 +194,18 @@ void __cdecl Sys_CreateThread(void(__cdecl* function)(uint32_t), ThreadContext_t
         (LPVOID)threadContext,
         4u,
         &threadId[threadContext]);
+
+#ifdef KISAK_SWITCH
+    if (threadContext == THREAD_CONTEXT_SERVER_DEMO)
+        Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: after CreateThread\n");
+#endif
+
     SetThreadName(threadId[threadContext], s_threadNames[threadContext]);
+
+#ifdef KISAK_SWITCH
+    if (threadContext == THREAD_CONTEXT_SERVER_DEMO)
+        Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: Sys_CreateThread leave\n");
+#endif
 }
 
 #define MS_VC_EXCEPTION 0x406d1388
@@ -216,9 +243,28 @@ uint32_t __stdcall Sys_ThreadMain(ThreadContext_t threadContext)
 {
     bcassert(threadContext, THREAD_CONTEXT_COUNT);
     iassert(threadFunc[threadContext]);
+
+#ifdef KISAK_SWITCH
+    if (threadContext == THREAD_CONTEXT_SERVER_DEMO)
+        Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: ThreadMain ENTER\n");
+#endif
+
     SetThreadName(0xFFFFFFFF, s_threadNames[threadContext]);
+
     Sys_InitThread(threadContext);
+
+#ifdef KISAK_SWITCH
+    if (threadContext == THREAD_CONTEXT_SERVER_DEMO)
+        Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: after Sys_InitThread\n");
+#endif
+
     threadFunc[threadContext](threadContext);
+
+#ifdef KISAK_SWITCH
+    if (threadContext == THREAD_CONTEXT_SERVER_DEMO)
+        Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: function returned\n");
+#endif
+
     return 0;
 }
 
@@ -333,7 +379,18 @@ void __cdecl Sys_SuspendThread(ThreadContext_t threadContext)
 void __cdecl Sys_ResumeThread(ThreadContext_t threadContext)
 {
     iassert( threadHandle[threadContext] );
+
+#ifdef KISAK_SWITCH
+    if (threadContext == THREAD_CONTEXT_SERVER_DEMO)
+        Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: before ResumeThread\n");
+#endif
+
     ResumeThread(threadHandle[threadContext]);
+
+#ifdef KISAK_SWITCH
+    if (threadContext == THREAD_CONTEXT_SERVER_DEMO)
+        Sys_Print("[SWITCH THREAD TRACE] SERVER_DEMO: after ResumeThread\n");
+#endif
 }
 
 void *__cdecl Sys_RendererSleep()
