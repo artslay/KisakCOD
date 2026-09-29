@@ -479,7 +479,7 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
                 I_strncpyz(startupLanguage, languageName, sizeof(startupLanguage));
                 if (loc_language)
                     Dvar_SetInt((dvar_s *)loc_language, i);
-                Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\\n", startupLanguage);
+                Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\n", startupLanguage);
                 return startupLanguage;
             }
         }
@@ -521,7 +521,7 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
             I_strncpyz(startupLanguage, languageName, sizeof(startupLanguage));
             if (loc_language)
                 Dvar_SetInt((dvar_s *)loc_language, i);
-            Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\\n", startupLanguage);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\n", startupLanguage);
             return startupLanguage;
         }
     }
@@ -543,7 +543,7 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
         I_strncpyz(startupLanguage, languageName, sizeof(startupLanguage));
         if (loc_language)
             Dvar_SetInt((dvar_s *)loc_language, i);
-        Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\\n", startupLanguage);
+        Com_Printf(CON_CHANNEL_SYSTEM, "Switch fastfile language: %s\n", startupLanguage);
         return startupLanguage;
     }
 
