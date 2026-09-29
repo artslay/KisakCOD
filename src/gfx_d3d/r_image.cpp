@@ -709,8 +709,20 @@ void __cdecl R_SetPicmip()
     bool cappedPicmip; // [esp+Bh] [ebp-5h]
     int minPicmip; // [esp+Ch] [ebp-4h]
 
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_GFX, "[SWITCH PICMIP] before dx.device assert\n");
+#endif
     iassert( dx.device );
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_GFX, "[SWITCH PICMIP] after dx.device assert\n");
+#endif
     texMemInMegs = R_AvailableTextureMemory();
+#ifdef __SWITCH__
+    Com_Printf(
+        CON_CHANNEL_GFX,
+        "[SWITCH PICMIP] after texture memory query: %u\n",
+        texMemInMegs);
+#endif
 #ifdef __SWITCH__
     // sys_sysMB is not registered by the Switch port. Do not enter the shared
     // dvar read lock here; use the same 2048 MB budget as the Switch texture budget.
@@ -718,9 +730,18 @@ void __cdecl R_SetPicmip()
 #else
     sysMemInMegs = Dvar_GetInt("sys_sysMB");
 #endif
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_GFX, "[SWITCH PICMIP] before reflection dvar assert\n");
+#endif
     iassert( r_reflectionProbeGenerate );
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_GFX, "[SWITCH PICMIP] after reflection dvar assert\n");
+#endif
     if (r_reflectionProbeGenerate->current.enabled)
     {
+#ifdef __SWITCH__
+        Com_Printf(CON_CHANNEL_GFX, "[SWITCH PICMIP] reflection dvar enabled\n");
+#endif
         Com_Printf(CON_CHANNEL_GFX, "Picmip is set to lowest quality for generating reflections.\n");
         imageGlobals.picmip = 2;
         imageGlobals.picmipBump = 2;
