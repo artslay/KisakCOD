@@ -463,7 +463,7 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
 
             for (size_t i = 0; i < count; ++i)
             {
-                if (requested[i] == '\\r' || requested[i] == '\\n')
+                if (requested[i] == '\\r' || requested[i] == '\n')
                 {
                     requested[i] = 0;
                     break;
@@ -891,12 +891,12 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
 #ifdef __SWITCH__
     extern void Switch_LogRaw(const char *msg);
     char trace[256];
-    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] before DB_FindXAssetEntry type=%i name=%s\\n", (int)type, name);
+    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] before DB_FindXAssetEntry type=%i name=%s\n", (int)type, name);
     Switch_LogRaw(trace);
 #endif
     XAssetEntryPoolEntry *assetEntry = DB_FindXAssetEntry(type, name);
 #ifdef __SWITCH__
-    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] after DB_FindXAssetEntry entry=%p\\n", (void *)assetEntry);
+    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] after DB_FindXAssetEntry entry=%p\n", (void *)assetEntry);
     Switch_LogRaw(trace);
 #endif
     if (assetEntry)
@@ -1468,7 +1468,7 @@ XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *na
 
     const uint32_t hash = DB_HashForName(name, type);
 #ifdef __SWITCH__
-    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] DB_FindXAssetEntry hash=%u name=%s first=%u\\n", hash, name, db_hashTable[hash]);
+    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] DB_FindXAssetEntry hash=%u name=%s first=%u\n", hash, name, db_hashTable[hash]);
     Switch_LogRaw(trace);
 #endif
     for (assetEntryIndex = db_hashTable[hash];
@@ -1513,7 +1513,7 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
 #ifdef __SWITCH__
     extern void Switch_LogRaw(const char *msg);
     char trace[256];
-    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] CreateDefaultEntry enter type=%i name=%s default=%s\\n",
+    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] CreateDefaultEntry enter type=%i name=%s default=%s\n",
         (int)type, name, g_defaultAssetName[type]);
     Switch_LogRaw(trace);
 #endif
@@ -1521,11 +1521,11 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
     XAssetEntry *newEntry; // [esp+14h] [ebp-4h]
 
 #ifdef __SWITCH__
-    Switch_LogRaw("[SWITCH DB TRACE] before DB_FindXAssetDefaultHeaderInternal\\n");
+    Switch_LogRaw("[SWITCH DB TRACE] before DB_FindXAssetDefaultHeaderInternal\n");
 #endif
     asset.header = DB_FindXAssetDefaultHeaderInternal(type);
 #ifdef __SWITCH__
-    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] after DB_FindXAssetDefaultHeaderInternal header=%p\\n", (void *)asset.header.data);
+    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] after DB_FindXAssetDefaultHeaderInternal header=%p\n", (void *)asset.header.data);
     Switch_LogRaw(trace);
 #endif
     if (!asset.header.data)
@@ -1547,17 +1547,17 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
     asset.type = type;
     ++g_defaultAssetCount;
 #ifdef __SWITCH__
-    Switch_LogRaw("[SWITCH DB TRACE] before DB_AllocXAssetEntry\\n");
+    Switch_LogRaw("[SWITCH DB TRACE] before DB_AllocXAssetEntry\n");
 #endif
     newEntry = (XAssetEntry *)DB_AllocXAssetEntry(type, 0);
 #ifdef __SWITCH__
-    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] after DB_AllocXAssetEntry entry=%p\\n", (void *)newEntry);
+    std::snprintf(trace, sizeof(trace), "[SWITCH DB TRACE] after DB_AllocXAssetEntry entry=%p\n", (void *)newEntry);
     Switch_LogRaw(trace);
-    Switch_LogRaw("[SWITCH DB TRACE] before DB_CloneXAssetInternal\\n");
+    Switch_LogRaw("[SWITCH DB TRACE] before DB_CloneXAssetInternal\n");
 #endif
     DB_CloneXAssetInternal(&asset, &newEntry->asset);
 #ifdef __SWITCH__
-    Switch_LogRaw("[SWITCH DB TRACE] after DB_CloneXAssetInternal\\n");
+    Switch_LogRaw("[SWITCH DB TRACE] after DB_CloneXAssetInternal\n");
 #endif
     if (type == ASSET_TYPE_SOUND)
     {
@@ -1567,12 +1567,12 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
     newEntry->nextHash = db_hashTable[DB_HashForName(name, type)];
     db_hashTable[DB_HashForName(name, type)] = ((char *)newEntry - (char *)g_assetEntryPool) >> 4;
 #ifdef __SWITCH__
-    Switch_LogRaw("[SWITCH DB TRACE] before DB_SetXAssetName/SL_GetString\\n");
+    Switch_LogRaw("[SWITCH DB TRACE] before DB_SetXAssetName/SL_GetString\n");
 #endif
     DB_SetXAssetName(&newEntry->asset, SL_ConvertToString(SL_GetString(name, 4)));
 #ifdef __SWITCH__
-    Switch_LogRaw("[SWITCH DB TRACE] after DB_SetXAssetName/SL_GetString\\n");
-    Switch_LogRaw("[SWITCH DB TRACE] CreateDefaultEntry return\\n");
+    Switch_LogRaw("[SWITCH DB TRACE] after DB_SetXAssetName/SL_GetString\n");
+    Switch_LogRaw("[SWITCH DB TRACE] CreateDefaultEntry return\n");
 #endif
     newEntry->inuse = 1;
     return newEntry;
@@ -1881,7 +1881,7 @@ static void __cdecl DB_InitSingleton(void *pool, int32_t size)
 {
     (void)pool;
     if (size != 1)
-        MyAssertHandler(".\\database\\db_registry.cpp", 528, 0, "%s\\n\\t(size) = %i", "(size == 1)", size);
+        MyAssertHandler(".\\database\\db_registry.cpp", 528, 0, "%s\n\\t(size) = %i", "(size == 1)", size);
 }
 
 static XAssetHeader __cdecl DB_AllocXAssetHeader(XAssetType type)
@@ -1891,9 +1891,9 @@ static XAssetHeader __cdecl DB_AllocXAssetHeader(XAssetType type)
     if (!header.data)
     {
         Sys_UnlockWrite(&db_hashCritSect);
-        Com_PrintError(CON_CHANNEL_ERROR, "Exceeded limit of %d '%s' assets.\\n", g_poolSize[type], g_assetNames[type]);
+        Com_PrintError(CON_CHANNEL_ERROR, "Exceeded limit of %d '%s' assets.\n", g_poolSize[type], g_assetNames[type]);
         DB_EnumXAssets(type, (void(__cdecl *)(XAssetHeader, void *))DB_PrintAssetName, &type, 1);
-        Com_Error(ERR_DROP, "Exceeded limit of %d '%s' assets.\\n", g_poolSize[type], g_assetNames[type]);
+        Com_Error(ERR_DROP, "Exceeded limit of %d '%s' assets.\n", g_poolSize[type], g_assetNames[type]);
     }
     return header;
 }
@@ -1925,7 +1925,7 @@ static XAssetEntryPoolEntry *__cdecl DB_AllocXAssetEntry(XAssetType type, uint8_
 static void __cdecl DB_PrintAssetName(XAssetHeader header, int32_t *data)
 {
     const char *XAssetHeaderName = DB_GetXAssetHeaderName(*data, &header);
-    Com_Printf(CON_CHANNEL_DONT_FILTER, "%s\\n", XAssetHeaderName);
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "%s\n", XAssetHeaderName);
 }
 
 static void __cdecl DB_RemoveWindowFocus(windowDef_t *window)
@@ -2203,12 +2203,12 @@ static void __cdecl DB_DelayedCloneXAsset(XAssetEntry *newEntry)
     {
         if (g_copyInfoCount >= 0x800)
         {
-            Com_Printf(CON_CHANNEL_DONT_FILTER, "g_copyInfo exceeded\\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "g_copyInfo exceeded\n");
             for (i = 0; i < 0x800; ++i)
             {
                 XAssetName = DB_GetXAssetName(&g_copyInfo[i]->asset);
                 XAssetTypeName = DB_GetXAssetTypeName(g_copyInfo[i]->asset.type);
-                Com_Printf(CON_CHANNEL_DONT_FILTER, "%s: %s\\n", XAssetTypeName, XAssetName);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%s: %s\n", XAssetTypeName, XAssetName);
             }
             Sys_Error("g_copyInfo exceeded");
         }
