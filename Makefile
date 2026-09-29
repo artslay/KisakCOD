@@ -9,13 +9,13 @@ BUILD       := build
 
 ARCH        := -march=armv8-a -mtune=cortex-a57 -mtp=soft
 MESA_SDK    := $(CURDIR)/mesa-sdk/opt/devkitpro/portlibs/switch
-CPPFLAGS    := -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE \
+CPPFLAGS    := -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DKISAK_OPENAL -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE \
                -I$(CURDIR)/src -I$(CURDIR)/src/gfx -I$(CURDIR)/deps \
                -I$(DEVKITPRO)/libnx/include -I$(MESA_SDK)/include
 CXXFLAGS    := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP
 CFLAGS      := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -MMD -MP
 LDFLAGS     := $(ARCH) -L$(MESA_SDK)/lib -L$(DEVKITPRO)/libnx/lib -specs=$(DEVKITPRO)/libnx/switch.specs -Wl,--gc-sections
-LIBS        := -lGL -lEGL -lglapi -lnx -lm
+LIBS        := -lGL -lEGL -lglapi -lopenal -lnx -lm
 
 include $(DEVKITPRO)/libnx/switch_rules
 
@@ -57,12 +57,12 @@ C_SOURCES := $(shell find src -type f -name '*.c' \
 # zlib is required by the engine's archive/zip loader.
 C_SOURCES += $(shell find deps/zlib -type f -name '*.c')
 
-CPP_SOURCES += src/platform/switch/switch_main.cpp src/platform/switch/switch_fs.cpp src/platform/switch/switch_threads.cpp src/platform/switch/switch_timing.cpp src/platform/switch/switch_profile.cpp src/platform/switch/switch_sys.cpp
+CPP_SOURCES += src/platform/switch/switch_main.cpp src/platform/switch/switch_fs.cpp src/platform/switch/switch_threads.cpp src/platform/switch/switch_timing.cpp src/platform/switch/switch_profile.cpp src/platform/switch/switch_sys.cpp src/platform/switch/switch_live_storage.cpp
 CPP_SOURCES += src/gfx_d3d/r_init_switch.cpp src/gfx_d3d/r_buffers.cpp src/gfx_d3d/r_state.cpp
 CPP_SOURCES += src/gfx_d3d/r_shade.cpp src/gfx_d3d/rb_shade.cpp src/gfx_d3d/r_material.cpp
-CPP_SOURCES += src/gfx_d3d/r_material_override.cpp src/gfx_d3d/rb_uploadshaders.cpp src/gfx_d3d/r_dvars.cpp
+CPP_SOURCES += src/gfx_d3d/r_material_override.cpp src/gfx_d3d/r_material_load_obj.cpp src/gfx_d3d/rb_uploadshaders.cpp src/gfx_d3d/r_dvars.cpp
 CPP_SOURCES += src/gfx_d3d/r_image.cpp src/gfx_d3d/r_image_load_common.cpp src/gfx_d3d/r_image_load_obj.cpp src/gfx_d3d/r_image_utils.cpp src/gfx_d3d/r_image_wavelet.cpp src/gfx_d3d/r_imagedecode.cpp src/gfx_d3d/r_rendertarget.cpp
-CPP_SOURCES += src/gfx_d3d/r_rendercmds.cpp
+CPP_SOURCES += src/gfx_d3d/r_rendercmds.cpp src/gfx_d3d/r_font.cpp src/gfx_d3d/r_cinematic.cpp src/gfx_d3d/r_devgui.cpp src/gfx_d3d/r_draw_pixelshader.cpp
 CPP_SOURCES += src/gfx_d3d/r_model.cpp src/gfx_d3d/r_scene.cpp src/gfx_d3d/r_dpvs.cpp
 CPP_SOURCES += src/gfx_d3d/r_draw_bsp.cpp src/gfx_d3d/r_draw_lit.cpp src/gfx_d3d/r_draw_staticmodel.cpp src/gfx_d3d/r_draw_xmodel.cpp src/gfx_d3d/r_model_skin.cpp
 CPP_SOURCES += src/gfx_d3d/r_bsp.cpp src/gfx_d3d/r_bsp_load_obj.cpp src/gfx_d3d/r_staticmodelcache.cpp src/gfx_d3d/r_dobj_skin.cpp src/gfx_d3d/r_model_lighting.cpp src/gfx_d3d/r_reflection_probe.cpp
@@ -70,7 +70,7 @@ CPP_SOURCES += src/gfx_d3d/r_model_pose.cpp src/gfx_d3d/r_state_utils.cpp src/gf
 CPP_SOURCES += src/gfx_d3d/r_dpvs_dynmodel.cpp src/gfx_d3d/r_dpvs_entity.cpp src/gfx_d3d/r_dpvs_sceneent.cpp src/gfx_d3d/r_dpvs_static.cpp
 CPP_SOURCES += src/gfx_d3d/r_marks.cpp
 CPP_SOURCES += src/gfx_d3d/r_utils.cpp src/gfx_d3d/r_warn.cpp src/gfx_d3d/rb_state.cpp src/gfx_d3d/rb_logfile.cpp
-CPP_SOURCES += src/gfx_d3d/r_debug.cpp src/gfx_d3d/r_debug_alloc.cpp src/gfx_d3d/rb_light.cpp src/gfx_d3d/rb_postfx.cpp
+CPP_SOURCES += src/gfx_d3d/r_debug.cpp src/gfx_d3d/r_debug_alloc.cpp src/gfx_d3d/rb_light.cpp src/gfx_d3d/rb_postfx.cpp src/gfx_d3d/rb_imagefilter.cpp src/gfx_d3d/rb_depthprepass.cpp src/gfx_d3d/rb_showcollision.cpp
 CPP_SOURCES += src/gfx_d3d/r_sky.cpp src/gfx_d3d/r_shadowcookie.cpp
 CPP_SOURCES += src/gfx_d3d/r_workercmds.cpp src/gfx_d3d/r_workercmds_common.cpp src/gfx_d3d/r_spotshadow.cpp src/gfx_d3d/r_sunshadow.cpp
 CPP_SOURCES += src/gfx_d3d/rb_fog.cpp src/gfx_d3d/r_fog.cpp src/gfx_d3d/r_draw_sunshadow.cpp
@@ -82,6 +82,7 @@ CPP_SOURCES += src/gfx_d3d/r_meshdata.cpp src/gfx_d3d/r_draw_method.cpp src/gfx_
 CPP_SOURCES += src/gfx_d3d/r_draw_material.cpp src/gfx_d3d/r_draw_shadowable_light.cpp src/gfx_d3d/rb_tess.cpp
 CPP_SOURCES += src/gfx_d3d/r_add_cmdbuf.cpp src/gfx_d3d/r_staticmodel.cpp src/gfx_d3d/r_xsurface.cpp src/gfx_d3d/r_reflection_probe_load_obj.cpp
 CPP_SOURCES += src/gfx_d3d/r_light.cpp src/gfx_d3d/r_light_load_obj.cpp src/gfx_d3d/r_primarylights.cpp src/gfx_d3d/r_outdoor.cpp
+CPP_SOURCES += src/physics/ode/collision_trimesh_box.cpp
 
 CPP_OBJECTS := $(CPP_SOURCES:%.cpp=$(BUILD)/%.o)
 C_OBJECTS   := $(C_SOURCES:%.c=$(BUILD)/%.o)

@@ -204,6 +204,8 @@ void R_MakeDedicated(const GfxConfiguration *config) { SetGfxConfig(config); }
 void R_UpdateGpuSyncType() {}
 int R_IsHiDef() { return 1; }
 
+void R_ShutdownStreams() {}
+
 void R_Shutdown(int destroyWindow) {
     (void)destroyWindow;
     R_ShutdownStreams();

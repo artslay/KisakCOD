@@ -267,6 +267,19 @@ uint16_t db_hashTable[32768];
 XAssetEntry *g_copyInfo[0x800];
 uint32_t g_copyInfoCount;
 XZone g_zones[ASSET_TYPE_COUNT]{ 0 };
+
+void __cdecl DB_GetIndexBufferAndBase(uint8_t zoneHandle, void *indices, void **ib, int32_t *baseIndex)
+{
+    *ib = g_zones[zoneHandle].mem.indexBuffer;
+    *baseIndex = ((uintptr_t)indices - (uintptr_t)g_zones[zoneHandle].mem.blocks[8].data) >> 1;
+}
+
+void __cdecl DB_GetVertexBufferAndOffset(uint8_t zoneHandle, uint8_t *verts, void **vb, int32_t *vertexOffset)
+{
+    *vertexOffset = (int32_t)(verts - g_zones[zoneHandle].mem.blocks[7].data);
+    *vb = g_zones[zoneHandle].mem.vertexBuffer;
+}
+
 uint8_t g_zoneHandles[32];
 XAssetEntryPoolEntry g_assetEntryPool[32768];
 uint8_t g_fileBuf[524288];

@@ -19,6 +19,8 @@
 static const auto g_sysStart = std::chrono::steady_clock::now();
 static std::mutex g_sysCritical[32];
 
+SysInfo sys_info = {};
+
 int g_debugClient = 0;
 unsigned char g_debugPacket[1][8192] = {};
 
