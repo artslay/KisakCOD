@@ -164,8 +164,12 @@ static void R_LoadGraphicsAssets()
         ++zoneCount;
     }
 
-    // Renderer bootstrap assets must be fully available before R_InitSystems().
-    DB_LoadXAssets(zoneInfo, zoneCount, 1);
+    // code_post_gfx must be loaded before R_InitSystems() so default renderer
+    // assets such as $white and $default are registered. Keep UI/common async.
+    if (zoneCount > 0)
+        DB_LoadXAssets(zoneInfo, 1, 1);
+    if (zoneCount > 1)
+        DB_LoadXAssets(zoneInfo + 1, zoneCount - 1, 0);
 }
 
 void R_InitGraphicsApi() {
