@@ -7,12 +7,6 @@
 TARGET      := kisakcod
 BUILD       := build
 
-# Nintendo Switch application metadata.
-APP_TITLE   := Call of Duty 4
-APP_AUTHOR  := artslay
-APP_VERSION := 1.0.0
-ICON        := icon.jpg
-
 ARCH        := -march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 MESA_SDK    := $(CURDIR)/mesa-sdk/opt/devkitpro/portlibs/switch
 OPENAL_SDK   := $(DEVKITPRO)/portlibs/switch
@@ -25,6 +19,14 @@ LDFLAGS     := $(ARCH) -L$(MESA_SDK)/lib -L$(OPENAL_SDK)/lib -L$(DEVKITPRO)/libn
 LIBS        := -lGL -lEGL -lglapi -lvulkan -lexpat -lopenal -lSDL2 -lnx -lm
 
 include $(DEVKITPRO)/libnx/switch_rules
+
+# Nintendo Switch application metadata.
+# Keep these after switch_rules: the rules file consumes them when it creates
+# the NACP and embeds the icon into the NRO.
+APP_TITLE   := Call of Duty 4
+APP_AUTHOR  := artslay
+APP_VERSION := 1.0.0
+ICON        := icon.jpg
 
 # Singleplayer Switch build. Keep shared engine/game code, but exclude MP, Windows and D3D9.
 CPP_SOURCES := $(shell find src -type f -name '*.cpp' \
