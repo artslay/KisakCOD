@@ -428,6 +428,7 @@ static int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags
 static int32_t __cdecl DB_GetAllXAssetOfType_LoadObj(XAssetType type, XAssetHeader *assets, int32_t maxCount);
 static void __cdecl DB_EnumXAssets_LoadObj(XAssetType type, void(*func)(void*, void*), void *inData);
 static void __cdecl DB_RemoveLoadedSound(XAssetHeader header);
+static void __cdecl DB_BuildOSPath_Mod(const char *zoneName, uint32_t size, char *filename);
 void __cdecl DB_RemoveXAsset(XAsset *asset);
 void __cdecl DB_SyncExternalAssets();
 void DB_FreeDefaultEntries();
@@ -438,6 +439,12 @@ void __cdecl DB_ReplaceXAsset(XAssetType type, const char *original, const char 
 void __cdecl DB_CloneXAsset(const XAsset *from, XAsset *to);
 void __cdecl Material_DirtyTechniqueSetOverrides();
 void __cdecl Material_ClearShaderUploadList();
+static void __cdecl DB_RemoveLoadedSound(XAssetHeader header)
+{
+    if (header.loadSnd && header.loadSnd->sound.data)
+        Z_Free(header.loadSnd->sound.data, 15);
+}
+
 #ifdef __SWITCH__
 static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
 {
@@ -504,7 +511,7 @@ static const char *DB_GetSwitchZoneLanguage(const char *zoneName)
         Com_sprintf(rootDir, sizeof(rootDir),
             "sdmc:/switch/KisakCOD/game/%s", languageName);
 
-        if (stat(rootDir, &zoneStat) == 0 && S_ISDIR(zoneStat))
+        if (stat(rootDir, &zoneStat) == 0 && S_ISDIR(zoneStat.st_mode))
             return setLanguage(languageName, i);
 
         // Some packages store localization in main/localized_<language>_iw##.iwd.
