@@ -164,7 +164,8 @@ static void R_LoadGraphicsAssets()
         ++zoneCount;
     }
 
-    DB_LoadXAssets(zoneInfo, zoneCount, 0);
+    // Renderer bootstrap assets must be fully available before R_InitSystems().
+    DB_LoadXAssets(zoneInfo, zoneCount, 1);
 }
 
 void R_InitGraphicsApi() {
