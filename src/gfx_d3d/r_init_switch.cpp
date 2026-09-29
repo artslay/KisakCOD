@@ -13,6 +13,10 @@
 #include "r_workercmds.h"
 #include "r_draw_method.h"
 #include <gfx/gfx_backend.h>
+
+// These are implemented by the shared renderer dvar/command modules.
+extern void __cdecl R_RegisterDvars();
+extern void __cdecl R_RegisterCmds();
 #include <gfx/opengl/gl_backend.h>
 
 #ifdef __SWITCH__
