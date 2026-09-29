@@ -5,6 +5,8 @@
 #include <cstring>
 
 #include "r_material.h"
+#include "r_init.h"
+#include <database/database.h>
 #include "r_bsp.h"
 #include "r_image.h"
 
