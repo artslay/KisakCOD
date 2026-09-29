@@ -142,14 +142,36 @@ void R_InitGraphicsApi() {
     dx.multiSampleQuality = 0;
 }
 void R_InitSystems() {
+    Switch_LogRaw("[SWITCH RSYS TRACE] before R_InitImages\n");
     R_InitImages();
+    Switch_LogRaw("[SWITCH RSYS TRACE] after R_InitImages\n");
+
+    Switch_LogRaw("[SWITCH RSYS TRACE] before Material_Init\n");
     Material_Init();
+    Switch_LogRaw("[SWITCH RSYS TRACE] after Material_Init\n");
+
+    Switch_LogRaw("[SWITCH RSYS TRACE] before R_InitFonts\n");
     R_InitFonts();
+    Switch_LogRaw("[SWITCH RSYS TRACE] after R_InitFonts\n");
+
+    Switch_LogRaw("[SWITCH RSYS TRACE] before R_InitLoadWater\n");
     R_InitLoadWater();
+    Switch_LogRaw("[SWITCH RSYS TRACE] after R_InitLoadWater\n");
+
+    Switch_LogRaw("[SWITCH RSYS TRACE] before R_InitLightDefs\n");
     R_InitLightDefs();
+    Switch_LogRaw("[SWITCH RSYS TRACE] after R_InitLightDefs\n");
+
+    Switch_LogRaw("[SWITCH RSYS TRACE] before R_ClearFogs\n");
     R_ClearFogs();
+    Switch_LogRaw("[SWITCH RSYS TRACE] after R_ClearFogs\n");
+
+    Switch_LogRaw("[SWITCH RSYS TRACE] before R_InitDebug\n");
     R_InitDebug();
+    Switch_LogRaw("[SWITCH RSYS TRACE] after R_InitDebug\n");
+
     rg.registered = 1;
+    Switch_LogRaw("[SWITCH RSYS TRACE] rg.registered=1\n");
 }
 char R_PreCreateWindow() { return 1; }
 void R_StoreDirect3DCaps(uint32_t) {}
