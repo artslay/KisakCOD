@@ -2,7 +2,6 @@
 #include "database.h"
 
 #ifdef __SWITCH__
-extern int32_t g_switchAssetIndex;
 #endif
 
 #include <qcommon/files.h>
@@ -900,11 +899,6 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
 
     iassert(IsFastFileLoad());
 
-#ifdef __SWITCH__
-    char trace[256];
-    std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] HEADER type=%d name=%s\n", (int)type, name ? name : "<null>");
-    Switch_LogWrite(trace);
-#endif
 
     // Match the upstream DB hash access pattern: readers may inspect the table
     // concurrently, but creation/linking requires the write lock.
@@ -921,18 +915,10 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
 
     if (assetEntry)
     {
-#ifdef __SWITCH__
-        std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] READ found=%p zone=%u\n",
-            (void *)assetEntry, assetEntry->zoneIndex);
-        Switch_LogWrite(trace);
-#endif
         assetEntry->inuse = 1;
         return assetEntry->asset.header;
     }
 
-#ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBFIND] READ miss, acquiring write lock\n");
-#endif
 
     Sys_LockWrite(&db_hashCritSect);
 
@@ -943,33 +929,19 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
         assetEntry = &existing->entry;
         assetEntry->inuse = 1;
         Sys_UnlockWrite(&db_hashCritSect);
-#ifdef __SWITCH__
-        Switch_LogWrite("[SWITCH DBFIND] WRITE recheck found\n");
-#endif
         return assetEntry->asset.header;
     }
 
     if (type == ASSET_TYPE_LOCALIZE_ENTRY || type == ASSET_TYPE_RAWFILE)
     {
         Sys_UnlockWrite(&db_hashCritSect);
-#ifdef __SWITCH__
-        Switch_LogWrite("[SWITCH DBFIND] missing non-default asset\n");
-#endif
         return {};
     }
 
-#ifdef __SWITCH__
-    std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] CREATE DEFAULT type=%d name=%s default=%s\n",
-        (int)type, name ? name : "<null>", g_defaultAssetName[type]);
-    Switch_LogWrite(trace);
-#endif
 
     newEntry = DB_CreateDefaultEntry(type, (char *)name);
     Sys_UnlockWrite(&db_hashCritSect);
 
-#ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBFIND] CREATE DEFAULT returned\n");
-#endif
 
     v5 = g_assetNames[type];
     (void)v5;
@@ -1522,47 +1494,17 @@ void __cdecl DB_RemoveGfxWorld(XAssetHeader ass)
 
 XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *name)
 {
-#ifdef __SWITCH__
-    char trace[256];
-    std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] ENTRY hash begin type=%d name=%s\n", (int)type, name ? name : "<null>");
-    Switch_LogWrite(trace);
-#endif
     const char *XAssetName; // eax
     uint32_t assetEntryIndex; // [esp+4h] [ebp-8h]
     XAssetEntryPoolEntry *assetEntry; // [esp+8h] [ebp-4h]
 
     const uint32_t hash = DB_HashForName(name, type);
-#ifdef __SWITCH__
-    std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] hash=%u head=%u\n", hash, db_hashTable[hash]);
-    Switch_LogWrite(trace);
-#endif
-    uint32_t iterations = 0;
     for (assetEntryIndex = db_hashTable[hash];
         assetEntryIndex;
         assetEntryIndex = assetEntry->entry.nextHash)
     {
-#ifdef __SWITCH__
-        if (assetEntryIndex >= 0x8000)
-        {
-            std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] INVALID idx=%u\n", assetEntryIndex);
-            Switch_LogWrite(trace);
+if (assetEntryIndex >= 0x8000)
             return 0;
-        }
-        if (++iterations <= 16)
-        {
-            std::snprintf(trace, sizeof(trace), "[SWITCH DBFIND] idx=%u next=%u type=%d\n",
-                assetEntryIndex, g_assetEntryPool[assetEntryIndex].entry.nextHash,
-                (int)g_assetEntryPool[assetEntryIndex].entry.asset.type);
-            Switch_LogWrite(trace);
-        }
-        else if (iterations == 17)
-        {
-            Switch_LogWrite("[SWITCH DBFIND] more than 16 chain entries -- possible cycle\n");
-        }
-#else
-        if (assetEntryIndex >= 0x8000)
-            return 0;
-#endif
         assetEntry = &g_assetEntryPool[assetEntryIndex];
         if (assetEntry->entry.asset.type == type)
         {
@@ -1571,9 +1513,6 @@ XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *na
                 return &g_assetEntryPool[assetEntryIndex];
         }
     }
-#ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBFIND] ENTRY not found\n");
-#endif
     return 0;
 }
 
@@ -2296,51 +2235,12 @@ XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
     XAssetEntryPoolEntry *existingEntry;
     XAssetEntryPoolEntry newEntry;
 
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_FILES,
-               "[SWITCH DBADD] index=%d BEGIN type=%d header=%p\n",
-               g_switchAssetIndex,
-               static_cast<int>(type),
-               header.data);
-#endif
-
     newEntry.entry.asset.type = type;
     newEntry.entry.asset.header = header;
-
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_FILES,
-               "[SWITCH DBADD] index=%d BEFORE Lock\n",
-               g_switchAssetIndex);
-#endif
     Sys_LockWrite(&db_hashCritSect);
-
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_FILES,
-               "[SWITCH DBADD] index=%d AFTER Lock BEFORE Link\n",
-               g_switchAssetIndex);
-#endif
     existingEntry = DB_LinkXAssetEntry(&newEntry, 0);
-
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_FILES,
-               "[SWITCH DBADD] index=%d AFTER Link BEFORE Unlock entry=%p\n",
-               g_switchAssetIndex,
-               (void *)existingEntry);
-#endif
     Sys_UnlockWrite(&db_hashCritSect);
-
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_FILES,
-               "[SWITCH DBADD] index=%d AFTER Unlock BEFORE Sync\n",
-               g_switchAssetIndex);
-#endif
     DB_SyncLostDevice();
-
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_FILES,
-               "[SWITCH DBADD] index=%d END\n",
-               g_switchAssetIndex);
-#endif
     return existingEntry->entry.asset.header;
 }
 
@@ -2360,20 +2260,8 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     uint16_t *pOverrideAssetEntryIndex;
     XAssetSize assetSize;
 
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_FILES,
-               "[SWITCH DBLINK] index=%d BEFORE GetName type=%d\n",
-               g_switchAssetIndex,
-               static_cast<int>(newEntry->entry.asset.type));
-#endif
     name = DB_GetXAssetName(&newEntry->entry.asset);
 
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_FILES,
-               "[SWITCH DBLINK] index=%d AFTER GetName name=%p\n",
-               g_switchAssetIndex,
-               (const void *)name);
-#endif
 
     v2 = *name;
     isStubAsset = v2 == ',';
@@ -2381,20 +2269,8 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         ++name;
     type = newEntry->entry.asset.type;
 
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_FILES,
-               "[SWITCH DBLINK] index=%d BEFORE HashName name=%p\n",
-               g_switchAssetIndex,
-               (const void *)name);
-#endif
     hash = DB_HashForName(name, type);
 
-#ifdef __SWITCH__
-    Com_Printf(CON_CHANNEL_FILES,
-               "[SWITCH DBLINK] index=%d AFTER HashName hash=%u\n",
-               g_switchAssetIndex,
-               hash);
-#endif
 
     existingEntry = NULL;
 
