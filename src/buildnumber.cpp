@@ -43,6 +43,11 @@ char *__cdecl getBuildNumber()
     while (*buildTime)
         *out++ = *buildTime++;
 
+    *out++ = ' ';
+    const char *commit = GIT_COMMIT;
+    while (*commit)
+        *out++ = *commit++;
+
     *out = '\0';
 	return buildnumbuf;
 }
