@@ -2142,7 +2142,18 @@ void __cdecl Load_GfxTextureLoad(bool atStreamStart)
     GfxTexture *inserted; // [esp+0h] [ebp-Ch]
     IDirect3DBaseTexture9 *value; // [esp+4h] [ebp-8h]
 
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH IMAGE] TextureLoad before Load_Stream\n");
+#endif
     Load_Stream(atStreamStart, (unsigned char*)varGfxTextureLoad, 4);
+#ifdef __SWITCH__
+    {
+        char trace[128];
+        std::snprintf(trace, sizeof(trace), "[SWITCH IMAGE] TextureLoad basemap=%08x\n",
+            static_cast<uint32_t>(reinterpret_cast<uintptr_t>(varGfxTextureLoad->basemap)));
+        Switch_LogWrite(trace);
+    }
+#endif
     DB_PushStreamPos(0);
     if (varGfxTextureLoad->basemap)
     {
@@ -2156,8 +2167,18 @@ void __cdecl Load_GfxTextureLoad(bool atStreamStart)
                 inserted = (GfxTexture*)DB_InsertPointer();
             else
                 inserted = 0;
+#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH IMAGE] TextureLoad before Load_GfxImageLoadDef\n");
+#endif
             Load_GfxImageLoadDef(1);
+#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH IMAGE] TextureLoad after Load_GfxImageLoadDef\n");
+            Switch_LogWrite("[SWITCH IMAGE] TextureLoad before Load_Texture\n");
+#endif
             Load_Texture(varGfxTextureLoad, varGfxImage);
+#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH IMAGE] TextureLoad after Load_Texture\n");
+#endif
             if (inserted)
                 inserted->basemap = varGfxTextureLoad->basemap;
         }
@@ -2259,7 +2280,13 @@ void __cdecl Load_GfxImage(bool atStreamStart)
         }
 
         varGfxTextureLoad = &varGfxImage->texture;
+#ifdef __SWITCH__
+        Switch_LogWrite("[SWITCH IMAGE] Image before Load_GfxTextureLoad\n");
+#endif
         Load_GfxTextureLoad(0);
+#ifdef __SWITCH__
+        Switch_LogWrite("[SWITCH IMAGE] Image after Load_GfxTextureLoad\n");
+#endif
 
         DB_PopStreamPos();
         return;
@@ -2293,8 +2320,18 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
                 inserted = DB_InsertPointer();
             else
                 inserted = 0;
+#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH IMAGE] Ptr before Load_GfxImage\n");
+#endif
             Load_GfxImage(1);
+#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH IMAGE] Ptr after Load_GfxImage\n");
+            Switch_LogWrite("[SWITCH IMAGE] Ptr before Load_GfxImageAsset\n");
+#endif
             Load_GfxImageAsset((XAssetHeader *)varGfxImagePtr);
+#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH IMAGE] Ptr after Load_GfxImageAsset\n");
+#endif
             if (inserted)
                 *inserted = *varGfxImagePtr;
         }
