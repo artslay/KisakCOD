@@ -363,7 +363,7 @@ static void __cdecl DB_FreeMaterial(void *pool, XAssetHeader header);
 static void __cdecl DB_Sleep(uint32_t msec);
 static void __cdecl DB_LogMissingAsset(XAssetType type, const char *name);
 static void __cdecl DB_RegisteredReorderAsset(int32_t type, const char *assetName, XAssetEntry *assetEntry);
-static XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *name);
+XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *name);
 static uint32_t __cdecl DB_HashForName(const char *name, XAssetType type);
 static XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name);
 static XAssetEntryPoolEntry *__cdecl DB_AllocXAssetEntry(XAssetType type, uint8_t zoneIndex);
