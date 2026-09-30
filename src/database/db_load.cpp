@@ -3184,82 +3184,42 @@ void __cdecl Load_MaterialTechniquePtrArray(bool atStreamStart, int32_t count)
 void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
 {
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH MATERIAL] techset read112 begin\n");
+    Switch_LogWrite("[SWITCH MATERIAL] techset read148 begin\n");
     struct SerializedMaterialTechniqueSet
     {
         uint32_t name;
         uint8_t worldVertFormat;
-        uint8_t pad[3];
-        uint32_t techniques[26];
+        uint8_t hasBeenUploaded;
+        uint8_t unused[2];
+        uint32_t remappedTechniqueSet;
+        uint32_t techniques[34];
     };
-    static_assert(sizeof(SerializedMaterialTechniqueSet) == 112);
+    static_assert(sizeof(SerializedMaterialTechniqueSet) == 148);
 
-    // The runtime technique set lives in Hunk memory on Switch; preserve
-    // the original 4-byte alignment of its serialized fastfile record.
+    iassert(atStreamStart);
+
+    // CoD4 PC fastfiles serialize the PC MaterialTechniqueSet layout:
+    // name + worldVertFormat/meta + remappedTechniqueSet + 34 technique pointers.
+    // The Switch runtime is 64-bit, so expand the serialized 32-bit pointers.
     DB_AllocStreamPos(3);
 
     SerializedMaterialTechniqueSet serialized{};
+    const uint8_t *techniqueSetStart = DB_GetStreamPos();
     DB_LoadXFileData(
         reinterpret_cast<uint8_t *>(&serialized),
         sizeof(serialized));
     DB_IncStreamPos(sizeof(serialized));
 
-#ifdef __SWITCH__
     Switch_LogRawDwords(
         "[SWITCH TECHSET WORDS]",
         reinterpret_cast<const uint8_t *>(&serialized),
         sizeof(serialized));
-#endif
 
-    // The fastfile stores 32-bit pointers. MaterialTechniqueSet is native
-    // 64-bit on Switch, so expand every serialized pointer explicitly.
     varMaterialTechniqueSet->worldVertFormat = serialized.worldVertFormat;
-    varMaterialTechniqueSet->hasBeenUploaded = false;
-    varMaterialTechniqueSet->unused[0] = 0;
-    varMaterialTechniqueSet->unused[1] = 0;
-
-#ifdef __SWITCH__
-    {
-        char trace[320];
-        std::snprintf(
-            trace,
-            sizeof(trace),
-            "[SWITCH TECHSET RAW] name=%08x meta=%02x%02x%02x%02x pos=%p\n",
-            serialized.name,
-            serialized.pad[3],
-            serialized.pad[2],
-            serialized.pad[1],
-            serialized.worldVertFormat,
-            static_cast<void *>(DB_GetStreamPos()));
-
-        Switch_LogWrite(trace);
-
-        for (int base = 0; base < 26; base += 6)
-        {
-            char row[256];
-            int written = std::snprintf(
-                row,
-                sizeof(row),
-                "[SWITCH TECHSET PTRS] %d:",
-                base);
-
-            for (int i = base; i < base + 6 && i < 26; ++i)
-            {
-                written += std::snprintf(
-                    row + written,
-                    sizeof(row) - static_cast<size_t>(written),
-                    " %08x",
-                    serialized.techniques[i]);
-            }
-
-            std::snprintf(
-                row + written,
-                sizeof(row) - static_cast<size_t>(written),
-                "\n");
-            Switch_LogWrite(row);
-        }
-    }
-#endif
+    varMaterialTechniqueSet->hasBeenUploaded =
+        serialized.hasBeenUploaded != 0;
+    varMaterialTechniqueSet->unused[0] = serialized.unused[0];
+    varMaterialTechniqueSet->unused[1] = serialized.unused[1];
 
     if (!serialized.name)
     {
@@ -3279,21 +3239,67 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
                 DB_ConvertOffsetToPointerValue(serialized.name));
     }
 
+    varMaterialTechniqueSet->remappedTechniqueSet = nullptr;
+    if (serialized.remappedTechniqueSet)
+    {
+        if (serialized.remappedTechniqueSet == UINT32_MAX)
+        {
+            // The original loader does not recursively load this field here;
+            // preserve it as null on Switch until a use of the remap is needed.
+            varMaterialTechniqueSet->remappedTechniqueSet = nullptr;
+        }
+        else
+        {
+            varMaterialTechniqueSet->remappedTechniqueSet =
+                reinterpret_cast<MaterialTechniqueSet *>(
+                    DB_ConvertOffsetToPointerValue(
+                        serialized.remappedTechniqueSet));
+        }
+    }
+
 #ifdef __SWITCH__
     {
-        char trace[256];
+        char trace[320];
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH TECHSET RAW] resolved name=%p\n",
-            static_cast<const void *>(varMaterialTechniqueSet->name));
+            "[SWITCH TECHSET RAW] pos=%p name=%08x world=%02x uploaded=%02x remap=%08x after=%p\n",
+            static_cast<const void *>(techniqueSetStart),
+            serialized.name,
+            static_cast<unsigned>(serialized.worldVertFormat),
+            static_cast<unsigned>(serialized.hasBeenUploaded),
+            serialized.remappedTechniqueSet,
+            static_cast<void *>(DB_GetStreamPos()));
         Switch_LogWrite(trace);
+
+        for (int base = 0; base < 34; base += 6)
+        {
+            char row[256];
+            int written = std::snprintf(
+                row,
+                sizeof(row),
+                "[SWITCH TECHSET PTRS] %d:",
+                base);
+
+            for (int i = base; i < base + 6 && i < 34; ++i)
+            {
+                written += std::snprintf(
+                    row + written,
+                    sizeof(row) - static_cast<size_t>(written),
+                    " %08x",
+                    serialized.techniques[i]);
+            }
+
+            std::snprintf(
+                row + written,
+                sizeof(row) - static_cast<size_t>(written),
+                "\n");
+            Switch_LogWrite(row);
+        }
     }
 #endif
 
-    varMaterialTechniqueSet->remappedTechniqueSet = nullptr;
-
-    for (int i = 0; i < 26; ++i)
+    for (int i = 0; i < 34; ++i)
     {
         const uint32_t value = serialized.techniques[i];
 
@@ -3301,24 +3307,34 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
         {
             varMaterialTechniqueSet->techniques[i] = nullptr;
         }
-        else if (value == UINT32_MAX)
+        else if (value == UINT32_MAX || value == UINT32_MAX - 1)
         {
+            constexpr uint32_t MAX_SWITCH_TECHNIQUE_PASSES = 64;
+            const uint32_t bytes =
+                static_cast<uint32_t>(
+                    sizeof(MaterialTechnique) +
+                    sizeof(MaterialPass) *
+                        (MAX_SWITCH_TECHNIQUE_PASSES - 1));
+
             varMaterialTechniqueSet->techniques[i] =
                 reinterpret_cast<MaterialTechnique *>(
                     Hunk_Alloc(
-                        static_cast<uint32_t>(
-                            sizeof(MaterialTechnique) +
-                            sizeof(MaterialPass) * 63),
+                        bytes,
                         "SwitchMaterialTechnique",
                         22));
             varMaterialTechnique =
                 varMaterialTechniqueSet->techniques[i];
-            memset(
-                varMaterialTechnique,
-                0,
-                sizeof(MaterialTechnique) +
-                    sizeof(MaterialPass) * 63);
+            memset(varMaterialTechnique, 0, bytes);
+
+            const void **inserted = nullptr;
+            if (value == UINT32_MAX - 1)
+                inserted = DB_InsertPointer();
+
             Load_MaterialTechnique(1);
+
+            if (inserted)
+                *inserted = *reinterpret_cast<void **>(
+                    &varMaterialTechniqueSet->techniques[i]);
         }
         else
         {
@@ -3328,9 +3344,18 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
         }
     }
 
-    for (int i = 26; i < TECHNIQUE_COUNT; ++i)
-        varMaterialTechniqueSet->techniques[i] = nullptr;
-
+#ifdef __SWITCH__
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH TECHSET] complete start=%p after=%p\n",
+            static_cast<const void *>(techniqueSetStart),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+#endif
 #else
     Load_Stream(atStreamStart, (uint8_t *)varMaterialTechniqueSet, 148);
     DB_PushStreamPos(4);
