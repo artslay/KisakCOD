@@ -3,6 +3,11 @@
 #include <string>
 
 
+#ifdef __SWITCH__
+bool Switch_GLBeginDatabaseContext();
+void Switch_GLEndDatabaseContext();
+#endif
+
 class OpenGLBackend : public IGfxBackend
 {
 public:
