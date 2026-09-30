@@ -481,7 +481,45 @@ GfxImage *__cdecl Image_Register(const char *imageName, uint8_t semantic, int im
 
 GfxImage *__cdecl Image_Register_FastFile(const char *imageName)
 {
-    if (imageName && imageName[0] == '
+    bool builtin = false;
+
+    if (imageName && imageName[0] == 36)
+    {
+        for (uint32_t i = 0; i < ARRAY_COUNT(constructorTable); ++i)
+        {
+            if (!I_stricmp(imageName, constructorTable[i].name))
+            {
+                builtin = true;
+                break;
+            }
+        }
+    }
+
+    if (builtin)
+    {
+        const uint32_t mask = IMAGE_HASH_TABLE_MASK;
+        uint32_t hashIndex = R_HashAssetName(imageName) & mask;
+
+        for (;;)
+        {
+            GfxImage *image = imageGlobals.imageHashTable[hashIndex];
+            if (!image)
+                break;
+
+            if (!I_stricmp(image->name, imageName))
+                return Image_IsProg(image) ? nullptr : image;
+
+            hashIndex = (hashIndex + 1) & mask;
+        }
+
+        return Image_LoadBuiltin(
+            const_cast<char *>(imageName),
+            TS_FUNCTION,
+            IMAGE_TRACK_MISC);
+    }
+
+    return Image_FindExisting(imageName);
+}
 
 char __cdecl Image_LoadFromFile(GfxImage *image)
 {
