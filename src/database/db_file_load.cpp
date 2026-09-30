@@ -376,6 +376,9 @@ void __cdecl DB_LoadXFileInternal()
         varXAssetList->assets =
             reinterpret_cast<XAsset *>(DB_AllocStreamPos(3));
         varXAsset = varXAssetList->assets;
+        if (varXAssetList->assetCount > 0)
+            DB_IncStreamPos(static_cast<int32_t>(
+                sizeof(XAsset) * static_cast<size_t>(varXAssetList->assetCount)));
         Load_XAssetArrayCustom(varXAssetList->assetCount);
     }
     DB_PopStreamPos();
