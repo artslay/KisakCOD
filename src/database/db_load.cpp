@@ -2388,8 +2388,20 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varGfxImagePtr));
         if (value == -1 || value == -2)
         {
+#ifdef __SWITCH__
+            *varGfxImagePtr =
+                reinterpret_cast<GfxImage *>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(sizeof(GfxImage)),
+                        "SwitchGfxImage",
+                        22));
+            varGfxImage = *varGfxImagePtr;
+            memset(varGfxImage, 0, sizeof(GfxImage));
+            Switch_LogWrite("[SWITCH IMAGE] allocated native GfxImage\n");
+#else
             *varGfxImagePtr = (GfxImage *)AllocLoad_FxElemVisStateSample();
             varGfxImage = *varGfxImagePtr;
+#endif
             if (value == -2)
                 inserted = DB_InsertPointer();
             else

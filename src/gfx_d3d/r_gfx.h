@@ -262,7 +262,9 @@ struct GfxImage // sizeof=0x24
     bool delayLoadPixels;
     const char* name;
 };
-#ifndef __SWITCH__
+#ifdef __SWITCH__
+static_assert(sizeof(GfxImage) >= 36);
+#else
 static_assert(sizeof(GfxImage) == 36);
 #endif
 
