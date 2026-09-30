@@ -1931,9 +1931,36 @@ void __cdecl Mark_snd_alias_list_nameArray(int32_t count)
 
 void __cdecl Load_MaterialInfo(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    {
+        char trace[160];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH MATINFO] raw_name=%08x\n",
+            *reinterpret_cast<uint32_t *>(&varMaterialInfo->name));
+        Switch_LogWrite(trace);
+    }
+#endif
     Load_Stream(atStreamStart, (uint8_t *)varMaterialInfo, 24);
+#ifdef __SWITCH__
+    {
+        char trace[160];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH MATINFO] loaded_name_raw=%08x\n",
+            *reinterpret_cast<uint32_t *>(&varMaterialInfo->name));
+        Switch_LogWrite(trace);
+    }
+#endif
     varXString = &varMaterialInfo->name;
     Load_XString(0);
+#ifdef __SWITCH__
+    {
+        char trace[160];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH MATINFO] name_ptr=%p\n",
+            static_cast<const void *>(varMaterialInfo->name));
+        Switch_LogWrite(trace);
+    }
+#endif
 }
 
 void __cdecl Load_GfxWorldVertex0Array(bool atStreamStart, int32_t count)
