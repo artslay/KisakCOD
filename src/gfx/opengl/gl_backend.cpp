@@ -79,6 +79,7 @@ EGLSurface s_surface = EGL_NO_SURFACE;
 EGLConfig s_config = nullptr;
 EGLContext s_databaseContext = EGL_NO_CONTEXT;
 EGLSurface s_databaseSurface = EGL_NO_SURFACE;
+bool s_databaseContextLogged = false;
 }
 #endif
 
@@ -141,6 +142,7 @@ void OpenGLBackend::Shutdown()
     s_config = nullptr;
     s_databaseContext = EGL_NO_CONTEXT;
     s_databaseSurface = EGL_NO_SURFACE;
+    s_databaseContextLogged = false;
 #endif
 
     m_window = nullptr;
@@ -591,11 +593,26 @@ bool Switch_GLBeginDatabaseContext()
             return false;
     }
 
-    return eglMakeCurrent(
+    const EGLBoolean current = eglMakeCurrent(
         s_display,
         s_databaseSurface,
         s_databaseSurface,
-        s_databaseContext) == EGL_TRUE;
+        s_databaseContext);
+
+    if (current == EGL_TRUE && !s_databaseContextLogged)
+    {
+        char trace[192];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH GLCTX] database ready ctx=%p dpy=%p surf=%p\\n",
+            (void *)s_databaseContext,
+            (void *)s_display,
+            (void *)s_databaseSurface);
+        Switch_LogWrite(trace);
+        s_databaseContextLogged = true;
+    }
+
+    return current == EGL_TRUE;
 }
 
 void Switch_GLEndDatabaseContext()
