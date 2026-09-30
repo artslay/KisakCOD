@@ -217,7 +217,7 @@ static void R_GLUploadTexture(
         char trace[320];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH GLTEX FAIL] image=%s object=%u target=%x format=%08x mip=%u size=%ux%ux%u bytes=%u bind=%04x upload=%04x\\n",
+            "[SWITCH GLTEX FAIL] image=%s object=%u target=%x format=%08x mip=%u size=%ux%ux%u bytes=%u bind=%04x upload=%04x\n",
             image->name ? image->name : "<null>",
             (unsigned)x->object,
             (unsigned)x->target,
