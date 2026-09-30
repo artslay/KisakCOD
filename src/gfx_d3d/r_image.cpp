@@ -116,9 +116,7 @@ static void R_GLAllocTexture(
     }
 
     glBindTexture(target, x->object);
-    glTexParameteri(
-        target,
-        GL_TEXTURE_MIN_FILTER,
+    glTexParameteri(target, GL_TEXTURE_MIN_FILTER,
         levels > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
     glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -134,19 +132,15 @@ static void R_GLAllocTexture(
         const uint32_t ld = std::max(1u, d >> l);
 
         if (target == GL_TEXTURE_3D)
-            glTexImage3D(
-                target, l, (GLint)i,
-                lw, lh, ld, 0, u, t, nullptr);
+            glTexImage3D(target, l, (GLint)i, lw, lh, ld, 0, u, t, nullptr);
         else if (target == GL_TEXTURE_CUBE_MAP)
         {
             for (uint32_t face = 0; face < 6; ++face)
-                glTexImage2D(
-                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
                     l, (GLint)i, lw, lh, 0, u, t, nullptr);
         }
         else
-            glTexImage2D(
-                target, l, (GLint)i, lw, lh, 0, u, t, nullptr);
+            glTexImage2D(target, l, (GLint)i, lw, lh, 0, u, t, nullptr);
     }
 }
 
@@ -471,6 +465,23 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
     signed int mipLevel; // [esp+5Ch] [ebp-4h]
 
     loadDef = remoteLoadDef->loadDef;
+#ifdef __SWITCH__
+    {
+        char trace[256];
+        std::snprintf(trace,sizeof(trace),
+            "[SWITCH TEXTURE] enter remote=%p loadDef=%p imageDef=%p levels=%u flags=%02x dim=%d,%d,%d format=%08x resource=%d renderer=%u\n",
+            (void*)remoteLoadDef,(void*)loadDef,(void*)image->texture.loadDef,
+            loadDef ? loadDef->levelCount : 0u,
+            loadDef ? loadDef->flags : 0u,
+            loadDef ? loadDef->dimensions[0] : 0,
+            loadDef ? loadDef->dimensions[1] : 0,
+            loadDef ? loadDef->dimensions[2] : 0,
+            loadDef ? (unsigned)loadDef->format : 0u,
+            loadDef ? loadDef->resourceSize : 0,
+            r_loadForRenderer->current.enabled ? 1u : 0u);
+        Switch_LogWrite(trace);
+    }
+#endif
     iassert(loadDef == image->texture.loadDef);
 
     image->texture.basemap = 0;
@@ -482,6 +493,9 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
             image->delayLoadPixels = 0;
             if (image->mapType == MAPTYPE_2D)
             {
+#ifdef __SWITCH__
+                Switch_LogWrite("[SWITCH TEXTURE] before Image_Create2DTexture_PC\n");
+#endif
                 Image_Create2DTexture_PC(
                     image,
                     loadDef->dimensions[0],
@@ -489,6 +503,9 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
                     loadDef->levelCount,
                     0,
                     imageFormat);
+#ifdef __SWITCH__
+                Switch_LogWrite("[SWITCH TEXTURE] after Image_Create2DTexture_PC\n");
+#endif
                 faceCount = 1;
             }
             else if (image->mapType == MAPTYPE_3D)
@@ -519,7 +536,19 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
                     v5 = (D3DCUBEMAP_FACES)Image_CubemapFace(faceIndex);
                 for (mipLevel = 0; mipLevel < mipCount; ++mipLevel)
                 {
+#ifdef __SWITCH__
+                    {
+                        char trace[192];
+                        std::snprintf(trace,sizeof(trace),
+                            "[SWITCH TEXTURE] before Image_UploadData face=%d mip=%d data=%p\n",
+                            faceIndex,mipLevel,(void*)data);
+                        Switch_LogWrite(trace);
+                    }
+#endif
                     Image_UploadData(image, imageFormat, v5, mipLevel, data);
+#ifdef __SWITCH__
+                    Switch_LogWrite("[SWITCH TEXTURE] after Image_UploadData\n");
+#endif
                     if (image->width >> mipLevel > 1)
                         mipWidth = image->width >> mipLevel;
                     else
@@ -553,6 +582,22 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
         }
         else
         {
+#ifdef __SWITCH__
+            {
+                const uint32_t expectedCardMemory = Image_GetCardMemoryAmount(
+                    loadDef->flags,
+                    loadDef->format,
+                    loadDef->dimensions[0],
+                    loadDef->dimensions[1],
+                    loadDef->dimensions[2]);
+                char trace[192];
+                std::snprintf(trace,sizeof(trace),
+                    "[SWITCH TEXTURE] external category=%u delay=%u card=%u expected=%u\n",
+                    image->category,image->delayLoadPixels ? 1u : 0u,
+                    image->cardMemory.platform[0],expectedCardMemory);
+                Switch_LogWrite(trace);
+            }
+#endif
             if (image->cardMemory.platform[0] != Image_GetCardMemoryAmount(
                 loadDef->flags,
                 loadDef->format,
@@ -581,8 +626,14 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
                 externalDataSize = image->cardMemory.platform[0];
                 image->cardMemory.platform[0] = 0;
                 image->cardMemory.platform[1] = 0;
+#ifdef __SWITCH__
+                Switch_LogWrite("[SWITCH TEXTURE] before Image_LoadFromFile\n");
+#endif
                 if (!Image_LoadFromFile(image))
                     Com_Error(ERR_DROP, "Couldn't load image '%s'\n", image->name);
+#ifdef __SWITCH__
+                Switch_LogWrite("[SWITCH TEXTURE] after Image_LoadFromFile\n");
+#endif
                 DB_LoadedExternalData(externalDataSize);
             }
         }
