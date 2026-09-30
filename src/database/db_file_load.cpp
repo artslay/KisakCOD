@@ -561,16 +561,46 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 
         Load_XAssetHeader(0);
 
+#ifdef __SWITCH__
+        if (serialized.type == ASSET_TYPE_MATERIAL)
+            Switch_LogWrite("[SWITCH XASSET] material Load_XAssetHeader done\n");
+#endif
+
         if (serialized.type == ASSET_TYPE_MATERIAL
             && serialized.header != 0
             && serialized.header != UINT32_MAX
             && serialized.header != UINT32_MAX - 1
             && varXAsset->header.material)
         {
+#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH XASSET] material DB_GetXAssetName begin\n");
+#endif
             const char *materialName = DB_GetXAssetName(varXAsset);
-            if (materialName && !DB_FindXAssetEntry(ASSET_TYPE_MATERIAL, materialName))
-                varXAsset->header =
-                    DB_AddXAsset(ASSET_TYPE_MATERIAL, varXAsset->header);
+#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH XASSET] material DB_GetXAssetName done\n");
+#endif
+            if (materialName)
+            {
+#ifdef __SWITCH__
+                Switch_LogWrite("[SWITCH XASSET] material DB_FindXAssetEntry begin\n");
+#endif
+                const bool missing =
+                    DB_FindXAssetEntry(ASSET_TYPE_MATERIAL, materialName) == nullptr;
+#ifdef __SWITCH__
+                Switch_LogWrite("[SWITCH XASSET] material DB_FindXAssetEntry done\n");
+#endif
+                if (missing)
+                {
+#ifdef __SWITCH__
+                    Switch_LogWrite("[SWITCH XASSET] material DB_AddXAsset begin\n");
+#endif
+                    varXAsset->header =
+                        DB_AddXAsset(ASSET_TYPE_MATERIAL, varXAsset->header);
+#ifdef __SWITCH__
+                    Switch_LogWrite("[SWITCH XASSET] material DB_AddXAsset done\n");
+#endif
+                }
+            }
         }
 
 #ifdef __SWITCH__
