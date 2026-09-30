@@ -8087,17 +8087,6 @@ void __cdecl Mark_XAssetHeader()
 {
     switch (varXAsset->type)
     {
-#ifdef KISAK_SP
-    case ASSET_TYPE_PIXELSHADER:
-        if (*reinterpret_cast<MaterialPixelShader **>(varXAssetHeader))
-        {
-            XAssetHeader header{};
-            header.pixelShader =
-                *reinterpret_cast<MaterialPixelShader **>(varXAssetHeader);
-            DB_GetXAsset(ASSET_TYPE_PIXELSHADER, header);
-        }
-        break;
-#endif
     case ASSET_TYPE_PHYSPRESET:
         varPhysPresetPtr = (PhysPreset **)varXAssetHeader;
         Mark_PhysPresetPtr();
