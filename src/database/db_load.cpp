@@ -2633,6 +2633,10 @@ static void Load_MaterialPixelShaderHandle(bool atStreamStart)
 
             Load_MaterialPixelShader(1);
 
+            // A null serialized name denotes an unnamed/null shader object.
+            // DB_LinkXAssetEntry() assumes every registered asset has a valid
+            // name, so do not insert this object into the named asset registry.
+            if ((*varMaterialPixelShaderPtr)->name)
             {
                 XAssetHeader header{};
                 header.pixelShader = *varMaterialPixelShaderPtr;
