@@ -633,40 +633,82 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
 
-#ifdef __SWITCH__
-        if (i < 8 || serialized.type != ASSET_TYPE_LOCALIZE_ENTRY)
-        {
-            char trace[192];
-            std::snprintf(
-                trace,
-                sizeof(trace),
-                "[SWITCH XASSET MAP] idx=%d raw=%u runtime=%u header=%08x\n",
-                i,
-                static_cast<unsigned>(serialized.type),
-                static_cast<unsigned>(runtimeType),
-                serialized.header);
-            Switch_LogWrite(trace);
-        }
-
-        if (runtimeType == ASSET_TYPE_MATERIAL)
-        {
-            char trace[192];
-            std::snprintf(
-                trace,
-                sizeof(trace),
-                "[SWITCH XASSET] material load begin index=%d header=%08x\n",
-                i,
-                serialized.header);
-            Switch_LogWrite(trace);
-        }
-#endif
-
         Load_XAssetHeader(0);
 
 #ifdef __SWITCH__
         if (i < 8 || serialized.type != ASSET_TYPE_LOCALIZE_ENTRY)
             Switch_LogWrite("[SWITCH XASSET] load done\n");
 #endif
+
+        ++var;
+    }
+
+#ifdef __SWITCH__
+    {
+        char trace[192];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH XASSET] records=%d image=%u inline=%u alias=%u null=%u adds=%u material=%u techset=%u localize=%u\n",
+            count, imageRecords, imageInline, imageAlias, imageNull,
+            g_switchImageAdds, materialRecords, techsetRecords,
+            localizeRecords);
+        Switch_LogWrite(trace);
+    }
+#endif
+#else
+    XAsset *var;
+    int32_t i;
+
+    Load_Stream(1, (uint8_t *)varXAsset, 8 * count);
+    var = varXAsset;
+    for (i = 0; i < count; ++i)
+    {
+        varXAsset = var;
+        Load_XAssetHeader(0);
+        ++var;
+    }
+#endif
+}
+
+void __cdecl DB_ResetZoneSize(int32_t trackLoadProgress)
+{
+    g_totalSize = 0;
+    g_loadedSize = 0;
+    g_totalExternalBytes = 0;
+    g_loadedExternalBytes = 0;
+    g_trackLoadProgress = trackLoadProgress;
+}
+
+void __cdecl DB_LoadXFile(
+    const char *path,
+    void *f,
+    const char *filename,
+    XZoneMemory *zoneMem,
+    void(__cdecl *interrupt)(),
+    uint8_t *buf,
+    int32_t allocType)
+{
+    if (((uintptr_t)buf & 3) != 0)
+        MyAssertHandler(".\\database\\db_file_load.cpp", 749, 0, "%s", "!(reinterpret_cast< psize_int >( buf ) & 3)");
+    memset((uint8_t *)&g_load, 0, sizeof(g_load));
+    g_load.f = f;
+    g_load.filename = filename;
+    g_load.zoneMem = zoneMem;
+    g_load.interrupt = interrupt;
+    g_load.allocType = allocType;
+    if (g_load.compressBufferStart)
+        MyAssertHandler(".\\database\\db_file_load.cpp", 762, 0, "%s", "!g_load.compressBufferStart");
+    if (!g_load.f)
+        MyAssertHandler(".\\database\\db_file_load.cpp", 764, 0, "%s", "g_load.f");
+    if (!buf)
+        MyAssertHandler(".\\database\\db_file_load.cpp", 766, 0, "%s", "buf");
+    g_load.compressBufferStart = buf;
+    g_load.compressBufferEnd = buf + 0x80000;
+    g_load.stream.next_in = buf;
+    g_load.stream.avail_in = 0;
+}
+
+
 
         ++var;
     }
