@@ -38,6 +38,7 @@
 #include <chrono>
 #include <cstdio>
 #include <gfx/gfx_backend.h>
+extern void Switch_LogWrite(const char *msg);
 static inline uint64_t KisakRendererClock()
 {
     return static_cast<uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count());
