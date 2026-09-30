@@ -9,6 +9,9 @@
 #include <algorithm>
 #include <vector>
 #include <string>
+#include <unordered_map>
+
+#include <qcommon/unzip.h>
 
 #include <universal/q_shared.h>
 #include <universal/com_files.h>
@@ -47,6 +50,213 @@ searchpath_s *fs_searchpaths = nullptr;
 static fileHandleData_t g_fsh[65] = {};
 static const char *const kSwitchRoot = "sdmc:/switch/KisakCOD/game";
 
+struct SwitchIwdArchive
+{
+    std::string path;
+    unzFile file = nullptr;
+};
+
+struct SwitchIwdEntry
+{
+    uint16_t archiveIndex = 0;
+    unsigned long infoPosition = 0;
+    uint32_t size = 0;
+};
+
+struct SwitchZipHandle
+{
+    unzFile file = nullptr;
+    uint32_t size = 0;
+};
+
+static std::vector<SwitchIwdArchive> g_iwdArchives;
+static std::unordered_map<std::string, SwitchIwdEntry> g_iwdEntries;
+static SwitchZipHandle g_zipHandles[65] = {};
+
+static std::string SwitchNormalizePath(const char *path)
+{
+    std::string normalized;
+    if (!path)
+        return normalized;
+
+    normalized.reserve(std::strlen(path));
+    for (const unsigned char *p = reinterpret_cast<const unsigned char *>(path); *p; ++p)
+    {
+        char c = static_cast<char>(*p);
+        if (c == '\\')
+            c = '/';
+        normalized.push_back(static_cast<char>(
+            std::tolower(static_cast<unsigned char>(c))));
+    }
+    while (normalized.rfind("./", 0) == 0)
+        normalized.erase(0, 2);
+    return normalized;
+}
+
+static void Switch_ClearIwdIndex()
+{
+    for (SwitchIwdArchive &archive : g_iwdArchives)
+    {
+        if (archive.file)
+            unzClose(archive.file);
+    }
+    g_iwdArchives.clear();
+    g_iwdEntries.clear();
+}
+
+static void Switch_IndexIwdArchive(const char *archivePath)
+{
+    unzFile archiveFile = unzOpen(archivePath);
+    if (!archiveFile)
+        return;
+
+    SwitchIwdArchive archive;
+    archive.path = archivePath;
+    archive.file = archiveFile;
+    const uint16_t archiveIndex = static_cast<uint16_t>(g_iwdArchives.size());
+    g_iwdArchives.push_back(std::move(archive));
+
+    int entryCount = 0;
+    if (unzGoToFirstFile(archiveFile) == UNZ_OK)
+    {
+        do
+        {
+            char name[256] = {};
+            unz_file_info info = {};
+            unsigned long infoPosition = 0;
+
+            if (unzGetCurrentFileInfo(
+                    archiveFile,
+                    &info,
+                    name,
+                    sizeof(name),
+                    nullptr,
+                    0,
+                    nullptr,
+                    0) != UNZ_OK)
+                continue;
+
+            if (unzGetCurrentFileInfoPosition(archiveFile, &infoPosition) != UNZ_OK)
+                continue;
+
+            const std::string normalizedName = SwitchNormalizePath(name);
+            if (normalizedName.empty() || normalizedName.back() == '/')
+                continue;
+
+            SwitchIwdEntry entry;
+            entry.archiveIndex = archiveIndex;
+            entry.infoPosition = infoPosition;
+            entry.size = static_cast<uint32_t>(info.uncompressed_size);
+
+            // iw_XX files are added as separate search paths. Since later
+            // search paths are inserted at the head, higher numbered archives
+            // have precedence when the same asset exists more than once.
+            g_iwdEntries[normalizedName] = entry;
+            ++entryCount;
+        } while (unzGoToNextFile(archiveFile) == UNZ_OK);
+    }
+
+    char trace[192];
+    std::snprintf(
+        trace,
+        sizeof(trace),
+        "[SWITCH IWD] indexed %s entries=%d\\n",
+        archivePath,
+        entryCount);
+    Switch_LogWrite(trace);
+}
+
+static void Switch_IndexIwdArchives(const char *game)
+{
+    Switch_ClearIwdIndex();
+
+    const char *base = fs_basepath && fs_basepath->current.string[0]
+        ? fs_basepath->current.string
+        : kSwitchRoot;
+
+    int archiveCount = 0;
+    for (int i = 0; i < 100; ++i)
+    {
+        char archivePath[256];
+        std::snprintf(
+            archivePath,
+            sizeof(archivePath),
+            "%s/%s/iw_%02d.iwd",
+            base,
+            game,
+            i);
+
+        struct stat st = {};
+        if (stat(archivePath, &st) != 0 || !S_ISREG(st.st_mode))
+            continue;
+
+        Switch_IndexIwdArchive(archivePath);
+        ++archiveCount;
+    }
+
+    char trace[160];
+    std::snprintf(
+        trace,
+        sizeof(trace),
+        "[SWITCH IWD] ready archives=%d files=%zu game=%s\\n",
+        archiveCount,
+        g_iwdEntries.size(),
+        game);
+    Switch_LogWrite(trace);
+}
+
+static bool Switch_OpenIwdFile(const char *filename, int *fileHandle)
+{
+    const std::string normalizedName = SwitchNormalizePath(filename);
+    const auto it = g_iwdEntries.find(normalizedName);
+    if (it == g_iwdEntries.end())
+        return false;
+
+    const SwitchIwdEntry &entry = it->second;
+    if (entry.archiveIndex >= g_iwdArchives.size())
+        return false;
+
+    SwitchIwdArchive &archive = g_iwdArchives[entry.archiveIndex];
+    if (!archive.file)
+        return false;
+
+    unzFile clone = unzReOpen(archive.path.c_str(), archive.file);
+    if (!clone)
+        return false;
+
+    if (unzSetCurrentFileInfoPosition(clone, entry.infoPosition) != UNZ_OK)
+    {
+        unzClose(clone);
+        return false;
+    }
+
+    if (unzOpenCurrentFile(clone) != UNZ_OK)
+    {
+        unzClose(clone);
+        return false;
+    }
+
+    const int h = AllocHandle();
+    if (!h)
+    {
+        unzCloseCurrentFile(clone);
+        unzClose(clone);
+        return false;
+    }
+
+    g_zipHandles[h].file = clone;
+    g_zipHandles[h].size = entry.size;
+    g_fsh[h].fileSize = static_cast<int>(entry.size);
+    g_fsh[h].streamed = 0;
+    g_fsh[h].zipFile = nullptr;
+    I_strncpyz(g_fsh[h].name, filename, sizeof(g_fsh[h].name));
+
+    if (fileHandle)
+        *fileHandle = h;
+    return true;
+}
+
+
 static void SwitchPath(char *dst, size_t dstSize, const char *base, const char *game, const char *qpath)
 {
     if (!base || !*base) base = kSwitchRoot;
@@ -77,7 +287,7 @@ bool __cdecl FS_SwitchLanguageHasAssets(int iLanguage)
 static int AllocHandle()
 {
     for (int i = 1; i < 65; ++i)
-        if (!g_fsh[i].handleFiles.file.o)
+        if (!g_fsh[i].handleFiles.file.o && !g_zipHandles[i].file)
             return i;
     return 0;
 }
@@ -150,6 +360,7 @@ void __cdecl FS_Startup(char *gameName)
 {
     Com_Printf(CON_CHANNEL_FILES, "----- Switch FS_Startup -----\n");
     FS_RegisterDvars();
+    Switch_IndexIwdArchives(gameName);
     if (com_logfile)
         Dvar_SetInt((dvar_s*)com_logfile, 0);
     FS_AddLocalizedGameDirectory((char*)kSwitchRoot, gameName);
@@ -229,23 +440,46 @@ int __cdecl FS_CreatePath(char *path)
 uint32_t __cdecl FS_FOpenFileReadForThread(const char *filename, int *file, FsThread)
 {
     FS_CheckFileSystemStarted();
-    if (file) *file = 0;
-    if (!filename || !*filename) return (uint32_t)-1;
+    if (file)
+        *file = 0;
+    if (!filename || !*filename)
+        return (uint32_t)-1;
+
+    const std::string normalizedName = SwitchNormalizePath(filename);
+    if (g_iwdEntries.find(normalizedName) != g_iwdEntries.end())
+    {
+        int iwdHandle = 0;
+        if (Switch_OpenIwdFile(filename, &iwdHandle))
+            return g_fsh[iwdHandle].fileSize;
+    }
 
     char path[256];
-    SwitchPath(path, sizeof(path), fs_basepath ? fs_basepath->current.string : kSwitchRoot,
-               fs_gamedir, filename);
-    FILE *fp = FS_FileOpenReadBinary(path);
-    if (!fp) return (uint32_t)-1;
+    SwitchPath(
+        path,
+        sizeof(path),
+        fs_basepath ? fs_basepath->current.string : kSwitchRoot,
+        fs_gamedir,
+        filename);
 
-    int h = AllocHandle();
-    if (!h) { fclose(fp); return (uint32_t)-1; }
+    FILE *fp = FS_FileOpenReadBinary(path);
+    if (!fp)
+        return (uint32_t)-1;
+
+    const int h = AllocHandle();
+    if (!h)
+    {
+        fclose(fp);
+        return (uint32_t)-1;
+    }
+
     g_fsh[h].handleFiles.file.o = fp;
     g_fsh[h].fileSize = FS_FileGetFileSize(fp);
     g_fsh[h].streamed = 0;
     g_fsh[h].zipFile = nullptr;
     I_strncpyz(g_fsh[h].name, filename, sizeof(g_fsh[h].name));
-    if (file) *file = h;
+
+    if (file)
+        *file = h;
     return g_fsh[h].fileSize;
 }
 
@@ -266,14 +500,121 @@ int __cdecl FS_FOpenFileReadDatabase(const char *filename, int *file)
 
 int __cdecl FS_filelength(int f)
 {
-    if (f <= 0 || f >= 65 || !g_fsh[f].handleFiles.file.o) return -1;
+    if (f <= 0 || f >= 65)
+        return -1;
+    if (g_zipHandles[f].file)
+        return static_cast<int>(g_zipHandles[f].size);
+    if (!g_fsh[f].handleFiles.file.o)
+        return -1;
     return g_fsh[f].fileSize;
 }
 
 uint32_t __cdecl FS_Read(uint8_t *buffer, uint32_t len, int h)
 {
-    if (h <= 0 || h >= 65 || !g_fsh[h].handleFiles.file.o) return 0;
+    if (h <= 0 || h >= 65)
+        return 0;
+    if (g_zipHandles[h].file)
+    {
+        const int read = unzReadCurrentFile(g_zipHandles[h].file, buffer, len);
+        return read > 0 ? static_cast<uint32_t>(read) : 0;
+    }
+    if (!g_fsh[h].handleFiles.file.o)
+        return 0;
     return FS_FileRead(buffer, len, g_fsh[h].handleFiles.file.o);
+}
+
+int __cdecl FS_Seek(int h, int offset, int origin)
+{
+    if (h <= 0 || h >= 65)
+        return -1;
+
+    if (g_zipHandles[h].file)
+    {
+        const long currentPosition = unztell(g_zipHandles[h].file);
+        if (currentPosition < 0)
+            return -1;
+
+        long targetPosition = 0;
+        switch (origin)
+        {
+            case SEEK_SET:
+                targetPosition = offset;
+                break;
+            case SEEK_CUR:
+                targetPosition = currentPosition + offset;
+                break;
+            case SEEK_END:
+                targetPosition = static_cast<long>(g_zipHandles[h].size) + offset;
+                break;
+            default:
+                return -1;
+        }
+
+        if (targetPosition < 0 || targetPosition > static_cast<long>(g_zipHandles[h].size))
+            return -1;
+
+        long current = currentPosition;
+        if (targetPosition < current)
+        {
+            unzCloseCurrentFile(g_zipHandles[h].file);
+            if (unzOpenCurrentFile(g_zipHandles[h].file) != UNZ_OK)
+                return -1;
+            current = 0;
+        }
+
+        uint8_t discard[4096];
+        while (current < targetPosition)
+        {
+            const uint32_t remaining = static_cast<uint32_t>(targetPosition - current);
+            const unsigned chunk = remaining > sizeof(discard)
+                ? static_cast<unsigned>(sizeof(discard))
+                : static_cast<unsigned>(remaining);
+            const int read = unzReadCurrentFile(g_zipHandles[h].file, discard, chunk);
+            if (read != static_cast<int>(chunk))
+                return -1;
+            current += read;
+        }
+        return 0;
+    }
+
+    if (!g_fsh[h].handleFiles.file.o)
+        return -1;
+
+    const int whence = origin == SEEK_SET ? SEEK_SET
+        : (origin == SEEK_CUR ? SEEK_CUR : SEEK_END);
+    return FS_FileSeek(g_fsh[h].handleFiles.file.o, offset, whence);
+}
+
+uint32_t __cdecl FS_FTell(int h)
+{
+    if (h <= 0 || h >= 65)
+        return 0;
+    if (g_zipHandles[h].file)
+    {
+        const long position = unztell(g_zipHandles[h].file);
+        return position < 0 ? 0u : static_cast<uint32_t>(position);
+    }
+    if (!g_fsh[h].handleFiles.file.o)
+        return 0;
+    return FS_FileTell(g_fsh[h].handleFiles.file.o);
+}
+
+void __cdecl FS_FCloseFile(int h)
+{
+    if (h <= 0 || h >= 65)
+        return;
+
+    if (g_zipHandles[h].file)
+    {
+        unzCloseCurrentFile(g_zipHandles[h].file);
+        unzClose(g_zipHandles[h].file);
+        std::memset(&g_zipHandles[h], 0, sizeof(g_zipHandles[h]));
+    }
+
+    if (g_fsh[h].handleFiles.file.o)
+        fclose(g_fsh[h].handleFiles.file.o);
+
+    std::memset(&g_fsh[h], 0, sizeof(g_fsh[h]));
 }
 
 uint32_t __cdecl FS_Write(const char *buffer, uint32_t len, int h)
@@ -336,10 +677,23 @@ bool __cdecl DB_ModFileExists()
 
 int __cdecl FS_FileExists(char *file)
 {
+    if (!file || !*file)
+        return 0;
+
+    const std::string normalizedName = SwitchNormalizePath(file);
+    if (g_iwdEntries.find(normalizedName) != g_iwdEntries.end())
+        return 1;
+
     char path[256];
-    SwitchPath(path, sizeof(path), fs_basepath ? fs_basepath->current.string : kSwitchRoot, fs_gamedir, file);
+    SwitchPath(
+        path,
+        sizeof(path),
+        fs_basepath ? fs_basepath->current.string : kSwitchRoot,
+        fs_gamedir,
+        file);
     FILE *fp = fopen(path, "rb");
-    if (!fp) return 0;
+    if (!fp)
+        return 0;
     fclose(fp);
     return 1;
 }
@@ -427,7 +781,15 @@ int __cdecl FS_TouchFile(const char *name)
     return 1;
 }
 
-void __cdecl FS_Flush(int h) { if (h > 0 && h < 65 && g_fsh[h].handleFiles.file.o) fflush(g_fsh[h].handleFiles.file.o); }
+void __cdecl FS_Flush(int h)
+{
+    if (h <= 0 || h >= 65)
+        return;
+    if (g_zipHandles[h].file)
+        return;
+    if (g_fsh[h].handleFiles.file.o)
+        fflush(g_fsh[h].handleFiles.file.o);
+}
 
 uint32_t __cdecl FS_FOpenFileByMode(char *qpath, int *f, fsMode_t mode)
 {
@@ -464,7 +826,10 @@ void __cdecl FS_Rename(char *from, char *fromDir, char *to, char *toDir)
 }
 void __cdecl FS_SV_Rename(char *from, char *to) { std::rename(from,to); }
 
-bool __cdecl FS_IsFileInZip(int) { return false; }
+bool __cdecl FS_IsFileInZip(int h)
+{
+    return h > 0 && h < 65 && g_zipHandles[h].file != nullptr;
+}
 int __cdecl FS_ConditionalRestart(int, int) { return 0; }
 int __cdecl FS_LoadStack() { return fs_loadStack; }
 int __cdecl FS_OpenFileOverwrite(char *qpath) { return FS_FOpenFileWrite(qpath); }
@@ -482,7 +847,13 @@ void __cdecl FS_AddCommands() {}
 void __cdecl FS_SetRestrictions() {}
 void __cdecl FS_RemoveCommands() {}
 void __cdecl FS_ShutdownSearchPaths() { fs_searchpaths = nullptr; }
-void __cdecl FS_Shutdown() { for(int i=1;i<65;++i) FS_FCloseFile(i); FS_ShutdownSearchPaths(); }
+void __cdecl FS_Shutdown()
+{
+    for (int i = 1; i < 65; ++i)
+        FS_FCloseFile(i);
+    Switch_ClearIwdIndex();
+    FS_ShutdownSearchPaths();
+}
 void __cdecl FS_FreeFileList(const char **) {}
 int __cdecl FS_GetModList(char *, int) { return 0; }
 int __cdecl FS_GetFileList(const char *, const char *, FsListBehavior_e, char *buf, int size) { if(size) *buf=0; return 0; }
