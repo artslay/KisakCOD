@@ -292,6 +292,7 @@ void __cdecl DB_LoadXFileInternal()
 
     iassert(g_load.f);
     DB_ReadXFileStage();
+#ifdef __SWITCH__
     if (!g_load.stream.avail_in)
         Com_Error(ERR_DROP, "Fastfile for zone '%s' is empty.", g_load.filename);
 #else
