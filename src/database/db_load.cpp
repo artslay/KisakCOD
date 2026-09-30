@@ -21,6 +21,10 @@
 #include <game/g_bsp.h>
 
 #ifdef __SWITCH__
+extern void Switch_LogRaw(const char *msg);
+#endif
+
+#ifdef __SWITCH__
 extern void Switch_LogWrite(const char *msg);
 
 enum weapPositionAnimNum_t : __int32
