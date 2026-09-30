@@ -2453,11 +2453,12 @@ void __cdecl Load_MaterialVertexShader(bool atStreamStart)
     struct SerializedMaterialVertexShader
     {
         uint32_t name;
+        uint32_t shader;
         uint32_t program;
         uint16_t programSize;
         uint16_t loadForRenderer;
     };
-    static_assert(sizeof(SerializedMaterialVertexShader) == 12);
+    static_assert(sizeof(SerializedMaterialVertexShader) == 16);
 
     iassert(atStreamStart);
 
@@ -2482,6 +2483,7 @@ void __cdecl Load_MaterialVertexShader(bool atStreamStart)
         varMaterialVertexShader->name = reinterpret_cast<const char *>(
             DB_ConvertOffsetToPointerValue(serialized.name));
 
+    (void)serialized.shader;
     varMaterialVertexShader->prog.vs = nullptr;
     varMaterialVertexShader->prog.loadDef.program =
         reinterpret_cast<void *>(static_cast<uintptr_t>(serialized.program));
@@ -2537,11 +2539,12 @@ void __cdecl Load_MaterialPixelShader(bool atStreamStart)
     struct SerializedMaterialPixelShader
     {
         uint32_t name;
+        uint32_t shader;
         uint32_t program;
         uint16_t programSize;
         uint16_t loadForRenderer;
     };
-    static_assert(sizeof(SerializedMaterialPixelShader) == 12);
+    static_assert(sizeof(SerializedMaterialPixelShader) == 16);
 
     iassert(atStreamStart);
 
@@ -2558,8 +2561,9 @@ void __cdecl Load_MaterialPixelShader(bool atStreamStart)
     {
         char trace[256];
         std::snprintf(trace, sizeof(trace),
-            "[SWITCH PIXELSHADER] raw name=%08x program=%08x size=%u renderer=%u\n",
+            "[SWITCH PIXELSHADER] raw name=%08x shader=%08x program=%08x size=%u renderer=%u\n",
             serialized.name,
+            serialized.shader,
             serialized.program,
             static_cast<unsigned>(serialized.programSize),
             static_cast<unsigned>(serialized.loadForRenderer));
@@ -2580,8 +2584,9 @@ void __cdecl Load_MaterialPixelShader(bool atStreamStart)
         varMaterialPixelShader->name = reinterpret_cast<const char *>(
             DB_ConvertOffsetToPointerValue(serialized.name));
 
-    // The serialized program is the original 32-bit load definition.
-    // Switch creates the native shader object later.
+    // The serialized shader field is the original 32-bit runtime shader handle.
+    // Switch recreates the native shader object later.
+    (void)serialized.shader;
     varMaterialPixelShader->prog.ps = nullptr;
     varMaterialPixelShader->prog.loadDef.program =
         reinterpret_cast<void *>(static_cast<uintptr_t>(serialized.program));
@@ -3286,8 +3291,6 @@ void __cdecl Load_Material(bool atStreamStart)
         uint8_t textureAtlasColumnCount;
         GfxDrawSurf drawSurf;
         uint32_t surfaceTypeBits;
-        uint16_t hashIndex;
-        uint16_t infoPad;
         uint8_t stateBitsEntry[26];
         uint8_t textureCount;
         uint8_t constantCount;
@@ -3301,7 +3304,7 @@ void __cdecl Load_Material(bool atStreamStart)
         uint32_t stateBitsTable;
     };
 
-    static_assert(sizeof(SerializedMaterial) == 72);
+    static_assert(sizeof(SerializedMaterial) == 68);
 
     SerializedMaterial serialized{};
     uint8_t *materialStreamPos = DB_GetStreamPos();
@@ -3334,7 +3337,7 @@ void __cdecl Load_Material(bool atStreamStart)
     varMaterial->info.textureAtlasColumnCount = serialized.textureAtlasColumnCount;
     varMaterial->info.drawSurf = serialized.drawSurf;
     varMaterial->info.surfaceTypeBits = serialized.surfaceTypeBits;
-    varMaterial->info.hashIndex = serialized.hashIndex;
+    varMaterial->info.hashIndex = 0;
 
     memcpy(
         varMaterial->stateBitsEntry,
