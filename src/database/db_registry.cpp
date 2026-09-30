@@ -2284,11 +2284,26 @@ XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
     newEntry.entry.asset.header = header;
 #ifdef __SWITCH__
     if (type == ASSET_TYPE_IMAGE)
+    {
         ++g_switchImageAdds;
+        Switch_LogWrite("[SWITCH IMAGE] DB_AddXAsset before write lock\\n");
+    }
 #endif
     Sys_LockWrite(&db_hashCritSect);
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_IMAGE)
+        Switch_LogWrite("[SWITCH IMAGE] DB_AddXAsset after write lock\\n");
+#endif
     existingEntry = DB_LinkXAssetEntry(&newEntry, 0);
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_IMAGE)
+        Switch_LogWrite("[SWITCH IMAGE] DB_AddXAsset after DB_LinkXAssetEntry\\n");
+#endif
     Sys_UnlockWrite(&db_hashCritSect);
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_IMAGE)
+        Switch_LogWrite("[SWITCH IMAGE] DB_AddXAsset after unlock\\n");
+#endif
     DB_SyncLostDevice();
     return existingEntry->entry.asset.header;
 }
@@ -2309,7 +2324,20 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     uint16_t *pOverrideAssetEntryIndex;
     XAssetSize assetSize;
 
+#ifdef __SWITCH__
+    if (newEntry->entry.asset.type == ASSET_TYPE_IMAGE)
+        Switch_LogWrite("[SWITCH IMAGE] DB_Link before DB_GetXAssetName\\n");
+#endif
     name = DB_GetXAssetName(&newEntry->entry.asset);
+#ifdef __SWITCH__
+    if (newEntry->entry.asset.type == ASSET_TYPE_IMAGE)
+    {
+        char trace[160];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH IMAGE] DB_Link image name ptr=%p\\n", (const void *)name);
+        Switch_LogWrite(trace);
+    }
+#endif
 
 
     v2 = *name;
