@@ -84,7 +84,6 @@ void __cdecl DB_PopStreamPos()
             (unsigned)g_streamPosStackIndex,
             (unsigned)g_streamPosIndex,
             static_cast<void *>(g_streamPos));
-        extern void Switch_LogWrite(const char *msg);
         Switch_LogWrite(trace);
         g_switchTraceNextStreamPop = false;
     }
@@ -102,7 +101,6 @@ void __cdecl DB_PopStreamPos()
             trace, sizeof(trace),
             "[SWITCH STREAMPOP TRAP] after decrement stack=%u\n",
             (unsigned)g_streamPosStackIndex);
-        extern void Switch_LogWrite(const char *msg);
         Switch_LogWrite(trace);
     }
 
@@ -118,7 +116,6 @@ void __cdecl DB_PopStreamPos()
             static_cast<void *>(g_streamPosStack[g_streamPosStackIndex].pos),
             (unsigned)g_streamPosIndex,
             static_cast<void *>(g_streamPos));
-        extern void Switch_LogWrite(const char *msg);
         Switch_LogWrite(trace);
     }
 
