@@ -72,6 +72,23 @@ void __cdecl DB_PopStreamPos()
 {
     vassert(g_streamPosStackIndex > 0, "(g_streamPosStackIndex = %d)", g_streamPosStackIndex);
     --g_streamPosStackIndex;
+
+#ifdef __SWITCH__
+    const uint32_t savedIndex = g_streamPosStack[g_streamPosStackIndex].index;
+    uint8_t *savedPos = g_streamPosStack[g_streamPosStackIndex].pos;
+
+    // Stream 0 is the temporary/inline asset stream. Its cursor must survive
+    // a scoped switch to stream 0; otherwise every DB_PushStreamPos(0) starts
+    // reading the same bytes again after returning to the parent stream.
+    if (g_streamPosIndex == 0 && savedIndex != 0)
+    {
+        g_streamPosArray[0] = g_streamPos;
+        g_streamPosIndex = savedIndex;
+        g_streamPos = savedPos;
+        return;
+    }
+#endif
+
     if (!g_streamPosIndex)
         g_streamPos = g_streamPosStack[g_streamPosStackIndex].pos;
     DB_SetStreamIndex(g_streamPosStack[g_streamPosStackIndex].index);
