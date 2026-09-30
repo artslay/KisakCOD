@@ -2893,31 +2893,82 @@ void __cdecl Load_MaterialHandle(bool atStreamStart)
 {
     const void **inserted; // [esp+0h] [ebp-Ch]
     uint32_t value; // [esp+4h] [ebp-8h]
+#ifdef __SWITCH__
+    static uint32_t switchMaterialHandleTraceCount = 0;
+    const bool switchTrace = switchMaterialHandleTraceCount < 8;
+    if (switchTrace)
+        Switch_LogRaw("[SWITCH MATERIAL HANDLE] ENTER\n");
+#endif
 
     Load_Stream(atStreamStart, (uint8_t *)varMaterialHandle, 4);
     DB_PushStreamPos(0);
     if (*varMaterialHandle)
     {
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varMaterialHandle));
+#ifdef __SWITCH__
+        if (switchTrace)
+            Switch_LogRaw("[SWITCH MATERIAL HANDLE] NONZERO\n");
+#endif
         if (value == -1 || value == -2)
         {
+#ifdef __SWITCH__
+            if (switchTrace)
+                Switch_LogRaw("[SWITCH MATERIAL HANDLE] INLINE\n");
+#endif
             *varMaterialHandle = (Material *)AllocLoad_FxElemVisStateSample();
             varMaterial = *varMaterialHandle;
+#ifdef __SWITCH__
+            if (switchTrace)
+                Switch_LogRaw("[SWITCH MATERIAL HANDLE] AFTER ALLOC\n");
+#endif
             if (value == -2)
                 inserted = DB_InsertPointer();
             else
                 inserted = 0;
+#ifdef __SWITCH__
+            if (switchTrace)
+                Switch_LogRaw("[SWITCH MATERIAL HANDLE] BEFORE Load_Material\n");
+#endif
             Load_Material(1);
+#ifdef __SWITCH__
+            if (switchTrace)
+                Switch_LogRaw("[SWITCH MATERIAL HANDLE] AFTER Load_Material\n");
+            if (switchTrace)
+                Switch_LogRaw("[SWITCH MATERIAL ASSET] BEFORE Load_MaterialAsset\n");
+#endif
             Load_MaterialAsset((XAssetHeader *)varMaterialHandle);
+#ifdef __SWITCH__
+            if (switchTrace)
+                Switch_LogRaw("[SWITCH MATERIAL ASSET] AFTER Load_MaterialAsset\n");
+#endif
             if (inserted)
                 *inserted = *varMaterialHandle;
+#ifdef __SWITCH__
+            if (switchTrace)
+                Switch_LogRaw("[SWITCH MATERIAL HANDLE] AFTER INSERT\n");
+#endif
         }
         else
         {
+#ifdef __SWITCH__
+            if (switchTrace)
+                Switch_LogRaw("[SWITCH MATERIAL HANDLE] OFFSET\n");
+#endif
             DB_ConvertOffsetToAlias((uint32_t *)varMaterialHandle);
+#ifdef __SWITCH__
+            if (switchTrace)
+                Switch_LogRaw("[SWITCH MATERIAL HANDLE] AFTER OFFSET\n");
+#endif
         }
     }
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (switchTrace)
+    {
+        Switch_LogRaw("[SWITCH MATERIAL HANDLE] AFTER PopStreamPos\n");
+        ++switchMaterialHandleTraceCount;
+    }
+#endif
 }
 
 void __cdecl Load_MaterialHandleArray(bool atStreamStart, int32_t count)
