@@ -453,7 +453,11 @@ uint32_t __cdecl FS_FOpenFileReadForThread(const char *filename, int *file, FsTh
     {
         int iwdHandle = 0;
         if (Switch_OpenIwdFile(filename, &iwdHandle))
+        {
+            if (file)
+                *file = iwdHandle;
             return g_fsh[iwdHandle].fileSize;
+        }
     }
 
     char path[256];
