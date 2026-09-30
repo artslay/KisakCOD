@@ -131,6 +131,20 @@ static void R_GLAllocTexture(
         const uint32_t lh = std::max(1u, h >> l);
         const uint32_t ld = std::max(1u, d >> l);
 
+        if (compressed)
+        {
+            // Compressed DXT formats do not have a meaningful external
+            // format/type pair for glTexImage*. Allocate immutable storage
+            // instead; the actual blocks are uploaded by glCompressedTexSubImage*.
+            if (target == GL_TEXTURE_3D)
+                glTexStorage3D(GL_TEXTURE_3D, levels, i, w, h, d);
+            else if (target == GL_TEXTURE_CUBE_MAP)
+                glTexStorage2D(GL_TEXTURE_CUBE_MAP, levels, i, w, h);
+            else
+                glTexStorage2D(target, levels, i, w, h);
+            break;
+        }
+
         if (target == GL_TEXTURE_3D)
             glTexImage3D(target, l, (GLint)i, lw, lh, ld, 0, u, t, nullptr);
         else if (target == GL_TEXTURE_CUBE_MAP)
