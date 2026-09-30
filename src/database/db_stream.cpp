@@ -74,7 +74,8 @@ void __cdecl DB_PopStreamPos()
 {
 #ifdef __SWITCH__
     extern bool g_switchTraceNextStreamPop;
-    if (g_switchTraceNextStreamPop)
+    const bool tracePop = g_switchTraceNextStreamPop;
+    if (tracePop)
     {
         char trace[192];
         std::snprintf(
@@ -88,15 +89,41 @@ void __cdecl DB_PopStreamPos()
         g_switchTraceNextStreamPop = false;
     }
 #endif
+
     vassert(g_streamPosStackIndex > 0, "(g_streamPosStackIndex = %d)", g_streamPosStackIndex);
+
     --g_streamPosStackIndex;
 
 #ifdef __SWITCH__
+    if (tracePop)
+    {
+        char trace[160];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH STREAMPOP TRAP] after decrement stack=%u\n",
+            (unsigned)g_streamPosStackIndex);
+        extern void Switch_LogWrite(const char *msg);
+        Switch_LogWrite(trace);
+    }
+
     const uint32_t savedIndex = g_streamPosStack[g_streamPosStackIndex].index;
+
+    if (tracePop)
+    {
+        char trace[160];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH STREAMPOP TRAP] savedIndex=%u savedPos=%p currentIndex=%u currentPos=%p\n",
+            (unsigned)savedIndex,
+            static_cast<void *>(g_streamPosStack[g_streamPosStackIndex].pos),
+            (unsigned)g_streamPosIndex,
+            static_cast<void *>(g_streamPos));
+        extern void Switch_LogWrite(const char *msg);
+        Switch_LogWrite(trace);
+    }
 
     if (savedIndex >= ARRAY_COUNT(g_streamPosArray))
     {
-        extern void Switch_LogWrite(const char *msg);
         char trace[160];
         std::snprintf(
             trace, sizeof(trace),
@@ -105,18 +132,31 @@ void __cdecl DB_PopStreamPos()
             (unsigned)g_streamPosStackIndex,
             (unsigned)g_streamPosIndex,
             static_cast<void *>(g_streamPos));
+        extern void Switch_LogWrite(const char *msg);
         Switch_LogWrite(trace);
         return;
     }
 
-    // A nested asset load can switch from its parent stream to stream 0.
-    // Preserve the advanced stream-0 cursor, then restore the parent's
-    // already-saved cursor from g_streamPosArray[savedIndex].
     if (g_streamPosIndex == 0 && savedIndex != 0)
     {
         g_streamPosArray[0] = g_streamPos;
+        if (tracePop)
+            Switch_LogWrite("[SWITCH STREAMPOP TRAP] after stream0 save\n");
+
         g_streamPosIndex = savedIndex;
+        if (tracePop)
+            Switch_LogWrite("[SWITCH STREAMPOP TRAP] after index restore\n");
+
         g_streamPos = g_streamPosArray[savedIndex];
+        if (tracePop)
+        {
+            char trace[160];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH STREAMPOP TRAP] after pos restore pos=%p\n",
+                static_cast<void *>(g_streamPos));
+            Switch_LogWrite(trace);
+        }
         return;
     }
 #endif
@@ -124,6 +164,11 @@ void __cdecl DB_PopStreamPos()
     if (!g_streamPosIndex)
         g_streamPos = g_streamPosStack[g_streamPosStackIndex].pos;
     DB_SetStreamIndex(g_streamPosStack[g_streamPosStackIndex].index);
+
+#ifdef __SWITCH__
+    if (tracePop)
+        Switch_LogWrite("[SWITCH STREAMPOP TRAP] normal path done\n");
+#endif
 }
 uint8_t *__cdecl DB_GetStreamPos()
 {
