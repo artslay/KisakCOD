@@ -42,7 +42,7 @@ uintptr_t __cdecl DB_ConvertOffsetToPointerValue(uint32_t offset)
     const uint32_t block = (offset - 1) >> 28;
     const uint32_t blockOffset = (offset - 1) & 0xFFFFFFF;
     return reinterpret_cast<uintptr_t>(
-        &g_streamZoneMem->blocks[block].data[blockOffset]);
+        &g_streamBlocks[block].data[blockOffset]);
 }
 
 void __cdecl DB_ConvertOffsetToAlias(void *data)
