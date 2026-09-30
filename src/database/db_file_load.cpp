@@ -445,9 +445,13 @@ void Load_XAssetListCustom()
         std::vector<uint32_t> serializedStrings(count);
 
         if (count)
+        {
             DB_LoadXFileData(
                 reinterpret_cast<uint8_t *>(serializedStrings.data()),
                 sizeof(uint32_t) * static_cast<size_t>(count));
+            DB_IncStreamPos(
+                static_cast<int32_t>(sizeof(uint32_t) * static_cast<size_t>(count)));
+        }
 
         const char **dst =
             reinterpret_cast<const char **>(Hunk_Alloc(
