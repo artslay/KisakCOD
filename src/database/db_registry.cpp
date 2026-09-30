@@ -2618,22 +2618,22 @@ void __cdecl Load_MaterialTechniqueSetAsset(XAssetHeader *techniqueSet)
         char trace[256];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH TECHSET ASSET] before add name=%p\\n",
+            "[SWITCH TECHSET ASSET] before add name=%p\n",
             static_cast<void *>(techniqueSet->techniqueSet));
         Switch_LogWrite(trace);
     }
 #endif
     techniqueSet->xmodelPieces = DB_AddXAsset(ASSET_TYPE_TECHNIQUE_SET, (XAssetHeader)techniqueSet->xmodelPieces).xmodelPieces;
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH TECHSET ASSET] after add\\n");
+    Switch_LogWrite("[SWITCH TECHSET ASSET] after add\n");
 #endif
     Material_OriginalRemapTechniqueSet(techniqueSet->techniqueSet);
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH TECHSET ASSET] after remap\\n");
+    Switch_LogWrite("[SWITCH TECHSET ASSET] after remap\n");
 #endif
     Material_UploadShaders(techniqueSet->techniqueSet);
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH TECHSET ASSET] after upload\\n");
+    Switch_LogWrite("[SWITCH TECHSET ASSET] after upload\n");
 #endif
 }
 
