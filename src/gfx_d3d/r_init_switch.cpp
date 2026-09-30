@@ -208,6 +208,9 @@ void R_InitGraphicsApi() {
 }
 void R_InitSystems() {
     R_InitImages();
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH RINIT] R_InitImages complete\n");
+#endif
 
     Material_Init();
 
