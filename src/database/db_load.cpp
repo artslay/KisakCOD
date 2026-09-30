@@ -7822,6 +7822,13 @@ void __cdecl Mark_WeaponDefPtr()
 void __cdecl Load_RawFile(bool atStreamStart)
 {
 #ifdef __SWITCH__
+    const bool switchRawFileTrace =
+        (g_switchCurrentAssetRawType == 31u &&
+         g_switchCurrentAssetIndex >= 1120 &&
+         g_switchCurrentAssetIndex <= 1140);
+    if (switchRawFileTrace)
+        Switch_LogWrite("[SWITCH RAWFILE] begin\n");
+
     struct SerializedRawFile
     {
         uint32_t name;
@@ -7842,19 +7849,60 @@ void __cdecl Load_RawFile(bool atStreamStart)
         varRawFile->len = serialized.len;
         varRawFile->buffer = reinterpret_cast<const char *>(
             static_cast<uintptr_t>(serialized.buffer));
+#ifdef __SWITCH__
+        if (switchRawFileTrace)
+        {
+            char trace[192];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH RAWFILE] raw name=%08x len=%d buffer=%08x pos=%p\n",
+                serialized.name,
+                serialized.len,
+                serialized.buffer,
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
+#endif
     }
 
     DB_PushStreamPos(4);
     varXString = &varRawFile->name;
     Load_XString(0);
+#ifdef __SWITCH__
+    if (switchRawFileTrace)
+        Switch_LogWrite("[SWITCH RAWFILE] name done\n");
+#endif
 
     if (varRawFile->buffer)
     {
+#ifdef __SWITCH__
+        if (switchRawFileTrace)
+        {
+            char trace[160];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH RAWFILE] buffer begin len=%d\n",
+                varRawFile->len);
+            Switch_LogWrite(trace);
+        }
+#endif
         varRawFile->buffer = (const char *)AllocLoad_raw_byte();
         varConstChar = (const char *)varRawFile->buffer;
         Load_ConstCharArray(1, varRawFile->len + 1);
+#ifdef __SWITCH__
+        if (switchRawFileTrace)
+            Switch_LogWrite("[SWITCH RAWFILE] buffer done\n");
+#endif
     }
+#ifdef __SWITCH__
+    if (switchRawFileTrace)
+        Switch_LogWrite("[SWITCH RAWFILE] before pop\n");
+#endif
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (switchRawFileTrace)
+        Switch_LogWrite("[SWITCH RAWFILE] after pop\n");
+#endif
 #else
     Load_Stream(atStreamStart, (uint8_t *)varRawFile, 12);
     DB_PushStreamPos(4);
