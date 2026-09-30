@@ -2413,8 +2413,19 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
 #ifdef __SWITCH__
             Switch_LogWrite("[SWITCH IMAGE] Ptr after Load_GfxImage\n");
             Switch_LogWrite("[SWITCH IMAGE] Ptr before Load_GfxImageAsset\n");
-#endif
+
+            // The serialized XAsset header is only 4 bytes on the original
+            // 32-bit format, while XAssetHeader is 8 bytes on Switch.
+            // Never pass varGfxImagePtr directly as XAssetHeader*: doing so
+            // makes the 8-byte union read the following serialized bytes
+            // (the image name starts at +4 here).
+            XAssetHeader imageHeader{};
+            imageHeader.image = *varGfxImagePtr;
+            Load_GfxImageAsset(&imageHeader);
+            *varGfxImagePtr = imageHeader.image;
+#else
             Load_GfxImageAsset((XAssetHeader *)varGfxImagePtr);
+#endif
 #ifdef __SWITCH__
             Switch_LogWrite("[SWITCH IMAGE] Ptr after Load_GfxImageAsset\n");
 #endif
