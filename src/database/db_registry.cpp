@@ -1523,7 +1523,7 @@ XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *na
     {
         char trace[192];
         std::snprintf(trace, sizeof(trace),
-            "[SWITCH DBLOOKUP] material $default hash=%u first=%u write=%u\\n",
+            "[SWITCH DBLOOKUP] material $default hash=%u first=%u write=%u\n",
             hash,
             static_cast<unsigned>(db_hashTable[hash]),
             static_cast<unsigned>(db_hashCritSect.writeCount));
