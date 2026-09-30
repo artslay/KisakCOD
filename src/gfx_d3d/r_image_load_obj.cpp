@@ -435,9 +435,30 @@ char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFile
     iassert( image );
     iassert( image->category == IMG_CATEGORY_LOAD_FROM_FILE );
     iassert( !image->texture.basemap );
+#ifdef __SWITCH__
+    {
+        char trace[160];
+        std::snprintf(trace,sizeof(trace),
+            "[SWITCH IWI] begin image=%p name=%p\n",
+            (void*)image,(const void*)image->name);
+        Switch_LogWrite(trace);
+    }
+#endif
     if (Com_sprintf(filepath, 64, "%s%s%s", "images/", image->name, ".iwi") >= 0)
     {
+#ifdef __SWITCH__
+        Switch_LogWrite("[SWITCH IWI] filepath built\n");
+#endif
         fileSize = OpenFileRead(filepath, &fileHandle);
+#ifdef __SWITCH__
+        {
+            char trace[224];
+            std::snprintf(trace,sizeof(trace),
+                "[SWITCH IWI] OpenFileRead size=%d handle=%d path=%s\n",
+                fileSize,fileHandle,filepath);
+            Switch_LogWrite(trace);
+        }
+#endif
         if (fileSize >= 0)
         {
             if ((uint32_t)fileSize < 0x1C)
@@ -448,8 +469,23 @@ char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFile
                     "%s\n\t(filepath) = %s",
                     "(fileSize >= sizeof( fileHeader ))",
                     filepath);
+#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH IWI] before header FS_Read\n");
+#endif
             if (FS_Read((uint8_t *)&fileHeader, sizeof(GfxImageFileHeader), fileHandle) == sizeof(GfxImageFileHeader))
             {
+#ifdef __SWITCH__
+                {
+                    char trace[224];
+                    std::snprintf(trace,sizeof(trace),
+                        "[SWITCH IWI] header tag=%c%c%c version=%u format=%u flags=%02x dim=%d,%d,%d size0=%d size1=%d size2=%d size3=%d\n",
+                        fileHeader.tag[0],fileHeader.tag[1],fileHeader.tag[2],fileHeader.version,
+                        fileHeader.format,fileHeader.flags,fileHeader.dimensions[0],fileHeader.dimensions[1],
+                        fileHeader.dimensions[2],fileHeader.fileSizeForPicmip[0],fileHeader.fileSizeForPicmip[1],
+                        fileHeader.fileSizeForPicmip[2],fileHeader.fileSizeForPicmip[3]);
+                    Switch_LogWrite(trace);
+                }
+#endif
                 if (Image_ValidateHeader(&fileHeader, filepath))
                 {
                     if ((fileHeader.flags & (IMG_FLAG_NOPICMIP | IMG_FLAG_NOMIPMAPS)) != 0
@@ -471,11 +507,31 @@ char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFile
                             fileHeader.fileSizeForPicmip[0],
                             fileSize);
                     readSize = fileHeader.fileSizeForPicmip[picmip] - 28;
+#ifdef __SWITCH__
+                    {
+                        char trace[160];
+                        std::snprintf(trace,sizeof(trace),
+                            "[SWITCH IWI] picmip=%d readSize=%d\n",picmip,readSize);
+                        Switch_LogWrite(trace);
+                    }
+#endif
                     imageData = Image_AllocTempMemory(readSize);
+#ifdef __SWITCH__
+                    Switch_LogWrite("[SWITCH IWI] before pixel FS_Read\n");
+#endif
                     if (FS_Read(imageData, readSize, fileHandle) == readSize)
                     {
+#ifdef __SWITCH__
+                        Switch_LogWrite("[SWITCH IWI] after pixel FS_Read\n");
+#endif
                         FS_FCloseFile(fileHandle);
+#ifdef __SWITCH__
+                        Switch_LogWrite("[SWITCH IWI] before Image_LoadFromData\n");
+#endif
                         Image_LoadFromData(image, &fileHeader, imageData);
+#ifdef __SWITCH__
+                        Switch_LogWrite("[SWITCH IWI] after Image_LoadFromData\n");
+#endif
                         Image_FreeTempMemory(imageData, readSize);
                         return 1;
                     }
