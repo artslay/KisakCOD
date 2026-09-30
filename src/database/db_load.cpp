@@ -3028,6 +3028,7 @@ void __cdecl Load_MaterialTechniquePtrArray(bool atStreamStart, int32_t count)
 void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
 {
 #ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH MATERIAL] techset read148 begin\n");
     struct SerializedMaterialTechniqueSet
     {
         uint32_t name;
@@ -3108,9 +3109,22 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
     if (*varMaterialTechniqueSetPtr)
     {
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varMaterialTechniqueSetPtr));
+#ifdef __SWITCH__
+        {
+            char trace[192];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH MATERIAL] techset ptr=%08x stream=%u\n",
+                value, g_streamPosIndex);
+            Switch_LogWrite(trace);
+        }
         if (value == -1 || value == -2)
         {
-#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH MATERIAL] techset inline begin\n");
+#else
+        if (value == -1 || value == -2)
+        {
+#endif
             *varMaterialTechniqueSetPtr =
                 reinterpret_cast<MaterialTechniqueSet *>(
                     Hunk_Alloc(
@@ -3129,6 +3143,9 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
             else
                 inserted = 0;
             Load_MaterialTechniqueSet(1);
+#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH MATERIAL] techset payload done\n");
+#endif
             Load_MaterialTechniqueSetAsset((XAssetHeader *)varMaterialTechniqueSetPtr);
             if (inserted)
                 *inserted = *varMaterialTechniqueSetPtr;
@@ -3214,7 +3231,7 @@ void __cdecl Load_Material(bool atStreamStart)
     DB_PushStreamPos(4);
 
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH MATERIAL] read80 done\\n");
+    Switch_LogWrite("[SWITCH MATERIAL] read80 done\n");
 #endif
 
     varMaterialInfo = &varMaterial->info;
@@ -3222,14 +3239,14 @@ void __cdecl Load_Material(bool atStreamStart)
     Load_XString(0);
 
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH MATERIAL] info done\\n");
+    Switch_LogWrite("[SWITCH MATERIAL] info done\n");
 #endif
 
     varMaterialTechniqueSetPtr = &varMaterial->techniqueSet;
     Load_MaterialTechniqueSetPtr(0);
 
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH MATERIAL] techset done\\n");
+    Switch_LogWrite("[SWITCH MATERIAL] techset done\n");
 #endif
 
     if (varMaterial->textureTable)
@@ -3248,7 +3265,7 @@ void __cdecl Load_Material(bool atStreamStart)
     }
 
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH MATERIAL] textures done\\n");
+    Switch_LogWrite("[SWITCH MATERIAL] textures done\n");
 #endif
 
     if (varMaterial->constantTable)
@@ -3267,7 +3284,7 @@ void __cdecl Load_Material(bool atStreamStart)
     }
 
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH MATERIAL] constants done\\n");
+    Switch_LogWrite("[SWITCH MATERIAL] constants done\n");
 #endif
 
     if (varMaterial->stateBitsTable)
@@ -3286,7 +3303,7 @@ void __cdecl Load_Material(bool atStreamStart)
     }
 
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH MATERIAL] statebits done\\n");
+    Switch_LogWrite("[SWITCH MATERIAL] statebits done\n");
 #endif
 
     DB_PopStreamPos();
@@ -3360,7 +3377,7 @@ void __cdecl Load_MaterialHandle(bool atStreamStart)
             Load_Material(1);
             Load_MaterialAsset((XAssetHeader *)varMaterialHandle);
 #ifdef __SWITCH__
-            Switch_LogWrite("[SWITCH MATERIAL] asset done\\n");
+            Switch_LogWrite("[SWITCH MATERIAL] asset done\n");
 #endif
             if (inserted)
                 *inserted = *varMaterialHandle;
