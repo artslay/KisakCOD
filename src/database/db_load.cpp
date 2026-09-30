@@ -2419,8 +2419,31 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
             // Never pass varGfxImagePtr directly as XAssetHeader*: doing so
             // makes the 8-byte union read the following serialized bytes
             // (the image name starts at +4 here).
+            const uintptr_t nativeImagePtr =
+                reinterpret_cast<uintptr_t>(*varGfxImagePtr);
+
             XAssetHeader imageHeader{};
-            imageHeader.image = *varGfxImagePtr;
+            std::memcpy(
+                &imageHeader,
+                &nativeImagePtr,
+                sizeof(nativeImagePtr));
+
+            {
+                const uint8_t *raw =
+                    reinterpret_cast<const uint8_t *>(&imageHeader);
+                char trace[256];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH IMAGE ABI] caller sizeofHeader=%u native=%016llx raw=%02x%02x%02x%02x%02x%02x%02x%02x image=%p\n",
+                    static_cast<unsigned>(sizeof(XAssetHeader)),
+                    static_cast<unsigned long long>(nativeImagePtr),
+                    raw[0], raw[1], raw[2], raw[3],
+                    raw[4], raw[5], raw[6], raw[7],
+                    static_cast<void *>(imageHeader.image));
+                Switch_LogWrite(trace);
+            }
+
             Load_GfxImageAsset(&imageHeader);
             *varGfxImagePtr = imageHeader.image;
 #else
