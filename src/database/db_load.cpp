@@ -2264,13 +2264,26 @@ void __cdecl Load_GfxImage(bool atStreamStart)
         varGfxImage->depth = serialized.depth;
         varGfxImage->category = serialized.category;
         varGfxImage->delayLoadPixels = serialized.delayLoadPixels != 0;
-        varGfxImage->name =
-            reinterpret_cast<const char *>(
-                static_cast<uintptr_t>(serialized.name));
+
+        if (!serialized.name)
+        {
+            varGfxImage->name = nullptr;
+        }
+        else if (serialized.name == UINT32_MAX)
+        {
+            char *nameBuffer =
+                reinterpret_cast<char *>(AllocLoad_raw_byte());
+            Load_XStringCustom(&nameBuffer);
+            varGfxImage->name = nameBuffer;
+        }
+        else
+        {
+            varGfxImage->name =
+                reinterpret_cast<const char *>(
+                    DB_ConvertOffsetToPointerValue(serialized.name));
+        }
 
         DB_PushStreamPos(4);
-        varXString = &varGfxImage->name;
-        Load_XString(0);
         varGfxTextureLoad = &varGfxImage->texture;
         Load_GfxTextureLoad(0);
         DB_PopStreamPos();
