@@ -9121,59 +9121,10 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
 
-#ifdef __SWITCH__
-        if (i < 32)
-        {
-            char trace[192];
-            std::snprintf(
-                trace,
-                sizeof(trace),
-                "[SWITCH XASSET MAP] idx=%d raw=%u runtime=%u stream=%u pos=%p header=%08x\n",
-                i,
-                static_cast<unsigned>(serialized.type),
-                static_cast<unsigned>(runtimeType),
-                g_streamPosIndex,
-                static_cast<void *>(DB_GetStreamPos()),
-                serialized.header);
-            Switch_LogWrite(trace);
-        }
 
-        if (runtimeType == ASSET_TYPE_MATERIAL)
-        {
-            char trace[192];
-            std::snprintf(
-                trace,
-                sizeof(trace),
-                "[SWITCH XASSET] material load begin index=%d header=%08x\n",
-                i,
-                serialized.header);
-            Switch_LogWrite(trace);
-        }
-#endif
-
-#ifdef __SWITCH__
-        {
-            char trace[192];
-            std::snprintf(
-                trace,
-                sizeof(trace),
-                "[SWITCH XASSET TRACE] begin idx=%d raw=%u runtime=%u header=%08x stream=%u pos=%p\n",
-                g_switchCurrentAssetIndex,
-                g_switchCurrentAssetRawType,
-                static_cast<unsigned>(runtimeType),
-                serialized.header,
-                g_streamPosIndex,
-                static_cast<void *>(DB_GetStreamPos()));
-            Switch_LogWrite(trace);
-        }
-#endif
 
         Load_XAssetHeader(0);
 
-#ifdef __SWITCH__
-        if (i < 32)
-            Switch_LogWrite("[SWITCH XASSET] load done\n");
-#endif
 
         ++var;
     }
