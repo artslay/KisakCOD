@@ -7297,6 +7297,41 @@ void __cdecl Mark_WeaponDefPtr()
 
 void __cdecl Load_RawFile(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedRawFile
+    {
+        uint32_t name;
+        int32_t len;
+        uint32_t buffer;
+    };
+
+    if (atStreamStart)
+    {
+        SerializedRawFile serialized{};
+        Load_Stream(
+            true,
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+
+        varRawFile->name = reinterpret_cast<const char *>(
+            static_cast<uintptr_t>(serialized.name));
+        varRawFile->len = serialized.len;
+        varRawFile->buffer = reinterpret_cast<const char *>(
+            static_cast<uintptr_t>(serialized.buffer));
+    }
+
+    DB_PushStreamPos(4);
+    varXString = &varRawFile->name;
+    Load_XString(0);
+
+    if (varRawFile->buffer)
+    {
+        varRawFile->buffer = (const char *)AllocLoad_raw_byte();
+        varConstChar = (const char *)varRawFile->buffer;
+        Load_ConstCharArray(1, varRawFile->len + 1);
+    }
+    DB_PopStreamPos();
+#else
     Load_Stream(atStreamStart, (uint8_t *)varRawFile, 12);
     DB_PushStreamPos(4);
     varXString = &varRawFile->name;
@@ -7308,6 +7343,7 @@ void __cdecl Load_RawFile(bool atStreamStart)
         Load_ConstCharArray(1, varRawFile->len + 1);
     }
     DB_PopStreamPos();
+#endif
 }
 
 void __cdecl Load_RawFilePtr(bool atStreamStart)
