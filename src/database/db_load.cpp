@@ -1655,21 +1655,20 @@ void __cdecl Load_MssSound(bool atStreamStart)
             sizeof(serialized));
 
         varMssSound->info.format = serialized.format;
-        varMssSound->info.data_ptr =
-            reinterpret_cast<const void *>(static_cast<uintptr_t>(serialized.data_ptr));
+        varMssSound->info.data_ptr = nullptr;
         varMssSound->info.data_len = serialized.data_len;
         varMssSound->info.rate = serialized.rate;
         varMssSound->info.bits = serialized.bits;
         varMssSound->info.channels = serialized.channels;
         varMssSound->info.samples = serialized.samples;
         varMssSound->info.block_size = serialized.block_size;
-        varMssSound->info.initial_ptr =
-            reinterpret_cast<const void *>(static_cast<uintptr_t>(serialized.initial_ptr));
-        varMssSound->data =
-            reinterpret_cast<uint8_t *>(static_cast<uintptr_t>(serialized.data));
+        varMssSound->info.initial_ptr = nullptr;
+        varMssSound->data = reinterpret_cast<uint8_t *>(
+            static_cast<uintptr_t>(serialized.data));
     }
 
     DB_PushStreamPos(0);
+
     if (varMssSound->data)
     {
         const uint32_t value = static_cast<uint32_t>(
@@ -1677,9 +1676,12 @@ void __cdecl Load_MssSound(bool atStreamStart)
 
         if (value < 0xFFFFFFFE)
         {
-            DB_ConvertOffsetToAlias(&value);
-            varMssSound->data = reinterpret_cast<uint8_t *>(
-                static_cast<uintptr_t>(value));
+            const uintptr_t aliasSlot =
+                DB_ConvertOffsetToPointerValue(value);
+            varMssSound->data = aliasSlot
+                ? reinterpret_cast<uint8_t *>(
+                    *reinterpret_cast<const uintptr_t *>(aliasSlot))
+                : nullptr;
         }
         else
         {
@@ -1694,6 +1696,7 @@ void __cdecl Load_MssSound(bool atStreamStart)
                 *inserted = varMssSound->data;
         }
     }
+
     DB_PopStreamPos();
 #else
     const void **inserted; // [esp+0h] [ebp-Ch]
@@ -1722,51 +1725,6 @@ void __cdecl Load_MssSound(bool atStreamStart)
                 *inserted = varMssSound->data;
         }
     }
-    DB_PopStreamPos();
-#endif
-}
-
-void __cdecl Load_LoadedSound(bool atStreamStart)
-{
-#ifdef __SWITCH__
-    struct SerializedLoadedSound
-    {
-        uint32_t name;
-        uint8_t sound[40];
-    };
-    static_assert(sizeof(SerializedLoadedSound) == 44);
-
-    if (atStreamStart)
-    {
-        SerializedLoadedSound serialized{};
-        Load_Stream(
-            true,
-            reinterpret_cast<uint8_t *>(&serialized),
-            sizeof(serialized));
-
-        varLoadedSound->name =
-            reinterpret_cast<const char *>(static_cast<uintptr_t>(serialized.name));
-
-        varMssSound = &varLoadedSound->sound;
-        std::memcpy(
-            reinterpret_cast<uint8_t *>(&varLoadedSound->sound),
-            serialized.sound,
-            sizeof(serialized.sound));
-    }
-
-    DB_PushStreamPos(4);
-    varXString = &varLoadedSound->name;
-    Load_XString(0);
-    varMssSound = &varLoadedSound->sound;
-    Load_MssSound(0);
-    DB_PopStreamPos();
-#else
-    Load_Stream(atStreamStart, (uint8_t *)varLoadedSound, 44);
-    DB_PushStreamPos(4);
-    varXString = &varLoadedSound->name;
-    Load_XString(0);
-    varMssSound = &varLoadedSound->sound;
-    Load_MssSound(0);
     DB_PopStreamPos();
 #endif
 }
@@ -1804,9 +1762,14 @@ void __cdecl Load_LoadedSoundPtr(bool atStreamStart)
 
 void __cdecl Load_StreamedSound(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    varStreamFileName = &varStreamedSound->filename;
+    Load_StreamFileName(atStreamStart);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varStreamedSound, 8);
     varStreamFileName = &varStreamedSound->filename;
     Load_StreamFileName(0);
+#endif
 }
 
 void __cdecl Load_SoundFileRef(bool atStreamStart)
@@ -1825,9 +1788,61 @@ void __cdecl Load_SoundFileRef(bool atStreamStart)
 
 void __cdecl Load_SoundFile(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedSoundFile
+    {
+        uint8_t type;
+        uint8_t exists;
+        uint8_t pad[2];
+        uint32_t ref0;
+        uint32_t ref1;
+    };
+    static_assert(sizeof(SerializedSoundFile) == 12);
+
+    if (atStreamStart)
+    {
+        SerializedSoundFile serialized{};
+        Load_Stream(
+            true,
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+
+        varSoundFile->type = serialized.type;
+        varSoundFile->exists = serialized.exists;
+        std::memset(&varSoundFile->u, 0, sizeof(varSoundFile->u));
+
+        if (serialized.type == SAT_LOADED)
+        {
+            std::memcpy(
+                &varSoundFile->u.loadSnd,
+                &serialized.ref0,
+                sizeof(serialized.ref0));
+        }
+        else
+        {
+            StreamedSound *streamed =
+                reinterpret_cast<StreamedSound *>(&varSoundFile->u);
+            varStreamFileName = &streamed->filename;
+            varStreamFileInfo = &varStreamFileName->info;
+            varStreamFileNameRaw = &varStreamFileInfo->raw;
+            std::memcpy(
+                &varStreamFileNameRaw->dir,
+                &serialized.ref0,
+                sizeof(serialized.ref0));
+            std::memcpy(
+                &varStreamFileNameRaw->name,
+                &serialized.ref1,
+                sizeof(serialized.ref1));
+        }
+    }
+
+    varSoundFileRef = &varSoundFile->u;
+    Load_SoundFileRef(0);
+#else
     Load_Stream(atStreamStart, &varSoundFile->type, 12);
     varSoundFileRef = &varSoundFile->u;
     Load_SoundFileRef(0);
+#endif
 }
 
 void __cdecl Load_SndCurve(bool atStreamStart)
