@@ -22,6 +22,47 @@
 
 #ifdef __SWITCH__
 extern void Switch_LogRaw(const char *msg);
+
+static void Switch_LogRawDwords(
+    const char *tag,
+    const uint8_t *data,
+    uint32_t size)
+{
+    for (uint32_t offset = 0; offset < size; offset += 16)
+    {
+        char trace[256];
+        int written = std::snprintf(
+            trace,
+            sizeof(trace),
+            "%s +%02x:",
+            tag,
+            offset);
+
+        for (uint32_t i = 0; i < 16 && offset + i < size; i += 4)
+        {
+            uint32_t word = 0;
+            const uint32_t remaining = size - offset - i;
+            const uint32_t copySize = remaining < 4 ? remaining : 4;
+
+            std::memcpy(
+                &word,
+                data + offset + i,
+                copySize);
+
+            written += std::snprintf(
+                trace + written,
+                sizeof(trace) - static_cast<size_t>(written),
+                " %08x",
+                word);
+        }
+
+        std::snprintf(
+            trace + written,
+            sizeof(trace) - static_cast<size_t>(written),
+            "\n");
+        Switch_LogRaw(trace);
+    }
+}
 #endif
 
 #ifdef __SWITCH__
@@ -3146,6 +3187,13 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
         sizeof(serialized));
     DB_IncStreamPos(sizeof(serialized));
 
+#ifdef __SWITCH__
+    Switch_LogRawDwords(
+        "[SWITCH TECHSET WORDS]",
+        reinterpret_cast<const uint8_t *>(&serialized),
+        sizeof(serialized));
+#endif
+
     // The fastfile stores 32-bit pointers. MaterialTechniqueSet is native
     // 64-bit on Switch, so expand every serialized pointer explicitly.
     varMaterialTechniqueSet->worldVertFormat = serialized.worldVertFormat;
@@ -3390,6 +3438,13 @@ void __cdecl Load_Material(bool atStreamStart)
         reinterpret_cast<uint8_t *>(&serialized),
         sizeof(serialized));
     DB_IncStreamPos(sizeof(serialized));
+
+#ifdef __SWITCH__
+    Switch_LogRawDwords(
+        "[SWITCH MATERIAL WORDS]",
+        reinterpret_cast<const uint8_t *>(&serialized),
+        sizeof(serialized));
+#endif
 
     {
         char trace[256];
