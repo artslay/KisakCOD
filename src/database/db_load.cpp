@@ -2889,8 +2889,6 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
     varMaterialPass->perObjArgCount = serialized.perObjArgCount;
     varMaterialPass->stableArgCount = serialized.stableArgCount;
     varMaterialPass->customSamplerFlags = serialized.customSamplerFlags;
-    varMaterialPass->precompiledIndex = serialized.precompiledIndex;
-
 #ifdef __SWITCH__
     {
         char trace[320];
