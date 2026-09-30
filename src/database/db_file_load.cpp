@@ -524,6 +524,11 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         uint32_t header;
     };
 
+    uint32_t imageRecords = 0;
+    uint32_t materialRecords = 0;
+    uint32_t techsetRecords = 0;
+    uint32_t localizeRecords = 0;
+
     XAsset *var = varXAsset;
     for (int32_t i = 0; i < count; ++i)
     {
@@ -532,6 +537,15 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             reinterpret_cast<uint8_t *>(&serialized),
             sizeof(serialized));
         DB_IncStreamPos(sizeof(serialized));
+
+        if (serialized.type == ASSET_TYPE_IMAGE)
+            ++imageRecords;
+        else if (serialized.type == ASSET_TYPE_MATERIAL)
+            ++materialRecords;
+        else if (serialized.type == ASSET_TYPE_TECHNIQUE_SET)
+            ++techsetRecords;
+        else if (serialized.type == ASSET_TYPE_LOCALIZE_ENTRY)
+            ++localizeRecords;
 
         varXAsset = var;
         memset(varXAsset, 0, sizeof(*varXAsset));
@@ -542,6 +556,17 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 
         ++var;
     }
+
+#ifdef __SWITCH__
+    {
+        char trace[192];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH XASSET] records=%d image=%u imageAdds=%u material=%u techset=%u localize=%u\n",
+            count, imageRecords, g_switchImageAdds,
+            materialRecords, techsetRecords, localizeRecords);
+        Switch_LogWrite(trace);
+    }
+#endif
 #else
     XAsset *var;
     int32_t i;
