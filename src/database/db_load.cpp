@@ -3011,8 +3011,25 @@ void __cdecl Load_MaterialTechnique(bool atStreamStart)
     DB_AllocStreamPos(3);
 
     SerializedMaterialTechnique serialized{};
+    const uint8_t *techniqueStart = DB_GetStreamPos();
     DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
     DB_IncStreamPos(sizeof(serialized));
+
+#ifdef __SWITCH__
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH TECHNIQUE RAW] pos=%p name=%08x flags=%04x passCount=%u after=%p\n",
+            static_cast<const void *>(techniqueStart),
+            serialized.name,
+            static_cast<unsigned>(serialized.flags),
+            static_cast<unsigned>(serialized.passCount),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+#endif
 
     varMaterialTechnique->flags = serialized.flags;
     varMaterialTechnique->passCount = serialized.passCount;
@@ -3167,7 +3184,7 @@ void __cdecl Load_MaterialTechniquePtrArray(bool atStreamStart, int32_t count)
 void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
 {
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH MATERIAL] techset read148 begin\n");
+    Switch_LogWrite("[SWITCH MATERIAL] techset read112 begin\n");
     struct SerializedMaterialTechniqueSet
     {
         uint32_t name;
