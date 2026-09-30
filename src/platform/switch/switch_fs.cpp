@@ -626,26 +626,6 @@ uint32_t __cdecl FS_Write(const char *buffer, uint32_t len, int h)
     return FS_FileWrite(buffer, len, g_fsh[h].handleFiles.file.o);
 }
 
-int __cdecl FS_Seek(int h, int offset, int origin)
-{
-    if (h <= 0 || h >= 65 || !g_fsh[h].handleFiles.file.o) return -1;
-    int whence = origin == 0 ? SEEK_SET : (origin == 1 ? SEEK_CUR : SEEK_END);
-    return FS_FileSeek(g_fsh[h].handleFiles.file.o, offset, whence);
-}
-
-uint32_t __cdecl FS_FTell(int h)
-{
-    if (h <= 0 || h >= 65 || !g_fsh[h].handleFiles.file.o) return 0;
-    return FS_FileTell(g_fsh[h].handleFiles.file.o);
-}
-
-void __cdecl FS_FCloseFile(int h)
-{
-    if (h <= 0 || h >= 65) return;
-    if (g_fsh[h].handleFiles.file.o) fclose(g_fsh[h].handleFiles.file.o);
-    std::memset(&g_fsh[h], 0, sizeof(g_fsh[h]));
-}
-
 void __cdecl FS_FCloseLogFile(int h) { FS_FCloseFile(h); }
 
 int __cdecl FS_ReadFile(const char *qpath, void **buffer)
