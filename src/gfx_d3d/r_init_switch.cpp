@@ -174,27 +174,6 @@ static void R_LoadGraphicsAssets()
     if (zoneCount > 0)
         DB_LoadXAssets(zoneInfo, zoneCount, 1);
 
-#ifdef __SWITCH__
-    {
-        XAssetHeader images[256]{};
-        const int imageCount = DB_GetAllXAssetOfType_FastFile(ASSET_TYPE_IMAGE, images, 256);
-        char trace[256];
-
-        std::snprintf(trace, sizeof(trace), "[SWITCH IMGDB] imageCount=%d\n", imageCount);
-        Switch_LogWrite(trace);
-
-        for (int i = 0; i < imageCount && i < 256; ++i)
-        {
-            if (images[i].image && images[i].image->name && images[i].image->name[0] == 36)
-            {
-                std::snprintf(trace, sizeof(trace),
-                    "[SWITCH IMGDB] code image[%d]=%s\n",
-                    i, images[i].image->name);
-                Switch_LogWrite(trace);
-            }
-        }
-    }
-#endif
 }
 
 void R_InitGraphicsApi() {
