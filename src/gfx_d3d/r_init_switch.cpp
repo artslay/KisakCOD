@@ -191,6 +191,9 @@ void R_InitGraphicsApi() {
     R_LoadGraphicsAssets();
 
     if (!dx.device) dx.device = new IDirect3DDevice9;
+    // RB_InitImages() runs before RB_SetInitialState() in the shared bootstrap.
+    // Its sampler binding path still needs the device pointer in the command state.
+    gfxCmdBufState.prim.device = dx.device;
     vidConfig.sceneWidth = 1280;
     vidConfig.sceneHeight = 720;
     vidConfig.displayWidth = 1280;
