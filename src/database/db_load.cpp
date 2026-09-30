@@ -492,7 +492,6 @@ XAssetList g_varXAssetList{};
 int32_t g_switchCurrentAssetIndex = -1;
 uint32_t g_switchCurrentAssetRawType = UINT32_MAX;
 uint32_t g_switchCurrentAssetHeader = 0;
-static uint32_t g_switchAssetTraceCount = 0;
 static uint32_t g_switchImagePtrTraceCount = 0;
 #endif
 
@@ -2903,7 +2902,7 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
                 char trace[192];
                 std::snprintf(
                     trace, sizeof(trace),
-                    "[SWITCH IMAGEPTR] %u after Load_GfxImageAsset image=%p name=%s\\n",
+                    "[SWITCH IMAGEPTR] %u after Load_GfxImageAsset image=%p name=%s\n",
                     (unsigned)g_switchImagePtrTraceCount,
                     static_cast<void *>(imageHeader.image),
                     imageHeader.image && imageHeader.image->name ? imageHeader.image->name : "<null>");
@@ -2924,7 +2923,7 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
                 char trace[128];
                 std::snprintf(
                     trace, sizeof(trace),
-                    "[SWITCH IMAGEPTR] %u after header store slot=%p\\n",
+                    "[SWITCH IMAGEPTR] %u after header store slot=%p\n",
                     (unsigned)g_switchImagePtrTraceCount,
                     static_cast<void *>(varGfxImagePtr));
                 Switch_LogWrite(trace);
@@ -2957,7 +2956,7 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
         char trace[128];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH IMAGEPTR] %u before PopStreamPos\\n",
+            "[SWITCH IMAGEPTR] %u before PopStreamPos\n",
             (unsigned)g_switchImagePtrTraceCount);
         Switch_LogWrite(trace);
     }
@@ -9280,18 +9279,18 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         varXAssetHeader = &varXAsset->header;
 
 #ifdef __SWITCH__
-        const bool traceAsset = g_switchAssetTraceCount < 64;
+        const bool traceAsset = (i & 63) == 0 || i == count - 1;
         if (traceAsset)
         {
             char trace[192];
             std::snprintf(
                 trace, sizeof(trace),
-                "[SWITCH ASSET] %u begin rawType=%u runtimeType=%u header=%08x ptr=%p\\n",
-                (unsigned)g_switchAssetTraceCount,
+                "[SWITCH ASSET] %d/%d begin rawType=%u runtimeType=%u header=%08x\n",
+                i,
+                count,
                 serialized.type,
                 runtimeType,
-                serialized.header,
-                static_cast<void *>(varXAsset));
+                serialized.header);
             Switch_LogWrite(trace);
         }
 #endif
@@ -9304,13 +9303,13 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             char trace[160];
             std::snprintf(
                 trace, sizeof(trace),
-                "[SWITCH ASSET] %u end rawType=%u runtimeType=%u\\n",
-                (unsigned)g_switchAssetTraceCount,
+                "[SWITCH ASSET] %d/%d end rawType=%u runtimeType=%u\n",
+                i,
+                count,
                 serialized.type,
                 runtimeType);
             Switch_LogWrite(trace);
         }
-        ++g_switchAssetTraceCount;
 #endif
 
         ++var;
