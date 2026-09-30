@@ -33,6 +33,12 @@ uint32_t __cdecl FS_FileWrite(const void *ptr, uint32_t len, FILE *stream)
     return fwrite(ptr, 1u, len, stream);
 }
 
+void __cdecl FS_FileClose(FILE *stream)
+{
+    if (stream)
+        fclose(stream);
+}
+
 FILE *__cdecl FS_FileOpenReadBinary(const char *filename)
 {
     FILE *file; // [esp+0h] [ebp-4h]
