@@ -8540,24 +8540,19 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         uint32_t header;
     };
 
-    std::vector<SerializedXAsset> serializedAssets(static_cast<size_t>(count));
-    if (count > 0)
-    {
-        const uint32_t serializedSize =
-            static_cast<uint32_t>(
-                sizeof(SerializedXAsset) * static_cast<size_t>(count));
-
-        DB_LoadXFileData(
-            reinterpret_cast<uint8_t *>(serializedAssets.data()),
-            serializedSize);
-        DB_IncStreamPos(static_cast<int32_t>(serializedSize));
-    }
-
     XAsset *var = varXAsset;
     for (int32_t i = 0; i < count; ++i)
     {
-        const SerializedXAsset &serialized =
-            serializedAssets[static_cast<size_t>(i)];
+        // Keep the stream cursor immediately after the current serialized
+        // XAsset record. Generated Load_*Ptr functions rely on this: their
+        // Load_Stream(0, ...) does not consume the pointer itself, then
+        // DB_PushStreamPos(0) saves the post-record position while the inline
+        // asset payload is loaded.
+        SerializedXAsset serialized{};
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+        DB_IncStreamPos(sizeof(serialized));
 
         varXAsset = var;
         memset(varXAsset, 0, sizeof(*varXAsset));
@@ -8575,17 +8570,18 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         varXAssetHeader = &varXAsset->header;
 
 #ifdef __SWITCH__
-        if (i < 4)
+        if (i < 8)
         {
             char trace[256];
             std::snprintf(
                 trace, sizeof(trace),
-                "[SWITCH XASSET MAP] idx=%d raw=%u runtime=%u stream=%u pos=%p\n",
+                "[SWITCH XASSET MAP] idx=%d raw=%u runtime=%u stream=%u pos=%p header=%08x\n",
                 i,
                 static_cast<unsigned>(serialized.type),
                 static_cast<unsigned>(runtimeType),
                 g_streamPosIndex,
-                static_cast<void *>(DB_GetStreamPos()));
+                static_cast<void *>(DB_GetStreamPos()),
+                serialized.header);
             Switch_LogWrite(trace);
         }
 #endif
