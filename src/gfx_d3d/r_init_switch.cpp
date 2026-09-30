@@ -11,6 +11,7 @@
 #include "r_water.h"
 #include "r_light.h"
 #include "r_workercmds.h"
+#include "rb_state.h"
 #include "r_draw_method.h"
 #include <gfx/gfx_backend.h>
 #include <database/database.h>
