@@ -2460,6 +2460,10 @@ void __cdecl Load_MaterialVertexShader(bool atStreamStart)
     static_assert(sizeof(SerializedMaterialVertexShader) == 12);
 
     iassert(atStreamStart);
+
+    // Preserve the original 4-byte serialized object alignment on Switch.
+    DB_AllocStreamPos(3);
+
     SerializedMaterialVertexShader serialized{};
     DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
     DB_IncStreamPos(sizeof(serialized));
@@ -2541,6 +2545,13 @@ void __cdecl Load_MaterialPixelShader(bool atStreamStart)
     static_assert(sizeof(SerializedMaterialPixelShader) == 16);
 
     iassert(atStreamStart);
+
+    // The original 32-bit loader allocates the serialized object with
+    // DB_AllocStreamPos(3), so every embedded shader starts on a 4-byte boundary.
+    // The Switch runtime object lives in Hunk memory, therefore we must preserve
+    // that stream alignment explicitly before reading its serialized 16-byte form.
+    DB_AllocStreamPos(3);
+
     SerializedMaterialPixelShader serialized{};
     DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
     DB_IncStreamPos(sizeof(serialized));
