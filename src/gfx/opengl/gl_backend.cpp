@@ -118,6 +118,12 @@ void OpenGLBackend::Shutdown()
 #ifdef __SWITCH__
     if (s_display != EGL_NO_DISPLAY)
     {
+        if (s_databaseContext != EGL_NO_CONTEXT)
+            eglDestroyContext(s_display, s_databaseContext);
+
+        if (s_databaseSurface != EGL_NO_SURFACE)
+            eglDestroySurface(s_display, s_databaseSurface);
+
         eglMakeCurrent(s_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
         if (s_context != EGL_NO_CONTEXT)
@@ -132,6 +138,9 @@ void OpenGLBackend::Shutdown()
     s_display = EGL_NO_DISPLAY;
     s_context = EGL_NO_CONTEXT;
     s_surface = EGL_NO_SURFACE;
+    s_config = nullptr;
+    s_databaseContext = EGL_NO_CONTEXT;
+    s_databaseSurface = EGL_NO_SURFACE;
 #endif
 
     m_window = nullptr;
