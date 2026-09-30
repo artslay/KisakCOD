@@ -1,6 +1,10 @@
 #include <universal/q_shared.h>
 #include "database.h"
 
+#ifdef __SWITCH__
+extern void Switch_LogWrite(const char *msg);
+#endif
+
 
 void __cdecl Load_Stream(bool atStreamStart, uint8_t *ptr, int32_t size)
 {
