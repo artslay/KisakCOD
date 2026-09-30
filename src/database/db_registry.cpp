@@ -2353,6 +2353,8 @@ XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
     newEntry.entry.asset.type = type;
     newEntry.entry.asset.header = header;
 #ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+        Switch_LogWrite("[SWITCH TECHSET ADD] before write lock\n");
     if (type == ASSET_TYPE_IMAGE)
     {
         ++g_switchImageAdds;
@@ -2361,16 +2363,22 @@ XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
 #endif
     Sys_LockWrite(&db_hashCritSect);
 #ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+        Switch_LogWrite("[SWITCH TECHSET ADD] after write lock\n");
     if (type == ASSET_TYPE_IMAGE)
         Switch_LogWrite("[SWITCH IMAGE] DB_AddXAsset after write lock\n");
 #endif
     existingEntry = DB_LinkXAssetEntry(&newEntry, 0);
 #ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+        Switch_LogWrite("[SWITCH TECHSET ADD] after link\n");
     if (type == ASSET_TYPE_IMAGE)
         Switch_LogWrite("[SWITCH IMAGE] DB_AddXAsset after DB_LinkXAssetEntry\n");
 #endif
     Sys_UnlockWrite(&db_hashCritSect);
 #ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+        Switch_LogWrite("[SWITCH TECHSET ADD] after unlock\n");
     if (type == ASSET_TYPE_IMAGE)
         Switch_LogWrite("[SWITCH IMAGE] DB_AddXAsset after unlock\n");
 #endif
@@ -2395,11 +2403,22 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     XAssetSize assetSize;
 
 #ifdef __SWITCH__
+    if (newEntry->entry.asset.type == ASSET_TYPE_TECHNIQUE_SET)
+        Switch_LogWrite("[SWITCH TECHSET LINK] before DB_GetXAssetName\n");
     if (newEntry->entry.asset.type == ASSET_TYPE_IMAGE)
         Switch_LogWrite("[SWITCH IMAGE] DB_Link before DB_GetXAssetName\n");
 #endif
     name = DB_GetXAssetName(&newEntry->entry.asset);
 #ifdef __SWITCH__
+    if (newEntry->entry.asset.type == ASSET_TYPE_TECHNIQUE_SET)
+    {
+        char trace[192];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH TECHSET LINK] name=%p first=%02x\n",
+            (const void *)name,
+            name ? static_cast<unsigned>(static_cast<uint8_t>(*name)) : 0u);
+        Switch_LogWrite(trace);
+    }
     if (newEntry->entry.asset.type == ASSET_TYPE_IMAGE)
     {
         char trace[160];
