@@ -3292,7 +3292,9 @@ void __cdecl Load_Material(bool atStreamStart)
         uint32_t drawSurfLow;
         uint32_t drawSurfHigh;
         uint32_t surfaceTypeBits;
-        uint8_t stateBitsEntry[26];
+        uint16_t hashIndex;
+        uint16_t infoPad;
+        uint8_t stateBitsEntry[34];
         uint8_t textureCount;
         uint8_t constantCount;
         uint8_t stateBitsCount;
@@ -3305,7 +3307,7 @@ void __cdecl Load_Material(bool atStreamStart)
         uint32_t stateBitsTable;
     };
 
-    static_assert(sizeof(SerializedMaterial) == 68);
+    static_assert(sizeof(SerializedMaterial) == 80);
 
     SerializedMaterial serialized{};
     uint8_t *materialStreamPos = DB_GetStreamPos();
@@ -3340,7 +3342,7 @@ void __cdecl Load_Material(bool atStreamStart)
         static_cast<uint64_t>(serialized.drawSurfLow) |
         (static_cast<uint64_t>(serialized.drawSurfHigh) << 32);
     varMaterial->info.surfaceTypeBits = serialized.surfaceTypeBits;
-    varMaterial->info.hashIndex = 0;
+    varMaterial->info.hashIndex = serialized.hashIndex;
 
     memcpy(
         varMaterial->stateBitsEntry,
@@ -3505,7 +3507,15 @@ void __cdecl Load_MaterialHandle(bool atStreamStart)
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varMaterialHandle));
         if (value == -1 || value == -2)
         {
+#ifdef __SWITCH__
+            *varMaterialHandle = reinterpret_cast<Material *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(Material)),
+                    "SwitchMaterial",
+                    22));
+#else
             *varMaterialHandle = (Material *)AllocLoad_FxElemVisStateSample();
+#endif
             varMaterial = *varMaterialHandle;
             if (value == -2)
                 inserted = DB_InsertPointer();
