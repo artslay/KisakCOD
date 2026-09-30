@@ -89,6 +89,8 @@ void __cdecl DB_ConvertOffsetToAlias(void *data)
     iassert(offset && offset != UINT32_MAX && offset != UINT32_MAX - 1);
 
     const uintptr_t aliasSlot = DB_ConvertOffsetToPointerValue(offset);
+    if (!aliasSlot)
+        return;
 #ifdef __SWITCH__
     const uintptr_t aliasValue =
         *reinterpret_cast<const uintptr_t *>(aliasSlot);
