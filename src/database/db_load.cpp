@@ -1669,9 +1669,30 @@ void __cdecl Load_MssSound(bool atStreamStart)
         varMssSound->info.initial_ptr = nullptr;
         varMssSound->data = reinterpret_cast<uint8_t *>(
             static_cast<uintptr_t>(serialized.data));
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetRawType == 7u &&
+            g_switchCurrentAssetIndex >= 1202 &&
+            g_switchCurrentAssetIndex <= 1212)
+        {
+            char trace[240];
+            std::snprintf(trace, sizeof(trace),
+                "[SWITCH MSS] raw format=%d data=%08x len=%u rate=%u bits=%d ch=%d samples=%u block=%u\n",
+                serialized.format, (unsigned)serialized.data,
+                (unsigned)serialized.data_len, (unsigned)serialized.rate,
+                serialized.bits, serialized.channels,
+                (unsigned)serialized.samples, (unsigned)serialized.block_size);
+            Switch_LogWrite(trace);
+        }
+#endif
     }
 
     DB_PushStreamPos(0);
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 7u &&
+        g_switchCurrentAssetIndex >= 1202 &&
+        g_switchCurrentAssetIndex <= 1212)
+        Switch_LogWrite("[SWITCH MSS] data begin\n");
+#endif
 
     if (varMssSound->data)
     {
@@ -1694,8 +1715,26 @@ void __cdecl Load_MssSound(bool atStreamStart)
             if (value == UINT32_MAX - 1)
                 inserted = DB_InsertPointer();
 
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetRawType == 7u &&
+                g_switchCurrentAssetIndex >= 1202 &&
+                g_switchCurrentAssetIndex <= 1212)
+                Switch_LogWrite("[SWITCH MSS] raw data load begin\n");
+#endif
             Load_byteArray(1, varMssSound->info.data_len);
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetRawType == 7u &&
+                g_switchCurrentAssetIndex >= 1202 &&
+                g_switchCurrentAssetIndex <= 1212)
+                Switch_LogWrite("[SWITCH MSS] raw data load done\n");
+#endif
             Load_SetSoundData(&varMssSound->data, varMssSound);
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetRawType == 7u &&
+                g_switchCurrentAssetIndex >= 1202 &&
+                g_switchCurrentAssetIndex <= 1212)
+                Switch_LogWrite("[SWITCH MSS] set data done\n");
+#endif
             if (inserted)
                 *inserted = varMssSound->data;
         }
@@ -1782,13 +1821,57 @@ void __cdecl Load_LoadedSound(bool atStreamStart)
         varMssSound->data =
             reinterpret_cast<uint8_t *>(
                 static_cast<uintptr_t>(serialized.sound.data));
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetRawType == 7u &&
+            g_switchCurrentAssetIndex >= 1202 &&
+            g_switchCurrentAssetIndex <= 1212)
+        {
+            char trace[256];
+            std::snprintf(trace, sizeof(trace),
+                "[SWITCH LOADEDSOUND] raw name=%08x format=%d data=%08x len=%u rate=%u bits=%d ch=%d samples=%u block=%u\n",
+                (unsigned)serialized.name,
+                serialized.sound.format,
+                (unsigned)serialized.sound.data,
+                (unsigned)serialized.sound.data_len,
+                (unsigned)serialized.sound.rate,
+                serialized.sound.bits,
+                serialized.sound.channels,
+                (unsigned)serialized.sound.samples,
+                (unsigned)serialized.sound.block_size);
+            Switch_LogWrite(trace);
+        }
+#endif
     }
 
     DB_PushStreamPos(4);
     varXString = &varLoadedSound->name;
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 7u &&
+        g_switchCurrentAssetIndex >= 1202 &&
+        g_switchCurrentAssetIndex <= 1212)
+        Switch_LogWrite("[SWITCH LOADEDSOUND] name begin\n");
+#endif
     Load_XString(0);
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 7u &&
+        g_switchCurrentAssetIndex >= 1202 &&
+        g_switchCurrentAssetIndex <= 1212)
+        Switch_LogWrite("[SWITCH LOADEDSOUND] name done\n");
+#endif
     varMssSound = &varLoadedSound->sound;
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 7u &&
+        g_switchCurrentAssetIndex >= 1202 &&
+        g_switchCurrentAssetIndex <= 1212)
+        Switch_LogWrite("[SWITCH LOADEDSOUND] mss begin\n");
+#endif
     Load_MssSound(0);
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 7u &&
+        g_switchCurrentAssetIndex >= 1202 &&
+        g_switchCurrentAssetIndex <= 1212)
+        Switch_LogWrite("[SWITCH LOADEDSOUND] mss done\n");
+#endif
     DB_PopStreamPos();
 #else
     Load_Stream(atStreamStart, (uint8_t *)varLoadedSound, 44);
@@ -1805,8 +1888,27 @@ void __cdecl Load_LoadedSoundPtr(bool atStreamStart)
 {
     const void **inserted; // [esp+0h] [ebp-Ch]
     uint32_t value; // [esp+4h] [ebp-8h]
-
+#ifdef __SWITCH__
+    const bool switchLoadedSoundTrace =
+        (g_switchCurrentAssetRawType == 7u &&
+         g_switchCurrentAssetIndex >= 1202 &&
+         g_switchCurrentAssetIndex <= 1212);
+    if (switchLoadedSoundTrace)
+        Switch_LogWrite("[SWITCH LOADEDSOUND PTR] begin\n");
+#endif
     Load_Stream(atStreamStart, (uint8_t *)varLoadedSoundPtr, 4);
+#ifdef __SWITCH__
+    if (switchLoadedSoundTrace)
+    {
+        char trace[160];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH LOADEDSOUND PTR] raw=%08x slot=%p\n",
+            (unsigned)static_cast<uint32_t>(
+                reinterpret_cast<uintptr_t>(*varLoadedSoundPtr)),
+            static_cast<void *>(varLoadedSoundPtr));
+        Switch_LogWrite(trace);
+    }
+#endif
     DB_PushStreamPos(0);
     if (*varLoadedSoundPtr)
     {
@@ -1815,11 +1917,29 @@ void __cdecl Load_LoadedSoundPtr(bool atStreamStart)
         {
             *varLoadedSoundPtr = (LoadedSound *)AllocLoad_FxElemVisStateSample();
             varLoadedSound = *varLoadedSoundPtr;
+#ifdef __SWITCH__
+            if (switchLoadedSoundTrace)
+            {
+                char trace[160];
+                std::snprintf(trace, sizeof(trace),
+                    "[SWITCH LOADEDSOUND PTR] alloc value=%08x ptr=%p\n",
+                    (unsigned)value, static_cast<void *>(varLoadedSound));
+                Switch_LogWrite(trace);
+            }
+#endif
             if (value == -2)
                 inserted = DB_InsertPointer();
             else
                 inserted = 0;
+#ifdef __SWITCH__
+            if (switchLoadedSoundTrace)
+                Switch_LogWrite("[SWITCH LOADEDSOUND PTR] load begin\n");
+#endif
             Load_LoadedSound(1);
+#ifdef __SWITCH__
+            if (switchLoadedSoundTrace)
+                Switch_LogWrite("[SWITCH LOADEDSOUND PTR] load done\n");
+#endif
             Load_LoadedSoundAsset((XAssetHeader *)varLoadedSoundPtr);
             if (inserted)
                 *inserted = *varLoadedSoundPtr;
@@ -1830,8 +1950,11 @@ void __cdecl Load_LoadedSoundPtr(bool atStreamStart)
         }
     }
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (switchLoadedSoundTrace)
+        Switch_LogWrite("[SWITCH LOADEDSOUND PTR] pop done\n");
+#endif
 }
-
 void __cdecl Load_StreamedSound(bool atStreamStart)
 {
 #ifdef __SWITCH__
