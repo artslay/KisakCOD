@@ -286,7 +286,12 @@ void R_TrackStatistics(trStatistics_t *) {}
 void R_UpdateTeamColors(int, const float *, const float *) {}
 void R_ConfigureRenderer(const GfxConfiguration *config) { SetGfxConfig(config); }
 void R_ComErrorCleanup() {}
-bool R_CheckLostDevice() { return false; }
+bool R_CheckLostDevice()
+{
+    // OpenGL on Switch has no D3D-style lost-device/reset cycle.
+    // Keep the original return contract: true means rendering may proceed.
+    return dx.device != nullptr;
+}
 void R_MakeDedicated(const GfxConfiguration *config) { SetGfxConfig(config); }
 void R_UpdateGpuSyncType() {}
 int R_IsHiDef() { return 1; }
