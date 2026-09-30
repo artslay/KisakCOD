@@ -71,6 +71,22 @@ void __cdecl DB_SetStreamIndex(uint32_t index)
 
 void __cdecl DB_PopStreamPos()
 {
+#ifdef __SWITCH__
+    extern bool g_switchTraceNextStreamPop;
+    if (g_switchTraceNextStreamPop)
+    {
+        char trace[192];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH STREAMPOP TRAP] enter stack=%u index=%u pos=%p\n",
+            (unsigned)g_streamPosStackIndex,
+            (unsigned)g_streamPosIndex,
+            static_cast<void *>(g_streamPos));
+        extern void Switch_LogWrite(const char *msg);
+        Switch_LogWrite(trace);
+        g_switchTraceNextStreamPop = false;
+    }
+#endif
     vassert(g_streamPosStackIndex > 0, "(g_streamPosStackIndex = %d)", g_streamPosStackIndex);
     --g_streamPosStackIndex;
 
@@ -83,7 +99,7 @@ void __cdecl DB_PopStreamPos()
         char trace[160];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH STREAMPOP FAIL] savedIndex=%u stack=%u currentIndex=%u pos=%p\\n",
+            "[SWITCH STREAMPOP FAIL] savedIndex=%u stack=%u currentIndex=%u pos=%p\n",
             (unsigned)savedIndex,
             (unsigned)g_streamPosStackIndex,
             (unsigned)g_streamPosIndex,
