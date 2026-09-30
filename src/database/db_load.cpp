@@ -2154,8 +2154,46 @@ void __cdecl Load_snd_alias_t(bool atStreamStart)
                     DB_ConvertOffsetToPointerValue(value));
         }
     }
+#else
+    Load_Stream(atStreamStart, (uint8_t *)varsnd_alias_t, 92);
+    varXString = &varsnd_alias_t->aliasName;
+    Load_XString(0);
+    varXString = &varsnd_alias_t->subtitle;
+    Load_XString(0);
+    varXString = &varsnd_alias_t->secondaryAliasName;
+    Load_XString(0);
+    varXString = &varsnd_alias_t->chainAliasName;
+    Load_XString(0);
+    if (varsnd_alias_t->soundFile)
+    {
+        if (varsnd_alias_t->soundFile == (SoundFile *)-1)
+        {
+            varsnd_alias_t->soundFile = (SoundFile *)AllocLoad_FxElemVisStateSample();
+            varSoundFile = varsnd_alias_t->soundFile;
+            Load_SoundFile(1);
+        }
+        else
+        {
+            DB_ConvertOffsetToPointer((uint32_t*)&varsnd_alias_t->soundFile);
+        }
+    }
+    varSndCurvePtr = &varsnd_alias_t->volumeFalloffCurve;
+    Load_SndCurvePtr(0);
+    if (varsnd_alias_t->speakerMap)
+    {
+        if (varsnd_alias_t->speakerMap == (SpeakerMap *)-1)
+        {
+            varsnd_alias_t->speakerMap = (SpeakerMap *)AllocLoad_FxElemVisStateSample();
+            varSpeakerMap = varsnd_alias_t->speakerMap;
+            Load_SpeakerMap(1);
+        }
+        else
+        {
+            DB_ConvertOffsetToPointer((uint32_t*)&varsnd_alias_t->speakerMap);
+        }
+    }
+#endif
 }
-
 void __cdecl Load_snd_alias_tArray(bool atStreamStart, int32_t count)
 {
 #ifdef __SWITCH__
