@@ -2283,6 +2283,14 @@ void __cdecl Load_GfxImage(bool atStreamStart)
                     DB_ConvertOffsetToPointerValue(serialized.name));
         }
 
+#ifdef __SWITCH__
+        Com_Printf(CON_CHANNEL_FILES,
+                   "[SWITCH GFXIMAGE] index=%d serialized_name=%08x restored_name=%p\n",
+                   g_switchAssetIndex,
+                   serialized.name,
+                   (const void *)varGfxImage->name);
+#endif
+
         DB_PushStreamPos(4);
         varGfxTextureLoad = &varGfxImage->texture;
         Load_GfxTextureLoad(0);
