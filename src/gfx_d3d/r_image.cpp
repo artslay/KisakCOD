@@ -1395,3 +1395,4 @@ void __cdecl R_ReloadImages()
     }
 }
 
+#endif
