@@ -556,6 +556,12 @@ bool Switch_GLBeginDatabaseContext()
         s_config == nullptr)
         return false;
 
+    // EGL's current client API is per-thread. The database std::thread starts
+    // with its own EGL state, so explicitly select desktop OpenGL before using
+    // eglGetCurrentContext/eglCreateContext on this thread.
+    if (eglBindAPI(EGL_OPENGL_API) != EGL_TRUE)
+        return false;
+
     if (eglGetCurrentContext() == s_databaseContext &&
         s_databaseContext != EGL_NO_CONTEXT)
         return true;
