@@ -2800,32 +2800,6 @@ void __cdecl Load_GfxImage(bool atStreamStart)
             sizeof(serialized));
         DB_IncStreamPos(sizeof(serialized));
 
-#ifdef __SWITCH__
-        {
-            char trace[256];
-            const uint32_t nameBlock = serialized.name
-                ? ((serialized.name - 1) >> 28)
-                : 0;
-            const uint32_t nameOffset = serialized.name
-                ? ((serialized.name - 1) & 0xFFFFFFF)
-                : 0;
-            std::snprintf(trace, sizeof(trace),
-                "[SWITCH IMAGE] raw map=%u texture=%08x width=%u height=%u depth=%u category=%u delay=%u name=%08x block=%u offset=%08x blockSize=%u\n",
-                serialized.mapType,
-                serialized.texture,
-                serialized.width,
-                serialized.height,
-                serialized.depth,
-                serialized.category,
-                serialized.delayLoadPixels,
-                serialized.name,
-                nameBlock,
-                nameOffset,
-                nameBlock < 9 ? g_streamZoneMem->blocks[nameBlock].size : 0);
-            Switch_LogWrite(trace);
-        }
-#endif
-
         varGfxImage->mapType = static_cast<MapType>(serialized.mapType);
         varGfxImage->texture.basemap =
             reinterpret_cast<IDirect3DBaseTexture9 *>(
@@ -2863,13 +2837,7 @@ void __cdecl Load_GfxImage(bool atStreamStart)
         }
 
         varGfxTextureLoad = &varGfxImage->texture;
-#ifdef __SWITCH__
-        Switch_LogWrite("[SWITCH IMAGE] Image before Load_GfxTextureLoad\n");
-#endif
         Load_GfxTextureLoad(0);
-#ifdef __SWITCH__
-        Switch_LogWrite("[SWITCH IMAGE] Image after Load_GfxTextureLoad\n");
-#endif
 
         DB_PopStreamPos();
         return;
@@ -2914,44 +2882,16 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
             varGfxImage = nativeImage;
             std::memset(nativeImage, 0, sizeof(GfxImage));
 
-            {
-                char trace[192];
-                std::snprintf(
-                    trace,
-                    sizeof(trace),
-                    "[SWITCH IMAGE ABI] alloc serialized=%08x native=%p slot=%p\n",
-                    value,
-                    static_cast<void *>(nativeImage),
-                    static_cast<void *>(varGfxImagePtr));
-                Switch_LogWrite(trace);
-            }
-
             if (value == UINT32_MAX - 1)
                 inserted = DB_InsertPointer();
 
-            Switch_LogWrite("[SWITCH IMAGE] Ptr before Load_GfxImage\n");
             Load_GfxImage(1);
-            Switch_LogWrite("[SWITCH IMAGE] Ptr after Load_GfxImage\n");
-            Switch_LogWrite("[SWITCH IMAGE] Ptr before Load_GfxImageAsset\n");
 
             // Keep the native pointer in a local variable.  Do not reload it
             // from the serialized/native slot after Load_GfxImage(), because
             // that slot may only have contained the original 32-bit sentinel.
             XAssetHeader imageHeader{};
             imageHeader.image = nativeImage;
-
-            {
-                char trace[192];
-                std::snprintf(
-                    trace,
-                    sizeof(trace),
-                    "[SWITCH IMAGE ABI] asset native=%p name=%p\n",
-                    static_cast<void *>(imageHeader.image),
-                    imageHeader.image
-                        ? static_cast<const void *>(imageHeader.image->name)
-                        : nullptr);
-                Switch_LogWrite(trace);
-            }
 
             Load_GfxImageAsset(&imageHeader);
 
@@ -2962,21 +2902,9 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
                 &imageHeader.image,
                 sizeof(imageHeader.image));
 
-            {
-                char trace[192];
-                std::snprintf(
-                    trace,
-                    sizeof(trace),
-                    "[SWITCH IMAGE ABI] stored image=%p slot=%p\n",
-                    static_cast<void *>(imageHeader.image),
-                    static_cast<void *>(varGfxImagePtr));
-                Switch_LogWrite(trace);
-            }
-
             if (inserted)
                 *inserted = imageHeader.image;
 
-            Switch_LogWrite("[SWITCH IMAGE] Ptr after Load_GfxImageAsset\n");
         }
         else
         {
