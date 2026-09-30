@@ -2871,15 +2871,17 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
         uint8_t stableArgCount;
         uint8_t customSamplerFlags;
         uint8_t precompiledIndex;
-        uint8_t materialType;
-        uint8_t pad[2];
+        uint8_t passPad[3];
         uint32_t args;
     };
     static_assert(sizeof(SerializedMaterialPass) == 24);
 
     iassert(atStreamStart);
+    const uint8_t *passStart = DB_GetStreamPos();
     SerializedMaterialPass serialized{};
-    DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+    DB_LoadXFileData(
+        reinterpret_cast<uint8_t *>(&serialized),
+        sizeof(serialized));
     DB_IncStreamPos(sizeof(serialized));
 
     memset(varMaterialPass, 0, sizeof(*varMaterialPass));
@@ -2887,6 +2889,29 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
     varMaterialPass->perObjArgCount = serialized.perObjArgCount;
     varMaterialPass->stableArgCount = serialized.stableArgCount;
     varMaterialPass->customSamplerFlags = serialized.customSamplerFlags;
+    varMaterialPass->precompiledIndex = serialized.precompiledIndex;
+
+#ifdef __SWITCH__
+    {
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH PASS RAW] pos=%p decl=%08x vs=%08x ps=%08x args=%08x counts=%u/%u/%u flags=%u pre=%u after=%p\n",
+            static_cast<const void *>(passStart),
+            serialized.vertexDecl,
+            serialized.vertexShader,
+            serialized.pixelShader,
+            serialized.args,
+            static_cast<unsigned>(serialized.perPrimArgCount),
+            static_cast<unsigned>(serialized.perObjArgCount),
+            static_cast<unsigned>(serialized.stableArgCount),
+            static_cast<unsigned>(serialized.customSamplerFlags),
+            static_cast<unsigned>(serialized.precompiledIndex),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+#endif
 
     if (serialized.vertexDecl == UINT32_MAX)
     {
@@ -2970,6 +2995,7 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
     }
 #endif
 }
+
 void __cdecl Load_MaterialPassArray(bool atStreamStart, int32_t count)
 {
 #ifdef __SWITCH__
@@ -3239,6 +3265,11 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
                 DB_ConvertOffsetToPointerValue(serialized.name));
     }
 
+    // The serialized TechniqueSet header is read from the current inline
+    // stream (stream 0). Its nested name and inline techniques are loaded from
+    // the virtual stream, matching the original PC loader's DB_PushStreamPos(4).
+    DB_PushStreamPos(4);
+
     varMaterialTechniqueSet->remappedTechniqueSet = nullptr;
     if (serialized.remappedTechniqueSet)
     {
@@ -3356,6 +3387,8 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
         Switch_LogWrite(trace);
     }
 #endif
+
+    DB_PopStreamPos();
 #else
     Load_Stream(atStreamStart, (uint8_t *)varMaterialTechniqueSet, 148);
     DB_PushStreamPos(4);
