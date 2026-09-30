@@ -8703,7 +8703,6 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             imageInline,
             imageAlias,
             imageNull,
-            g_switchImageAdds,
             materialRecords,
             techsetRecords,
             localizeRecords);
