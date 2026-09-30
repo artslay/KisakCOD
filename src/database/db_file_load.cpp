@@ -58,6 +58,10 @@ volatile int32_t g_totalSize;
 volatile int32_t g_totalExternalBytes;
 int32_t g_trackLoadProgress;
 
+#ifdef __SWITCH__
+const char *g_switchDbStage = "idle";
+#endif
+
 extern XAssetList g_varXAssetList;
 
 // --- file-local forward declarations (moved out of database.h) ---
@@ -398,6 +402,9 @@ void __cdecl DB_LoadXFileInternal()
     }
     DB_AllocXZoneMemory(file.blockSize, g_load.filename, g_load.zoneMem, g_load.allocType);
     DB_InitStreams(g_load.zoneMem);
+#ifdef __SWITCH__
+    g_switchDbStage = "asset_list";
+#endif
     Load_XAssetListCustom();
     DB_PushStreamPos(4);
     if (varXAssetList->assets)
@@ -409,12 +416,21 @@ void __cdecl DB_LoadXFileInternal()
                 "SwitchXAssetArray",
                 22));
         varXAsset = varXAssetList->assets;
+#ifdef __SWITCH__
+        g_switchDbStage = "xasset_array";
+#endif
         Load_XAssetArrayCustom(varXAssetList->assetCount);
     }
     DB_PopStreamPos();
     DB_FinishGeometryBlocks(g_load.zoneMem);
     --g_loadingAssets;
+#ifdef __SWITCH__
+    g_switchDbStage = "delay_stream";
+#endif
     Load_DelayStream();
+#ifdef __SWITCH__
+    g_switchDbStage = "delayed_images";
+#endif
     DB_LoadDelayedImages();
     iassert(g_load.compressBufferStart);
     Com_Printf(CON_CHANNEL_FILES, "Loaded zone '%s'\n", g_load.filename);
