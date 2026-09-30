@@ -2844,23 +2844,135 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
 
 void __cdecl Load_Material(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedMaterial
+    {
+        uint32_t name;
+        uint8_t gameFlags;
+        uint8_t sortKey;
+        uint8_t textureAtlasRowCount;
+        uint8_t textureAtlasColumnCount;
+        GfxDrawSurf drawSurf;
+        uint32_t surfaceTypeBits;
+        uint16_t hashIndex;
+        uint16_t infoPad;
+        uint8_t stateBitsEntry[TECHNIQUE_COUNT];
+        uint8_t textureCount;
+        uint8_t constantCount;
+        uint8_t stateBitsCount;
+        uint8_t stateFlags;
+        uint8_t cameraRegion;
+        uint8_t materialPad;
+        uint32_t techniqueSet;
+        uint32_t textureTable;
+        uint32_t constantTable;
+        uint32_t stateBitsTable;
+    };
 
-    Load_Stream(atStreamStart, (uint8_t *)varMaterial, 80);
+    static_assert(sizeof(SerializedMaterial) == 80);
 
+    SerializedMaterial serialized{};
+    DB_LoadXFileData(
+        reinterpret_cast<uint8_t *>(&serialized),
+        sizeof(serialized));
+    DB_IncStreamPos(sizeof(serialized));
+
+    memset(varMaterial, 0, sizeof(*varMaterial));
+
+    varMaterial->info.name =
+        reinterpret_cast<const char *>(static_cast<uintptr_t>(serialized.name));
+    varMaterial->info.gameFlags = serialized.gameFlags;
+    varMaterial->info.sortKey = serialized.sortKey;
+    varMaterial->info.textureAtlasRowCount = serialized.textureAtlasRowCount;
+    varMaterial->info.textureAtlasColumnCount = serialized.textureAtlasColumnCount;
+    varMaterial->info.drawSurf = serialized.drawSurf;
+    varMaterial->info.surfaceTypeBits = serialized.surfaceTypeBits;
+    varMaterial->info.hashIndex = serialized.hashIndex;
+
+    memcpy(
+        varMaterial->stateBitsEntry,
+        serialized.stateBitsEntry,
+        sizeof(serialized.stateBitsEntry));
+    varMaterial->textureCount = serialized.textureCount;
+    varMaterial->constantCount = serialized.constantCount;
+    varMaterial->stateBitsCount = serialized.stateBitsCount;
+    varMaterial->stateFlags = serialized.stateFlags;
+    varMaterial->cameraRegion = serialized.cameraRegion;
+
+    varMaterial->techniqueSet =
+        reinterpret_cast<MaterialTechniqueSet *>(
+            static_cast<uintptr_t>(serialized.techniqueSet));
+    varMaterial->textureTable =
+        reinterpret_cast<MaterialTextureDef *>(
+            static_cast<uintptr_t>(serialized.textureTable));
+    varMaterial->constantTable =
+        reinterpret_cast<MaterialConstantDef *>(
+            static_cast<uintptr_t>(serialized.constantTable));
+    varMaterial->stateBitsTable =
+        reinterpret_cast<GfxStateBits *>(
+            static_cast<uintptr_t>(serialized.stateBitsTable));
 
     DB_PushStreamPos(4);
-
 
     varMaterialInfo = &varMaterial->info;
     Load_MaterialInfo(0);
 
-
     varMaterialTechniqueSetPtr = &varMaterial->techniqueSet;
-
-
     Load_MaterialTechniqueSetPtr(0);
 
+    if (varMaterial->textureTable)
+    {
+        if (varMaterial->textureTable == (MaterialTextureDef *)-1)
+        {
+            varMaterial->textureTable =
+                (MaterialTextureDef *)AllocLoad_FxElemVisStateSample();
+            varMaterialTextureDef = varMaterial->textureTable;
+            Load_MaterialTextureDefArray(1, varMaterial->textureCount);
+        }
+        else
+        {
+            DB_ConvertOffsetToPointer((uint32_t *)&varMaterial->textureTable);
+        }
+    }
 
+    if (varMaterial->constantTable)
+    {
+        if (varMaterial->constantTable == (MaterialConstantDef *)-1)
+        {
+            varMaterial->constantTable =
+                (MaterialConstantDef *)AllocLoad_GfxPackedVertex0();
+            varMaterialConstantDef = varMaterial->constantTable;
+            Load_MaterialConstantDefArray(1, varMaterial->constantCount);
+        }
+        else
+        {
+            DB_ConvertOffsetToPointer((uint32_t *)&varMaterial->constantTable);
+        }
+    }
+
+    if (varMaterial->stateBitsTable)
+    {
+        if (varMaterial->stateBitsTable == (GfxStateBits *)-1)
+        {
+            varMaterial->stateBitsTable =
+                (GfxStateBits *)AllocLoad_FxElemVisStateSample();
+            varGfxStateBits = varMaterial->stateBitsTable;
+            Load_GfxStateBitsArray(1, varMaterial->stateBitsCount);
+        }
+        else
+        {
+            DB_ConvertOffsetToPointer((uint32_t *)&varMaterial->stateBitsTable);
+        }
+    }
+
+    DB_PopStreamPos();
+#else
+    Load_Stream(atStreamStart, (uint8_t *)varMaterial, 80);
+    DB_PushStreamPos(4);
+    varMaterialInfo = &varMaterial->info;
+    Load_MaterialInfo(0);
+    varMaterialTechniqueSetPtr = &varMaterial->techniqueSet;
+    Load_MaterialTechniqueSetPtr(0);
     if (varMaterial->textureTable)
     {
         if (varMaterial->textureTable == (MaterialTextureDef *)-1)
@@ -2874,7 +2986,6 @@ void __cdecl Load_Material(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)&varMaterial->textureTable);
         }
     }
-
     if (varMaterial->constantTable)
     {
         if (varMaterial->constantTable == (MaterialConstantDef *)-1)
@@ -2888,7 +2999,6 @@ void __cdecl Load_Material(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)&varMaterial->constantTable);
         }
     }
-
     if (varMaterial->stateBitsTable)
     {
         if (varMaterial->stateBitsTable == (GfxStateBits *)-1)
@@ -2902,10 +3012,8 @@ void __cdecl Load_Material(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)&varMaterial->stateBitsTable);
         }
     }
-
-
     DB_PopStreamPos();
-
+#endif
 }
 
 void __cdecl Load_MaterialHandle(bool atStreamStart)
