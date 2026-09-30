@@ -128,6 +128,8 @@ void __cdecl DB_EnumXAssets_FastFile(
     bool includeOverride);
 bool __cdecl DB_IsMinimumFastFileLoaded();
 XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name);
+XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *name);
+XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header);
 void __cdecl DB_Update();
 void __cdecl DB_SetInitializing(bool inUse);
 bool __cdecl DB_IsXAssetDefault(XAssetType type, const char *name);
