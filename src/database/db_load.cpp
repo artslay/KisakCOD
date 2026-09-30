@@ -2548,7 +2548,7 @@ void __cdecl Load_MaterialPixelShader(bool atStreamStart)
     {
         char trace[256];
         std::snprintf(trace, sizeof(trace),
-            "[SWITCH PIXELSHADER] raw name=%08x shader=%08x program=%08x size=%u renderer=%u\\n",
+            "[SWITCH PIXELSHADER] raw name=%08x shader=%08x program=%08x size=%u renderer=%u\n",
             serialized.name,
             serialized.shader,
             serialized.program,
@@ -2584,13 +2584,13 @@ void __cdecl Load_MaterialPixelShader(bool atStreamStart)
     {
         char trace[160];
         std::snprintf(trace, sizeof(trace),
-            "[SWITCH PIXELSHADER] before program program=%08x size=%u\\n",
+            "[SWITCH PIXELSHADER] before program program=%08x size=%u\n",
             serialized.program,
             static_cast<unsigned>(serialized.programSize));
         Switch_LogWrite(trace);
     }
     Load_MaterialPixelShaderProgram(0);
-    Switch_LogWrite("[SWITCH PIXELSHADER] after program\\n");
+    Switch_LogWrite("[SWITCH PIXELSHADER] after program\n");
 #else
     Load_Stream(atStreamStart, (uint8_t *)varMaterialPixelShader, 16);
     varXString = &varMaterialPixelShader->name;
