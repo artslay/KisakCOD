@@ -64,6 +64,31 @@ static int32_t DB_WaitXFileStage();
 static void DB_ReadXFileStage();
 static int32_t __cdecl DB_ReadData();
 static void Load_XAssetListCustom();
+static void __cdecl Load_XAssetArrayCustom(int32_t count);
+
+void __cdecl DB_CancelLoadXFile()
+{
+    if (g_load.compressBufferStart)
+    {
+        while (g_load.outstandingReads)
+            DB_WaitXFileStage();
+        DB_AuthLoad_InflateEnd(&g_load.stream);
+        if (!g_load.f)
+            MyAssertHandler(".\\database\\db_file_load.cpp", 165, 0, "%s", "g_load.f");
+#ifdef __SWITCH__
+        fclose(static_cast<FILE *>(g_load.f));
+#else
+        CloseHandle(g_load.f);
+#endif
+        g_load.f = nullptr;
+    }
+}
+
+int32_t DB_WaitXFileStage()
+int32_t DB_WaitXFileStage();
+static void DB_ReadXFileStage();
+static int32_t __cdecl DB_ReadData();
+static void Load_XAssetListCustom();
 static void __cdecl Load_XAssetArrayCustom(int32_t count)
 {
 #ifdef __SWITCH__
