@@ -1486,26 +1486,6 @@ void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData)
 {
     // KISAKTODO: float check MssSound struct usage here. It looks 'okay' at first glance
 
-#ifdef __SWITCH__
-    const bool switchSoundTrace =
-        (g_switchCurrentAssetRawType == 7u &&
-         g_switchCurrentAssetIndex >= 1202 &&
-         g_switchCurrentAssetIndex <= 1212);
-    if (switchSoundTrace)
-    {
-        char trace[192];
-        std::snprintf(trace, sizeof(trace),
-            "[SWITCH SNDDATA] begin sound=%p src=%p len=%u rate=%u format=%d bits=%d ch=%d\n",
-            static_cast<void *>(mssSound), srcData,
-            (unsigned)mssSound->info.data_len,
-            (unsigned)mssSound->info.rate,
-            mssSound->info.format,
-            mssSound->info.bits,
-            mssSound->info.channels);
-        Switch_LogWrite(trace);
-    }
-#endif
-
     _AILMIXINFO mixinfo; // [esp+Ch] [ebp-80h] BYREF
     int digitalFormat; // [esp+88h] [ebp-4h]
 
@@ -1546,33 +1526,11 @@ void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData)
     }
     else
     {
-#ifdef __SWITCH__
-        if (switchSoundTrace)
-            Switch_LogWrite("[SWITCH SNDDATA] alloc begin\n");
-#endif
         mssSound->data = MSS_Alloc(mssSound->info.data_len, mssSound->info.rate);
-#ifdef __SWITCH__
-        if (switchSoundTrace)
-        {
-            char trace[160];
-            std::snprintf(trace, sizeof(trace),
-                "[SWITCH SNDDATA] alloc done dst=%p\n",
-                static_cast<void *>(mssSound->data));
-            Switch_LogWrite(trace);
-        }
-#endif
         Com_Memcpy(mssSound->data, srcData, mssSound->info.data_len);
-#ifdef __SWITCH__
-        if (switchSoundTrace)
-            Switch_LogWrite("[SWITCH SNDDATA] memcpy done\n");
-#endif
     }
 
     mssSound->info.data_ptr = mssSound->data;
-#ifdef __SWITCH__
-    if (switchSoundTrace)
-        Switch_LogWrite("[SWITCH SNDDATA] end\n");
-#endif
     mssSound->info.initial_ptr = mssSound->data;
 }
 
