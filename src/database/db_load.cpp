@@ -494,6 +494,7 @@ uint32_t g_switchCurrentAssetRawType = UINT32_MAX;
 uint32_t g_switchCurrentAssetHeader = 0;
 static uint32_t g_switchImagePtrTraceCount = 0;
 bool g_switchTraceNextStreamPop = false;
+static uint32_t g_switchTextureReturnTraceCount = 0;
 #endif
 
 void *varint;
@@ -2746,7 +2747,24 @@ void __cdecl Load_GfxTextureLoad(bool atStreamStart)
             DB_ConvertOffsetToAlias((uint32_t*)varGfxTextureLoad);
         }
     }
+#ifdef __SWITCH__
+    if (g_switchTextureReturnTraceCount < 24)
+    {
+        char trace[160];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH TEXRETURN] gfxtexture before pop count=%u stream=%u pos=%p\n",
+            (unsigned)g_switchTextureReturnTraceCount,
+            (unsigned)g_streamPosIndex,
+            static_cast<void *>(g_streamPos));
+        Switch_LogWrite(trace);
+    }
+#endif
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (g_switchTextureReturnTraceCount < 24)
+        Switch_LogWrite("[SWITCH TEXRETURN] gfxtexture after pop\n");
+#endif
 }
 
 void __cdecl Load_GfxRawTextureArray(bool atStreamStart, int32_t count)
@@ -2965,6 +2983,19 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
     g_switchTraceNextStreamPop = true;
 #endif
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (g_switchTextureReturnTraceCount < 24)
+    {
+        char trace[160];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH TEXRETURN] imageptr exit count=%u stream=%u pos=%p\n",
+            (unsigned)g_switchTextureReturnTraceCount++,
+            (unsigned)g_streamPosIndex,
+            static_cast<void *>(g_streamPos));
+        Switch_LogWrite(trace);
+    }
+#endif
 #else
     uint32_t value;
     Load_Stream(atStreamStart, (uint8_t *)varGfxImagePtr, 4);
@@ -3719,6 +3750,10 @@ void __cdecl Load_MaterialTextureDefInfo(bool atStreamStart)
     {
         varGfxImagePtr = (GfxImage **)varMaterialTextureDefInfo;
         Load_GfxImagePtr(atStreamStart);
+#ifdef __SWITCH__
+        if (g_switchTextureReturnTraceCount < 24)
+            Switch_LogWrite("[SWITCH TEXRETURN] texturedef info returned\n");
+#endif
     }
 }
 
@@ -3741,7 +3776,22 @@ void __cdecl Load_MaterialTextureDefArray(bool atStreamStart, int32_t count)
         varMaterialTextureDef = var;
         Load_MaterialTextureDef(0);
         ++var;
+#ifdef __SWITCH__
+        if (g_switchTextureReturnTraceCount < 24)
+        {
+            char trace[128];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH TEXRETURN] texturedef item=%d done\n",
+                i);
+            Switch_LogWrite(trace);
+        }
+#endif
     }
+#ifdef __SWITCH__
+    if (g_switchTextureReturnTraceCount < 24)
+        Switch_LogWrite("[SWITCH TEXRETURN] texturedef array end\n");
+#endif
 }
 
 void __cdecl Load_MaterialConstantDefArray(bool atStreamStart, int32_t count)
