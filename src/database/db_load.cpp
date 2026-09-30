@@ -2199,13 +2199,19 @@ void __cdecl Load_GfxTextureLoad(bool atStreamStart)
     DB_PushStreamPos(0);
     if (varGfxTextureLoad->basemap)
     {
-        // LWSS: union abuse here
+        // Fastfiles store the texture union as a 32-bit pointer/sentinel.
+        // The Switch runtime pointer is 64-bit, so inspect only the serialized
+        // low 32 bits when checking the inline-load sentinels.
         value = varGfxTextureLoad->basemap;
-        if (value == (IDirect3DBaseTexture9 *)-1 || value == (IDirect3DBaseTexture9*)-2)
+        const uint32_t serializedValue =
+            static_cast<uint32_t>(reinterpret_cast<uintptr_t>(value));
+        if (serializedValue == UINT32_MAX ||
+            serializedValue == UINT32_MAX - 1)
         {
-            varGfxTextureLoad->basemap = (IDirect3DBaseTexture9*)AllocLoad_FxElemVisStateSample();
+            varGfxTextureLoad->basemap =
+                (IDirect3DBaseTexture9*)AllocLoad_FxElemVisStateSample();
             varGfxImageLoadDef = varGfxTextureLoad->loadDef;
-            if (value == (IDirect3DBaseTexture9*)-2)
+            if (serializedValue == UINT32_MAX - 1)
                 inserted = (GfxTexture*)DB_InsertPointer();
             else
                 inserted = 0;
