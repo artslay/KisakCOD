@@ -2504,7 +2504,7 @@ void __cdecl Load_MaterialVertexShaderPtr(bool atStreamStart)
         if (value == UINT32_MAX)
         {
             *varMaterialVertexShaderPtr =
-                static_cast<MaterialVertexShader *>(Hunk_Alloc(
+                reinterpret_cast<MaterialVertexShader *>(Hunk_Alloc(
                     static_cast<uint32_t>(sizeof(MaterialVertexShader)),
                     "SwitchMaterialVertexShader", 22));
             varMaterialVertexShader = *varMaterialVertexShaderPtr;
@@ -2584,7 +2584,7 @@ void __cdecl Load_MaterialPixelShaderPtr(bool atStreamStart)
         if (value == UINT32_MAX)
         {
             *varMaterialPixelShaderPtr =
-                static_cast<MaterialPixelShader *>(Hunk_Alloc(
+                reinterpret_cast<MaterialPixelShader *>(Hunk_Alloc(
                     static_cast<uint32_t>(sizeof(MaterialPixelShader)),
                     "SwitchMaterialPixelShader", 22));
             varMaterialPixelShader = *varMaterialPixelShaderPtr;
@@ -2757,7 +2757,7 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
     if (serialized.vertexDecl == UINT32_MAX)
     {
         varMaterialPass->vertexDecl =
-            static_cast<MaterialVertexDeclaration *>(Hunk_Alloc(
+            reinterpret_cast<MaterialVertexDeclaration *>(Hunk_Alloc(
                 static_cast<uint32_t>(sizeof(MaterialVertexDeclaration)),
                 "SwitchMaterialVertexDeclaration", 22));
         varMaterialVertexDeclaration = varMaterialPass->vertexDecl;
@@ -2798,7 +2798,7 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
         if (count)
         {
             varMaterialPass->args =
-                static_cast<MaterialShaderArgument *>(Hunk_Alloc(
+                reinterpret_cast<MaterialShaderArgument *>(Hunk_Alloc(
                     static_cast<uint32_t>(
                         sizeof(MaterialShaderArgument) * count),
                     "SwitchMaterialShaderArguments", 22));
@@ -2983,7 +2983,7 @@ void __cdecl Load_MaterialTechniquePtr(bool atStreamStart)
                     sizeof(MaterialPass) *
                         (MAX_SWITCH_TECHNIQUE_PASSES - 1));
             *varMaterialTechniquePtr =
-                static_cast<MaterialTechnique *>(
+                reinterpret_cast<MaterialTechnique *>(
                     Hunk_Alloc(bytes, "SwitchMaterialTechnique", 22));
             varMaterialTechnique = *varMaterialTechniquePtr;
             memset(varMaterialTechnique, 0, bytes);
@@ -3112,7 +3112,7 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
         {
 #ifdef __SWITCH__
             *varMaterialTechniqueSetPtr =
-                static_cast<MaterialTechniqueSet *>(
+                reinterpret_cast<MaterialTechniqueSet *>(
                     Hunk_Alloc(
                         static_cast<uint32_t>(sizeof(MaterialTechniqueSet)),
                         "SwitchMaterialTechniqueSet",
