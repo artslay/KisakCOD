@@ -47,47 +47,91 @@ static bool R_GLImageFormat(_D3DFORMAT f, GLenum &i, GLenum &u, GLenum &t, bool 
 static uint32_t R_GLFullMipCount(uint32_t w,uint32_t h,uint32_t d){uint32_t n=1;while(w>1||h>1||d>1){w=std::max(1u,w>>1);h=std::max(1u,h>>1);d=std::max(1u,d>>1);++n;}return n;}
 static void R_GLAllocTexture(KisakGLTexture *x,GLenum target,uint32_t w,uint32_t h,uint32_t d,uint32_t levels,_D3DFORMAT f)
 {
-    GLenum i,u,t; bool c; if(!R_GLImageFormat(f,i,u,t,c)) return;
+    GLenum i,u,t; bool c; if(!R_GLImageFormat(f,i,u,t,c)) {
+#ifdef __SWITCH__
+        char trace[128];
+        std::snprintf(trace,sizeof(trace),"[SWITCH GLTEX] unsupported format=%08x\\n",(unsigned)f);
+        Switch_LogWrite(trace);
+#endif
+        return;
+    }
     x->target=target;x->sourceFormat=f;x->internalFormat=i;x->uploadFormat=u;x->uploadType=t;x->width=w;x->height=h;x->depth=d;x->mipLevels=levels;
 #ifdef __SWITCH__
-    if (x->sourceFormat == D3DFMT_A8R8G8B8 && w == 1 && h == 1)
-        Switch_LogWrite("[SWITCH IMGBOOT] $white glGen begin\n");
+    {
+        char trace[256];
+        std::snprintf(trace,sizeof(trace),
+            "[SWITCH GLTEX] alloc target=%x source=%08x internal=%x upload=%x type=%x compressed=%u size=%ux%ux%u levels=%u\\n",
+            target,(unsigned)f,i,u,t,c?1u:0u,w,h,d,levels);
+        Switch_LogWrite(trace);
+    }
 #endif
     glGenTextures(1,&x->object);
 #ifdef __SWITCH__
-    if (x->sourceFormat == D3DFMT_A8R8G8B8 && w == 1 && h == 1)
-        Switch_LogWrite("[SWITCH IMGBOOT] $white glGen done\n");
+    {
+        char trace[128];
+        std::snprintf(trace,sizeof(trace),"[SWITCH GLTEX] after glGen object=%u\\n",x->object);
+        Switch_LogWrite(trace);
+    }
 #endif
     glBindTexture(target,x->object);
 #ifdef __SWITCH__
-    if (x->sourceFormat == D3DFMT_A8R8G8B8 && w == 1 && h == 1)
-        Switch_LogWrite("[SWITCH IMGBOOT] $white glBind done\n");
+    Switch_LogWrite("[SWITCH GLTEX] after glBindTexture\\n");
 #endif
     glTexParameteri(target,GL_TEXTURE_MIN_FILTER,levels>1?GL_LINEAR_MIPMAP_LINEAR:GL_LINEAR);
     glTexParameteri(target,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
     glTexParameteri(target,GL_TEXTURE_WRAP_S,GL_REPEAT); glTexParameteri(target,GL_TEXTURE_WRAP_T,GL_REPEAT);
     if(target==GL_TEXTURE_3D||target==GL_TEXTURE_CUBE_MAP) glTexParameteri(target,GL_TEXTURE_WRAP_R,GL_REPEAT);
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH GLTEX] after texture parameters\\n");
+#endif
     for(uint32_t l=0;l<levels;++l){uint32_t lw=std::max(1u,w>>l),lh=std::max(1u,h>>l),ld=std::max(1u,d>>l);
 #ifdef __SWITCH__
-        if (x->sourceFormat == D3DFMT_A8R8G8B8 && w == 1 && h == 1)
-            Switch_LogWrite("[SWITCH IMGBOOT] $white glTexImage begin\n");
+        {
+            char trace[160];
+            std::snprintf(trace,sizeof(trace),
+                "[SWITCH GLTEX] before glTexImage level=%u size=%ux%ux%u\\n",l,lw,lh,ld);
+            Switch_LogWrite(trace);
+        }
 #endif
         if(target==GL_TEXTURE_3D) glTexImage3D(target,l,(GLint)i,lw,lh,ld,0,u,t,nullptr);
         else if(target==GL_TEXTURE_CUBE_MAP) for(uint32_t fce=0;fce<6;++fce) glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+fce,l,(GLint)i,lw,lh,0,u,t,nullptr);
         else glTexImage2D(target,l,(GLint)i,lw,lh,0,u,t,nullptr);
+#ifdef __SWITCH__
+        Switch_LogWrite("[SWITCH GLTEX] after glTexImage level\\n");
+#endif
     }
 }
 static void R_GLUploadTexture(const GfxImage *image,_D3DFORMAT f,_D3DCUBEMAP_FACES face,uint32_t l,const uint8_t *src)
 {
-    auto *x=image->texture.basemap;if(!x||!src)return;GLenum i,u,t;bool c;if(!R_GLImageFormat(f,i,u,t,c))return;glBindTexture(x->target,x->object);
+    auto *x=image->texture.basemap;if(!x||!src)return;GLenum i,u,t;bool c;if(!R_GLImageFormat(f,i,u,t,c))return;
+#ifdef __SWITCH__
+    {
+        char trace[224];
+        std::snprintf(trace,sizeof(trace),
+            "[SWITCH GLTEX] upload face=%u mip=%u format=%08x target=%x object=%u src=%p\\n",
+            (unsigned)face,l,(unsigned)f,x->target,x->object,(const void*)src);
+        Switch_LogWrite(trace);
+    }
+#endif
+    glBindTexture(x->target,x->object);
     uint32_t w=std::max(1u,(uint32_t)image->width>>l),h=std::max(1u,(uint32_t)image->height>>l),d=std::max(1u,(uint32_t)image->depth>>l);
     if(c){uint32_t b=f==D3DFMT_DXT1?8:16,s=((w+3)/4)*((h+3)/4)*b*d;
+#ifdef __SWITCH__
+        {
+            char trace[160];
+            std::snprintf(trace,sizeof(trace),"[SWITCH GLTEX] compressed upload bytes=%u size=%ux%ux%u\\n",s,w,h,d);
+            Switch_LogWrite(trace);
+        }
+#endif
         if(x->target==GL_TEXTURE_CUBE_MAP)glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+face,l,0,0,w,h,i,s,src);
         else if(x->target==GL_TEXTURE_3D)glCompressedTexSubImage3D(GL_TEXTURE_3D,l,0,0,0,w,h,d,i,s,src);
         else glCompressedTexSubImage2D(GL_TEXTURE_2D,l,0,0,w,h,i,s,src);
     } else if(x->target==GL_TEXTURE_3D)glTexSubImage3D(GL_TEXTURE_3D,l,0,0,0,w,h,d,u,t,src);
     else if(x->target==GL_TEXTURE_CUBE_MAP)glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+face,l,0,0,w,h,u,t,src);
     else glTexSubImage2D(GL_TEXTURE_2D,l,0,0,w,h,u,t,src);
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH GLTEX] upload GL call returned\\n");
+#endif
 }
 #endif
 
@@ -357,6 +401,23 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
     signed int mipLevel; // [esp+5Ch] [ebp-4h]
 
     loadDef = remoteLoadDef->loadDef;
+#ifdef __SWITCH__
+    {
+        char trace[256];
+        std::snprintf(trace,sizeof(trace),
+            "[SWITCH TEXTURE] enter remote=%p loadDef=%p imageDef=%p levels=%u flags=%02x dim=%d,%d,%d format=%08x resource=%d renderer=%u\\n",
+            (void*)remoteLoadDef,(void*)loadDef,(void*)image->texture.loadDef,
+            loadDef ? loadDef->levelCount : 0u,
+            loadDef ? loadDef->flags : 0u,
+            loadDef ? loadDef->dimensions[0] : 0,
+            loadDef ? loadDef->dimensions[1] : 0,
+            loadDef ? loadDef->dimensions[2] : 0,
+            loadDef ? (unsigned)loadDef->format : 0u,
+            loadDef ? loadDef->resourceSize : 0,
+            r_loadForRenderer->current.enabled ? 1u : 0u);
+        Switch_LogWrite(trace);
+    }
+#endif
     iassert(loadDef == image->texture.loadDef);
 
     image->texture.basemap = 0;
@@ -368,6 +429,9 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
             image->delayLoadPixels = 0;
             if (image->mapType == MAPTYPE_2D)
             {
+#ifdef __SWITCH__
+                Switch_LogWrite("[SWITCH TEXTURE] before Image_Create2DTexture_PC\\n");
+#endif
                 Image_Create2DTexture_PC(
                     image,
                     loadDef->dimensions[0],
@@ -375,6 +439,9 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
                     loadDef->levelCount,
                     0,
                     imageFormat);
+#ifdef __SWITCH__
+                Switch_LogWrite("[SWITCH TEXTURE] after Image_Create2DTexture_PC\\n");
+#endif
                 faceCount = 1;
             }
             else if (image->mapType == MAPTYPE_3D)
@@ -405,7 +472,19 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
                     v5 = (D3DCUBEMAP_FACES)Image_CubemapFace(faceIndex);
                 for (mipLevel = 0; mipLevel < mipCount; ++mipLevel)
                 {
+#ifdef __SWITCH__
+                    {
+                        char trace[192];
+                        std::snprintf(trace,sizeof(trace),
+                            "[SWITCH TEXTURE] before Image_UploadData face=%d mip=%d data=%p\\n",
+                            faceIndex,mipLevel,(void*)data);
+                        Switch_LogWrite(trace);
+                    }
+#endif
                     Image_UploadData(image, imageFormat, v5, mipLevel, data);
+#ifdef __SWITCH__
+                    Switch_LogWrite("[SWITCH TEXTURE] after Image_UploadData\\n");
+#endif
                     if (image->width >> mipLevel > 1)
                         mipWidth = image->width >> mipLevel;
                     else
