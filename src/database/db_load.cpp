@@ -2100,7 +2100,7 @@ void __cdecl Load_snd_alias_t(bool atStreamStart)
     {
         char trace[160];
         std::snprintf(trace, sizeof(trace),
-            "[SWITCH SOUND] asset=%d alias=%d raw begin\\n",
+            "[SWITCH SOUND] asset=%d alias=%d raw begin\n",
             g_switchCurrentAssetIndex, g_switchCurrentSoundAliasIndex);
         Switch_LogWrite(trace);
 
@@ -2147,7 +2147,7 @@ void __cdecl Load_snd_alias_t(bool atStreamStart)
     {
         char trace[240];
         std::snprintf(trace, sizeof(trace),
-            "[SWITCH SOUND] fields alias=%08x file=%08x curve=%08x speaker=%08x seq=%d\\n",
+            "[SWITCH SOUND] fields alias=%08x file=%08x curve=%08x speaker=%08x seq=%d\n",
             (unsigned)static_cast<uint32_t>(reinterpret_cast<uintptr_t>(varsnd_alias_t->aliasName)),
             (unsigned)static_cast<uint32_t>(reinterpret_cast<uintptr_t>(varsnd_alias_t->soundFile)),
             (unsigned)static_cast<uint32_t>(reinterpret_cast<uintptr_t>(varsnd_alias_t->volumeFalloffCurve)),
@@ -2158,17 +2158,17 @@ void __cdecl Load_snd_alias_t(bool atStreamStart)
 
     varXString = &varsnd_alias_t->aliasName;
     Load_XString(0);
-    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] aliasName done\\n");
+    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] aliasName done\n");
     varXString = &varsnd_alias_t->subtitle;
     Load_XString(0);
-    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] subtitle done\\n");
+    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] subtitle done\n");
     varXString = &varsnd_alias_t->secondaryAliasName;
     Load_XString(0);
-    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] secondary done\\n");
+    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] secondary done\n");
     varXString = &varsnd_alias_t->chainAliasName;
     Load_XString(0);
 
-    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] chain done\\n");
+    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] chain done\n");
 
     if (varsnd_alias_t->soundFile)
     {
@@ -2184,9 +2184,9 @@ void __cdecl Load_snd_alias_t(bool atStreamStart)
                     22));
             varSoundFile = varsnd_alias_t->soundFile;
             std::memset(varSoundFile, 0, sizeof(*varSoundFile));
-            if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] soundfile begin\\n");
+            if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] soundfile begin\n");
             Load_SoundFile(1);
-            if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] soundfile done\\n");
+            if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] soundfile done\n");
         }
         else
         {
@@ -2196,10 +2196,10 @@ void __cdecl Load_snd_alias_t(bool atStreamStart)
         }
     }
 
-    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] curve begin\\n");
+    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] curve begin\n");
     varSndCurvePtr = &varsnd_alias_t->volumeFalloffCurve;
     Load_SndCurvePtr(0);
-    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] curve done\\n");
+    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] curve done\n");
 
     if (varsnd_alias_t->speakerMap)
     {
@@ -2215,9 +2215,9 @@ void __cdecl Load_snd_alias_t(bool atStreamStart)
                     22));
             varSpeakerMap = varsnd_alias_t->speakerMap;
             std::memset(varSpeakerMap, 0, sizeof(*varSpeakerMap));
-            if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] speaker begin\\n");
+            if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] speaker begin\n");
             Load_SpeakerMap(1);
-            if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] speaker done\\n");
+            if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] speaker done\n");
         }
         else
         {
@@ -2273,10 +2273,12 @@ void __cdecl Load_snd_alias_tArray(bool atStreamStart, int32_t count)
 
     for (int32_t i = 0; i < count; ++i)
     {
+        g_switchCurrentSoundAliasIndex = i;
         varsnd_alias_t = var;
         Load_snd_alias_t(true);
         ++var;
     }
+    g_switchCurrentSoundAliasIndex = -1;
 #else
     snd_alias_t *var; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
@@ -2313,11 +2315,36 @@ void __cdecl Load_snd_alias_list_t(bool atStreamStart)
         varsnd_alias_list_t->head =
             reinterpret_cast<snd_alias_t *>(static_cast<uintptr_t>(serialized.head));
         varsnd_alias_list_t->count = serialized.count;
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetRawType == 7u &&
+            g_switchCurrentAssetIndex >= 1202 &&
+            g_switchCurrentAssetIndex <= 1212)
+        {
+            char trace[192];
+            std::snprintf(trace, sizeof(trace),
+                "[SWITCH SOUNDLIST] asset=%d head=%08x count=%d pos=%p\n",
+                g_switchCurrentAssetIndex, serialized.head,
+                serialized.count, static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
+#endif
     }
 
     DB_PushStreamPos(4);
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 7u &&
+        g_switchCurrentAssetIndex >= 1202 &&
+        g_switchCurrentAssetIndex <= 1212)
+        Switch_LogWrite("[SWITCH SOUNDLIST] name begin\n");
+#endif
     varXString = &varsnd_alias_list_t->aliasName;
     Load_XString(0);
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 7u &&
+        g_switchCurrentAssetIndex >= 1202 &&
+        g_switchCurrentAssetIndex <= 1212)
+        Switch_LogWrite("[SWITCH SOUNDLIST] name done\n");
+#endif
 
     const uint32_t headValue = static_cast<uint32_t>(
         reinterpret_cast<uintptr_t>(varsnd_alias_list_t->head));
@@ -2333,7 +2360,19 @@ void __cdecl Load_snd_alias_list_t(bool atStreamStart)
                     "SwitchSndAliasArray",
                     22));
             varsnd_alias_t = varsnd_alias_list_t->head;
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetRawType == 7u &&
+                g_switchCurrentAssetIndex >= 1202 &&
+                g_switchCurrentAssetIndex <= 1212)
+                Switch_LogWrite("[SWITCH SOUNDLIST] alias array begin\n");
+#endif
             Load_snd_alias_tArray(1, varsnd_alias_list_t->count);
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetRawType == 7u &&
+                g_switchCurrentAssetIndex >= 1202 &&
+                g_switchCurrentAssetIndex <= 1212)
+                Switch_LogWrite("[SWITCH SOUNDLIST] alias array done\n");
+#endif
         }
         else
         {
@@ -2341,6 +2380,12 @@ void __cdecl Load_snd_alias_list_t(bool atStreamStart)
                 DB_ConvertOffsetToPointerValue(headValue));
         }
     }
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 7u &&
+        g_switchCurrentAssetIndex >= 1202 &&
+        g_switchCurrentAssetIndex <= 1212)
+        Switch_LogWrite("[SWITCH SOUNDLIST] pop done\n");
+#endif
     DB_PopStreamPos();
 #else
     Load_Stream(atStreamStart, (uint8_t *)varsnd_alias_list_t, 12);
@@ -2383,6 +2428,17 @@ void __cdecl Load_snd_alias_list_ptr(bool atStreamStart)
             sizeof(serialized));
     }
 
+    if (g_switchCurrentAssetRawType == 7u &&
+        g_switchCurrentAssetIndex >= 1202 &&
+        g_switchCurrentAssetIndex <= 1212)
+    {
+        char trace[160];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH SOUND] ptr asset=%d value=%08x\\n",
+            g_switchCurrentAssetIndex, serialized);
+        Switch_LogWrite(trace);
+    }
+
     DB_PushStreamPos(0);
     if (serialized)
     {
@@ -2403,7 +2459,15 @@ void __cdecl Load_snd_alias_list_ptr(bool atStreamStart)
             varsnd_alias_list_t = nativeList;
             std::memset(nativeList, 0, sizeof(*nativeList));
 
+            if (g_switchCurrentAssetRawType == 7u &&
+                g_switchCurrentAssetIndex >= 1202 &&
+                g_switchCurrentAssetIndex <= 1212)
+                Switch_LogWrite("[SWITCH SOUND] list begin\\n");
             Load_snd_alias_list_t(1);
+            if (g_switchCurrentAssetRawType == 7u &&
+                g_switchCurrentAssetIndex >= 1202 &&
+                g_switchCurrentAssetIndex <= 1212)
+                Switch_LogWrite("[SWITCH SOUND] list done\\n");
             Load_snd_alias_list_Asset((XAssetHeader *)varsnd_alias_list_ptr);
             if (inserted)
                 *inserted = *varsnd_alias_list_ptr;
@@ -2419,6 +2483,12 @@ void __cdecl Load_snd_alias_list_ptr(bool atStreamStart)
         }
     }
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 7u &&
+        g_switchCurrentAssetIndex >= 1202 &&
+        g_switchCurrentAssetIndex <= 1212)
+        Switch_LogWrite("[SWITCH SOUND] ptr pop done\n");
+#endif
 #else
     Load_Stream(atStreamStart, (unsigned char*)varsnd_alias_list_ptr, 4);
     DB_PushStreamPos(0);
