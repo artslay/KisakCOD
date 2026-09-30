@@ -488,6 +488,11 @@ struct DynEntityServer // sizeof=0x24
 };
 
 XAssetList g_varXAssetList{};
+#ifdef __SWITCH__
+int32_t g_switchCurrentAssetIndex = -1;
+uint32_t g_switchCurrentAssetRawType = UINT32_MAX;
+uint32_t g_switchCurrentAssetHeader = 0;
+#endif
 
 void *varint;
 void *varuint;
@@ -8743,6 +8748,11 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         }
 
         varXAsset = var;
+#ifdef __SWITCH__
+        g_switchCurrentAssetIndex = i;
+        g_switchCurrentAssetRawType = serialized.type;
+        g_switchCurrentAssetHeader = serialized.header;
+#endif
         memset(varXAsset, 0, sizeof(*varXAsset));
 
         // The Switch SP runtime has an extra MaterialPixelShader asset slot,
@@ -8786,6 +8796,23 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
                 "[SWITCH XASSET] material load begin index=%d header=%08x\n",
                 i,
                 serialized.header);
+            Switch_LogWrite(trace);
+        }
+#endif
+
+#ifdef __SWITCH__
+        {
+            char trace[192];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XASSET TRACE] begin idx=%d raw=%u runtime=%u header=%08x stream=%u pos=%p\n",
+                g_switchCurrentAssetIndex,
+                g_switchCurrentAssetRawType,
+                static_cast<unsigned>(runtimeType),
+                serialized.header,
+                g_streamPosIndex,
+                static_cast<void *>(DB_GetStreamPos()));
             Switch_LogWrite(trace);
         }
 #endif
