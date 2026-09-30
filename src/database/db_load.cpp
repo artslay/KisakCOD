@@ -3280,7 +3280,7 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
             char trace[256];
             std::snprintf(
                 trace, sizeof(trace),
-                "[SWITCH MATERIAL] techset alias slot=%p raw=%08x %08x\\n",
+                "[SWITCH MATERIAL] techset alias slot=%p raw=%08x %08x\n",
                 reinterpret_cast<void *>(aliasSlot),
                 aliasWords[0],
                 aliasWords[1]);
@@ -3314,7 +3314,7 @@ void __cdecl Load_Material(bool atStreamStart)
         uint32_t surfaceTypeBits;
         uint16_t hashIndex;
         uint16_t infoPad;
-        uint8_t stateBitsEntry[34];
+        uint8_t stateBitsEntry[26];
         uint8_t textureCount;
         uint8_t constantCount;
         uint8_t stateBitsCount;
@@ -3327,7 +3327,7 @@ void __cdecl Load_Material(bool atStreamStart)
         uint32_t stateBitsTable;
     };
 
-    static_assert(sizeof(SerializedMaterial) == 80);
+    static_assert(sizeof(SerializedMaterial) == 72);
 
     SerializedMaterial serialized{};
     uint8_t *materialStreamPos = DB_GetStreamPos();
