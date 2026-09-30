@@ -2295,10 +2295,6 @@ XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
     newEntry.entry.asset.type = type;
     newEntry.entry.asset.header = header;
     Sys_LockWrite(&db_hashCritSect);
-#ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBADD] AFTER LOCK\n");
-    Switch_LogWrite("[SWITCH DBADD] BEFORE LINK\n");
-#endif
     existingEntry = DB_LinkXAssetEntry(&newEntry, 0);
     Sys_UnlockWrite(&db_hashCritSect);
     DB_SyncLostDevice();
@@ -2358,10 +2354,6 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         asset.type = newEntry->entry.asset.type;
         asset.header = newEntry->entry.asset.header;
         newEntry = DB_AllocXAssetEntry(asset.type, g_zoneIndex);
-#ifdef __SWITCH__
-        Switch_LogWrite("[SWITCH DBLINK] AFTER ENTRY ALLOC\n");
-        Switch_LogWrite("[SWITCH DBLINK] BEFORE CLONE\n");
-#endif
         DB_CloneXAssetInternal(&asset, &newEntry->entry.asset);
     }
 
