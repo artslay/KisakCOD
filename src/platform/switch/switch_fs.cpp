@@ -525,7 +525,7 @@ uint32_t __cdecl FS_Read(uint8_t *buffer, uint32_t len, int h)
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH IWD] read error handle=%d request=%u result=%d pos=%ld size=%u\\n",
+                "[SWITCH IWD] read error handle=%d request=%u result=%d pos=%ld size=%u\n",
                 h,
                 len,
                 read,
