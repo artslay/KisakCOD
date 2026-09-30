@@ -1729,6 +1729,74 @@ void __cdecl Load_MssSound(bool atStreamStart)
 #endif
 }
 
+void __cdecl Load_LoadedSound(bool atStreamStart)
+{
+#ifdef __SWITCH__
+    struct SerializedMssSound
+    {
+        int32_t format;
+        uint32_t data_ptr;
+        uint32_t data_len;
+        uint32_t rate;
+        int32_t bits;
+        int32_t channels;
+        uint32_t samples;
+        uint32_t block_size;
+        uint32_t initial_ptr;
+        uint32_t data;
+    };
+    struct SerializedLoadedSound
+    {
+        uint32_t name;
+        SerializedMssSound sound;
+    };
+    static_assert(sizeof(SerializedLoadedSound) == 44);
+
+    if (atStreamStart)
+    {
+        SerializedLoadedSound serialized{};
+        Load_Stream(
+            true,
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+
+        std::memset(varLoadedSound, 0, sizeof(*varLoadedSound));
+        varLoadedSound->name =
+            reinterpret_cast<const char *>(
+                static_cast<uintptr_t>(serialized.name));
+
+        varMssSound = &varLoadedSound->sound;
+        varMssSound->info.format = serialized.sound.format;
+        varMssSound->info.data_ptr = nullptr;
+        varMssSound->info.data_len = serialized.sound.data_len;
+        varMssSound->info.rate = serialized.sound.rate;
+        varMssSound->info.bits = serialized.sound.bits;
+        varMssSound->info.channels = serialized.sound.channels;
+        varMssSound->info.samples = serialized.sound.samples;
+        varMssSound->info.block_size = serialized.sound.block_size;
+        varMssSound->info.initial_ptr = nullptr;
+        varMssSound->data =
+            reinterpret_cast<uint8_t *>(
+                static_cast<uintptr_t>(serialized.sound.data));
+    }
+
+    DB_PushStreamPos(4);
+    varXString = &varLoadedSound->name;
+    Load_XString(0);
+    varMssSound = &varLoadedSound->sound;
+    Load_MssSound(0);
+    DB_PopStreamPos();
+#else
+    Load_Stream(atStreamStart, (uint8_t *)varLoadedSound, 44);
+    DB_PushStreamPos(4);
+    varXString = &varLoadedSound->name;
+    Load_XString(0);
+    varMssSound = &varLoadedSound->sound;
+    Load_MssSound(0);
+    DB_PopStreamPos();
+#endif
+}
+
 void __cdecl Load_LoadedSoundPtr(bool atStreamStart)
 {
     const void **inserted; // [esp+0h] [ebp-Ch]
