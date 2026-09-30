@@ -2494,11 +2494,12 @@ void __cdecl Load_MaterialVertexShader(bool atStreamStart)
     struct SerializedMaterialVertexShader
     {
         uint32_t name;
+        uint32_t shader;
         uint32_t program;
         uint16_t programSize;
         uint16_t loadForRenderer;
     };
-    static_assert(sizeof(SerializedMaterialVertexShader) == 12);
+    static_assert(sizeof(SerializedMaterialVertexShader) == 16);
 
     iassert(atStreamStart);
 
@@ -2515,9 +2516,10 @@ void __cdecl Load_MaterialVertexShader(bool atStreamStart)
         char trace[320];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH VERTEXSHADER RAW] pos=%p name=%08x program=%08x size=%u renderer=%u after=%p\n",
+            "[SWITCH VERTEXSHADER RAW] pos=%p name=%08x shader=%08x program=%08x size=%u renderer=%u after=%p\n",
             static_cast<const void *>(vertexShaderStart),
             serialized.name,
+            serialized.shader,
             serialized.program,
             static_cast<unsigned>(serialized.programSize),
             static_cast<unsigned>(serialized.loadForRenderer),
@@ -2540,6 +2542,7 @@ void __cdecl Load_MaterialVertexShader(bool atStreamStart)
         varMaterialVertexShader->name = reinterpret_cast<const char *>(
             DB_ConvertOffsetToPointerValue(serialized.name));
 
+    (void)serialized.shader;
     varMaterialVertexShader->prog.vs = nullptr;
     varMaterialVertexShader->prog.loadDef.program =
         reinterpret_cast<void *>(static_cast<uintptr_t>(serialized.program));
@@ -2618,8 +2621,8 @@ void __cdecl Load_MaterialPixelShader(bool atStreamStart)
 #ifdef __SWITCH__
     Switch_LogRawDwords(
         "[SWITCH PIXELSHADER RAW]",
-        pixelShaderStart,
-        32);
+        reinterpret_cast<const uint8_t *>(&serialized),
+        sizeof(serialized));
 #endif
 
     {
@@ -2895,11 +2898,9 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
         uint8_t perObjArgCount;
         uint8_t stableArgCount;
         uint8_t customSamplerFlags;
-        uint8_t precompiledIndex;
-        uint8_t passPad[3];
         uint32_t args;
     };
-    static_assert(sizeof(SerializedMaterialPass) == 24);
+    static_assert(sizeof(SerializedMaterialPass) == 20);
 
     iassert(atStreamStart);
     const uint8_t *passStart = DB_GetStreamPos();
@@ -2920,7 +2921,7 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH PASS RAW] pos=%p decl=%08x vs=%08x ps=%08x args=%08x counts=%u/%u/%u flags=%u pre=%u after=%p\n",
+            "[SWITCH PASS RAW] pos=%p decl=%08x vs=%08x ps=%08x args=%08x counts=%u/%u/%u flags=%u after=%p\n",
             static_cast<const void *>(passStart),
             serialized.vertexDecl,
             serialized.vertexShader,
@@ -2930,7 +2931,6 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
             static_cast<unsigned>(serialized.perObjArgCount),
             static_cast<unsigned>(serialized.stableArgCount),
             static_cast<unsigned>(serialized.customSamplerFlags),
-            static_cast<unsigned>(serialized.precompiledIndex),
             static_cast<void *>(DB_GetStreamPos()));
         Switch_LogWrite(trace);
     }
