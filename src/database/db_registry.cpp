@@ -21,6 +21,7 @@ extern FILE *FS_SwitchOpenRootFile(const char *path);
 #ifdef __SWITCH__
 extern void __cdecl NET_Sleep(int msec);
 extern void Switch_LogWrite(const char *msg);
+extern uint32_t g_switchImageAdds;
 #endif
 #include <qcommon/com_bsp.h>
 #include <gfx_d3d/r_init.h>
@@ -2237,6 +2238,10 @@ XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
 
     newEntry.entry.asset.type = type;
     newEntry.entry.asset.header = header;
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_IMAGE)
+        ++g_switchImageAdds;
+#endif
     Sys_LockWrite(&db_hashCritSect);
     existingEntry = DB_LinkXAssetEntry(&newEntry, 0);
     Sys_UnlockWrite(&db_hashCritSect);
