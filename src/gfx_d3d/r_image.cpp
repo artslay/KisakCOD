@@ -22,6 +22,7 @@
 #include <algorithm>
 
 #ifdef __SWITCH__
+#include <EGL/egl.h>
 extern void Switch_LogWrite(const char *msg);
 #endif
 
@@ -45,74 +46,163 @@ static bool R_GLImageFormat(_D3DFORMAT f, GLenum &i, GLenum &u, GLenum &t, bool 
     }
 }
 static uint32_t R_GLFullMipCount(uint32_t w,uint32_t h,uint32_t d){uint32_t n=1;while(w>1||h>1||d>1){w=std::max(1u,w>>1);h=std::max(1u,h>>1);d=std::max(1u,d>>1);++n;}return n;}
-static void R_GLAllocTexture(KisakGLTexture *x,GLenum target,uint32_t w,uint32_t h,uint32_t d,uint32_t levels,_D3DFORMAT f)
+static void R_GLAllocTexture(
+    KisakGLTexture *x,
+    GLenum target,
+    uint32_t w,
+    uint32_t h,
+    uint32_t d,
+    uint32_t levels,
+    _D3DFORMAT f)
 {
-    GLenum i,u,t; bool c; if(!R_GLImageFormat(f,i,u,t,c)) {
-#ifdef __SWITCH__
+    GLenum i, u, t;
+    bool compressed;
+
+    if (!R_GLImageFormat(f, i, u, t, compressed))
+    {
         char trace[128];
-        std::snprintf(trace,sizeof(trace),"[SWITCH GLTEX] unsupported format=%08x\n",(unsigned)f);
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH GLTEX] unsupported format=%08x\\n",
+            (unsigned)f);
         Switch_LogWrite(trace);
-#endif
         return;
     }
-    x->target=target;x->sourceFormat=f;x->internalFormat=i;x->uploadFormat=u;x->uploadType=t;x->width=w;x->height=h;x->depth=d;x->mipLevels=levels;
-#ifdef __SWITCH__
+
+    x->target = target;
+    x->sourceFormat = f;
+    x->internalFormat = i;
+    x->uploadFormat = u;
+    x->uploadType = t;
+    x->width = w;
+    x->height = h;
+    x->depth = d;
+    x->mipLevels = levels;
+
+    const EGLDisplay eglDisplay = eglGetCurrentDisplay();
+    const EGLContext eglContext = eglGetCurrentContext();
+    const EGLSurface eglSurface = eglGetCurrentSurface(EGL_DRAW);
+    const GLenum glErrorBefore = glGetError();
+
+    glGenTextures(1, &x->object);
+
+    const GLenum glErrorAfterGen = glGetError();
+
+    if (eglDisplay == EGL_NO_DISPLAY ||
+        eglContext == EGL_NO_CONTEXT ||
+        eglSurface == EGL_NO_SURFACE ||
+        x->object == 0 ||
+        glErrorBefore != GL_NO_ERROR ||
+        glErrorAfterGen != GL_NO_ERROR)
     {
-        char trace[256];
-        std::snprintf(trace,sizeof(trace),
-            "[SWITCH GLTEX] alloc target=%x source=%08x internal=%x upload=%x type=%x compressed=%u size=%ux%ux%u levels=%u\n",
-            target,(unsigned)f,i,u,t,c?1u:0u,w,h,d,levels);
+        char trace[320];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH GLTEX DIAG] ctx=%p dpy=%p surf=%p target=%x format=%08x size=%ux%ux%u levels=%u object=%u gl_pre=%04x gl_gen=%04x egl=%04x\\n",
+            (void *)eglContext,
+            (void *)eglDisplay,
+            (void *)eglSurface,
+            (unsigned)target,
+            (unsigned)f,
+            (unsigned)w,
+            (unsigned)h,
+            (unsigned)d,
+            (unsigned)levels,
+            (unsigned)x->object,
+            (unsigned)glErrorBefore,
+            (unsigned)glErrorAfterGen,
+            (unsigned)eglGetError());
         Switch_LogWrite(trace);
     }
-#endif
-    glGenTextures(1,&x->object);
-#ifdef __SWITCH__
+
+    glBindTexture(target, x->object);
+    glTexParameteri(
+        target,
+        GL_TEXTURE_MIN_FILTER,
+        levels > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    if (target == GL_TEXTURE_3D || target == GL_TEXTURE_CUBE_MAP)
+        glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_REPEAT);
+
+    for (uint32_t l = 0; l < levels; ++l)
     {
-        char trace[128];
-        std::snprintf(trace,sizeof(trace),"[SWITCH GLTEX] after glGen object=%u\n",x->object);
-        Switch_LogWrite(trace);
-    }
-#endif
-    glBindTexture(target,x->object);
-#ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH GLTEX] after glBindTexture\n");
-#endif
-    glTexParameteri(target,GL_TEXTURE_MIN_FILTER,levels>1?GL_LINEAR_MIPMAP_LINEAR:GL_LINEAR);
-    glTexParameteri(target,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    glTexParameteri(target,GL_TEXTURE_WRAP_S,GL_REPEAT); glTexParameteri(target,GL_TEXTURE_WRAP_T,GL_REPEAT);
-    if(target==GL_TEXTURE_3D||target==GL_TEXTURE_CUBE_MAP) glTexParameteri(target,GL_TEXTURE_WRAP_R,GL_REPEAT);
-#ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH GLTEX] after texture parameters\n");
-#endif
-    for(uint32_t l=0;l<levels;++l){uint32_t lw=std::max(1u,w>>l),lh=std::max(1u,h>>l),ld=std::max(1u,d>>l);
-#ifdef __SWITCH__
+        const uint32_t lw = std::max(1u, w >> l);
+        const uint32_t lh = std::max(1u, h >> l);
+        const uint32_t ld = std::max(1u, d >> l);
+
+        if (target == GL_TEXTURE_3D)
+            glTexImage3D(
+                target, l, (GLint)i,
+                lw, lh, ld, 0, u, t, nullptr);
+        else if (target == GL_TEXTURE_CUBE_MAP)
         {
-            char trace[160];
-            std::snprintf(trace,sizeof(trace),
-                "[SWITCH GLTEX] before glTexImage level=%u size=%ux%ux%u\n",l,lw,lh,ld);
-            Switch_LogWrite(trace);
+            for (uint32_t face = 0; face < 6; ++face)
+                glTexImage2D(
+                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
+                    l, (GLint)i, lw, lh, 0, u, t, nullptr);
         }
-#endif
-        if(target==GL_TEXTURE_3D) glTexImage3D(target,l,(GLint)i,lw,lh,ld,0,u,t,nullptr);
-        else if(target==GL_TEXTURE_CUBE_MAP) for(uint32_t fce=0;fce<6;++fce) glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+fce,l,(GLint)i,lw,lh,0,u,t,nullptr);
-        else glTexImage2D(target,l,(GLint)i,lw,lh,0,u,t,nullptr);
-#ifdef __SWITCH__
-        Switch_LogWrite("[SWITCH GLTEX] after glTexImage level\n");
-#endif
+        else
+            glTexImage2D(
+                target, l, (GLint)i, lw, lh, 0, u, t, nullptr);
     }
 }
-static void R_GLUploadTexture(const GfxImage *image,_D3DFORMAT f,_D3DCUBEMAP_FACES face,uint32_t l,const uint8_t *src)
+
+static void R_GLUploadTexture(
+    const GfxImage *image,
+    _D3DFORMAT f,
+    _D3DCUBEMAP_FACES face,
+    uint32_t l,
+    const uint8_t *src)
 {
-    auto *x=image->texture.basemap;if(!x||!src)return;GLenum i,u,t;bool c;if(!R_GLImageFormat(f,i,u,t,c))return;
-#ifdef __SWITCH__
+    auto *x = image->texture.basemap;
+    if (!x || !src)
+        return;
+
+    GLenum i, u, t;
+    bool compressed;
+    if (!R_GLImageFormat(f, i, u, t, compressed))
+        return;
+
+    glBindTexture(x->target, x->object);
+
+    const uint32_t w = std::max(1u, (uint32_t)image->width >> l);
+    const uint32_t h = std::max(1u, (uint32_t)image->height >> l);
+    const uint32_t d = std::max(1u, (uint32_t)image->depth >> l);
+
+    if (compressed)
     {
-        char trace[224];
-        std::snprintf(trace,sizeof(trace),
-            "[SWITCH GLTEX] upload face=%u mip=%u format=%08x target=%x object=%u src=%p\n",
-            (unsigned)face,l,(unsigned)f,x->target,x->object,(const void*)src);
-        Switch_LogWrite(trace);
+        const uint32_t blockBytes = f == D3DFMT_DXT1 ? 8 : 16;
+        const uint32_t size =
+            ((w + 3) / 4) * ((h + 3) / 4) * blockBytes * d;
+
+        if (x->target == GL_TEXTURE_CUBE_MAP)
+            glCompressedTexSubImage2D(
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
+                l, 0, 0, w, h, i, size, src);
+        else if (x->target == GL_TEXTURE_3D)
+            glCompressedTexSubImage3D(
+                GL_TEXTURE_3D,
+                l, 0, 0, 0, w, h, d, i, size, src);
+        else
+            glCompressedTexSubImage2D(
+                GL_TEXTURE_2D,
+                l, 0, 0, w, h, i, size, src);
     }
-#endif
+    else if (x->target == GL_TEXTURE_3D)
+        glTexSubImage3D(
+            GL_TEXTURE_3D, l, 0, 0, 0, w, h, d, u, t, src);
+    else if (x->target == GL_TEXTURE_CUBE_MAP)
+        glTexSubImage2D(
+            GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
+            l, 0, 0, w, h, u, t, src);
+    else
+        glTexSubImage2D(
+            GL_TEXTURE_2D, l, 0, 0, w, h, u, t, src);
+}
+
     glBindTexture(x->target,x->object);
     uint32_t w=std::max(1u,(uint32_t)image->width>>l),h=std::max(1u,(uint32_t)image->height>>l),d=std::max(1u,(uint32_t)image->depth>>l);
     if(c){uint32_t b=f==D3DFMT_DXT1?8:16,s=((w+3)/4)*((h+3)/4)*b*d;
