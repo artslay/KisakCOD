@@ -2958,6 +2958,11 @@ void __cdecl Load_MaterialTechnique(bool atStreamStart)
     static_assert(sizeof(SerializedMaterialTechnique) == 8);
 
     iassert(atStreamStart);
+
+    // The runtime technique lives in Hunk memory on Switch; preserve the
+    // original 4-byte alignment of its serialized fastfile record.
+    DB_AllocStreamPos(3);
+
     SerializedMaterialTechnique serialized{};
     DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
     DB_IncStreamPos(sizeof(serialized));
@@ -3124,6 +3129,10 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
         uint32_t techniques[26];
     };
     static_assert(sizeof(SerializedMaterialTechniqueSet) == 112);
+
+    // The runtime technique set lives in Hunk memory on Switch; preserve
+    // the original 4-byte alignment of its serialized fastfile record.
+    DB_AllocStreamPos(3);
 
     SerializedMaterialTechniqueSet serialized{};
     DB_LoadXFileData(
