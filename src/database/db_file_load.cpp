@@ -546,6 +546,24 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         varXAssetHeader = &varXAsset->header;
         Load_XAssetHeader(0);
 
+#ifdef __SWITCH__
+        if (serialized.type == ASSET_TYPE_MATERIAL)
+        {
+            char trace[256];
+            const char *materialName =
+                varXAsset->header.material
+                    ? DB_GetXAssetName(&varXAsset->header)
+                    : "(null)";
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XASSET] material header=%08x name=%s\\n",
+                serialized.header,
+                materialName ? materialName : "(null)");
+            Switch_LogWrite(trace);
+        }
+#endif
+
         ++var;
     }
 
