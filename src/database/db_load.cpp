@@ -492,6 +492,7 @@ XAssetList g_varXAssetList{};
 int32_t g_switchCurrentAssetIndex = -1;
 uint32_t g_switchCurrentAssetRawType = UINT32_MAX;
 uint32_t g_switchCurrentAssetHeader = 0;
+static int32_t g_switchCurrentSoundAliasIndex = -1;
 static uint32_t g_switchImagePtrTraceCount = 0;
 bool g_switchTraceNextStreamPop = false;
 static uint32_t g_switchTextureReturnTraceCount = 0;
@@ -2091,8 +2092,18 @@ void __cdecl Load_snd_alias_t(bool atStreamStart)
     };
     static_assert(sizeof(SerializedSndAlias) == 92);
 
-    if (atStreamStart)
+    const bool switchSoundTrace =
+        (g_switchCurrentAssetRawType == 7u &&
+         g_switchCurrentAssetIndex >= 1202 &&
+         g_switchCurrentAssetIndex <= 1212);
+    if (switchSoundTrace && atStreamStart)
     {
+        char trace[160];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH SOUND] asset=%d alias=%d raw begin\\n",
+            g_switchCurrentAssetIndex, g_switchCurrentSoundAliasIndex);
+        Switch_LogWrite(trace);
+
         SerializedSndAlias serialized{};
         Load_Stream(
             true,
@@ -2132,14 +2143,32 @@ void __cdecl Load_snd_alias_t(bool atStreamStart)
             reinterpret_cast<SpeakerMap *>(static_cast<uintptr_t>(serialized.speakerMap));
     }
 
+    if (switchSoundTrace && atStreamStart)
+    {
+        char trace[240];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH SOUND] fields alias=%08x file=%08x curve=%08x speaker=%08x seq=%d\\n",
+            (unsigned)static_cast<uint32_t>(reinterpret_cast<uintptr_t>(varsnd_alias_t->aliasName)),
+            (unsigned)static_cast<uint32_t>(reinterpret_cast<uintptr_t>(varsnd_alias_t->soundFile)),
+            (unsigned)static_cast<uint32_t>(reinterpret_cast<uintptr_t>(varsnd_alias_t->volumeFalloffCurve)),
+            (unsigned)static_cast<uint32_t>(reinterpret_cast<uintptr_t>(varsnd_alias_t->speakerMap)),
+            varsnd_alias_t->sequence);
+        Switch_LogWrite(trace);
+    }
+
     varXString = &varsnd_alias_t->aliasName;
     Load_XString(0);
+    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] aliasName done\\n");
     varXString = &varsnd_alias_t->subtitle;
     Load_XString(0);
+    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] subtitle done\\n");
     varXString = &varsnd_alias_t->secondaryAliasName;
     Load_XString(0);
+    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] secondary done\\n");
     varXString = &varsnd_alias_t->chainAliasName;
     Load_XString(0);
+
+    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] chain done\\n");
 
     if (varsnd_alias_t->soundFile)
     {
@@ -2155,7 +2184,9 @@ void __cdecl Load_snd_alias_t(bool atStreamStart)
                     22));
             varSoundFile = varsnd_alias_t->soundFile;
             std::memset(varSoundFile, 0, sizeof(*varSoundFile));
+            if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] soundfile begin\\n");
             Load_SoundFile(1);
+            if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] soundfile done\\n");
         }
         else
         {
@@ -2165,8 +2196,10 @@ void __cdecl Load_snd_alias_t(bool atStreamStart)
         }
     }
 
+    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] curve begin\\n");
     varSndCurvePtr = &varsnd_alias_t->volumeFalloffCurve;
     Load_SndCurvePtr(0);
+    if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] curve done\\n");
 
     if (varsnd_alias_t->speakerMap)
     {
@@ -2182,7 +2215,9 @@ void __cdecl Load_snd_alias_t(bool atStreamStart)
                     22));
             varSpeakerMap = varsnd_alias_t->speakerMap;
             std::memset(varSpeakerMap, 0, sizeof(*varSpeakerMap));
+            if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] speaker begin\\n");
             Load_SpeakerMap(1);
+            if (switchSoundTrace) Switch_LogWrite("[SWITCH SOUND] speaker done\\n");
         }
         else
         {
