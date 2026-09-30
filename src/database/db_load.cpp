@@ -3423,7 +3423,7 @@ void __cdecl Load_Material(bool atStreamStart)
         uint8_t stateBitsCount;
         uint8_t stateFlags;
         uint8_t cameraRegion;
-        uint8_t materialPad[3];
+        uint8_t materialPad;
         uint32_t techniqueSet;
         uint32_t textureTable;
         uint32_t constantTable;
