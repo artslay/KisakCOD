@@ -2448,18 +2448,73 @@ void __cdecl Load_MaterialPixelShaderProgram(bool atStreamStart)
 
 void __cdecl Load_MaterialVertexShader(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedMaterialVertexShader
+    {
+        uint32_t name;
+        uint32_t program;
+        uint16_t programSize;
+        uint16_t loadForRenderer;
+    };
+    static_assert(sizeof(SerializedMaterialVertexShader) == 12);
+
+    iassert(atStreamStart);
+    SerializedMaterialVertexShader serialized{};
+    DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+    DB_IncStreamPos(sizeof(serialized));
+
+    memset(varMaterialVertexShader, 0, sizeof(*varMaterialVertexShader));
+
+    if (!serialized.name)
+        varMaterialVertexShader->name = nullptr;
+    else if (serialized.name == UINT32_MAX)
+    {
+        char *nameBuffer = reinterpret_cast<char *>(AllocLoad_raw_byte());
+        Load_XStringCustom(&nameBuffer);
+        varMaterialVertexShader->name = nameBuffer;
+    }
+    else
+        varMaterialVertexShader->name = reinterpret_cast<const char *>(
+            DB_ConvertOffsetToPointerValue(serialized.name));
+
+    varMaterialVertexShader->prog.vs = nullptr;
+    varMaterialVertexShader->prog.loadDef.program =
+        reinterpret_cast<void *>(static_cast<uintptr_t>(serialized.program));
+    varMaterialVertexShader->prog.loadDef.programSize = serialized.programSize;
+    varMaterialVertexShader->prog.loadDef.loadForRenderer = serialized.loadForRenderer;
+
+    varMaterialVertexShaderProgram = &varMaterialVertexShader->prog;
+    Load_MaterialVertexShaderProgram(0);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varMaterialVertexShader, 16);
     varXString = &varMaterialVertexShader->name;
     Load_XString(0);
     varMaterialVertexShaderProgram = &varMaterialVertexShader->prog;
     Load_MaterialVertexShaderProgram(0);
+#endif
 }
-
 void __cdecl Load_MaterialVertexShaderPtr(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varMaterialVertexShaderPtr, 4);
     if (*varMaterialVertexShaderPtr)
     {
+#ifdef __SWITCH__
+        const uint32_t value = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(*varMaterialVertexShaderPtr));
+        if (value == UINT32_MAX)
+        {
+            *varMaterialVertexShaderPtr =
+                static_cast<MaterialVertexShader *>(Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(MaterialVertexShader)),
+                    "SwitchMaterialVertexShader", 22));
+            varMaterialVertexShader = *varMaterialVertexShaderPtr;
+            Load_MaterialVertexShader(1);
+        }
+        else
+            *varMaterialVertexShaderPtr =
+                reinterpret_cast<MaterialVertexShader *>(
+                    DB_ConvertOffsetToPointerValue(value));
+#else
         if (*varMaterialVertexShaderPtr == (MaterialVertexShader *)-1)
         {
             *varMaterialVertexShaderPtr = (MaterialVertexShader *)AllocLoad_FxElemVisStateSample();
@@ -2467,26 +2522,79 @@ void __cdecl Load_MaterialVertexShaderPtr(bool atStreamStart)
             Load_MaterialVertexShader(1);
         }
         else
-        {
             DB_ConvertOffsetToPointer((uint32_t*)varMaterialVertexShaderPtr);
-        }
+#endif
     }
 }
-
 void __cdecl Load_MaterialPixelShader(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedMaterialPixelShader
+    {
+        uint32_t name;
+        uint32_t program;
+        uint16_t programSize;
+        uint16_t loadForRenderer;
+    };
+    static_assert(sizeof(SerializedMaterialPixelShader) == 12);
+
+    iassert(atStreamStart);
+    SerializedMaterialPixelShader serialized{};
+    DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+    DB_IncStreamPos(sizeof(serialized));
+
+    memset(varMaterialPixelShader, 0, sizeof(*varMaterialPixelShader));
+
+    if (!serialized.name)
+        varMaterialPixelShader->name = nullptr;
+    else if (serialized.name == UINT32_MAX)
+    {
+        char *nameBuffer = reinterpret_cast<char *>(AllocLoad_raw_byte());
+        Load_XStringCustom(&nameBuffer);
+        varMaterialPixelShader->name = nameBuffer;
+    }
+    else
+        varMaterialPixelShader->name = reinterpret_cast<const char *>(
+            DB_ConvertOffsetToPointerValue(serialized.name));
+
+    varMaterialPixelShader->prog.ps = nullptr;
+    varMaterialPixelShader->prog.loadDef.program =
+        reinterpret_cast<void *>(static_cast<uintptr_t>(serialized.program));
+    varMaterialPixelShader->prog.loadDef.programSize = serialized.programSize;
+    varMaterialPixelShader->prog.loadDef.loadForRenderer = serialized.loadForRenderer;
+
+    varMaterialPixelShaderProgram = &varMaterialPixelShader->prog;
+    Load_MaterialPixelShaderProgram(0);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varMaterialPixelShader, 16);
     varXString = &varMaterialPixelShader->name;
     Load_XString(0);
     varMaterialPixelShaderProgram = &varMaterialPixelShader->prog;
     Load_MaterialPixelShaderProgram(0);
+#endif
 }
-
 void __cdecl Load_MaterialPixelShaderPtr(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varMaterialPixelShaderPtr, 4);
     if (*varMaterialPixelShaderPtr)
     {
+#ifdef __SWITCH__
+        const uint32_t value = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(*varMaterialPixelShaderPtr));
+        if (value == UINT32_MAX)
+        {
+            *varMaterialPixelShaderPtr =
+                static_cast<MaterialPixelShader *>(Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(MaterialPixelShader)),
+                    "SwitchMaterialPixelShader", 22));
+            varMaterialPixelShader = *varMaterialPixelShaderPtr;
+            Load_MaterialPixelShader(1);
+        }
+        else
+            *varMaterialPixelShaderPtr =
+                reinterpret_cast<MaterialPixelShader *>(
+                    DB_ConvertOffsetToPointerValue(value));
+#else
         if (*varMaterialPixelShaderPtr == (MaterialPixelShader *)-1)
         {
             *varMaterialPixelShaderPtr = (MaterialPixelShader *)AllocLoad_FxElemVisStateSample();
@@ -2494,17 +2602,54 @@ void __cdecl Load_MaterialPixelShaderPtr(bool atStreamStart)
             Load_MaterialPixelShader(1);
         }
         else
-        {
             DB_ConvertOffsetToPointer((uint32_t*)varMaterialPixelShaderPtr);
-        }
+#endif
     }
 }
-
 void __cdecl Load_MaterialVertexDeclaration(bool atStreamStart)
 {
-    Load_Stream(atStreamStart, &varMaterialVertexDeclaration->streamCount, sizeof(MaterialVertexDeclaration));
-}
+#ifdef __SWITCH__
+    struct SerializedMaterialVertexDeclaration
+    {
+        uint8_t streamCount;
+        uint8_t hasOptionalSource;
+        uint8_t isLoaded;
+        uint8_t pad;
+        MaterialStreamRouting data[16];
+        uint32_t decl[16];
+    };
+    static_assert(sizeof(SerializedMaterialVertexDeclaration) == 100);
 
+    iassert(atStreamStart);
+    SerializedMaterialVertexDeclaration serialized{};
+    DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+    DB_IncStreamPos(sizeof(serialized));
+
+    memset(varMaterialVertexDeclaration, 0, sizeof(*varMaterialVertexDeclaration));
+    varMaterialVertexDeclaration->streamCount = serialized.streamCount;
+    varMaterialVertexDeclaration->hasOptionalSource = serialized.hasOptionalSource != 0;
+    varMaterialVertexDeclaration->isLoaded = serialized.isLoaded != 0;
+    memcpy(varMaterialVertexDeclaration->routing.data,
+           serialized.data, sizeof(serialized.data));
+
+    for (int i = 0; i < 16; ++i)
+    {
+        const uint32_t value = serialized.decl[i];
+        if (!value)
+            varMaterialVertexDeclaration->routing.decl[i] = nullptr;
+        else
+            varMaterialVertexDeclaration->routing.decl[i] =
+                value == UINT32_MAX
+                    ? reinterpret_cast<IDirect3DVertexDeclaration9 *>(
+                        static_cast<uintptr_t>(UINT32_MAX))
+                    : reinterpret_cast<IDirect3DVertexDeclaration9 *>(
+                        DB_ConvertOffsetToPointerValue(value));
+    }
+#else
+    Load_Stream(atStreamStart, &varMaterialVertexDeclaration->streamCount,
+                sizeof(MaterialVertexDeclaration));
+#endif
+}
 void __cdecl Load_MaterialArgumentCodeConst(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varMaterialArgumentCodeConst, 4);
@@ -2584,6 +2729,86 @@ void __cdecl Load_GfxStateBitsArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_MaterialPass(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedMaterialPass
+    {
+        uint32_t vertexDecl;
+        uint32_t vertexShader;
+        uint32_t pixelShader;
+        uint8_t perPrimArgCount;
+        uint8_t perObjArgCount;
+        uint8_t stableArgCount;
+        uint8_t customSamplerFlags;
+        uint32_t args;
+    };
+    static_assert(sizeof(SerializedMaterialPass) == 20);
+
+    iassert(atStreamStart);
+    SerializedMaterialPass serialized{};
+    DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+    DB_IncStreamPos(sizeof(serialized));
+
+    memset(varMaterialPass, 0, sizeof(*varMaterialPass));
+    varMaterialPass->perPrimArgCount = serialized.perPrimArgCount;
+    varMaterialPass->perObjArgCount = serialized.perObjArgCount;
+    varMaterialPass->stableArgCount = serialized.stableArgCount;
+    varMaterialPass->customSamplerFlags = serialized.customSamplerFlags;
+
+    if (serialized.vertexDecl == UINT32_MAX)
+    {
+        varMaterialPass->vertexDecl =
+            static_cast<MaterialVertexDeclaration *>(Hunk_Alloc(
+                static_cast<uint32_t>(sizeof(MaterialVertexDeclaration)),
+                "SwitchMaterialVertexDeclaration", 22));
+        varMaterialVertexDeclaration = varMaterialPass->vertexDecl;
+        Load_MaterialVertexDeclaration(1);
+        Load_BuildVertexDecl(&varMaterialPass->vertexDecl);
+    }
+    else if (serialized.vertexDecl)
+    {
+        varMaterialPass->vertexDecl =
+            reinterpret_cast<MaterialVertexDeclaration *>(
+                DB_ConvertOffsetToPointerValue(serialized.vertexDecl));
+    }
+    else
+        varMaterialPass->vertexDecl = nullptr;
+
+    varMaterialPass->vertexShader =
+        reinterpret_cast<MaterialVertexShader *>(
+            static_cast<uintptr_t>(serialized.vertexShader));
+    varMaterialVertexShaderPtr = &varMaterialPass->vertexShader;
+    Load_MaterialVertexShaderPtr(0);
+
+    varMaterialPass->pixelShader =
+        reinterpret_cast<MaterialPixelShader *>(
+            static_cast<uintptr_t>(serialized.pixelShader));
+    varMaterialPixelShaderPtr = &varMaterialPass->pixelShader;
+    Load_MaterialPixelShaderPtr(0);
+
+    varMaterialPass->args =
+        reinterpret_cast<MaterialShaderArgument *>(
+            static_cast<uintptr_t>(serialized.args));
+    if (serialized.args)
+    {
+        const uint32_t count =
+            static_cast<uint32_t>(
+                varMaterialPass->stableArgCount +
+                varMaterialPass->perObjArgCount +
+                varMaterialPass->perPrimArgCount);
+        if (count)
+        {
+            varMaterialPass->args =
+                static_cast<MaterialShaderArgument *>(Hunk_Alloc(
+                    static_cast<uint32_t>(
+                        sizeof(MaterialShaderArgument) * count),
+                    "SwitchMaterialShaderArguments", 22));
+            varMaterialShaderArgument = varMaterialPass->args;
+            Load_MaterialShaderArgumentArray(1, static_cast<int32_t>(count));
+        }
+        else
+            varMaterialPass->args = nullptr;
+    }
+#else
     Load_Stream(atStreamStart, (unsigned char*)varMaterialPass, 20);
     if (varMaterialPass->vertexDecl)
     {
@@ -2595,9 +2820,7 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
             Load_BuildVertexDecl(&varMaterialPass->vertexDecl);
         }
         else
-        {
             DB_ConvertOffsetToPointer((uint32_t*)varMaterialPass);
-        }
     }
     varMaterialVertexShaderPtr = &varMaterialPass->vertexShader;
     Load_MaterialVertexShaderPtr(0);
@@ -2611,41 +2834,84 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
             1,
             varMaterialPass->stableArgCount + varMaterialPass->perObjArgCount + varMaterialPass->perPrimArgCount);
     }
+#endif
 }
-
 void __cdecl Load_MaterialPassArray(bool atStreamStart, int32_t count)
 {
-    MaterialPass *var; // [esp+0h] [ebp-8h]
-    int32_t i; // [esp+4h] [ebp-4h]
-
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+    for (int32_t i = 0; i < count; ++i)
+    {
+        varMaterialPass =
+            reinterpret_cast<MaterialPass *>(
+                reinterpret_cast<uint8_t *>(varMaterialPass) +
+                static_cast<size_t>(i) * sizeof(MaterialPass));
+        Load_MaterialPass(1);
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varMaterialPass, 20 * count);
-    var = (MaterialPass *)varMaterialPass;
-    for (i = 0; i < count; ++i)
+    MaterialPass *var = (MaterialPass *)varMaterialPass;
+    for (int32_t i = 0; i < count; ++i)
     {
         varMaterialPass = (MaterialPass*)&var->vertexDecl;
         Load_MaterialPass(0);
         ++var;
     }
+#endif
 }
-
 void __cdecl Load_MaterialTechnique(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedMaterialTechnique
+    {
+        uint32_t name;
+        uint16_t flags;
+        uint16_t passCount;
+    };
+    static_assert(sizeof(SerializedMaterialTechnique) == 8);
+
+    iassert(atStreamStart);
+    SerializedMaterialTechnique serialized{};
+    DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+    DB_IncStreamPos(sizeof(serialized));
+
+    varMaterialTechnique->flags = serialized.flags;
+    varMaterialTechnique->passCount = serialized.passCount;
+
+    if (!serialized.name)
+        varMaterialTechnique->name = nullptr;
+    else if (serialized.name != UINT32_MAX)
+        varMaterialTechnique->name = reinterpret_cast<const char *>(
+            DB_ConvertOffsetToPointerValue(serialized.name));
+    else
+        varMaterialTechnique->name =
+            reinterpret_cast<const char *>(
+                static_cast<uintptr_t>(UINT32_MAX));
+
+    // Fastfile order: header, all pass records/payloads, then the inline name.
+    varMaterialPass = varMaterialTechnique->passArray;
+    Load_MaterialPassArray(1, varMaterialTechnique->passCount);
+
+    if (serialized.name == UINT32_MAX)
+    {
+        char *nameBuffer = reinterpret_cast<char *>(AllocLoad_raw_byte());
+        Load_XStringCustom(&nameBuffer);
+        varMaterialTechnique->name = nameBuffer;
+    }
+#else
     if (!atStreamStart)
-        MyAssertHandler("c:\\trees\\cod3\\src\\database\\../gfx_d3d/r_material_load_db.h", 5470, 0, "%s", "atStreamStart");
-    Load_Stream(1, (uint8_t *)varMaterialTechnique, 8); // 0x2668
+        MyAssertHandler("c:\trees\cod3\src\database\../gfx_d3d/r_material_load_db.h", 5470, 0, "%s", "atStreamStart");
+    Load_Stream(1, (uint8_t *)varMaterialTechnique, 8);
     if (DB_GetStreamPos() != (uint8_t *)varMaterialTechnique->passArray)
         MyAssertHandler(
-            "c:\\trees\\cod3\\src\\database\\../gfx_d3d/r_material_load_db.h",
-            5472,
-            0,
-            "%s",
-            "DB_GetStreamPos() == reinterpret_cast< byte * >( varMaterialTechnique->passArray )");
+            "c:\trees\cod3\src\database\../gfx_d3d/r_material_load_db.h",
+            5472, 0, "%s", "DB_GetStreamPos() == reinterpret_cast< byte * >( varMaterialTechnique->passArray )");
     varMaterialPass = (MaterialPass*)&varMaterialTechnique->passArray[0].vertexDecl;
-    Load_MaterialPassArray(1, varMaterialTechnique->passCount); // 0x2990
+    Load_MaterialPassArray(1, varMaterialTechnique->passCount);
     varXString = &varMaterialTechnique->name;
-    Load_XString(0); // 0x29A1
+    Load_XString(0);
+#endif
 }
-
 void __cdecl Load_MaterialTextureDefInfo(bool atStreamStart)
 {
     if (varMaterialTextureDef->semantic == TS_WATER_MAP)
