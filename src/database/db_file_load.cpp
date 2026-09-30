@@ -552,7 +552,7 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             char trace[256];
             const char *materialName =
                 varXAsset->header.material
-                    ? DB_GetXAssetName(&varXAsset->header)
+                    ? DB_GetXAssetName(varXAsset)
                     : "(null)";
             std::snprintf(
                 trace,
