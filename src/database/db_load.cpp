@@ -3618,7 +3618,10 @@ void __cdecl Load_Material(bool atStreamStart)
 
     if (varMaterial->textureTable)
     {
-        if (varMaterial->textureTable == (MaterialTextureDef *)-1)
+        const uint32_t textureTableValue =
+            static_cast<uint32_t>(
+                reinterpret_cast<uintptr_t>(varMaterial->textureTable));
+        if (textureTableValue == UINT32_MAX)
         {
             varMaterial->textureTable =
                 (MaterialTextureDef *)AllocLoad_FxElemVisStateSample();
@@ -3637,7 +3640,10 @@ void __cdecl Load_Material(bool atStreamStart)
 
     if (varMaterial->constantTable)
     {
-        if (varMaterial->constantTable == (MaterialConstantDef *)-1)
+        const uint32_t constantTableValue =
+            static_cast<uint32_t>(
+                reinterpret_cast<uintptr_t>(varMaterial->constantTable));
+        if (constantTableValue == UINT32_MAX)
         {
             varMaterial->constantTable =
                 (MaterialConstantDef *)AllocLoad_GfxPackedVertex0();
@@ -3656,7 +3662,10 @@ void __cdecl Load_Material(bool atStreamStart)
 
     if (varMaterial->stateBitsTable)
     {
-        if (varMaterial->stateBitsTable == (GfxStateBits *)-1)
+        const uint32_t stateBitsTableValue =
+            static_cast<uint32_t>(
+                reinterpret_cast<uintptr_t>(varMaterial->stateBitsTable));
+        if (stateBitsTableValue == UINT32_MAX)
         {
             varMaterial->stateBitsTable =
                 (GfxStateBits *)AllocLoad_FxElemVisStateSample();
