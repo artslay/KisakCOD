@@ -2592,8 +2592,17 @@ void __cdecl Load_MaterialTechniquePtr(bool atStreamStart)
     Load_Stream(atStreamStart, (uint8_t *)varMaterialTechniquePtr, 4);
     if (*varMaterialTechniquePtr)
     {
+#ifdef __SWITCH__
+        const uint32_t value =
+            static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varMaterialTechniquePtr));
+        if (value == UINT32_MAX)
+#else
         if (*varMaterialTechniquePtr == (MaterialTechnique *)-1)
+#endif
         {
+#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH TECHNIQUE PTR] INLINE\n");
+#endif
             *varMaterialTechniquePtr = (MaterialTechnique *)AllocLoad_FxElemVisStateSample();
             varMaterialTechnique = *varMaterialTechniquePtr;
             Load_MaterialTechnique(1);
