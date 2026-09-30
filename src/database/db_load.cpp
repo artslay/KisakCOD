@@ -21,6 +21,8 @@
 #include <game/g_bsp.h>
 
 #ifdef __SWITCH__
+extern void Switch_LogWrite(const char *msg);
+
 enum weapPositionAnimNum_t : __int32
 {
     WEAP_POSITION_ANIM_INVALID = 0
