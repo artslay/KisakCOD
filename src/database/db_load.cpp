@@ -2743,166 +2743,207 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
 void __cdecl Load_Material(bool atStreamStart)
 {
 #ifdef __SWITCH__
-    static uint32_t switchMaterialTraceCount = 0;
-    const bool switchTrace = switchMaterialTraceCount < 8;
-    if (switchTrace)
-        Switch_LogRaw("[SWITCH MATERIAL] ENTER\n");
-#endif
+    struct SerializedMaterialInfo
+    {
+        uint32_t name;
+        uint8_t gameFlags;
+        uint8_t sortKey;
+        uint8_t textureAtlasRowCount;
+        uint8_t textureAtlasColumnCount;
+        uint64_t drawSurf;
+        uint32_t surfaceTypeBits;
+        uint16_t hashIndex;
+        uint16_t pad;
+    };
 
-    Load_Stream(atStreamStart, (uint8_t *)varMaterial, 80);
+    struct SerializedMaterial
+    {
+        SerializedMaterialInfo info;
+        uint8_t stateBitsEntry[TECHNIQUE_COUNT];
+        uint8_t textureCount;
+        uint8_t constantCount;
+        uint8_t stateBitsCount;
+        uint8_t stateFlags;
+        uint8_t cameraRegion;
+        uint8_t pad;
+        uint32_t techniqueSet;
+        uint32_t textureTable;
+        uint32_t constantTable;
+        uint32_t stateBitsTable;
+    };
 
-#ifdef __SWITCH__
-    if (switchTrace)
-        Switch_LogRaw("[SWITCH MATERIAL] AFTER Load_Stream\n");
-#endif
+    static_assert(sizeof(SerializedMaterialInfo) == 24);
+    static_assert(sizeof(SerializedMaterial) == 80);
+
+    SerializedMaterial serialized{};
+
+    if (atStreamStart)
+    {
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+        DB_IncStreamPos(sizeof(serialized));
+    }
+    else
+    {
+        memcpy(&serialized, varMaterial, sizeof(serialized));
+    }
+
+    memset(varMaterial, 0, sizeof(*varMaterial));
+
+    varMaterial->info.gameFlags = serialized.info.gameFlags;
+    varMaterial->info.sortKey = serialized.info.sortKey;
+    varMaterial->info.textureAtlasRowCount = serialized.info.textureAtlasRowCount;
+    varMaterial->info.textureAtlasColumnCount = serialized.info.textureAtlasColumnCount;
+    varMaterial->info.drawSurf.packed = serialized.info.drawSurf;
+    varMaterial->info.surfaceTypeBits = serialized.info.surfaceTypeBits;
+    varMaterial->info.hashIndex = serialized.info.hashIndex;
+
+    for (int i = 0; i < TECHNIQUE_COUNT; ++i)
+        varMaterial->stateBitsEntry[i] = serialized.stateBitsEntry[i];
+
+    varMaterial->textureCount = serialized.textureCount;
+    varMaterial->constantCount = serialized.constantCount;
+    varMaterial->stateBitsCount = serialized.stateBitsCount;
+    varMaterial->stateFlags = serialized.stateFlags;
+    varMaterial->cameraRegion = serialized.cameraRegion;
+
+    if (!serialized.info.name)
+    {
+        varMaterial->info.name = nullptr;
+    }
+    else if (serialized.info.name == UINT32_MAX)
+    {
+        char *nameBuffer = reinterpret_cast<char *>(AllocLoad_raw_byte());
+        Load_XStringCustom(&nameBuffer);
+        varMaterial->info.name = nameBuffer;
+    }
+    else
+    {
+        varMaterial->info.name = reinterpret_cast<const char *>(
+            DB_ConvertOffsetToPointerValue(serialized.info.name));
+    }
+
+    varMaterial->techniqueSet =
+        reinterpret_cast<MaterialTechniqueSet *>(
+            static_cast<uintptr_t>(serialized.techniqueSet));
+    varMaterial->textureTable =
+        reinterpret_cast<MaterialTextureDef *>(
+            static_cast<uintptr_t>(serialized.textureTable));
+    varMaterial->constantTable =
+        reinterpret_cast<MaterialConstantDef *>(
+            static_cast<uintptr_t>(serialized.constantTable));
+    varMaterial->stateBitsTable =
+        reinterpret_cast<GfxStateBits *>(
+            static_cast<uintptr_t>(serialized.stateBitsTable));
 
     DB_PushStreamPos(4);
 
-#ifdef __SWITCH__
-    if (switchTrace)
-        Switch_LogRaw("[SWITCH MATERIAL] AFTER PushStreamPos\n");
-#endif
-
-    varMaterialInfo = &varMaterial->info;
-    Load_MaterialInfo(0);
-
-#ifdef __SWITCH__
-    if (switchTrace)
-        Switch_LogRaw("[SWITCH MATERIAL] AFTER Load_MaterialInfo\n");
-#endif
-
     varMaterialTechniqueSetPtr = &varMaterial->techniqueSet;
-
-#ifdef __SWITCH__
-    if (switchTrace)
-        Switch_LogRaw("[SWITCH MATERIAL] BEFORE Load_TechniqueSetPtr\n");
-#endif
-
     Load_MaterialTechniqueSetPtr(0);
-
-#ifdef __SWITCH__
-    if (switchTrace)
-        Switch_LogRaw("[SWITCH MATERIAL] AFTER Load_TechniqueSetPtr\n");
-#endif
 
     if (varMaterial->textureTable)
     {
-#ifdef __SWITCH__
-        if (switchTrace)
-            Switch_LogRaw("[SWITCH MATERIAL] TEXTURE ENTER\n");
-#endif
         if (varMaterial->textureTable == (MaterialTextureDef *)-1)
         {
-#ifdef __SWITCH__
-            if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] TEXTURE INLINE\n");
-#endif
-            varMaterial->textureTable = (MaterialTextureDef *)AllocLoad_FxElemVisStateSample();
+            varMaterial->textureTable =
+                (MaterialTextureDef *)AllocLoad_FxElemVisStateSample();
             varMaterialTextureDef = varMaterial->textureTable;
             Load_MaterialTextureDefArray(1, varMaterial->textureCount);
-#ifdef __SWITCH__
-            if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] TEXTURE INLINE DONE\n");
-#endif
         }
         else
         {
-#ifdef __SWITCH__
-            if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] TEXTURE OFFSET\n");
-#endif
-            DB_ConvertOffsetToPointer((uint32_t*)&varMaterial->textureTable);
-#ifdef __SWITCH__
-            if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] TEXTURE OFFSET DONE\n");
-#endif
+            DB_ConvertOffsetToPointer((uint32_t *)&serialized.textureTable);
+            varMaterial->textureTable =
+                reinterpret_cast<MaterialTextureDef *>(
+                    DB_ConvertOffsetToPointerValue(serialized.textureTable));
         }
     }
 
     if (varMaterial->constantTable)
     {
-#ifdef __SWITCH__
-        if (switchTrace)
-            Switch_LogRaw("[SWITCH MATERIAL] CONSTANT ENTER\n");
-#endif
         if (varMaterial->constantTable == (MaterialConstantDef *)-1)
         {
-#ifdef __SWITCH__
-            if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] CONSTANT INLINE\n");
-#endif
-            varMaterial->constantTable = (MaterialConstantDef *)AllocLoad_GfxPackedVertex0();
+            varMaterial->constantTable =
+                (MaterialConstantDef *)AllocLoad_GfxPackedVertex0();
             varMaterialConstantDef = varMaterial->constantTable;
             Load_MaterialConstantDefArray(1, varMaterial->constantCount);
-#ifdef __SWITCH__
-            if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] CONSTANT INLINE DONE\n");
-#endif
         }
         else
         {
-#ifdef __SWITCH__
-            if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] CONSTANT OFFSET\n");
-#endif
-            DB_ConvertOffsetToPointer((uint32_t*)&varMaterial->constantTable);
-#ifdef __SWITCH__
-            if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] CONSTANT OFFSET DONE\n");
-#endif
+            varMaterial->constantTable =
+                reinterpret_cast<MaterialConstantDef *>(
+                    DB_ConvertOffsetToPointerValue(serialized.constantTable));
         }
     }
 
     if (varMaterial->stateBitsTable)
     {
-#ifdef __SWITCH__
-        if (switchTrace)
-            Switch_LogRaw("[SWITCH MATERIAL] STATEBITS ENTER\n");
-#endif
         if (varMaterial->stateBitsTable == (GfxStateBits *)-1)
         {
-#ifdef __SWITCH__
-            if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] STATEBITS INLINE\n");
-#endif
-            varMaterial->stateBitsTable = (GfxStateBits *)AllocLoad_FxElemVisStateSample();
+            varMaterial->stateBitsTable =
+                (GfxStateBits *)AllocLoad_FxElemVisStateSample();
             varGfxStateBits = varMaterial->stateBitsTable;
             Load_GfxStateBitsArray(1, varMaterial->stateBitsCount);
-#ifdef __SWITCH__
-            if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] STATEBITS INLINE DONE\n");
-#endif
         }
         else
         {
-#ifdef __SWITCH__
-            if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] STATEBITS OFFSET\n");
-#endif
-            DB_ConvertOffsetToPointer((uint32_t*)&varMaterial->stateBitsTable);
-#ifdef __SWITCH__
-            if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] STATEBITS OFFSET DONE\n");
-#endif
+            varMaterial->stateBitsTable =
+                reinterpret_cast<GfxStateBits *>(
+                    DB_ConvertOffsetToPointerValue(serialized.stateBitsTable));
         }
     }
 
-#ifdef __SWITCH__
-    if (switchTrace)
-        Switch_LogRaw("[SWITCH MATERIAL] BEFORE PopStreamPos\n");
-#endif
-
     DB_PopStreamPos();
-
-#ifdef __SWITCH__
-    if (switchTrace)
+#else
+    Load_Stream(atStreamStart, (uint8_t *)varMaterial, 80);
+    DB_PushStreamPos(4);
+    varMaterialInfo = &varMaterial->info;
+    Load_MaterialInfo(0);
+    varMaterialTechniqueSetPtr = &varMaterial->techniqueSet;
+    Load_MaterialTechniqueSetPtr(0);
+    if (varMaterial->textureTable)
     {
-        Switch_LogRaw("[SWITCH MATERIAL] AFTER PopStreamPos\n");
-        ++switchMaterialTraceCount;
+        if (varMaterial->textureTable == (MaterialTextureDef *)-1)
+        {
+            varMaterial->textureTable = (MaterialTextureDef *)AllocLoad_FxElemVisStateSample();
+            varMaterialTextureDef = varMaterial->textureTable;
+            Load_MaterialTextureDefArray(1, varMaterial->textureCount);
+        }
+        else
+        {
+            DB_ConvertOffsetToPointer((uint32_t*)&varMaterial->textureTable);
+        }
     }
+    if (varMaterial->constantTable)
+    {
+        if (varMaterial->constantTable == (MaterialConstantDef *)-1)
+        {
+            varMaterial->constantTable = (MaterialConstantDef *)AllocLoad_GfxPackedVertex0();
+            varMaterialConstantDef = varMaterial->constantTable;
+            Load_MaterialConstantDefArray(1, varMaterial->constantCount);
+        }
+        else
+        {
+            DB_ConvertOffsetToPointer((uint32_t*)&varMaterial->constantTable);
+        }
+    }
+    if (varMaterial->stateBitsTable)
+    {
+        if (varMaterial->stateBitsTable == (GfxStateBits *)-1)
+        {
+            varMaterial->stateBitsTable = (GfxStateBits *)AllocLoad_FxElemVisStateSample();
+            varGfxStateBits = varMaterial->stateBitsTable;
+            Load_GfxStateBitsArray(1, varMaterial->stateBitsCount);
+        }
+        else
+        {
+            DB_ConvertOffsetToPointer((uint32_t*)&varMaterial->stateBitsTable);
+        }
+    }
+    DB_PopStreamPos();
 #endif
 }
-
 void __cdecl Load_MaterialHandle(bool atStreamStart)
 {
     const void **inserted; // [esp+0h] [ebp-Ch]
