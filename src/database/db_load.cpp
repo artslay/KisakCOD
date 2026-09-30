@@ -1568,11 +1568,39 @@ void __cdecl Load_DObjAnimMatArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_StreamFileNameRaw(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedStreamFileNameRaw
+    {
+        uint32_t dir;
+        uint32_t name;
+    };
+    static_assert(sizeof(SerializedStreamFileNameRaw) == 8);
+
+    if (atStreamStart)
+    {
+        SerializedStreamFileNameRaw serialized{};
+        Load_Stream(
+            true,
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+
+        varStreamFileNameRaw->dir =
+            reinterpret_cast<const char *>(static_cast<uintptr_t>(serialized.dir));
+        varStreamFileNameRaw->name =
+            reinterpret_cast<const char *>(static_cast<uintptr_t>(serialized.name));
+    }
+
+    varXString = &varStreamFileNameRaw->dir;
+    Load_XString(0);
+    varXString = &varStreamFileNameRaw->name;
+    Load_XString(0);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varStreamFileNameRaw, 8);
     varXString = &varStreamFileNameRaw->dir;
     Load_XString(0);
     varXString = &varStreamFileNameRaw->name;
     Load_XString(0);
+#endif
 }
 
 void __cdecl Load_StreamFileInfo(bool atStreamStart)
@@ -1583,9 +1611,14 @@ void __cdecl Load_StreamFileInfo(bool atStreamStart)
 
 void __cdecl Load_StreamFileName(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    varStreamFileInfo = &varStreamFileName->info;
+    Load_StreamFileInfo(atStreamStart);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varStreamFileName, 8);
     varStreamFileInfo = &varStreamFileName->info;
     Load_StreamFileInfo(0);
+#endif
 }
 
 void __cdecl Load_SetSoundData(uint8_t **data, MssSoundCOD4 *mssSound)
@@ -1595,6 +1628,74 @@ void __cdecl Load_SetSoundData(uint8_t **data, MssSoundCOD4 *mssSound)
 
 void __cdecl Load_MssSound(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedMssSound
+    {
+        int32_t format;
+        uint32_t data_ptr;
+        uint32_t data_len;
+        uint32_t rate;
+        int32_t bits;
+        int32_t channels;
+        uint32_t samples;
+        uint32_t block_size;
+        uint32_t initial_ptr;
+        uint32_t data;
+    };
+    static_assert(sizeof(SerializedMssSound) == 40);
+
+    const void **inserted = nullptr;
+
+    if (atStreamStart)
+    {
+        SerializedMssSound serialized{};
+        Load_Stream(
+            true,
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+
+        varMssSound->info.format = serialized.format;
+        varMssSound->info.data_ptr =
+            reinterpret_cast<const void *>(static_cast<uintptr_t>(serialized.data_ptr));
+        varMssSound->info.data_len = serialized.data_len;
+        varMssSound->info.rate = serialized.rate;
+        varMssSound->info.bits = serialized.bits;
+        varMssSound->info.channels = serialized.channels;
+        varMssSound->info.samples = serialized.samples;
+        varMssSound->info.block_size = serialized.block_size;
+        varMssSound->info.initial_ptr =
+            reinterpret_cast<const void *>(static_cast<uintptr_t>(serialized.initial_ptr));
+        varMssSound->data =
+            reinterpret_cast<uint8_t *>(static_cast<uintptr_t>(serialized.data));
+    }
+
+    DB_PushStreamPos(0);
+    if (varMssSound->data)
+    {
+        const uint32_t value = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(varMssSound->data));
+
+        if (value < 0xFFFFFFFE)
+        {
+            DB_ConvertOffsetToAlias(&value);
+            varMssSound->data = reinterpret_cast<uint8_t *>(
+                static_cast<uintptr_t>(value));
+        }
+        else
+        {
+            varMssSound->data = AllocLoad_raw_byte();
+            varbyte = varMssSound->data;
+            if (value == UINT32_MAX - 1)
+                inserted = DB_InsertPointer();
+
+            Load_byteArray(1, varMssSound->info.data_len);
+            Load_SetSoundData(&varMssSound->data, varMssSound);
+            if (inserted)
+                *inserted = varMssSound->data;
+        }
+    }
+    DB_PopStreamPos();
+#else
     const void **inserted; // [esp+0h] [ebp-Ch]
     uint32_t value; // [esp+4h] [ebp-8h]
 
@@ -1622,10 +1723,44 @@ void __cdecl Load_MssSound(bool atStreamStart)
         }
     }
     DB_PopStreamPos();
+#endif
 }
 
 void __cdecl Load_LoadedSound(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedLoadedSound
+    {
+        uint32_t name;
+        uint8_t sound[40];
+    };
+    static_assert(sizeof(SerializedLoadedSound) == 44);
+
+    if (atStreamStart)
+    {
+        SerializedLoadedSound serialized{};
+        Load_Stream(
+            true,
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+
+        varLoadedSound->name =
+            reinterpret_cast<const char *>(static_cast<uintptr_t>(serialized.name));
+
+        varMssSound = &varLoadedSound->sound;
+        std::memcpy(
+            reinterpret_cast<uint8_t *>(&varLoadedSound->sound),
+            serialized.sound,
+            sizeof(serialized.sound));
+    }
+
+    DB_PushStreamPos(4);
+    varXString = &varLoadedSound->name;
+    Load_XString(0);
+    varMssSound = &varLoadedSound->sound;
+    Load_MssSound(0);
+    DB_PopStreamPos();
+#else
     Load_Stream(atStreamStart, (uint8_t *)varLoadedSound, 44);
     DB_PushStreamPos(4);
     varXString = &varLoadedSound->name;
@@ -1633,6 +1768,7 @@ void __cdecl Load_LoadedSound(bool atStreamStart)
     varMssSound = &varLoadedSound->sound;
     Load_MssSound(0);
     DB_PopStreamPos();
+#endif
 }
 
 void __cdecl Load_LoadedSoundPtr(bool atStreamStart)
@@ -1696,11 +1832,43 @@ void __cdecl Load_SoundFile(bool atStreamStart)
 
 void __cdecl Load_SndCurve(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedSndCurve
+    {
+        uint32_t filename;
+        int32_t knotCount;
+        float knots[8][2];
+    };
+    static_assert(sizeof(SerializedSndCurve) == 72);
+
+    if (atStreamStart)
+    {
+        SerializedSndCurve serialized{};
+        Load_Stream(
+            true,
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+
+        varSndCurve->filename =
+            reinterpret_cast<const char *>(static_cast<uintptr_t>(serialized.filename));
+        varSndCurve->knotCount = serialized.knotCount;
+        std::memcpy(
+            varSndCurve->knots,
+            serialized.knots,
+            sizeof(serialized.knots));
+    }
+
+    DB_PushStreamPos(4);
+    varXString = &varSndCurve->filename;
+    Load_XString(0);
+    DB_PopStreamPos();
+#else
     Load_Stream(atStreamStart, (uint8_t *)varSndCurve, 72);
     DB_PushStreamPos(4);
     varXString = &varSndCurve->filename;
     Load_XString(0);
     DB_PopStreamPos();
+#endif
 }
 
 void __cdecl Load_SndCurvePtr(bool atStreamStart)
@@ -1736,14 +1904,114 @@ void __cdecl Load_SndCurvePtr(bool atStreamStart)
 
 void __cdecl Load_SpeakerMap(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedSpeakerMap
+    {
+        uint8_t isDefault;
+        uint8_t pad[3];
+        uint32_t name;
+        MSSChannelMap channelMaps[2][2];
+    };
+    static_assert(sizeof(SerializedSpeakerMap) == 408);
+
+    if (atStreamStart)
+    {
+        SerializedSpeakerMap serialized{};
+        Load_Stream(
+            true,
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+
+        varSpeakerMap->isDefault = serialized.isDefault != 0;
+        varSpeakerMap->name =
+            reinterpret_cast<const char *>(static_cast<uintptr_t>(serialized.name));
+        std::memcpy(
+            varSpeakerMap->channelMaps,
+            serialized.channelMaps,
+            sizeof(serialized.channelMaps));
+    }
+
+    varXString = &varSpeakerMap->name;
+    Load_XString(0);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varSpeakerMap, 408);
     varXString = &varSpeakerMap->name;
     Load_XString(0);
+#endif
 }
 
 void __cdecl Load_snd_alias_t(bool atStreamStart)
 {
-    Load_Stream(atStreamStart, (uint8_t *)varsnd_alias_t, 92);
+#ifdef __SWITCH__
+    struct SerializedSndAlias
+    {
+        uint32_t aliasName;
+        uint32_t subtitle;
+        uint32_t secondaryAliasName;
+        uint32_t chainAliasName;
+        uint32_t soundFile;
+        int32_t sequence;
+        float volMin;
+        float volMax;
+        float pitchMin;
+        float pitchMax;
+        float distMin;
+        float distMax;
+        int32_t flags;
+        float slavePercentage;
+        float probability;
+        float lfePercentage;
+        float centerPercentage;
+        int32_t startDelay;
+        uint32_t volumeFalloffCurve;
+        float envelopMin;
+        float envelopMax;
+        float envelopPercentage;
+        uint32_t speakerMap;
+    };
+    static_assert(sizeof(SerializedSndAlias) == 92);
+
+    if (atStreamStart)
+    {
+        SerializedSndAlias serialized{};
+        Load_Stream(
+            true,
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+
+        std::memset(varsnd_alias_t, 0, sizeof(*varsnd_alias_t));
+        varsnd_alias_t->aliasName =
+            reinterpret_cast<const char *>(static_cast<uintptr_t>(serialized.aliasName));
+        varsnd_alias_t->subtitle =
+            reinterpret_cast<const char *>(static_cast<uintptr_t>(serialized.subtitle));
+        varsnd_alias_t->secondaryAliasName =
+            reinterpret_cast<const char *>(static_cast<uintptr_t>(serialized.secondaryAliasName));
+        varsnd_alias_t->chainAliasName =
+            reinterpret_cast<const char *>(static_cast<uintptr_t>(serialized.chainAliasName));
+        varsnd_alias_t->soundFile =
+            reinterpret_cast<SoundFile *>(static_cast<uintptr_t>(serialized.soundFile));
+        varsnd_alias_t->sequence = serialized.sequence;
+        varsnd_alias_t->volMin = serialized.volMin;
+        varsnd_alias_t->volMax = serialized.volMax;
+        varsnd_alias_t->pitchMin = serialized.pitchMin;
+        varsnd_alias_t->pitchMax = serialized.pitchMax;
+        varsnd_alias_t->distMin = serialized.distMin;
+        varsnd_alias_t->distMax = serialized.distMax;
+        varsnd_alias_t->flags = serialized.flags;
+        varsnd_alias_t->slavePercentage = serialized.slavePercentage;
+        varsnd_alias_t->probability = serialized.probability;
+        varsnd_alias_t->lfePercentage = serialized.lfePercentage;
+        varsnd_alias_t->centerPercentage = serialized.centerPercentage;
+        varsnd_alias_t->startDelay = serialized.startDelay;
+        varsnd_alias_t->volumeFalloffCurve =
+            reinterpret_cast<SndCurve *>(static_cast<uintptr_t>(serialized.volumeFalloffCurve));
+        varsnd_alias_t->envelopMin = serialized.envelopMin;
+        varsnd_alias_t->envelopMax = serialized.envelopMax;
+        varsnd_alias_t->envelopPercentage = serialized.envelopPercentage;
+        varsnd_alias_t->speakerMap =
+            reinterpret_cast<SpeakerMap *>(static_cast<uintptr_t>(serialized.speakerMap));
+    }
+
     varXString = &varsnd_alias_t->aliasName;
     Load_XString(0);
     varXString = &varsnd_alias_t->subtitle;
@@ -1752,38 +2020,71 @@ void __cdecl Load_snd_alias_t(bool atStreamStart)
     Load_XString(0);
     varXString = &varsnd_alias_t->chainAliasName;
     Load_XString(0);
+
     if (varsnd_alias_t->soundFile)
     {
-        if (varsnd_alias_t->soundFile == (SoundFile *)-1)
+        const uint32_t value = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(varsnd_alias_t->soundFile));
+
+        if (value == UINT32_MAX)
         {
-            varsnd_alias_t->soundFile = (SoundFile *)AllocLoad_FxElemVisStateSample();
+            varsnd_alias_t->soundFile =
+                reinterpret_cast<SoundFile *>(Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(SoundFile)),
+                    "SwitchSoundFile",
+                    22));
             varSoundFile = varsnd_alias_t->soundFile;
+            std::memset(varSoundFile, 0, sizeof(*varSoundFile));
             Load_SoundFile(1);
         }
         else
         {
-            DB_ConvertOffsetToPointer((uint32_t*)&varsnd_alias_t->soundFile);
+            varsnd_alias_t->soundFile =
+                reinterpret_cast<SoundFile *>(
+                    DB_ConvertOffsetToPointerValue(value));
         }
     }
+
     varSndCurvePtr = &varsnd_alias_t->volumeFalloffCurve;
     Load_SndCurvePtr(0);
+
     if (varsnd_alias_t->speakerMap)
     {
-        if (varsnd_alias_t->speakerMap == (SpeakerMap *)-1)
+        const uint32_t value = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(varsnd_alias_t->speakerMap));
+
+        if (value == UINT32_MAX)
         {
-            varsnd_alias_t->speakerMap = (SpeakerMap *)AllocLoad_FxElemVisStateSample();
+            varsnd_alias_t->speakerMap =
+                reinterpret_cast<SpeakerMap *>(Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(SpeakerMap)),
+                    "SwitchSpeakerMap",
+                    22));
             varSpeakerMap = varsnd_alias_t->speakerMap;
+            std::memset(varSpeakerMap, 0, sizeof(*varSpeakerMap));
             Load_SpeakerMap(1);
         }
         else
         {
-            DB_ConvertOffsetToPointer((uint32_t*)&varsnd_alias_t->speakerMap);
+            varsnd_alias_t->speakerMap =
+                reinterpret_cast<SpeakerMap *>(
+                    DB_ConvertOffsetToPointerValue(value));
         }
     }
 }
 
 void __cdecl Load_snd_alias_tArray(bool atStreamStart, int32_t count)
 {
+#ifdef __SWITCH__
+    snd_alias_t *var = varsnd_alias_t;
+
+    for (int32_t i = 0; i < count; ++i)
+    {
+        varsnd_alias_t = var;
+        Load_snd_alias_t(true);
+        ++var;
+    }
+#else
     snd_alias_t *var; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
 
@@ -1795,6 +2096,7 @@ void __cdecl Load_snd_alias_tArray(bool atStreamStart, int32_t count)
         Load_snd_alias_t(0);
         ++var;
     }
+#endif
 }
 
 void __cdecl Load_snd_alias_list_t(bool atStreamStart)
