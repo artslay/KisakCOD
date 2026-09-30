@@ -3273,7 +3273,27 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
         }
         else
         {
+#ifdef __SWITCH__
+            const uintptr_t aliasSlot = DB_ConvertOffsetToPointerValue(value);
+            const uint32_t *aliasWords =
+                reinterpret_cast<const uint32_t *>(aliasSlot);
+            char trace[256];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH MATERIAL] techset alias slot=%p raw=%08x %08x\\n",
+                reinterpret_cast<void *>(aliasSlot),
+                aliasWords[0],
+                aliasWords[1]);
+            Switch_LogWrite(trace);
             DB_ConvertOffsetToAlias((uint32_t *)varMaterialTechniqueSetPtr);
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH MATERIAL] techset alias result=%p\\n",
+                reinterpret_cast<void *>(*varMaterialTechniqueSetPtr));
+            Switch_LogWrite(trace);
+#else
+            DB_ConvertOffsetToAlias((uint32_t *)varMaterialTechniqueSetPtr);
+#endif
         }
     }
     DB_PopStreamPos();
