@@ -3289,7 +3289,8 @@ void __cdecl Load_Material(bool atStreamStart)
         uint8_t sortKey;
         uint8_t textureAtlasRowCount;
         uint8_t textureAtlasColumnCount;
-        uint64_t drawSurf;
+        uint32_t drawSurfLow;
+        uint32_t drawSurfHigh;
         uint32_t surfaceTypeBits;
         uint8_t stateBitsEntry[26];
         uint8_t textureCount;
@@ -3335,7 +3336,9 @@ void __cdecl Load_Material(bool atStreamStart)
     varMaterial->info.sortKey = serialized.sortKey;
     varMaterial->info.textureAtlasRowCount = serialized.textureAtlasRowCount;
     varMaterial->info.textureAtlasColumnCount = serialized.textureAtlasColumnCount;
-    varMaterial->info.drawSurf.packed = serialized.drawSurf;
+    varMaterial->info.drawSurf.packed =
+        static_cast<uint64_t>(serialized.drawSurfLow) |
+        (static_cast<uint64_t>(serialized.drawSurfHigh) << 32);
     varMaterial->info.surfaceTypeBits = serialized.surfaceTypeBits;
     varMaterial->info.hashIndex = 0;
 
