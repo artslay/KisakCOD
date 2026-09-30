@@ -1837,7 +1837,6 @@ void __cdecl Load_snd_alias_list_t(bool atStreamStart)
                         sizeof(snd_alias_t) * static_cast<size_t>(varsnd_alias_list_t->count)),
                     "SwitchSndAliasArray",
                     22));
-            varSndAlias_t = nullptr;
             varsnd_alias_t = varsnd_alias_list_t->head;
             Load_snd_alias_tArray(1, varsnd_alias_list_t->count);
         }
