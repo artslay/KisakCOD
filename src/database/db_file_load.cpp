@@ -524,24 +524,14 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         uint32_t header;
     };
 
-    std::vector<SerializedXAsset> serializedAssets(static_cast<size_t>(count));
-    if (count > 0)
-    {
-        const uint32_t serializedSize =
-            static_cast<uint32_t>(
-                sizeof(SerializedXAsset) * static_cast<size_t>(count));
-
-        DB_LoadXFileData(
-            reinterpret_cast<uint8_t *>(serializedAssets.data()),
-            serializedSize);
-        DB_IncStreamPos(static_cast<int32_t>(serializedSize));
-    }
-
     XAsset *var = varXAsset;
     for (int32_t i = 0; i < count; ++i)
     {
-        const SerializedXAsset &serialized =
-            serializedAssets[static_cast<size_t>(i)];
+        SerializedXAsset serialized{};
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+        DB_IncStreamPos(sizeof(serialized));
 
         varXAsset = var;
         memset(varXAsset, 0, sizeof(*varXAsset));
@@ -549,7 +539,6 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         memcpy(&varXAsset->header, &serialized.header, sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
 
-#ifdef __SWITCH__
         g_switchAssetIndex = i;
         if (i < 32)
         {
@@ -559,11 +548,9 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
                 static_cast<int>(serialized.type),
                 serialized.header);
         }
-#endif
 
         Load_XAssetHeader(0);
 
-#ifdef __SWITCH__
         if (i < 32)
         {
             Com_Printf(CON_CHANNEL_FILES,
@@ -571,17 +558,7 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
                 i,
                 static_cast<int>(serialized.type));
         }
-#endif
 
-        if (i < 16)
-        {
-            Com_Printf(CON_CHANNEL_FILES,
-                "Switch DB: asset[%d] type=%d raw=%08x header=%p\n",
-                i,
-                static_cast<int>(varXAsset->type),
-                serialized.header,
-                varXAsset->header.data);
-        }
         ++var;
     }
 #else
