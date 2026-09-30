@@ -3288,7 +3288,7 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
             DB_ConvertOffsetToAlias((uint32_t *)varMaterialTechniqueSetPtr);
             std::snprintf(
                 trace, sizeof(trace),
-                "[SWITCH MATERIAL] techset alias result=%p\\n",
+                "[SWITCH MATERIAL] techset alias result=%p\n",
                 reinterpret_cast<void *>(*varMaterialTechniqueSetPtr));
             Switch_LogWrite(trace);
 #else
