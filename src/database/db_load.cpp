@@ -3153,6 +3153,20 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
     varMaterialTechniqueSet->unused[0] = 0;
     varMaterialTechniqueSet->unused[1] = 0;
 
+#ifdef __SWITCH__
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH TECHSET RAW] name=%08x stream=%u pos=%p\\n",
+            serialized.name,
+            g_streamPosIndex,
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+#endif
+
     if (!serialized.name)
     {
         varMaterialTechniqueSet->name = nullptr;
@@ -3170,6 +3184,22 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
             reinterpret_cast<const char *>(
                 DB_ConvertOffsetToPointerValue(serialized.name));
     }
+
+#ifdef __SWITCH__
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH TECHSET RAW] resolved name=%p first=%02x\\n",
+            static_cast<const void *>(varMaterialTechniqueSet->name),
+            varMaterialTechniqueSet->name
+                ? static_cast<unsigned>(
+                    static_cast<uint8_t>(*varMaterialTechniqueSet->name))
+                : 0u);
+        Switch_LogWrite(trace);
+    }
+#endif
 
     varMaterialTechniqueSet->remappedTechniqueSet = nullptr;
 
