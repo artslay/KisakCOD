@@ -3114,7 +3114,7 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
             char trace[192];
             std::snprintf(
                 trace, sizeof(trace),
-                "[SWITCH MATERIAL] techset ptr=%08x stream=%u\\n",
+                "[SWITCH MATERIAL] techset ptr=%08x stream=%u\n",
                 value, g_streamPosIndex);
             Switch_LogWrite(trace);
         }
@@ -3122,7 +3122,7 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
         if (value == -1 || value == -2)
         {
 #ifdef __SWITCH__
-            Switch_LogWrite("[SWITCH MATERIAL] techset inline begin\\n");
+            Switch_LogWrite("[SWITCH MATERIAL] techset inline begin\n");
             *varMaterialTechniqueSetPtr =
                 reinterpret_cast<MaterialTechniqueSet *>(
                     Hunk_Alloc(
@@ -3142,7 +3142,7 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
                 inserted = 0;
             Load_MaterialTechniqueSet(1);
 #ifdef __SWITCH__
-            Switch_LogWrite("[SWITCH MATERIAL] techset payload done\\n");
+            Switch_LogWrite("[SWITCH MATERIAL] techset payload done\n");
 #endif
             Load_MaterialTechniqueSetAsset((XAssetHeader *)varMaterialTechniqueSetPtr);
             if (inserted)
