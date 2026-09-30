@@ -292,8 +292,6 @@ void __cdecl DB_LoadXFileInternal()
 
     iassert(g_load.f);
     DB_ReadXFileStage();
-#ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBSTAGE] after ReadXFileStage#1\n");
     if (!g_load.stream.avail_in)
         Com_Error(ERR_DROP, "Fastfile for zone '%s' is empty.", g_load.filename);
 #else
@@ -371,9 +369,6 @@ void __cdecl DB_LoadXFileInternal()
     DB_AllocXZoneMemory(file.blockSize, g_load.filename, g_load.zoneMem, g_load.allocType);
     DB_InitStreams(g_load.zoneMem);
     Load_XAssetListCustom();
-#ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBSTAGE] after Load_XAssetListCustom\n");
-#endif
     DB_PushStreamPos(4);
     if (varXAssetList->assets)
     {
