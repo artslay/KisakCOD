@@ -163,7 +163,7 @@ static void Switch_IndexIwdArchive(const char *archivePath)
     std::snprintf(
         trace,
         sizeof(trace),
-        "[SWITCH IWD] indexed %s entries=%d\\n",
+        "[SWITCH IWD] indexed %s entries=%d\n",
         archivePath,
         entryCount);
     Switch_LogWrite(trace);
@@ -201,7 +201,7 @@ static void Switch_IndexIwdArchives(const char *game)
     std::snprintf(
         trace,
         sizeof(trace),
-        "[SWITCH IWD] ready archives=%d files=%zu game=%s\\n",
+        "[SWITCH IWD] ready archives=%d files=%zu game=%s\n",
         archiveCount,
         g_iwdEntries.size(),
         game);
