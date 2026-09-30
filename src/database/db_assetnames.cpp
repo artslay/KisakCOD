@@ -280,14 +280,14 @@ const char *__cdecl DB_GetXAssetHeaderName(int32_t type, const XAssetHeader *hea
 
 #ifdef __SWITCH__
     if (type == ASSET_TYPE_TECHNIQUE_SET)
-        Switch_LogWrite("[SWITCH TECHSET NAME] after header assert\\n");
+        Switch_LogWrite("[SWITCH TECHSET NAME] after header assert\n");
     if (type == ASSET_TYPE_IMAGE)
     {
         char trace[224];
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH IMAGE NAME] pre handler header=%p data=%p image=%p name=%p handler=%p\\n",
+            "[SWITCH IMAGE NAME] pre handler header=%p data=%p image=%p name=%p handler=%p\n",
             static_cast<const void *>(header),
             header ? header->data : nullptr,
             header ? static_cast<const void *>(header->image) : nullptr,
@@ -301,18 +301,18 @@ const char *__cdecl DB_GetXAssetHeaderName(int32_t type, const XAssetHeader *hea
 
 #ifdef __SWITCH__
     if (type == ASSET_TYPE_TECHNIQUE_SET)
-        Switch_LogWrite("[SWITCH TECHSET NAME] after handler assert\\n");
+        Switch_LogWrite("[SWITCH TECHSET NAME] after handler assert\n");
     if (type == ASSET_TYPE_IMAGE)
-        Switch_LogWrite("[SWITCH IMAGE NAME] after handler assert\\n");
+        Switch_LogWrite("[SWITCH IMAGE NAME] after handler assert\n");
 #endif
 
     iassert(header->data);
 
 #ifdef __SWITCH__
     if (type == ASSET_TYPE_TECHNIQUE_SET)
-        Switch_LogWrite("[SWITCH TECHSET NAME] after data assert\\n");
+        Switch_LogWrite("[SWITCH TECHSET NAME] after data assert\n");
     if (type == ASSET_TYPE_IMAGE)
-        Switch_LogWrite("[SWITCH IMAGE NAME] after data assert\\n");
+        Switch_LogWrite("[SWITCH IMAGE NAME] after data assert\n");
 #endif
 
     name = DB_XAssetGetNameHandler[type](header);
@@ -324,7 +324,7 @@ const char *__cdecl DB_GetXAssetHeaderName(int32_t type, const XAssetHeader *hea
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH IMAGE NAME] handler returned=%p\\n",
+            "[SWITCH IMAGE NAME] handler returned=%p\n",
             static_cast<const void *>(name));
         Switch_LogWrite(trace);
     }
