@@ -2575,17 +2575,36 @@ void __cdecl Load_MaterialTechniquePtrArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH TECHSET] ENTER\n");
+#endif
     Load_Stream(atStreamStart, (uint8_t *)varMaterialTechniqueSet, 148);
     DB_PushStreamPos(4);
     varXString = &varMaterialTechniqueSet->name;
     Load_XString(0);
     varMaterialTechniquePtr = varMaterialTechniqueSet->techniques;
+#ifdef __SWITCH__
+    {
+        char trace[128];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH TECHSET] technique0=%p\n",
+            varMaterialTechniqueSet->techniques[0]);
+        Switch_LogWrite(trace);
+    }
+    Switch_LogWrite("[SWITCH TECHSET] BEFORE PTRARRAY\n");
+#endif
     Load_MaterialTechniquePtrArray(0, TECHNIQUE_COUNT);
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH TECHSET] AFTER PTRARRAY\n");
+#endif
     DB_PopStreamPos();
 }
 
 void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH TECHSETPTR] ENTER\n");
+#endif
     const void **inserted; // [esp+0h] [ebp-Ch]
     uint32_t value; // [esp+4h] [ebp-8h]
 
@@ -2594,6 +2613,14 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
     if (*varMaterialTechniqueSetPtr)
     {
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varMaterialTechniqueSetPtr));
+#ifdef __SWITCH__
+        {
+            char trace[128];
+            std::snprintf(trace, sizeof(trace),
+                "[SWITCH TECHSETPTR] value=%08x\n", value);
+            Switch_LogWrite(trace);
+        }
+#endif
         if (value == -1 || value == -2)
         {
             *varMaterialTechniqueSetPtr = (MaterialTechniqueSet *)AllocLoad_FxElemVisStateSample();
@@ -2602,7 +2629,13 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
                 inserted = DB_InsertPointer();
             else
                 inserted = 0;
+#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH TECHSETPTR] BEFORE LOAD TECHSET\n");
+#endif
             Load_MaterialTechniqueSet(1);
+#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH TECHSETPTR] AFTER LOAD TECHSET\n");
+#endif
             Load_MaterialTechniqueSetAsset((XAssetHeader *)varMaterialTechniqueSetPtr);
             if (inserted)
                 *inserted = *varMaterialTechniqueSetPtr;
@@ -2612,6 +2645,9 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
             DB_ConvertOffsetToAlias((uint32_t *)varMaterialTechniqueSetPtr);
         }
     }
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH TECHSETPTR] AFTER\n");
+#endif
     DB_PopStreamPos();
 }
 
