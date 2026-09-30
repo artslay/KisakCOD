@@ -2221,6 +2221,63 @@ void __cdecl Load_GfxImageLoadDef(bool atStreamStart)
 
 void __cdecl Load_GfxImage(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        struct SerializedGfxImage
+        {
+            uint32_t mapType;
+            uint32_t texture;
+            uint8_t picmip[2];
+            uint8_t noPicmip;
+            uint8_t semantic;
+            uint8_t track;
+            uint8_t pad[3];
+            CardMemory cardMemory;
+            uint16_t width;
+            uint16_t height;
+            uint16_t depth;
+            uint8_t category;
+            uint8_t delayLoadPixels;
+            uint32_t name;
+        };
+
+        static_assert(sizeof(SerializedGfxImage) == 36);
+
+        SerializedGfxImage serialized{};
+        Load_Stream(true,
+                    reinterpret_cast<uint8_t *>(&serialized),
+                    sizeof(serialized));
+
+        varGfxImage->mapType = static_cast<MapType>(serialized.mapType);
+        varGfxImage->texture.basemap =
+            reinterpret_cast<IDirect3DBaseTexture9 *>(
+                static_cast<uintptr_t>(serialized.texture));
+        varGfxImage->picmip.platform[0] = serialized.picmip[0];
+        varGfxImage->picmip.platform[1] = serialized.picmip[1];
+        varGfxImage->noPicmip = serialized.noPicmip != 0;
+        varGfxImage->semantic = serialized.semantic;
+        varGfxImage->track = serialized.track;
+        varGfxImage->cardMemory = serialized.cardMemory;
+        varGfxImage->width = serialized.width;
+        varGfxImage->height = serialized.height;
+        varGfxImage->depth = serialized.depth;
+        varGfxImage->category = serialized.category;
+        varGfxImage->delayLoadPixels = serialized.delayLoadPixels != 0;
+        varGfxImage->name =
+            reinterpret_cast<const char *>(
+                static_cast<uintptr_t>(serialized.name));
+
+        DB_PushStreamPos(4);
+        varXString = &varGfxImage->name;
+        Load_XString(0);
+        varGfxTextureLoad = &varGfxImage->texture;
+        Load_GfxTextureLoad(0);
+        DB_PopStreamPos();
+        return;
+    }
+#endif
+
     Load_Stream(atStreamStart, (uint8_t *)varGfxImage, 36);
     DB_PushStreamPos(4);
     varXString = &varGfxImage->name;
