@@ -197,9 +197,8 @@ static std::string Switch_GetStartupLanguage(const char *game)
 
         size_t begin = 0;
         while (begin < count &&
-            (requested[begin] == '\\ufeff' ||
-             requested[begin] == ' ' ||
-             requested[begin] == '\\t'))
+            (requested[begin] == ' ' ||
+             requested[begin] == '\t'))
             ++begin;
 
         size_t end = begin;
