@@ -519,6 +519,20 @@ uint32_t __cdecl FS_Read(uint8_t *buffer, uint32_t len, int h)
     if (g_zipHandles[h].file)
     {
         const int read = unzReadCurrentFile(g_zipHandles[h].file, buffer, len);
+        if (read < 0)
+        {
+            char trace[192];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH IWD] read error handle=%d request=%u result=%d pos=%ld size=%u\\n",
+                h,
+                len,
+                read,
+                unztell(g_zipHandles[h].file),
+                g_zipHandles[h].size);
+            Switch_LogWrite(trace);
+        }
         return read > 0 ? static_cast<uint32_t>(read) : 0;
     }
     if (!g_fsh[h].handleFiles.file.o)
