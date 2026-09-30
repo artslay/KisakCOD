@@ -3186,10 +3186,25 @@ void __cdecl Load_Material(bool atStreamStart)
     static_assert(sizeof(SerializedMaterial) == 80);
 
     SerializedMaterial serialized{};
+    uint8_t *materialStreamPos = DB_GetStreamPos();
     DB_LoadXFileData(
         reinterpret_cast<uint8_t *>(&serialized),
         sizeof(serialized));
     DB_IncStreamPos(sizeof(serialized));
+
+    {
+        char trace[256];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH MATERIAL RAW] pos=%p name=%08x tech=%08x tex=%08x const=%08x state=%08x\n",
+            static_cast<void *>(materialStreamPos),
+            serialized.name,
+            serialized.techniqueSet,
+            serialized.textureTable,
+            serialized.constantTable,
+            serialized.stateBitsTable);
+        Switch_LogWrite(trace);
+    }
 
     memset(varMaterial, 0, sizeof(*varMaterial));
 
@@ -8180,6 +8195,21 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         varXAsset->type = static_cast<XAssetType>(serialized.type);
         memcpy(&varXAsset->header, &serialized.header, sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
+
+#ifdef __SWITCH__
+        if (i < 4)
+        {
+            char trace[192];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH XASSET] index=%d type=%u stream=%u pos=%p\n",
+                i,
+                static_cast<unsigned>(serialized.type),
+                g_streamPosIndex,
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
+#endif
 
         Load_XAssetHeader(0);
         ++var;
