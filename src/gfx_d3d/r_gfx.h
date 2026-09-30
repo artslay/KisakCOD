@@ -263,7 +263,7 @@ struct GfxImage // sizeof=0x24
     const char* name;
 };
 #ifdef __SWITCH__
-static_assert(sizeof(GfxImage) >= 36);
+static_assert(sizeof(GfxImage) == 48);
 #else
 static_assert(sizeof(GfxImage) == 36);
 #endif
