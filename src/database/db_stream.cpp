@@ -72,44 +72,23 @@ void __cdecl DB_SetStreamIndex(uint32_t index)
 void __cdecl DB_PopStreamPos()
 {
     vassert(g_streamPosStackIndex > 0, "(g_streamPosStackIndex = %d)", g_streamPosStackIndex);
-
-#ifdef __SWITCH__
-    {
-        char trace[192];
-        std::snprintf(
-            trace, sizeof(trace),
-            "[SWITCH STREAMPOP] begin stack=%u index=%u pos=%p\n",
-            (unsigned)g_streamPosStackIndex,
-            (unsigned)g_streamPosIndex,
-            static_cast<void *>(g_streamPos));
-        extern void Switch_LogWrite(const char *msg);
-        Switch_LogWrite(trace);
-    }
-#endif
-
     --g_streamPosStackIndex;
 
 #ifdef __SWITCH__
     const uint32_t savedIndex = g_streamPosStack[g_streamPosStackIndex].index;
 
-    {
-        char trace[192];
-        std::snprintf(
-            trace, sizeof(trace),
-            "[SWITCH STREAMPOP] saved stack=%u savedIndex=%u savedPos=%p currentIndex=%u currentPos=%p\n",
-            (unsigned)g_streamPosStackIndex,
-            (unsigned)savedIndex,
-            static_cast<void *>(g_streamPosStack[g_streamPosStackIndex].pos),
-            (unsigned)g_streamPosIndex,
-            static_cast<void *>(g_streamPos));
-        extern void Switch_LogWrite(const char *msg);
-        Switch_LogWrite(trace);
-    }
-
     if (savedIndex >= ARRAY_COUNT(g_streamPosArray))
     {
         extern void Switch_LogWrite(const char *msg);
-        Switch_LogWrite("[SWITCH STREAMPOP] INVALID savedIndex\n");
+        char trace[160];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH STREAMPOP FAIL] savedIndex=%u stack=%u currentIndex=%u pos=%p\\n",
+            (unsigned)savedIndex,
+            (unsigned)g_streamPosStackIndex,
+            (unsigned)g_streamPosIndex,
+            static_cast<void *>(g_streamPos));
+        Switch_LogWrite(trace);
         return;
     }
 
@@ -121,19 +100,6 @@ void __cdecl DB_PopStreamPos()
         g_streamPosArray[0] = g_streamPos;
         g_streamPosIndex = savedIndex;
         g_streamPos = g_streamPosArray[savedIndex];
-#ifdef __SWITCH__
-        {
-            char trace[160];
-            std::snprintf(
-                trace, sizeof(trace),
-                "[SWITCH STREAMPOP] restore0 done stack=%u index=%u pos=%p\n",
-                (unsigned)g_streamPosStackIndex,
-                (unsigned)g_streamPosIndex,
-                static_cast<void *>(g_streamPos));
-            extern void Switch_LogWrite(const char *msg);
-            Switch_LogWrite(trace);
-        }
-#endif
         return;
     }
 #endif
@@ -141,21 +107,7 @@ void __cdecl DB_PopStreamPos()
     if (!g_streamPosIndex)
         g_streamPos = g_streamPosStack[g_streamPosStackIndex].pos;
     DB_SetStreamIndex(g_streamPosStack[g_streamPosStackIndex].index);
-#ifdef __SWITCH__
-    {
-        char trace[160];
-        std::snprintf(
-            trace, sizeof(trace),
-            "[SWITCH STREAMPOP] done stack=%u index=%u pos=%p\n",
-            (unsigned)g_streamPosStackIndex,
-            (unsigned)g_streamPosIndex,
-            static_cast<void *>(g_streamPos));
-        extern void Switch_LogWrite(const char *msg);
-        Switch_LogWrite(trace);
-    }
-#endif
 }
-
 uint8_t *__cdecl DB_GetStreamPos()
 {
     return g_streamPos;
