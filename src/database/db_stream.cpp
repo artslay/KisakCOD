@@ -20,6 +20,7 @@ void __cdecl DB_InitStreams(XZoneMemory *zoneMem)
     int32_t i; // [esp+0h] [ebp-4h]
 
     g_streamZoneMem = zoneMem;
+    g_streamBlocks = zoneMem->blocks;
     g_streamPos = zoneMem->blocks[0].data;
     g_streamPosIndex = 0;
     g_streamDelayIndex = 0;
