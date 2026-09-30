@@ -23,7 +23,6 @@
 
 #ifdef __SWITCH__
 extern void Switch_LogWrite(const char *msg);
-static inline void R_SwitchPicmipTrace(const char *msg)
 {
     Switch_LogWrite(msg);
 }
@@ -706,7 +705,6 @@ IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image)
 void __cdecl R_SetPicmip()
 {
 #ifdef __SWITCH__
-    R_SwitchPicmipTrace("[SWITCH PICMIP] ENTER\n");
 #endif
     uint32_t texMemInMegs; // [esp+0h] [ebp-10h]
     uint32_t sysMemInMegs; // [esp+4h] [ebp-Ch]
@@ -714,15 +712,12 @@ void __cdecl R_SetPicmip()
     int minPicmip; // [esp+Ch] [ebp-4h]
 
 #ifdef __SWITCH__
-    R_SwitchPicmipTrace("[SWITCH PICMIP] BEFORE DX ASSERT\n");
 #endif
     iassert( dx.device );
 #ifdef __SWITCH__
-    R_SwitchPicmipTrace("[SWITCH PICMIP] AFTER DX ASSERT\n");
 #endif
     texMemInMegs = R_AvailableTextureMemory();
 #ifdef __SWITCH__
-    R_SwitchPicmipTrace("[SWITCH PICMIP] AFTER TEXMEM\n");
 #endif
 #ifdef __SWITCH__
     // sys_sysMB is not registered by the Switch port. Do not enter the shared
@@ -732,16 +727,13 @@ void __cdecl R_SetPicmip()
     sysMemInMegs = Dvar_GetInt("sys_sysMB");
 #endif
 #ifdef __SWITCH__
-    R_SwitchPicmipTrace("[SWITCH PICMIP] BEFORE REFLECTION ASSERT\n");
 #endif
     iassert( r_reflectionProbeGenerate );
 #ifdef __SWITCH__
-    R_SwitchPicmipTrace("[SWITCH PICMIP] AFTER REFLECTION ASSERT\n");
 #endif
     if (r_reflectionProbeGenerate->current.enabled)
     {
 #ifdef __SWITCH__
-        R_SwitchPicmipTrace("[SWITCH PICMIP] REFLECTION ENABLED\n");
 #endif
         Com_Printf(CON_CHANNEL_GFX, "Picmip is set to lowest quality for generating reflections.\n");
         imageGlobals.picmip = 2;
@@ -761,7 +753,6 @@ void __cdecl R_SetPicmip()
         {
             Com_Printf(CON_CHANNEL_GFX, "Texture detail is set automatically.\n");
 #ifdef __SWITCH__
-            R_SwitchPicmipTrace("[SWITCH PICMIP] AFTER DETAIL LOG\n");
 #endif
             if (texMemInMegs < 0x1C2)
             {
@@ -829,12 +820,10 @@ void __cdecl R_SetPicmip()
 #endif
         }
 #ifdef __SWITCH__
-        R_SwitchPicmipTrace("[SWITCH PICMIP] BEFORE SPECULAR CHECK\n");
 #endif
         if (!r_specular->current.enabled || !r_rendererInUse->current.integer)
             imageGlobals.picmipSpec = 3;
 #ifdef __SWITCH__
-        R_SwitchPicmipTrace("[SWITCH PICMIP] AFTER SPECULAR CHECK\n");
 #endif
         Com_Printf(
             CON_CHANNEL_GFX,
@@ -857,9 +846,7 @@ void __cdecl R_InitImages()
     {
         iassert(imageGlobals.totalMemory.platform[i] == 0);
     }
-    Com_Printf(CON_CHANNEL_GFX, "[SWITCH IMG] before R_SetPicmip\n");
     R_SetPicmip();
-    Com_Printf(CON_CHANNEL_GFX, "[SWITCH IMG] after R_SetPicmip\n");
     R_InitCodeImages();
     RB_InitImages();
     R_InitRawImage();
@@ -879,41 +866,33 @@ bool __cdecl Image_IsCodeImage(int track)
 void R_InitCodeImages()
 {
 #ifdef __SWITCH__
-    R_SwitchPicmipTrace("[SWITCH CODEIMG] ENTER\n");
 #endif
     rgp.whiteImage = Image_Register("$white", TS_FUNCTION, IMAGE_TRACK_MISC);
 #ifdef __SWITCH__
-    R_SwitchPicmipTrace("[SWITCH CODEIMG] after $white\n");
 #endif
     iassert(rgp.whiteImage);
     rgp.blackImage = Image_Register("$black", TS_FUNCTION, IMAGE_TRACK_MISC);
 #ifdef __SWITCH__
-    R_SwitchPicmipTrace("[SWITCH CODEIMG] after $black\n");
 #endif
     iassert(rgp.blackImage);
     rgp.blackImage3D = Image_Register("$black_3d", TS_FUNCTION, IMAGE_TRACK_MISC);
 #ifdef __SWITCH__
-    R_SwitchPicmipTrace("[SWITCH CODEIMG] after $black_3d\n");
 #endif
     iassert(rgp.blackImage3D);
     rgp.blackImageCube = Image_Register("$black_cube", TS_FUNCTION, IMAGE_TRACK_MISC);
 #ifdef __SWITCH__
-    R_SwitchPicmipTrace("[SWITCH CODEIMG] after $black_cube\n");
 #endif
     iassert(rgp.blackImageCube);
     rgp.grayImage = Image_Register("$gray", TS_FUNCTION, IMAGE_TRACK_MISC);
 #ifdef __SWITCH__
-    R_SwitchPicmipTrace("[SWITCH CODEIMG] after $gray\n");
 #endif
     iassert(rgp.grayImage);
     rgp.identityNormalMapImage = Image_Register("$identitynormalmap", TS_FUNCTION, IMAGE_TRACK_MISC);
 #ifdef __SWITCH__
-    R_SwitchPicmipTrace("[SWITCH CODEIMG] after $identitynormalmap\n");
 #endif
     iassert(rgp.identityNormalMapImage);
     rgp.pixelCostColorCodeImage = Image_Register("$pixelcostcolorcode", TS_FUNCTION, IMAGE_TRACK_MISC);
 #ifdef __SWITCH__
-    R_SwitchPicmipTrace("[SWITCH CODEIMG] after $pixelcostcolorcode\n");
 #endif
     iassert(rgp.pixelCostColorCodeImage);
 }
