@@ -49,14 +49,16 @@ void __cdecl DB_ConvertOffsetToAlias(void *data)
 {
     const uint32_t offset = *reinterpret_cast<const uint32_t *>(data);
     iassert(offset && offset != UINT32_MAX && offset != UINT32_MAX - 1);
-    const uint32_t block = (offset - 1) >> 28;
-    const uint32_t blockOffset = (offset - 1) & 0xFFFFFFF;
-    const uintptr_t ptr = DB_ConvertOffsetToPointerValue(offset);
+
+    const uintptr_t aliasSlot = DB_ConvertOffsetToPointerValue(offset);
+    const uintptr_t aliasValue =
+        *reinterpret_cast<const uintptr_t *>(aliasSlot);
+
 #ifdef __SWITCH__
-    *reinterpret_cast<uintptr_t *>(data) = ptr;
+    *reinterpret_cast<uintptr_t *>(data) = aliasValue;
 #else
     *reinterpret_cast<uint32_t *>(data) =
-        static_cast<uint32_t>(ptr);
+        static_cast<uint32_t>(aliasValue);
 #endif
 }
 
