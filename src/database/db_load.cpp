@@ -2706,11 +2706,31 @@ void __cdecl Load_MaterialTechniquePtr(bool atStreamStart)
     {
 #ifdef __SWITCH__
         const uint32_t value =
-            static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varMaterialTechniquePtr));
+            static_cast<uint32_t>(
+                reinterpret_cast<uintptr_t>(*varMaterialTechniquePtr));
         if (value == UINT32_MAX)
+        {
+            constexpr uint32_t MAX_SWITCH_TECHNIQUE_PASSES = 64;
+            const uint32_t bytes =
+                static_cast<uint32_t>(
+                    sizeof(MaterialTechnique) +
+                    sizeof(MaterialPass) *
+                        (MAX_SWITCH_TECHNIQUE_PASSES - 1));
+            *varMaterialTechniquePtr =
+                static_cast<MaterialTechnique *>(
+                    Hunk_Alloc(bytes, "SwitchMaterialTechnique", 22));
+            varMaterialTechnique = *varMaterialTechniquePtr;
+            memset(varMaterialTechnique, 0, bytes);
+            Load_MaterialTechnique(1);
+        }
+        else
+        {
+            *varMaterialTechniquePtr =
+                reinterpret_cast<MaterialTechnique *>(
+                    DB_ConvertOffsetToPointerValue(value));
+        }
 #else
         if (*varMaterialTechniquePtr == (MaterialTechnique *)-1)
-#endif
         {
             *varMaterialTechniquePtr = (MaterialTechnique *)AllocLoad_FxElemVisStateSample();
             varMaterialTechnique = *varMaterialTechniquePtr;
@@ -2720,6 +2740,7 @@ void __cdecl Load_MaterialTechniquePtr(bool atStreamStart)
         {
             DB_ConvertOffsetToPointer((uint32_t*)varMaterialTechniquePtr);
         }
+#endif
     }
 }
 
@@ -2823,8 +2844,20 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varMaterialTechniqueSetPtr));
         if (value == -1 || value == -2)
         {
-            *varMaterialTechniqueSetPtr = (MaterialTechniqueSet *)AllocLoad_FxElemVisStateSample();
+#ifdef __SWITCH__
+            *varMaterialTechniqueSetPtr =
+                static_cast<MaterialTechniqueSet *>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(sizeof(MaterialTechniqueSet)),
+                        "SwitchMaterialTechniqueSet",
+                        22));
             varMaterialTechniqueSet = *varMaterialTechniqueSetPtr;
+            memset(varMaterialTechniqueSet, 0, sizeof(MaterialTechniqueSet));
+#else
+            *varMaterialTechniqueSetPtr =
+                (MaterialTechniqueSet *)AllocLoad_FxElemVisStateSample();
+            varMaterialTechniqueSet = *varMaterialTechniqueSetPtr;
+#endif
             if (value == -2)
                 inserted = DB_InsertPointer();
             else
