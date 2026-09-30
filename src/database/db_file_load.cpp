@@ -389,9 +389,6 @@ void __cdecl DB_LoadXFileInternal()
         varXAssetList->assets =
             reinterpret_cast<XAsset *>(DB_AllocStreamPos(3));
         varXAsset = varXAssetList->assets;
-        if (varXAssetList->assetCount > 0)
-            DB_IncStreamPos(static_cast<int32_t>(
-                sizeof(XAsset) * static_cast<size_t>(varXAssetList->assetCount)));
         Load_XAssetArrayCustom(varXAssetList->assetCount);
 #ifdef __SWITCH__
         Switch_LogWrite("[SWITCH DBSTAGE] after Load_XAssetArrayCustom\n");
@@ -525,6 +522,9 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
     };
 
     uint32_t imageRecords = 0;
+    uint32_t imageInline = 0;
+    uint32_t imageAlias = 0;
+    uint32_t imageNull = 0;
     uint32_t materialRecords = 0;
     uint32_t techsetRecords = 0;
     uint32_t localizeRecords = 0;
@@ -539,7 +539,15 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         DB_IncStreamPos(sizeof(serialized));
 
         if (serialized.type == ASSET_TYPE_IMAGE)
+        {
             ++imageRecords;
+            if (serialized.header == UINT32_MAX || serialized.header == UINT32_MAX - 1)
+                ++imageInline;
+            else if (serialized.header)
+                ++imageAlias;
+            else
+                ++imageNull;
+        }
         else if (serialized.type == ASSET_TYPE_MATERIAL)
             ++materialRecords;
         else if (serialized.type == ASSET_TYPE_TECHNIQUE_SET)
@@ -561,8 +569,8 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
     {
         char trace[192];
         std::snprintf(trace, sizeof(trace),
-            "[SWITCH XASSET] records=%d image=%u imageAdds=%u material=%u techset=%u localize=%u\n",
-            count, imageRecords, g_switchImageAdds,
+            "[SWITCH XASSET] records=%d image=%u inline=%u alias=%u null=%u adds=%u material=%u techset=%u localize=%u\n",
+            count, imageRecords, imageInline, imageAlias, imageNull, g_switchImageAdds,
             materialRecords, techsetRecords, localizeRecords);
         Switch_LogWrite(trace);
     }
