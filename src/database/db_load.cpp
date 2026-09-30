@@ -8479,10 +8479,10 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 #ifdef __SWITCH__
         if (i < 4)
         {
-            char trace[224];
+            char trace[256];
             std::snprintf(
                 trace, sizeof(trace),
-                "[SWITCH XASSET] index=%d rawType=%u runtimeType=%u stream=%u pos=%p\n",
+                "[SWITCH XASSET MAP] idx=%d raw=%u runtime=%u stream=%u pos=%p\n",
                 i,
                 static_cast<unsigned>(serialized.type),
                 static_cast<unsigned>(runtimeType),
