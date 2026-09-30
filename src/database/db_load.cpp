@@ -9071,6 +9071,19 @@ void __cdecl Load_XAssetHeader(bool atStreamStart)
         Load_StringTablePtr(atStreamStart);
         break;
     }
+#ifdef __SWITCH__
+    if (varXAsset->type == ASSET_TYPE_IMAGE && g_switchImagePtrTraceCount <= 24)
+    {
+        char trace[192];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH XHEADER] image header returned asset=%u rawType=%u header=%08x\n",
+            (unsigned)g_switchCurrentAssetIndex,
+            (unsigned)g_switchCurrentAssetRawType,
+            (unsigned)g_switchCurrentAssetHeader);
+        Switch_LogWrite(trace);
+    }
+#endif
 }
 
 void __cdecl Load_XAsset(bool atStreamStart)
