@@ -8463,19 +8463,31 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 
         varXAsset = var;
         memset(varXAsset, 0, sizeof(*varXAsset));
-        varXAsset->type = static_cast<XAssetType>(serialized.type);
+
+        // The Switch SP runtime keeps the Xbox-specific MaterialPixelShader
+        // entry in XAssetType, but the fastfiles currently loaded by KisakCOD
+        // use the PC CoD4 type numbering: 0..4 are identical, and every type
+        // from 5 onward is one slot lower because PC has no pixelshader asset.
+        uint32_t runtimeType = serialized.type;
+#ifdef KISAK_SP
+        if (runtimeType >= 5)
+            ++runtimeType;
+#endif
+
+        varXAsset->type = static_cast<XAssetType>(runtimeType);
         memcpy(&varXAsset->header, &serialized.header, sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
 
 #ifdef __SWITCH__
         if (i < 4)
         {
-            char trace[192];
+            char trace[224];
             std::snprintf(
                 trace, sizeof(trace),
-                "[SWITCH XASSET] index=%d type=%u stream=%u pos=%p\n",
+                "[SWITCH XASSET] index=%d rawType=%u runtimeType=%u stream=%u pos=%p\n",
                 i,
                 static_cast<unsigned>(serialized.type),
+                static_cast<unsigned>(runtimeType),
                 g_streamPosIndex,
                 static_cast<void *>(DB_GetStreamPos()));
             Switch_LogWrite(trace);
