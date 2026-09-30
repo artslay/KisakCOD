@@ -213,14 +213,20 @@ struct GfxImageLoadDef // sizeof=0x14
     uint8_t data[4]; // data extends beyond 4... '4' is to force alignment
 };
 
-union GfxTexture // sizeof=0x4
-{                                       // ...
+union GfxTexture
+{
     IDirect3DBaseTexture9* basemap;
     IDirect3DTexture9* map;
     IDirect3DVolumeTexture9* volmap;
     IDirect3DCubeTexture9* cubemap;
     GfxImageLoadDef* loadDef;
 };
+
+#ifdef __SWITCH__
+static_assert(sizeof(GfxTexture) == sizeof(void *));
+#else
+static_assert(sizeof(GfxTexture) == 4);
+#endif
 
 enum $F18C17676CCABCF3A7521CF0683F7501 : __int32
 {
