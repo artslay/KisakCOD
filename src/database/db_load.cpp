@@ -3417,20 +3417,20 @@ void __cdecl Load_Material(bool atStreamStart)
         uint32_t surfaceTypeBits;
         uint16_t hashIndex;
         uint16_t infoPad;
-        uint8_t stateBitsEntry[26];
+        uint8_t stateBitsEntry[34];
         uint8_t textureCount;
         uint8_t constantCount;
         uint8_t stateBitsCount;
         uint8_t stateFlags;
         uint8_t cameraRegion;
-        uint8_t materialPad;
+        uint8_t materialPad[3];
         uint32_t techniqueSet;
         uint32_t textureTable;
         uint32_t constantTable;
         uint32_t stateBitsTable;
     };
 
-    static_assert(sizeof(SerializedMaterial) == 72);
+    static_assert(sizeof(SerializedMaterial) == 80);
 
     SerializedMaterial serialized{};
     uint8_t *materialStreamPos = DB_GetStreamPos();
@@ -8464,16 +8464,9 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         varXAsset = var;
         memset(varXAsset, 0, sizeof(*varXAsset));
 
-        // The Switch SP runtime keeps the Xbox-specific MaterialPixelShader
-        // entry in XAssetType, but the fastfiles currently loaded by KisakCOD
-        // use the PC CoD4 type numbering: 0..4 are identical, and every type
-        // from 5 onward is one slot lower because PC has no pixelshader asset.
-        uint32_t runtimeType = serialized.type;
-#ifdef KISAK_SP
-        if (runtimeType >= 5)
-            ++runtimeType;
-#endif
-
+        // CoD4 SP fastfiles use the runtime asset numbering with
+        // MaterialPixelShader present at type 5.
+        const uint32_t runtimeType = serialized.type;
         varXAsset->type = static_cast<XAssetType>(runtimeType);
         memcpy(&varXAsset->header, &serialized.header, sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
@@ -8484,10 +8477,9 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             char trace[224];
             std::snprintf(
                 trace, sizeof(trace),
-                "[SWITCH XASSET] index=%d rawType=%u runtimeType=%u stream=%u pos=%p\n",
+                "[SWITCH XASSET] index=%d type=%u stream=%u pos=%p\n",
                 i,
                 static_cast<unsigned>(serialized.type),
-                static_cast<unsigned>(runtimeType),
                 g_streamPosIndex,
                 static_cast<void *>(DB_GetStreamPos()));
             Switch_LogWrite(trace);
