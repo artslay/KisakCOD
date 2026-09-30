@@ -71,6 +71,9 @@ struct DBReorderAssetEntry // sizeof=0x10
 #define POOLSIZE_XANIMPARTS     4096
 #define POOLSIZE_XMODEL         1000
 #define POOLSIZE_MATERIAL       2048
+#ifdef KISAK_SP
+#define POOLSIZE_PIXELSHADER    1536
+#endif
 #define POOLSIZE_TECHNIQUE_SET  1024 // 512 on SP (XBox?)
 #define POOLSIZE_IMAGE          2400
 #define POOLSIZE_SOUND          16'000
@@ -107,6 +110,9 @@ int32_t g_poolSize[ASSET_TYPE_COUNT] =
     POOLSIZE_XANIMPARTS,
     POOLSIZE_XMODEL,
     POOLSIZE_MATERIAL,
+#ifdef KISAK_SP
+    POOLSIZE_PIXELSHADER,
+#endif
     POOLSIZE_TECHNIQUE_SET,
     POOLSIZE_IMAGE,
     POOLSIZE_SOUND,
@@ -151,6 +157,9 @@ XAssetPool<PhysPreset, POOLSIZE_PHYSPRESET> g_PhysPresetPool;
 XAssetPool<XAnimParts, POOLSIZE_XANIMPARTS> g_XAnimPartsPool;
 XAssetPool<XModel, POOLSIZE_XMODEL> g_XModelPool;
 XAssetPool<Material, POOLSIZE_MATERIAL> g_MaterialPool;
+#ifdef KISAK_SP
+XAssetPool<MaterialPixelShader, POOLSIZE_PIXELSHADER> g_MaterialPixelShaderPool;
+#endif
 XAssetPool<MaterialTechniqueSet, POOLSIZE_TECHNIQUE_SET> g_MaterialTechniqueSetPool;
 XAssetPool<GfxImage, POOLSIZE_IMAGE> g_GfxImagePool;
 XAssetPool<snd_alias_list_t, POOLSIZE_SOUND> g_SoundPool;
@@ -191,6 +200,9 @@ void(__cdecl *DB_InitPoolHeaderHandler[ASSET_TYPE_COUNT])(void *, int) =
   DB_InitPool<XAssetPool<XAnimParts, POOLSIZE_XANIMPARTS>>,
   DB_InitPool<XAssetPool<XModel, POOLSIZE_XMODEL>>,
   DB_InitPool<XAssetPool<Material, POOLSIZE_MATERIAL>>,
+#ifdef KISAK_SP
+  DB_InitPool<XAssetPool<MaterialPixelShader, POOLSIZE_PIXELSHADER>>,
+#endif
   DB_InitPool<XAssetPool<MaterialTechniqueSet, POOLSIZE_TECHNIQUE_SET>>,
   DB_InitPool<XAssetPool<GfxImage, POOLSIZE_IMAGE>>,
   DB_InitPool<XAssetPool<snd_alias_list_t, POOLSIZE_SOUND>>,
@@ -228,6 +240,9 @@ void *DB_XAssetPool[ASSET_TYPE_COUNT] =
   &g_XAnimPartsPool,
   &g_XModelPool,
   &g_MaterialPool,
+#ifdef KISAK_SP
+  &g_MaterialPixelShaderPool,
+#endif
   &g_MaterialTechniqueSetPool,
   &g_GfxImagePool,
   &g_SoundPool,
@@ -313,6 +328,9 @@ const char *g_defaultAssetName[ASSET_TYPE_COUNT] =
     "void",
     "void",
     "$default",
+#ifdef KISAK_SP
+    "",
+#endif
     "default",
     "$white",
     "null",
@@ -401,6 +419,9 @@ static void(__cdecl *DB_DynamicCloneXAssetHandler[ASSET_TYPE_COUNT])(XAssetHeade
     NULL,
     NULL,
     NULL,
+#ifdef KISAK_SP
+    NULL,
+#endif
     DB_DynamicCloneMenu,
     NULL,
     (void(*)(XAssetHeader, XAssetHeader, int))KISAK_NULLSUB,
@@ -1455,13 +1476,16 @@ int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags)
 #endif
 
 // Restored upstream asset type names required by DB registry.
-const char *g_assetNames[ASSET_TYPE_COUNT] = // SP/MP same
+const char *g_assetNames[ASSET_TYPE_COUNT] =
 {
   "xmodelpieces",
   "physpreset",
   "xanim",
   "xmodel",
   "material",
+#ifdef KISAK_SP
+  "pixelshader",
+#endif
   "techset",
   "image",
   "sound",
