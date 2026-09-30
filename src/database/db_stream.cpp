@@ -74,6 +74,21 @@ void __cdecl DB_PopStreamPos()
     vassert(g_streamPosStackIndex > 0, "(g_streamPosStackIndex = %d)", g_streamPosStackIndex);
     --g_streamPosStackIndex;
 
+#ifdef __SWITCH__
+    const uint32_t savedIndex = g_streamPosStack[g_streamPosStackIndex].index;
+
+    // A nested asset load can switch from its parent stream to stream 0.
+    // Preserve the advanced stream-0 cursor, then restore the parent's
+    // already-saved cursor from g_streamPosArray[savedIndex].
+    if (g_streamPosIndex == 0 && savedIndex != 0)
+    {
+        g_streamPosArray[0] = g_streamPos;
+        g_streamPosIndex = savedIndex;
+        g_streamPos = g_streamPosArray[savedIndex];
+        return;
+    }
+#endif
+
     if (!g_streamPosIndex)
         g_streamPos = g_streamPosStack[g_streamPosStackIndex].pos;
     DB_SetStreamIndex(g_streamPosStack[g_streamPosStackIndex].index);
