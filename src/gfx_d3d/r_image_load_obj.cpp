@@ -6,6 +6,10 @@
 #include <universal/com_files.h>
 #include <universal/profile.h>
 
+#ifdef __SWITCH__
+extern void Switch_LogWrite(const char *msg);
+#endif
+
 uint8_t *s_imageLoadBuf;
 uint32_t s_imageLoadBytesUsed;
 
