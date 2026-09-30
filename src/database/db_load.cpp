@@ -2238,6 +2238,8 @@ void __cdecl Load_GfxImage(bool atStreamStart)
         varGfxImage->category = serialized.category;
         varGfxImage->delayLoadPixels = serialized.delayLoadPixels != 0;
 
+        DB_PushStreamPos(4);
+
         if (!serialized.name)
         {
             varGfxImage->name = nullptr;
@@ -2256,9 +2258,9 @@ void __cdecl Load_GfxImage(bool atStreamStart)
                     DB_ConvertOffsetToPointerValue(serialized.name));
         }
 
-        DB_PushStreamPos(4);
         varGfxTextureLoad = &varGfxImage->texture;
         Load_GfxTextureLoad(0);
+
         DB_PopStreamPos();
         return;
     }
