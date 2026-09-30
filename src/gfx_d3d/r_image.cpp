@@ -63,7 +63,7 @@ static void R_GLAllocTexture(
         char trace[128];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH GLTEX] unsupported format=%08x\\n",
+            "[SWITCH GLTEX] unsupported format=%08x\n",
             (unsigned)f);
         Switch_LogWrite(trace);
         return;
@@ -98,7 +98,7 @@ static void R_GLAllocTexture(
         char trace[320];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH GLTEX DIAG] ctx=%p dpy=%p surf=%p target=%x format=%08x size=%ux%ux%u levels=%u object=%u gl_pre=%04x gl_gen=%04x egl=%04x\\n",
+            "[SWITCH GLTEX DIAG] ctx=%p dpy=%p surf=%p target=%x format=%08x size=%ux%ux%u levels=%u object=%u gl_pre=%04x gl_gen=%04x egl=%04x\n",
             (void *)eglContext,
             (void *)eglDisplay,
             (void *)eglSurface,
@@ -203,26 +203,6 @@ static void R_GLUploadTexture(
             GL_TEXTURE_2D, l, 0, 0, w, h, u, t, src);
 }
 
-    glBindTexture(x->target,x->object);
-    uint32_t w=std::max(1u,(uint32_t)image->width>>l),h=std::max(1u,(uint32_t)image->height>>l),d=std::max(1u,(uint32_t)image->depth>>l);
-    if(c){uint32_t b=f==D3DFMT_DXT1?8:16,s=((w+3)/4)*((h+3)/4)*b*d;
-#ifdef __SWITCH__
-        {
-            char trace[160];
-            std::snprintf(trace,sizeof(trace),"[SWITCH GLTEX] compressed upload bytes=%u size=%ux%ux%u\n",s,w,h,d);
-            Switch_LogWrite(trace);
-        }
-#endif
-        if(x->target==GL_TEXTURE_CUBE_MAP)glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+face,l,0,0,w,h,i,s,src);
-        else if(x->target==GL_TEXTURE_3D)glCompressedTexSubImage3D(GL_TEXTURE_3D,l,0,0,0,w,h,d,i,s,src);
-        else glCompressedTexSubImage2D(GL_TEXTURE_2D,l,0,0,w,h,i,s,src);
-    } else if(x->target==GL_TEXTURE_3D)glTexSubImage3D(GL_TEXTURE_3D,l,0,0,0,w,h,d,u,t,src);
-    else if(x->target==GL_TEXTURE_CUBE_MAP)glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+face,l,0,0,w,h,u,t,src);
-    else glTexSubImage2D(GL_TEXTURE_2D,l,0,0,w,h,u,t,src);
-#ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH GLTEX] upload GL call returned\n");
-#endif
-}
 #endif
 
 
