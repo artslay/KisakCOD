@@ -105,9 +105,10 @@ void __cdecl DB_ConvertOffsetToAlias(void *data)
     if (!aliasSlot)
         return;
 #ifdef __SWITCH__
-    const uintptr_t aliasValue =
-        *reinterpret_cast<const uintptr_t *>(aliasSlot);
-    *reinterpret_cast<uintptr_t *>(data) = aliasValue;
+    const uint32_t serializedAliasValue =
+        *reinterpret_cast<const uint32_t *>(aliasSlot);
+    *reinterpret_cast<uintptr_t *>(data) =
+        static_cast<uintptr_t>(serializedAliasValue);
 #else
     const uint32_t aliasValue =
         *reinterpret_cast<const uint32_t *>(aliasSlot);
