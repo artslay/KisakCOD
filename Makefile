@@ -19,7 +19,10 @@ OPENAL_SDK   := $(DEVKITPRO)/portlibs/switch
 CPPFLAGS    := -D__SWITCH__ -DKISAK_SWITCH -DKISAK_SP -DKISAK_OPENAL -DCINEMA -DUSE_SEPARATE_BLIT_TEXTURE \
                -I$(CURDIR)/src -I$(CURDIR)/src/gfx -I$(CURDIR)/deps \
                -I$(DEVKITPRO)/libnx/include -I$(MESA_SDK)/include -I$(OPENAL_SDK)/include
+GIT_COMMIT  := $(shell git rev-parse --short=12 HEAD 2>/dev/null || printf "unknown")
+
 CXXFLAGS    := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -fno-rtti -std=gnu++20 -MMD -MP
+CPPFLAGS    += -DGIT_COMMIT=\"$(GIT_COMMIT)\"
 CFLAGS      := $(ARCH) -O2 -g -ffunction-sections -fdata-sections -MMD -MP
 LDFLAGS     := $(ARCH) -L$(MESA_SDK)/lib -L$(OPENAL_SDK)/lib -L$(DEVKITPRO)/libnx/lib -specs=$(DEVKITPRO)/libnx/switch.specs -Wl,--gc-sections
 LIBS        := -lGL -lEGL -lglapi -lvulkan -lexpat -lopenal -lSDL2 -lnx -lm
