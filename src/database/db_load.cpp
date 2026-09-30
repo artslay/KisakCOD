@@ -2732,21 +2732,21 @@ void __cdecl Load_Material(bool atStreamStart)
     static uint32_t switchMaterialTraceCount = 0;
     const bool switchTrace = switchMaterialTraceCount < 8;
     if (switchTrace)
-        Switch_LogRaw("[SWITCH MATERIAL] ENTER\\n");
+        Switch_LogRaw("[SWITCH MATERIAL] ENTER\n");
 #endif
 
     Load_Stream(atStreamStart, (uint8_t *)varMaterial, 80);
 
 #ifdef __SWITCH__
     if (switchTrace)
-        Switch_LogRaw("[SWITCH MATERIAL] AFTER Load_Stream\\n");
+        Switch_LogRaw("[SWITCH MATERIAL] AFTER Load_Stream\n");
 #endif
 
     DB_PushStreamPos(4);
 
 #ifdef __SWITCH__
     if (switchTrace)
-        Switch_LogRaw("[SWITCH MATERIAL] AFTER PushStreamPos\\n");
+        Switch_LogRaw("[SWITCH MATERIAL] AFTER PushStreamPos\n");
 #endif
 
     varMaterialInfo = &varMaterial->info;
@@ -2754,53 +2754,53 @@ void __cdecl Load_Material(bool atStreamStart)
 
 #ifdef __SWITCH__
     if (switchTrace)
-        Switch_LogRaw("[SWITCH MATERIAL] AFTER Load_MaterialInfo\\n");
+        Switch_LogRaw("[SWITCH MATERIAL] AFTER Load_MaterialInfo\n");
 #endif
 
     varMaterialTechniqueSetPtr = &varMaterial->techniqueSet;
 
 #ifdef __SWITCH__
     if (switchTrace)
-        Switch_LogRaw("[SWITCH MATERIAL] BEFORE Load_TechniqueSetPtr\\n");
+        Switch_LogRaw("[SWITCH MATERIAL] BEFORE Load_TechniqueSetPtr\n");
 #endif
 
     Load_MaterialTechniqueSetPtr(0);
 
 #ifdef __SWITCH__
     if (switchTrace)
-        Switch_LogRaw("[SWITCH MATERIAL] AFTER Load_TechniqueSetPtr\\n");
+        Switch_LogRaw("[SWITCH MATERIAL] AFTER Load_TechniqueSetPtr\n");
 #endif
 
     if (varMaterial->textureTable)
     {
 #ifdef __SWITCH__
         if (switchTrace)
-            Switch_LogRaw("[SWITCH MATERIAL] TEXTURE ENTER\\n");
+            Switch_LogRaw("[SWITCH MATERIAL] TEXTURE ENTER\n");
 #endif
         if (varMaterial->textureTable == (MaterialTextureDef *)-1)
         {
 #ifdef __SWITCH__
             if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] TEXTURE INLINE\\n");
+                Switch_LogRaw("[SWITCH MATERIAL] TEXTURE INLINE\n");
 #endif
             varMaterial->textureTable = (MaterialTextureDef *)AllocLoad_FxElemVisStateSample();
             varMaterialTextureDef = varMaterial->textureTable;
             Load_MaterialTextureDefArray(1, varMaterial->textureCount);
 #ifdef __SWITCH__
             if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] TEXTURE INLINE DONE\\n");
+                Switch_LogRaw("[SWITCH MATERIAL] TEXTURE INLINE DONE\n");
 #endif
         }
         else
         {
 #ifdef __SWITCH__
             if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] TEXTURE OFFSET\\n");
+                Switch_LogRaw("[SWITCH MATERIAL] TEXTURE OFFSET\n");
 #endif
             DB_ConvertOffsetToPointer((uint32_t*)&varMaterial->textureTable);
 #ifdef __SWITCH__
             if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] TEXTURE OFFSET DONE\\n");
+                Switch_LogRaw("[SWITCH MATERIAL] TEXTURE OFFSET DONE\n");
 #endif
         }
     }
@@ -2809,32 +2809,32 @@ void __cdecl Load_Material(bool atStreamStart)
     {
 #ifdef __SWITCH__
         if (switchTrace)
-            Switch_LogRaw("[SWITCH MATERIAL] CONSTANT ENTER\\n");
+            Switch_LogRaw("[SWITCH MATERIAL] CONSTANT ENTER\n");
 #endif
         if (varMaterial->constantTable == (MaterialConstantDef *)-1)
         {
 #ifdef __SWITCH__
             if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] CONSTANT INLINE\\n");
+                Switch_LogRaw("[SWITCH MATERIAL] CONSTANT INLINE\n");
 #endif
             varMaterial->constantTable = (MaterialConstantDef *)AllocLoad_GfxPackedVertex0();
             varMaterialConstantDef = varMaterial->constantTable;
             Load_MaterialConstantDefArray(1, varMaterial->constantCount);
 #ifdef __SWITCH__
             if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] CONSTANT INLINE DONE\\n");
+                Switch_LogRaw("[SWITCH MATERIAL] CONSTANT INLINE DONE\n");
 #endif
         }
         else
         {
 #ifdef __SWITCH__
             if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] CONSTANT OFFSET\\n");
+                Switch_LogRaw("[SWITCH MATERIAL] CONSTANT OFFSET\n");
 #endif
             DB_ConvertOffsetToPointer((uint32_t*)&varMaterial->constantTable);
 #ifdef __SWITCH__
             if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] CONSTANT OFFSET DONE\\n");
+                Switch_LogRaw("[SWITCH MATERIAL] CONSTANT OFFSET DONE\n");
 #endif
         }
     }
@@ -2843,39 +2843,39 @@ void __cdecl Load_Material(bool atStreamStart)
     {
 #ifdef __SWITCH__
         if (switchTrace)
-            Switch_LogRaw("[SWITCH MATERIAL] STATEBITS ENTER\\n");
+            Switch_LogRaw("[SWITCH MATERIAL] STATEBITS ENTER\n");
 #endif
         if (varMaterial->stateBitsTable == (GfxStateBits *)-1)
         {
 #ifdef __SWITCH__
             if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] STATEBITS INLINE\\n");
+                Switch_LogRaw("[SWITCH MATERIAL] STATEBITS INLINE\n");
 #endif
             varMaterial->stateBitsTable = (GfxStateBits *)AllocLoad_FxElemVisStateSample();
             varGfxStateBits = varMaterial->stateBitsTable;
             Load_GfxStateBitsArray(1, varMaterial->stateBitsCount);
 #ifdef __SWITCH__
             if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] STATEBITS INLINE DONE\\n");
+                Switch_LogRaw("[SWITCH MATERIAL] STATEBITS INLINE DONE\n");
 #endif
         }
         else
         {
 #ifdef __SWITCH__
             if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] STATEBITS OFFSET\\n");
+                Switch_LogRaw("[SWITCH MATERIAL] STATEBITS OFFSET\n");
 #endif
             DB_ConvertOffsetToPointer((uint32_t*)&varMaterial->stateBitsTable);
 #ifdef __SWITCH__
             if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL] STATEBITS OFFSET DONE\\n");
+                Switch_LogRaw("[SWITCH MATERIAL] STATEBITS OFFSET DONE\n");
 #endif
         }
     }
 
 #ifdef __SWITCH__
     if (switchTrace)
-        Switch_LogRaw("[SWITCH MATERIAL] BEFORE PopStreamPos\\n");
+        Switch_LogRaw("[SWITCH MATERIAL] BEFORE PopStreamPos\n");
 #endif
 
     DB_PopStreamPos();
@@ -2883,7 +2883,7 @@ void __cdecl Load_Material(bool atStreamStart)
 #ifdef __SWITCH__
     if (switchTrace)
     {
-        Switch_LogRaw("[SWITCH MATERIAL] AFTER PopStreamPos\\n");
+        Switch_LogRaw("[SWITCH MATERIAL] AFTER PopStreamPos\n");
         ++switchMaterialTraceCount;
     }
 #endif
@@ -7403,7 +7403,7 @@ void __cdecl Load_XAssetHeader(bool atStreamStart)
     static uint32_t switchAssetLogCount = 0;
     if (switchAssetLogCount < 64)
     {
-        Com_Printf(CON_CHANNEL_FILES, "Switch DB: XAsset type %d\\n", static_cast<int>(varXAsset->type));
+        Com_Printf(CON_CHANNEL_FILES, "Switch DB: XAsset type %d\n", static_cast<int>(varXAsset->type));
         ++switchAssetLogCount;
     }
 #endif
