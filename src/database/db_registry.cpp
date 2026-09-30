@@ -900,6 +900,11 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
 
     iassert(IsFastFileLoad());
 
+#ifdef __SWITCH__
+    const bool traceDefaultMaterial =
+        type == ASSET_TYPE_MATERIAL && name && !I_stricmp(name, "$default");
+#endif
+
 
     // Match the upstream DB hash access pattern: readers may inspect the table
     // concurrently, but creation/linking requires the write lock.
