@@ -175,6 +175,7 @@ static void R_GLUploadTexture(
         return;
 
     glBindTexture(x->target, x->object);
+    const GLenum glBindError = glGetError();
 
     const uint32_t w = std::max(1u, (uint32_t)image->width >> l);
     const uint32_t h = std::max(1u, (uint32_t)image->height >> l);
@@ -209,6 +210,26 @@ static void R_GLUploadTexture(
     else
         glTexSubImage2D(
             GL_TEXTURE_2D, l, 0, 0, w, h, u, t, src);
+
+    const GLenum glUploadError = glGetError();
+    if (glBindError != GL_NO_ERROR || glUploadError != GL_NO_ERROR)
+    {
+        char trace[320];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH GLTEX FAIL] image=%s object=%u target=%x format=%08x mip=%u size=%ux%ux%u bytes=%u bind=%04x upload=%04x\\n",
+            image->name ? image->name : "<null>",
+            (unsigned)x->object,
+            (unsigned)x->target,
+            (unsigned)f,
+            (unsigned)l,
+            (unsigned)w,
+            (unsigned)h,
+            (unsigned)((w + 3) / 4 * ((h + 3) / 4) * (f == D3DFMT_DXT1 ? 8 : 16) * d),
+            (unsigned)glBindError,
+            (unsigned)glUploadError);
+        Switch_LogWrite(trace);
+    }
 }
 
 #endif
