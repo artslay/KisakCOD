@@ -204,10 +204,10 @@ static std::string Switch_GetStartupLanguage(const char *game)
 
         size_t end = begin;
         while (end < count &&
-            requested[end] != '\\r' &&
-            requested[end] != '\\n' &&
+            requested[end] != '\r' &&
+            requested[end] != '\n' &&
             requested[end] != ' ' &&
-            requested[end] != '\\t')
+            requested[end] != '\t')
             ++end;
 
         requested[end] = 0;
@@ -281,7 +281,7 @@ static void Switch_IndexIwdArchives(const char *game)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH IWD] game directory missing path=%s\\n",
+            "[SWITCH IWD] game directory missing path=%s\n",
             gamePath);
         Switch_LogWrite(trace);
         return;
@@ -366,7 +366,7 @@ static void Switch_IndexIwdArchives(const char *game)
     std::snprintf(
         trace,
         sizeof(trace),
-        "[SWITCH IWD] ready archives=%d files=%zu language=%s game=%s\\n",
+        "[SWITCH IWD] ready archives=%d files=%zu language=%s game=%s\n",
         archiveCount,
         g_iwdEntries.size(),
         selectedLanguage.c_str(),
