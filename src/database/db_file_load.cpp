@@ -561,6 +561,18 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 
         Load_XAssetHeader(0);
 
+        if (serialized.type == ASSET_TYPE_MATERIAL
+            && serialized.header != 0
+            && serialized.header != UINT32_MAX
+            && serialized.header != UINT32_MAX - 1
+            && varXAsset->header.material)
+        {
+            const char *materialName = DB_GetXAssetName(varXAsset);
+            if (materialName && !DB_FindXAssetEntry(ASSET_TYPE_MATERIAL, materialName))
+                varXAsset->header =
+                    DB_AddXAsset(ASSET_TYPE_MATERIAL, varXAsset->header);
+        }
+
 #ifdef __SWITCH__
         if (serialized.type == ASSET_TYPE_MATERIAL)
             Switch_LogWrite("[SWITCH XASSET] material load done\n");
