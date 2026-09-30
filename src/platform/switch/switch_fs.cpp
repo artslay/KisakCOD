@@ -6,6 +6,7 @@
 #include <cctype>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <dirent.h>
 #include <algorithm>
 #include <vector>
 #include <string>
@@ -169,6 +170,92 @@ static void Switch_IndexIwdArchive(const char *archivePath)
     Switch_LogWrite(trace);
 }
 
+static std::string Switch_GetStartupLanguage(const char *game)
+{
+    const char *base = fs_basepath && fs_basepath->current.string[0]
+        ? fs_basepath->current.string
+        : kSwitchRoot;
+
+    char path[256];
+    std::snprintf(
+        path,
+        sizeof(path),
+        "%s/%s/localization.txt",
+        base,
+        game && *game ? game : "main");
+
+    FILE *file = FS_FileOpenReadBinary(path);
+    if (file)
+    {
+        char requested[64] = {};
+        const size_t count = std::fread(
+            requested,
+            1,
+            sizeof(requested) - 1,
+            file);
+        std::fclose(file);
+
+        size_t begin = 0;
+        while (begin < count &&
+            (requested[begin] == '\\ufeff' ||
+             requested[begin] == ' ' ||
+             requested[begin] == '\\t'))
+            ++begin;
+
+        size_t end = begin;
+        while (end < count &&
+            requested[end] != '\\r' &&
+            requested[end] != '\\n' &&
+            requested[end] != ' ' &&
+            requested[end] != '\\t')
+            ++end;
+
+        requested[end] = 0;
+
+        int languageIndex = 0;
+        if (requested[begin] &&
+            SEH_GetLanguageIndexForName(requested + begin, &languageIndex))
+        {
+            const char *languageName = SEH_GetLanguageName(languageIndex);
+            if (loc_language)
+                Dvar_SetInt((dvar_s *)loc_language, languageIndex);
+            return languageName ? languageName : "english";
+        }
+    }
+
+    return "english";
+}
+
+static bool Switch_GetLocalizedIwdLanguage(
+    const char *filename,
+    char *languageName,
+    size_t languageNameSize)
+{
+    if (!filename || !languageName || languageNameSize == 0)
+        return false;
+
+    const std::string normalized = SwitchNormalizePath(filename);
+    if (normalized.rfind("localized_", 0) != 0)
+        return false;
+
+    size_t pos = 10;
+    const size_t start = pos;
+    while (pos < normalized.size() &&
+        std::isalpha(static_cast<unsigned char>(normalized[pos])))
+        ++pos;
+
+    if (pos == start)
+        return false;
+
+    const size_t length = pos - start;
+    if (length >= languageNameSize)
+        return false;
+
+    std::memcpy(languageName, normalized.data() + start, length);
+    languageName[length] = 0;
+    return true;
+}
+
 static void Switch_IndexIwdArchives(const char *game)
 {
     Switch_ClearIwdIndex();
@@ -176,35 +263,114 @@ static void Switch_IndexIwdArchives(const char *game)
     const char *base = fs_basepath && fs_basepath->current.string[0]
         ? fs_basepath->current.string
         : kSwitchRoot;
+    const char *gameName = game && *game ? game : "main";
+    const std::string selectedLanguage = Switch_GetStartupLanguage(gameName);
 
-    int archiveCount = 0;
-    for (int i = 0; i < 100; ++i)
+    char gamePath[256];
+    std::snprintf(
+        gamePath,
+        sizeof(gamePath),
+        "%s/%s",
+        base,
+        gameName);
+
+    DIR *directory = opendir(gamePath);
+    if (!directory)
     {
-        char archivePath[256];
+        char trace[192];
         std::snprintf(
-            archivePath,
-            sizeof(archivePath),
-            "%s/%s/iw_%02d.iwd",
-            base,
-            game,
-            i);
-
-        struct stat st = {};
-        if (stat(archivePath, &st) != 0 || !S_ISREG(st.st_mode))
-            continue;
-
-        Switch_IndexIwdArchive(archivePath);
-        ++archiveCount;
+            trace,
+            sizeof(trace),
+            "[SWITCH IWD] game directory missing path=%s\\n",
+            gamePath);
+        Switch_LogWrite(trace);
+        return;
     }
 
-    char trace[160];
+    std::vector<std::string> regularArchives;
+    std::vector<std::string> localizedArchives;
+
+    while (dirent *entry = readdir(directory))
+    {
+        if (!entry->d_name || entry->d_name[0] == '.')
+            continue;
+
+        const std::string normalizedName = SwitchNormalizePath(entry->d_name);
+        if (normalizedName.size() < 4 ||
+            normalizedName.compare(
+                normalizedName.size() - 4,
+                4,
+                ".iwd") != 0)
+            continue;
+
+        char localizedLanguage[64] = {};
+        const bool localized = Switch_GetLocalizedIwdLanguage(
+            normalizedName.c_str(),
+            localizedLanguage,
+            sizeof(localizedLanguage));
+
+        if (localized)
+        {
+            if (I_stricmp(localizedLanguage, selectedLanguage.c_str()) != 0)
+                continue;
+            localizedArchives.emplace_back(entry->d_name);
+        }
+        else
+        {
+            regularArchives.emplace_back(entry->d_name);
+        }
+    }
+
+    closedir(directory);
+
+    auto archiveSort = [](const std::string &a, const std::string &b)
+    {
+        const std::string na = SwitchNormalizePath(a.c_str());
+        const std::string nb = SwitchNormalizePath(b.c_str());
+        return na < nb;
+    };
+
+    std::sort(regularArchives.begin(), regularArchives.end(), archiveSort);
+    std::sort(localizedArchives.begin(), localizedArchives.end(), archiveSort);
+
+    int archiveCount = 0;
+
+    auto indexArchives = [&](const std::vector<std::string> &archives)
+    {
+        for (const std::string &archiveName : archives)
+        {
+            char archivePath[256];
+            std::snprintf(
+                archivePath,
+                sizeof(archivePath),
+                "%s/%s/%s",
+                base,
+                gameName,
+                archiveName.c_str());
+
+            struct stat st = {};
+            if (stat(archivePath, &st) != 0 || !S_ISREG(st.st_mode))
+                continue;
+
+            Switch_IndexIwdArchive(archivePath);
+            ++archiveCount;
+        }
+    };
+
+    // Keep normal IWDs first so selected localized archives have precedence
+    // over ordinary assets, matching the original search-path semantics.
+    indexArchives(regularArchives);
+    indexArchives(localizedArchives);
+
+    char trace[224];
     std::snprintf(
         trace,
         sizeof(trace),
-        "[SWITCH IWD] ready archives=%d files=%zu game=%s\n",
+        "[SWITCH IWD] ready archives=%d files=%zu language=%s game=%s\\n",
         archiveCount,
         g_iwdEntries.size(),
-        game);
+        selectedLanguage.c_str(),
+        gameName);
     Switch_LogWrite(trace);
 }
 
