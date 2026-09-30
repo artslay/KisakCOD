@@ -605,11 +605,14 @@ void Switch_GLEndDatabaseContext()
         return;
 
     if (eglGetCurrentContext() == s_databaseContext)
+    {
+        glFlush();
         eglMakeCurrent(
             s_display,
             EGL_NO_SURFACE,
             EGL_NO_SURFACE,
             EGL_NO_CONTEXT);
+    }
 }
 
 #endif
