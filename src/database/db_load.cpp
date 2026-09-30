@@ -9288,6 +9288,22 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             reinterpret_cast<uint8_t *>(serializedAssets.data()),
             serializedSize);
         DB_IncStreamPos(static_cast<int32_t>(serializedSize));
+
+#ifdef __SWITCH__
+        for (int32_t traceIndex = 1125; traceIndex <= 1132 && traceIndex < count; ++traceIndex)
+        {
+            char trace[160];
+            const SerializedXAsset &traceAsset = serializedAssets[static_cast<size_t>(traceIndex)];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH XASSET RAW] %d type=%u header=%08x runtime=%u\n",
+                traceIndex,
+                traceAsset.type,
+                traceAsset.header,
+                traceAsset.type >= 5 ? traceAsset.type + 1 : traceAsset.type);
+            Switch_LogWrite(trace);
+        }
+#endif
     }
 
     XAsset *var = varXAsset;
