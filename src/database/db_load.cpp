@@ -3088,8 +3088,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
     {
         uint32_t name;
         uint8_t worldVertFormat;
-        uint8_t hasBeenUploaded;
-        uint8_t unused[2];
+        uint8_t pad[3];
         uint32_t techniques[26];
     };
     static_assert(sizeof(SerializedMaterialTechniqueSet) == 112);
@@ -3103,10 +3102,9 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
     // The fastfile stores 32-bit pointers. MaterialTechniqueSet is native
     // 64-bit on Switch, so expand every serialized pointer explicitly.
     varMaterialTechniqueSet->worldVertFormat = serialized.worldVertFormat;
-    varMaterialTechniqueSet->hasBeenUploaded =
-        serialized.hasBeenUploaded != 0;
-    varMaterialTechniqueSet->unused[0] = serialized.unused[0];
-    varMaterialTechniqueSet->unused[1] = serialized.unused[1];
+    varMaterialTechniqueSet->hasBeenUploaded = false;
+    varMaterialTechniqueSet->unused[0] = 0;
+    varMaterialTechniqueSet->unused[1] = 0;
 
     if (!serialized.name)
     {
