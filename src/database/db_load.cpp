@@ -1006,8 +1006,22 @@ void __cdecl Load_TempStringArray(bool atStreamStart, int32_t count)
 void __cdecl Load_XString(bool atStreamStart)
 {
 #ifdef __SWITCH__
-    uint32_t serialized = 0;
-    Load_Stream(atStreamStart, reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+    uint32_t serialized;
+    if (atStreamStart)
+    {
+        serialized = 0;
+        Load_Stream(true, reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+    }
+    else
+    {
+        // Nested XStrings are already present in the containing 64-bit runtime
+        // struct. The fastfile stores the pointer field as a 32-bit offset, so
+        // use the low 32 bits that were copied by Load_Stream() rather than
+        // resetting a local temporary to zero.
+        serialized = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(*varXString));
+    }
+
     *varXString = nullptr;
     if (serialized)
     {
