@@ -2,7 +2,6 @@
 #include "database.h"
 
 #ifdef __SWITCH__
-extern int32_t g_switchAssetIndex;
 #endif
 
 #include <qcommon/threads.h>
@@ -537,10 +536,7 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         memset(varXAsset, 0, sizeof(*varXAsset));
         varXAsset->type = static_cast<XAssetType>(serialized.type);
         memcpy(&varXAsset->header, &serialized.header, sizeof(serialized.header));
-        varXAssetHeader = &varXAsset->header;
-
-        g_switchAssetIndex = i;
-        if (i < 32)
+        varXAssetHeader = &varXAsset->header;        if (i < 32)
         {
             Com_Printf(CON_CHANNEL_FILES,
                 "[SWITCH ASSET] BEGIN index=%d type=%d raw=%08x\n",
