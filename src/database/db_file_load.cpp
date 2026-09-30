@@ -557,7 +557,7 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH XASSET] material header=%08x name=%s\\n",
+                "[SWITCH XASSET] material header=%08x name=%s\n",
                 serialized.header,
                 materialName ? materialName : "(null)");
             Switch_LogWrite(trace);
