@@ -2434,7 +2434,7 @@ void __cdecl Load_snd_alias_list_ptr(bool atStreamStart)
     {
         char trace[160];
         std::snprintf(trace, sizeof(trace),
-            "[SWITCH SOUND] ptr asset=%d value=%08x\\n",
+            "[SWITCH SOUND] ptr asset=%d value=%08x\n",
             g_switchCurrentAssetIndex, serialized);
         Switch_LogWrite(trace);
     }
@@ -2462,12 +2462,12 @@ void __cdecl Load_snd_alias_list_ptr(bool atStreamStart)
             if (g_switchCurrentAssetRawType == 7u &&
                 g_switchCurrentAssetIndex >= 1202 &&
                 g_switchCurrentAssetIndex <= 1212)
-                Switch_LogWrite("[SWITCH SOUND] list begin\\n");
+                Switch_LogWrite("[SWITCH SOUND] list begin\n");
             Load_snd_alias_list_t(1);
             if (g_switchCurrentAssetRawType == 7u &&
                 g_switchCurrentAssetIndex >= 1202 &&
                 g_switchCurrentAssetIndex <= 1212)
-                Switch_LogWrite("[SWITCH SOUND] list done\\n");
+                Switch_LogWrite("[SWITCH SOUND] list done\n");
             Load_snd_alias_list_Asset((XAssetHeader *)varsnd_alias_list_ptr);
             if (inserted)
                 *inserted = *varsnd_alias_list_ptr;
