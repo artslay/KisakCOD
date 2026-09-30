@@ -493,7 +493,7 @@ int32_t g_switchCurrentAssetIndex = -1;
 uint32_t g_switchCurrentAssetRawType = UINT32_MAX;
 uint32_t g_switchCurrentAssetHeader = 0;
 static uint32_t g_switchImagePtrTraceCount = 0;
-static bool g_switchTraceNextStreamPop = false;
+bool g_switchTraceNextStreamPop = false;
 #endif
 
 void *varint;
