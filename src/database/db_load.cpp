@@ -8464,9 +8464,14 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         varXAsset = var;
         memset(varXAsset, 0, sizeof(*varXAsset));
 
-        // CoD4 SP fastfiles use the runtime asset numbering with
-        // MaterialPixelShader present at type 5.
-        const uint32_t runtimeType = serialized.type;
+        // The Switch SP runtime keeps MaterialPixelShader in XAssetType,
+        // while the loaded CoD4 PC fastfiles do not. PC asset ids from
+        // TechniqueSet onward are therefore one slot lower than the runtime enum.
+        uint32_t runtimeType = serialized.type;
+#ifdef KISAK_SP
+        if (runtimeType >= 5)
+            ++runtimeType;
+#endif
         varXAsset->type = static_cast<XAssetType>(runtimeType);
         memcpy(&varXAsset->header, &serialized.header, sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
@@ -8477,9 +8482,10 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             char trace[224];
             std::snprintf(
                 trace, sizeof(trace),
-                "[SWITCH XASSET] index=%d type=%u stream=%u pos=%p\n",
+                "[SWITCH XASSET] index=%d rawType=%u runtimeType=%u stream=%u pos=%p\n",
                 i,
                 static_cast<unsigned>(serialized.type),
+                static_cast<unsigned>(runtimeType),
                 g_streamPosIndex,
                 static_cast<void *>(DB_GetStreamPos()));
             Switch_LogWrite(trace);
