@@ -63,6 +63,11 @@ const char *g_switchDbStage = "idle";
 #endif
 
 extern XAssetList g_varXAssetList;
+#ifdef __SWITCH__
+extern int32_t g_switchCurrentAssetIndex;
+extern uint32_t g_switchCurrentAssetRawType;
+extern uint32_t g_switchCurrentAssetHeader;
+#endif
 
 // --- file-local forward declarations (moved out of database.h) ---
 static void __cdecl DB_CancelLoadXFile();
@@ -608,6 +613,11 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         }
 
         varXAsset = var;
+#ifdef __SWITCH__
+        g_switchCurrentAssetIndex = i;
+        g_switchCurrentAssetRawType = serialized.type;
+        g_switchCurrentAssetHeader = serialized.header;
+#endif
         memset(varXAsset, 0, sizeof(*varXAsset));
 
         // The Switch SP runtime has an extra MaterialPixelShader asset slot,
