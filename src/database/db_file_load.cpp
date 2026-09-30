@@ -349,6 +349,34 @@ void __cdecl DB_LoadXFileInternal()
     }
     
     DB_LoadXFileData((uint8_t *)&file, sizeof(XFile));
+#ifdef __SWITCH__
+    {
+        char trace[768];
+        int written = std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XFILE RAW] size=%u external=%u",
+            file.size,
+            file.externalSize);
+
+        for (int i = 0; i < 9; ++i)
+        {
+            written += std::snprintf(
+                trace + written,
+                sizeof(trace) - static_cast<size_t>(written),
+                " b%d=%u",
+                i,
+                file.blockSize[i]);
+        }
+
+        std::snprintf(
+            trace + written,
+            sizeof(trace) - static_cast<size_t>(written),
+            "\n");
+
+        Switch_LogWrite(trace);
+    }
+#endif
     if (g_trackLoadProgress)
     {
 #ifdef __SWITCH__
