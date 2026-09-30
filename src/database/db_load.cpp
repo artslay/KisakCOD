@@ -3214,7 +3214,8 @@ void __cdecl Load_Material(bool atStreamStart)
     DB_PushStreamPos(4);
 
     varMaterialInfo = &varMaterial->info;
-    Load_MaterialInfo(0);
+    varXString = &varMaterial->info.name;
+    Load_XString(0);
 
     varMaterialTechniqueSetPtr = &varMaterial->techniqueSet;
     Load_MaterialTechniqueSetPtr(0);
