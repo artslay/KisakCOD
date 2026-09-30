@@ -7825,7 +7825,7 @@ void __cdecl Load_RawFile(bool atStreamStart)
     const bool switchRawFileTrace =
         (g_switchCurrentAssetRawType == 31u &&
          g_switchCurrentAssetIndex >= 1120 &&
-         g_switchCurrentAssetIndex <= 1160);
+         g_switchCurrentAssetIndex <= 1200);
     if (switchRawFileTrace)
         {
         char trace[128];
