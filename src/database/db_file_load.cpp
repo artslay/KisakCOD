@@ -544,24 +544,26 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         varXAsset->type = static_cast<XAssetType>(serialized.type);
         memcpy(&varXAsset->header, &serialized.header, sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
-        Load_XAssetHeader(0);
 
 #ifdef __SWITCH__
         if (serialized.type == ASSET_TYPE_MATERIAL)
         {
-            char trace[256];
-            const char *materialName =
-                varXAsset->header.material
-                    ? DB_GetXAssetName(varXAsset)
-                    : "(null)";
+            char trace[192];
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH XASSET] material header=%08x name=%s\n",
-                serialized.header,
-                materialName ? materialName : "(null)");
+                "[SWITCH XASSET] material load begin index=%d header=%08x\n",
+                i,
+                serialized.header);
             Switch_LogWrite(trace);
         }
+#endif
+
+        Load_XAssetHeader(0);
+
+#ifdef __SWITCH__
+        if (serialized.type == ASSET_TYPE_MATERIAL)
+            Switch_LogWrite("[SWITCH XASSET] material load done\n");
 #endif
 
         ++var;
