@@ -863,8 +863,12 @@ bool __cdecl Image_IsCodeImage(int track)
 void R_InitCodeImages()
 {
 #ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH RINIT] before $white\n");
 #endif
     rgp.whiteImage = Image_Register("$white", TS_FUNCTION, IMAGE_TRACK_MISC);
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH RINIT] after $white\n");
+#endif
 #ifdef __SWITCH__
 #endif
     iassert(rgp.whiteImage);
