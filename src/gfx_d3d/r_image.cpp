@@ -912,9 +912,24 @@ void __cdecl R_InitImages()
         iassert(imageGlobals.totalMemory.platform[i] == 0);
     }
     R_SetPicmip();
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH RINIT] before R_InitCodeImages\n");
+#endif
     R_InitCodeImages();
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH RINIT] after R_InitCodeImages\n");
+    Switch_LogWrite("[SWITCH RINIT] before RB_InitImages\n");
+#endif
     RB_InitImages();
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH RINIT] after RB_InitImages\n");
+    Switch_LogWrite("[SWITCH RINIT] before R_InitRawImage\n");
+#endif
     R_InitRawImage();
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH RINIT] after R_InitRawImage\n");
+#endif
+    rg.waterFloatTime = rg.waterFloatTime + 1.0;
     rg.waterFloatTime = rg.waterFloatTime + 1.0;
 #ifdef KISAK_RADIANT
     // idb R_InitImages tail: load the editor's case-texture density-visualization images
