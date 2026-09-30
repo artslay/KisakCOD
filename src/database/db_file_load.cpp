@@ -545,9 +545,10 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         if (i < 16)
         {
             Com_Printf(CON_CHANNEL_FILES,
-                "Switch DB: asset[%d] type=%d header=%p\n",
+                "Switch DB: asset[%d] type=%d raw=%08x header=%p\n",
                 i,
                 static_cast<int>(varXAsset->type),
+                serialized.header,
                 varXAsset->header.data);
         }
         ++var;
