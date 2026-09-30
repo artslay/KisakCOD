@@ -536,24 +536,8 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         memset(varXAsset, 0, sizeof(*varXAsset));
         varXAsset->type = static_cast<XAssetType>(serialized.type);
         memcpy(&varXAsset->header, &serialized.header, sizeof(serialized.header));
-        varXAssetHeader = &varXAsset->header;        if (i < 32)
-        {
-            Com_Printf(CON_CHANNEL_FILES,
-                "[SWITCH ASSET] BEGIN index=%d type=%d raw=%08x\n",
-                i,
-                static_cast<int>(serialized.type),
-                serialized.header);
-        }
-
+        varXAssetHeader = &varXAsset->header;
         Load_XAssetHeader(0);
-
-        if (i < 32)
-        {
-            Com_Printf(CON_CHANNEL_FILES,
-                "[SWITCH ASSET] END index=%d type=%d\n",
-                i,
-                static_cast<int>(serialized.type));
-        }
 
         ++var;
     }
