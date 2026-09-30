@@ -76,6 +76,9 @@ static GLuint LinkGLProgram(GLuint vs, GLuint ps, std::string &error)
 EGLDisplay s_display = EGL_NO_DISPLAY;
 EGLContext s_context = EGL_NO_CONTEXT;
 EGLSurface s_surface = EGL_NO_SURFACE;
+EGLConfig s_config = nullptr;
+EGLContext s_databaseContext = EGL_NO_CONTEXT;
+EGLSurface s_databaseSurface = EGL_NO_SURFACE;
 }
 #endif
 
@@ -471,6 +474,7 @@ bool OpenGLBackend::InitContext(const GfxWindowParms* wndParms)
     static const EGLint configAttributes[] =
     {
         EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
+        EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
         EGL_RED_SIZE, 8,
         EGL_GREEN_SIZE, 8,
         EGL_BLUE_SIZE, 8,
@@ -488,6 +492,8 @@ bool OpenGLBackend::InitContext(const GfxWindowParms* wndParms)
         m_lastError = "eglChooseConfig failed";
         return false;
     }
+
+    s_config = config;
 
     Switch_LogReleaseScreen();
     s_surface = eglCreateWindowSurface(
