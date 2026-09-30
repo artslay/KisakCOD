@@ -6517,6 +6517,34 @@ void __cdecl Mark_MenuListPtr()
 
 void __cdecl Load_LocalizeEntry(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedLocalizeEntry
+    {
+        uint32_t value;
+        uint32_t name;
+    };
+
+    static_assert(sizeof(SerializedLocalizeEntry) == 8);
+    iassert(atStreamStart);
+
+    SerializedLocalizeEntry serialized{};
+    DB_LoadXFileData(
+        reinterpret_cast<uint8_t *>(&serialized),
+        sizeof(serialized));
+    DB_IncStreamPos(sizeof(serialized));
+
+    varLocalizeEntry->value = reinterpret_cast<const char *>(
+        static_cast<uintptr_t>(serialized.value));
+    varLocalizeEntry->name = reinterpret_cast<const char *>(
+        static_cast<uintptr_t>(serialized.name));
+
+    DB_PushStreamPos(4);
+    varXString = &varLocalizeEntry->value;
+    Load_XString(0);
+    varXString = &varLocalizeEntry->name;
+    Load_XString(0);
+    DB_PopStreamPos();
+#else
     Load_Stream(atStreamStart, (uint8_t *)varLocalizeEntry, 8);
     DB_PushStreamPos(4);
     varXString = &varLocalizeEntry->value;
@@ -6524,6 +6552,7 @@ void __cdecl Load_LocalizeEntry(bool atStreamStart)
     varXString = &varLocalizeEntry->name;
     Load_XString(0);
     DB_PopStreamPos();
+#endif
 }
 
 void __cdecl Load_LocalizeEntryPtr(bool atStreamStart)
@@ -6539,8 +6568,16 @@ void __cdecl Load_LocalizeEntryPtr(bool atStreamStart)
             reinterpret_cast<uintptr_t>(*varLocalizeEntryPtr));
         if (value == -1 || value == -2)
         {
+#ifdef __SWITCH__
+            *varLocalizeEntryPtr = reinterpret_cast<LocalizeEntry *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(LocalizeEntry)),
+                    "SwitchLocalizeEntry",
+                    22));
+#else
             *varLocalizeEntryPtr =
                 (LocalizeEntry *)AllocLoad_FxElemVisStateSample();
+#endif
             varLocalizeEntry = *varLocalizeEntryPtr;
 
             if (value == -2)
