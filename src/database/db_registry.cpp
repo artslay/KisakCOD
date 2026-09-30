@@ -2650,6 +2650,22 @@ void __cdecl Mark_MaterialTechniqueSetAsset(MaterialTechniqueSet *techniqueSet)
 
 void __cdecl Load_GfxImageAsset(XAssetHeader *image)
 {
+#ifdef __SWITCH__
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH IMAGE ABI] hdr=%zu asset=%zu entry=%zu pool=%zu image=%p name=%p\\n",
+            sizeof(XAssetHeader),
+            sizeof(XAsset),
+            sizeof(XAssetEntry),
+            sizeof(XAssetEntryPoolEntry),
+            image ? static_cast<void *>(image->image) : nullptr,
+            image && image->image ? static_cast<const void *>(image->image->name) : nullptr);
+        Switch_LogWrite(trace);
+    }
+#endif
     image->xmodelPieces = DB_AddXAsset(ASSET_TYPE_IMAGE, (XAssetHeader)image->xmodelPieces).xmodelPieces;
 }
 
