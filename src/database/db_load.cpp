@@ -1846,20 +1846,53 @@ void __cdecl Load_StreamedSound(bool atStreamStart)
 
 void __cdecl Load_SoundFileRef(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    const bool switchSoundTrace =
+        (g_switchCurrentAssetRawType == 7u &&
+         g_switchCurrentAssetIndex >= 1202 &&
+         g_switchCurrentAssetIndex <= 1212);
+    if (switchSoundTrace)
+    {
+        char trace[192];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH SOUNDFILE REF] asset=%d type=%u ptr=%p\n",
+            g_switchCurrentAssetIndex, (unsigned)varSoundFile->type,
+            static_cast<void *>(varSoundFileRef));
+        Switch_LogWrite(trace);
+    }
+#endif
     if (varSoundFile->type == SAT_LOADED)
     {
+#ifdef __SWITCH__
+        if (switchSoundTrace)
+            Switch_LogWrite("[SWITCH SOUNDFILE REF] loaded branch\n");
+#endif
         varLoadedSoundPtr = &varSoundFileRef->loadSnd;
         Load_LoadedSoundPtr(atStreamStart);
     }
     else
     {
+#ifdef __SWITCH__
+        if (switchSoundTrace)
+            Switch_LogWrite("[SWITCH SOUNDFILE REF] streamed branch\n");
+#endif
         varStreamedSound = (StreamedSound *)varSoundFileRef;
         Load_StreamedSound(atStreamStart);
     }
+#ifdef __SWITCH__
+    if (switchSoundTrace)
+        Switch_LogWrite("[SWITCH SOUNDFILE REF] done\n");
+#endif
 }
 
 void __cdecl Load_SoundFile(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    const bool switchSoundTrace =
+        (g_switchCurrentAssetRawType == 7u &&
+         g_switchCurrentAssetIndex >= 1202 &&
+         g_switchCurrentAssetIndex <= 1212);
+#endif
 #ifdef __SWITCH__
     struct SerializedSoundFile
     {
@@ -1882,6 +1915,17 @@ void __cdecl Load_SoundFile(bool atStreamStart)
         varSoundFile->type = serialized.type;
         varSoundFile->exists = serialized.exists;
         std::memset(&varSoundFile->u, 0, sizeof(varSoundFile->u));
+
+        if (switchSoundTrace)
+        {
+            char trace[192];
+            std::snprintf(trace, sizeof(trace),
+                "[SWITCH SOUNDFILE] raw type=%u exists=%u ref0=%08x ref1=%08x pos=%p\n",
+                (unsigned)serialized.type, (unsigned)serialized.exists,
+                (unsigned)serialized.ref0, (unsigned)serialized.ref1,
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
 
         if (serialized.type == SAT_LOADED)
         {
@@ -1909,7 +1953,15 @@ void __cdecl Load_SoundFile(bool atStreamStart)
     }
 
     varSoundFileRef = &varSoundFile->u;
+#ifdef __SWITCH__
+    if (switchSoundTrace)
+        Switch_LogWrite("[SWITCH SOUNDFILE] ref begin\n");
+#endif
     Load_SoundFileRef(0);
+#ifdef __SWITCH__
+    if (switchSoundTrace)
+        Switch_LogWrite("[SWITCH SOUNDFILE] ref done\n");
+#endif
 #else
     Load_Stream(atStreamStart, &varSoundFile->type, 12);
     varSoundFileRef = &varSoundFile->u;
