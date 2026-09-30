@@ -2838,10 +2838,7 @@ void __cdecl Load_MaterialHandle(bool atStreamStart)
                 inserted = 0;
             Load_Material(1);
 #ifdef __SWITCH__
-            if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL HANDLE] AFTER Load_Material\n");
-            if (switchTrace)
-                Switch_LogRaw("[SWITCH MATERIAL ASSET] BEFORE Load_MaterialAsset\n");
+            Switch_LogWrite("[SWITCH MATERIAL ASSET] BEGIN\n");
 #endif
             Load_MaterialAsset((XAssetHeader *)varMaterialHandle);
 #ifdef __SWITCH__
@@ -2856,13 +2853,6 @@ void __cdecl Load_MaterialHandle(bool atStreamStart)
         }
     }
     DB_PopStreamPos();
-#ifdef __SWITCH__
-    if (switchTrace)
-    {
-        Switch_LogRaw("[SWITCH MATERIAL HANDLE] AFTER PopStreamPos\n");
-        ++switchMaterialHandleTraceCount;
-    }
-#endif
 }
 
 void __cdecl Load_MaterialHandleArray(bool atStreamStart, int32_t count)
