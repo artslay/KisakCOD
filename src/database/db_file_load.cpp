@@ -336,9 +336,6 @@ void __cdecl DB_LoadXFileInternal()
     }
     fileIsSecure = memcmp(magic, "IWffu100", 8u) != 0;
     err = DB_AuthLoad_InflateInit(&g_load.stream, fileIsSecure);
-#ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBSTAGE] after InflateInit\n");
-#endif
     failureReason = 0;
     if (fileIsSecure)
         failureReason = "authenticated file not supported";
@@ -371,13 +368,7 @@ void __cdecl DB_LoadXFileInternal()
             g_loadedExternalBytes = 0;
         }
     }
-#ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBSTAGE] before DB_AllocXZoneMemory\n");
-#endif
     DB_AllocXZoneMemory(file.blockSize, g_load.filename, g_load.zoneMem, g_load.allocType);
-#ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBSTAGE] after DB_AllocXZoneMemory\n");
-#endif
     DB_InitStreams(g_load.zoneMem);
     Load_XAssetListCustom();
 #ifdef __SWITCH__
@@ -390,18 +381,12 @@ void __cdecl DB_LoadXFileInternal()
             reinterpret_cast<XAsset *>(DB_AllocStreamPos(3));
         varXAsset = varXAssetList->assets;
         Load_XAssetArrayCustom(varXAssetList->assetCount);
-#ifdef __SWITCH__
-        Switch_LogWrite("[SWITCH DBSTAGE] after Load_XAssetArrayCustom\n");
-#endif
     }
     DB_PopStreamPos();
     DB_FinishGeometryBlocks(g_load.zoneMem);
     --g_loadingAssets;
     Load_DelayStream();
     DB_LoadDelayedImages();
-#ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBSTAGE] after DB_LoadDelayedImages\n");
-#endif
     iassert(g_load.compressBufferStart);
     Com_Printf(CON_CHANNEL_FILES, "Loaded zone '%s'\n", g_load.filename);
 #ifdef __SWITCH__
