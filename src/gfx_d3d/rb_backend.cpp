@@ -36,6 +36,7 @@
 #include <universal/timing.h>
 #ifdef __SWITCH__
 #include <chrono>
+#include <cstdio>
 #include <gfx/gfx_backend.h>
 static inline uint64_t KisakRendererClock()
 {
@@ -3131,8 +3132,25 @@ void __cdecl RB_BindDefaultImages()
 
     context.source = &gfxCmdBufSourceState;
     context.state = &gfxCmdBufState;
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH RINIT] RB_BindDefaultImages begin\n");
+#endif
     for (samplerIndex = 0; samplerIndex < 0x10; ++samplerIndex)
+    {
+#ifdef __SWITCH__
+        char msg[96];
+        snprintf(msg, sizeof(msg), "[SWITCH RINIT] sampler %u begin\n", samplerIndex);
+        Switch_LogWrite(msg);
+#endif
         R_SetSampler(context, samplerIndex, 1u, rgp.whiteImage);
+#ifdef __SWITCH__
+        snprintf(msg, sizeof(msg), "[SWITCH RINIT] sampler %u done\n", samplerIndex);
+        Switch_LogWrite(msg);
+#endif
+    }
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH RINIT] RB_BindDefaultImages complete\n");
+#endif
 }
 
 void __cdecl RB_InitCodeImages()
