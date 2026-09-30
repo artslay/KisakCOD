@@ -2245,9 +2245,10 @@ void __cdecl Load_GfxImage(bool atStreamStart)
         static_assert(sizeof(SerializedGfxImage) == 36);
 
         SerializedGfxImage serialized{};
-        Load_Stream(true,
-                    reinterpret_cast<uint8_t *>(&serialized),
-                    sizeof(serialized));
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+        DB_IncStreamPos(sizeof(serialized));
 
         varGfxImage->mapType = static_cast<MapType>(serialized.mapType);
         varGfxImage->texture.basemap =
