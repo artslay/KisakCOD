@@ -3213,12 +3213,24 @@ void __cdecl Load_Material(bool atStreamStart)
 
     DB_PushStreamPos(4);
 
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH MATERIAL] read80 done\\n");
+#endif
+
     varMaterialInfo = &varMaterial->info;
     varXString = &varMaterial->info.name;
     Load_XString(0);
 
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH MATERIAL] info done\\n");
+#endif
+
     varMaterialTechniqueSetPtr = &varMaterial->techniqueSet;
     Load_MaterialTechniqueSetPtr(0);
+
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH MATERIAL] techset done\\n");
+#endif
 
     if (varMaterial->textureTable)
     {
@@ -3235,6 +3247,10 @@ void __cdecl Load_Material(bool atStreamStart)
         }
     }
 
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH MATERIAL] textures done\\n");
+#endif
+
     if (varMaterial->constantTable)
     {
         if (varMaterial->constantTable == (MaterialConstantDef *)-1)
@@ -3250,6 +3266,10 @@ void __cdecl Load_Material(bool atStreamStart)
         }
     }
 
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH MATERIAL] constants done\\n");
+#endif
+
     if (varMaterial->stateBitsTable)
     {
         if (varMaterial->stateBitsTable == (GfxStateBits *)-1)
@@ -3264,6 +3284,10 @@ void __cdecl Load_Material(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t *)&varMaterial->stateBitsTable);
         }
     }
+
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH MATERIAL] statebits done\\n");
+#endif
 
     DB_PopStreamPos();
 #else
@@ -3335,6 +3359,9 @@ void __cdecl Load_MaterialHandle(bool atStreamStart)
                 inserted = 0;
             Load_Material(1);
             Load_MaterialAsset((XAssetHeader *)varMaterialHandle);
+#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH MATERIAL] asset done\\n");
+#endif
             if (inserted)
                 *inserted = *varMaterialHandle;
         }
