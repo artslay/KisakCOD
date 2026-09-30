@@ -7825,9 +7825,16 @@ void __cdecl Load_RawFile(bool atStreamStart)
     const bool switchRawFileTrace =
         (g_switchCurrentAssetRawType == 31u &&
          g_switchCurrentAssetIndex >= 1120 &&
-         g_switchCurrentAssetIndex <= 1140);
+         g_switchCurrentAssetIndex <= 1160);
     if (switchRawFileTrace)
-        Switch_LogWrite("[SWITCH RAWFILE] begin\n");
+        {
+        char trace[128];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH RAWFILE] begin asset=%d rawType=%u\n",
+            g_switchCurrentAssetIndex, g_switchCurrentAssetRawType);
+        Switch_LogWrite(trace);
+    }
 
     struct SerializedRawFile
     {
