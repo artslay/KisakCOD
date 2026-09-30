@@ -49,12 +49,29 @@ static void R_GLAllocTexture(KisakGLTexture *x,GLenum target,uint32_t w,uint32_t
 {
     GLenum i,u,t; bool c; if(!R_GLImageFormat(f,i,u,t,c)) return;
     x->target=target;x->sourceFormat=f;x->internalFormat=i;x->uploadFormat=u;x->uploadType=t;x->width=w;x->height=h;x->depth=d;x->mipLevels=levels;
-    glGenTextures(1,&x->object); glBindTexture(target,x->object);
+#ifdef __SWITCH__
+    if (x->sourceFormat == D3DFMT_A8R8G8B8 && w == 1 && h == 1)
+        Switch_LogWrite("[SWITCH IMGBOOT] $white glGen begin\n");
+#endif
+    glGenTextures(1,&x->object);
+#ifdef __SWITCH__
+    if (x->sourceFormat == D3DFMT_A8R8G8B8 && w == 1 && h == 1)
+        Switch_LogWrite("[SWITCH IMGBOOT] $white glGen done\n");
+#endif
+    glBindTexture(target,x->object);
+#ifdef __SWITCH__
+    if (x->sourceFormat == D3DFMT_A8R8G8B8 && w == 1 && h == 1)
+        Switch_LogWrite("[SWITCH IMGBOOT] $white glBind done\n");
+#endif
     glTexParameteri(target,GL_TEXTURE_MIN_FILTER,levels>1?GL_LINEAR_MIPMAP_LINEAR:GL_LINEAR);
     glTexParameteri(target,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
     glTexParameteri(target,GL_TEXTURE_WRAP_S,GL_REPEAT); glTexParameteri(target,GL_TEXTURE_WRAP_T,GL_REPEAT);
     if(target==GL_TEXTURE_3D||target==GL_TEXTURE_CUBE_MAP) glTexParameteri(target,GL_TEXTURE_WRAP_R,GL_REPEAT);
     for(uint32_t l=0;l<levels;++l){uint32_t lw=std::max(1u,w>>l),lh=std::max(1u,h>>l),ld=std::max(1u,d>>l);
+#ifdef __SWITCH__
+        if (x->sourceFormat == D3DFMT_A8R8G8B8 && w == 1 && h == 1)
+            Switch_LogWrite("[SWITCH IMGBOOT] $white glTexImage begin\n");
+#endif
         if(target==GL_TEXTURE_3D) glTexImage3D(target,l,(GLint)i,lw,lh,ld,0,u,t,nullptr);
         else if(target==GL_TEXTURE_CUBE_MAP) for(uint32_t fce=0;fce<6;++fce) glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+fce,l,(GLint)i,lw,lh,0,u,t,nullptr);
         else glTexImage2D(target,l,(GLint)i,lw,lh,0,u,t,nullptr);
@@ -659,7 +676,13 @@ GfxImage *__cdecl Image_LoadBuiltin(char *name, uint8_t semantic, uint8_t imageT
 
     image = Image_Alloc(name, IMG_CATEGORY_AUTO_GENERATED, semantic, imageTrack);
     iassert(image);
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH IMGBOOT] $white Image_Alloc done\n");
+#endif
     constructorTable[tableIndex].LoadCallback(image);
+#ifdef __SWITCH__
+    Switch_LogWrite("[SWITCH IMGBOOT] $white builtin callback done\n");
+#endif
     return image;
 }
 
@@ -710,8 +733,16 @@ GfxImage *__cdecl Image_Alloc(
 
     iassert( name );
     v5 = strlen(name);
+#ifdef __SWITCH__
+    if (name && !I_stricmp(name, "$white"))
+        Switch_LogWrite("[SWITCH IMGBOOT] $white Hunk_Alloc begin\n");
+#endif
     image = (GfxImage *)Hunk_Alloc(v5 + 37, "Image_Alloc", 22);
     iassert( image );
+#ifdef __SWITCH__
+    if (name && !I_stricmp(name, "$white"))
+        Switch_LogWrite("[SWITCH IMGBOOT] $white Hunk_Alloc done\n");
+#endif
     image->name = (const char *)&image[1];
     Image_Construct(name, v5 + 1, category, semantic, imageTrack, image);
     imageGlobals.imageHashTable[Image_GetAvailableHashLocation(name)] = image;
