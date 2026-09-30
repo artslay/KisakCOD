@@ -2533,11 +2533,12 @@ void __cdecl Load_MaterialPixelShader(bool atStreamStart)
     struct SerializedMaterialPixelShader
     {
         uint32_t name;
+        uint32_t shader;
         uint32_t program;
         uint16_t programSize;
         uint16_t loadForRenderer;
     };
-    static_assert(sizeof(SerializedMaterialPixelShader) == 12);
+    static_assert(sizeof(SerializedMaterialPixelShader) == 16);
 
     iassert(atStreamStart);
     SerializedMaterialPixelShader serialized{};
@@ -2558,6 +2559,9 @@ void __cdecl Load_MaterialPixelShader(bool atStreamStart)
         varMaterialPixelShader->name = reinterpret_cast<const char *>(
             DB_ConvertOffsetToPointerValue(serialized.name));
 
+    // The serialized shader object contains the original 32-bit shader handle
+    // plus the bytecode load definition. Switch creates the native shader object later.
+    (void)serialized.shader;
     varMaterialPixelShader->prog.ps = nullptr;
     varMaterialPixelShader->prog.loadDef.program =
         reinterpret_cast<void *>(static_cast<uintptr_t>(serialized.program));
