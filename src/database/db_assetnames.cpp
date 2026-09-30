@@ -254,16 +254,70 @@ const char *__cdecl DB_GetXAssetHeaderName(int32_t type, const XAssetHeader *hea
 {
     const char *name; // [esp+0h] [ebp-4h]
 
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH TECHSET NAME] enter type=%d header=%p data=%p handler=%p\n",
+            type,
+            static_cast<const void *>(header),
+            header ? header->data : nullptr,
+            (type >= 0 && type < ASSET_TYPE_COUNT)
+                ? reinterpret_cast<const void *>(DB_XAssetGetNameHandler[type])
+                : nullptr);
+        Switch_LogWrite(trace);
+    }
+#endif
+
     iassert(header);
+
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+        Switch_LogWrite("[SWITCH TECHSET NAME] after header assert\n");
+#endif
+
     iassert(DB_XAssetGetNameHandler[type]);
+
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+        Switch_LogWrite("[SWITCH TECHSET NAME] after handler assert\n");
+#endif
+
     iassert(header->data);
+
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+        Switch_LogWrite("[SWITCH TECHSET NAME] after data assert\n");
+#endif
 
     name = DB_XAssetGetNameHandler[type](header);
 
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+    {
+        char trace[128];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH TECHSET NAME] handler returned name=%p\n",
+            static_cast<const void *>(name));
+        Switch_LogWrite(trace);
+    }
+#endif
+
     iassert(name);
+
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+        Switch_LogWrite("[SWITCH TECHSET NAME] after name assert\n");
+#endif
+
     //if (!name)
     //{
-    //    MyAssertHandler(".\\database\\db_assetnames.cpp", 594, 0, "%s\n\t%s", "name", 
+    //    MyAssertHandler(".\\database\\db_assetnames.cpp", 594, 0, "%s\n\t%s", "name",
     //      va("Name not found for asset type %s\n", g_assetNames[type]));
     //}
     return name;
