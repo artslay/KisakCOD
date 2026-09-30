@@ -141,6 +141,7 @@ static void Load_MaterialPixelShaderProgram(bool atStreamStart);
 static void Load_MaterialVertexShader(bool atStreamStart);
 static void Load_MaterialVertexShaderPtr(bool atStreamStart);
 static void Load_MaterialPixelShader(bool atStreamStart);
+static void Load_MaterialPixelShaderHandle(bool atStreamStart);
 static void Load_MaterialPixelShaderPtr(bool atStreamStart);
 static void Load_MaterialVertexDeclaration(bool atStreamStart);
 static void Load_MaterialArgumentCodeConst(bool atStreamStart);
@@ -2573,6 +2574,53 @@ void __cdecl Load_MaterialPixelShader(bool atStreamStart)
     Load_MaterialPixelShaderProgram(0);
 #endif
 }
+static void Load_MaterialPixelShaderHandle(bool atStreamStart)
+{
+    const void **inserted = nullptr;
+    uint32_t value;
+
+    Load_Stream(atStreamStart, (uint8_t *)varMaterialPixelShaderPtr, 4);
+    DB_PushStreamPos(0);
+    if (*varMaterialPixelShaderPtr)
+    {
+        value = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(*varMaterialPixelShaderPtr));
+        if (value == UINT32_MAX || value == UINT32_MAX - 1)
+        {
+            *varMaterialPixelShaderPtr =
+                reinterpret_cast<MaterialPixelShader *>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(sizeof(MaterialPixelShader)),
+                        "SwitchMaterialPixelShader",
+                        22));
+            varMaterialPixelShader = *varMaterialPixelShaderPtr;
+
+            if (value == UINT32_MAX - 1)
+                inserted = DB_InsertPointer();
+
+            Load_MaterialPixelShader(1);
+
+            {
+                XAssetHeader header{};
+                header.pixelShader = *varMaterialPixelShaderPtr;
+                *varMaterialPixelShaderPtr =
+                    DB_AddXAsset(
+                        ASSET_TYPE_PIXELSHADER,
+                        header).pixelShader;
+            }
+
+            if (inserted)
+                *inserted = *varMaterialPixelShaderPtr;
+        }
+        else
+        {
+            DB_ConvertOffsetToAlias(
+                (uint32_t *)varMaterialPixelShaderPtr);
+        }
+    }
+    DB_PopStreamPos();
+}
+
 void __cdecl Load_MaterialPixelShaderPtr(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varMaterialPixelShaderPtr, 4);
@@ -7889,6 +7937,13 @@ void __cdecl Load_XAssetHeader(bool atStreamStart)
 {
     switch (varXAsset->type)
     {
+#ifdef KISAK_SP
+    case ASSET_TYPE_PIXELSHADER:
+        varMaterialPixelShaderPtr =
+            (MaterialPixelShader **)varXAssetHeader;
+        Load_MaterialPixelShaderHandle(atStreamStart);
+        break;
+#endif
     case ASSET_TYPE_PHYSPRESET:
         varPhysPresetPtr = (PhysPreset **)varXAssetHeader;
         Load_PhysPresetPtr(atStreamStart);
@@ -8004,6 +8059,17 @@ void __cdecl Mark_XAssetHeader()
 {
     switch (varXAsset->type)
     {
+#ifdef KISAK_SP
+    case ASSET_TYPE_PIXELSHADER:
+        if (*reinterpret_cast<MaterialPixelShader **>(varXAssetHeader))
+        {
+            XAssetHeader header{};
+            header.pixelShader =
+                *reinterpret_cast<MaterialPixelShader **>(varXAssetHeader);
+            DB_GetXAsset(ASSET_TYPE_PIXELSHADER, header);
+        }
+        break;
+#endif
     case ASSET_TYPE_PHYSPRESET:
         varPhysPresetPtr = (PhysPreset **)varXAssetHeader;
         Mark_PhysPresetPtr();
