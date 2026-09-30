@@ -8577,41 +8577,87 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         uint32_t header;
     };
 
+    uint32_t imageRecords = 0;
+    uint32_t imageInline = 0;
+    uint32_t imageAlias = 0;
+    uint32_t imageNull = 0;
+    uint32_t materialRecords = 0;
+    uint32_t techsetRecords = 0;
+    uint32_t localizeRecords = 0;
+
+    std::vector<SerializedXAsset> serializedAssets(
+        count > 0 ? static_cast<size_t>(count) : 0u);
+
+    if (count > 0)
+    {
+        const uint32_t serializedSize =
+            static_cast<uint32_t>(
+                sizeof(SerializedXAsset) * static_cast<size_t>(count));
+
+        // The generated loader consumes the complete XAsset record array
+        // before parsing any inline asset payload. This is required because
+        // individual asset loaders may realign stream 0 to a 4-byte boundary.
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(serializedAssets.data()),
+            serializedSize);
+        DB_IncStreamPos(static_cast<int32_t>(serializedSize));
+    }
+
     XAsset *var = varXAsset;
     for (int32_t i = 0; i < count; ++i)
     {
-        // Keep the stream cursor immediately after the current serialized
-        // XAsset record. Generated Load_*Ptr functions rely on this: their
-        // Load_Stream(0, ...) does not consume the pointer itself, then
-        // DB_PushStreamPos(0) saves the post-record position while the inline
-        // asset payload is loaded.
-        SerializedXAsset serialized{};
-        DB_LoadXFileData(
-            reinterpret_cast<uint8_t *>(&serialized),
-            sizeof(serialized));
-        DB_IncStreamPos(sizeof(serialized));
+        const SerializedXAsset &serialized =
+            serializedAssets[static_cast<size_t>(i)];
+
+        if (serialized.type == ASSET_TYPE_IMAGE)
+        {
+            ++imageRecords;
+            if (serialized.header == UINT32_MAX ||
+                serialized.header == UINT32_MAX - 1)
+                ++imageInline;
+            else if (serialized.header)
+                ++imageAlias;
+            else
+                ++imageNull;
+        }
+        else if (serialized.type == ASSET_TYPE_MATERIAL)
+        {
+            ++materialRecords;
+        }
+        else if (serialized.type == ASSET_TYPE_TECHNIQUE_SET)
+        {
+            ++techsetRecords;
+        }
+        else if (serialized.type == ASSET_TYPE_LOCALIZE_ENTRY)
+        {
+            ++localizeRecords;
+        }
 
         varXAsset = var;
         memset(varXAsset, 0, sizeof(*varXAsset));
 
-        // The Switch SP runtime keeps MaterialPixelShader in XAssetType,
-        // while the loaded CoD4 PC fastfiles do not. PC asset ids from
-        // TechniqueSet onward are therefore one slot lower than the runtime enum.
+        // The Switch SP runtime has an extra MaterialPixelShader asset slot,
+        // while CoD4 PC fastfiles use the original PC asset numbering.
         uint32_t runtimeType = serialized.type;
 #ifdef KISAK_SP
         if (runtimeType >= 5)
             ++runtimeType;
 #endif
+
         varXAsset->type = static_cast<XAssetType>(runtimeType);
-        memcpy(&varXAsset->header, &serialized.header, sizeof(serialized.header));
+        memcpy(
+            &varXAsset->header,
+            &serialized.header,
+            sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
 
 #ifdef __SWITCH__
         if (i < 8)
         {
-            char trace[256];
+            char trace[192];
             std::snprintf(
-                trace, sizeof(trace),
+                trace,
+                sizeof(trace),
                 "[SWITCH XASSET MAP] idx=%d raw=%u runtime=%u stream=%u pos=%p header=%08x\n",
                 i,
                 static_cast<unsigned>(serialized.type),
@@ -8621,11 +8667,49 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
                 serialized.header);
             Switch_LogWrite(trace);
         }
+
+        if (runtimeType == ASSET_TYPE_MATERIAL)
+        {
+            char trace[192];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XASSET] material load begin index=%d header=%08x\n",
+                i,
+                serialized.header);
+            Switch_LogWrite(trace);
+        }
 #endif
 
         Load_XAssetHeader(0);
+
+#ifdef __SWITCH__
+        if (i < 8)
+            Switch_LogWrite("[SWITCH XASSET] load done\n");
+#endif
+
         ++var;
     }
+
+#ifdef __SWITCH__
+    {
+        char trace[192];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XASSET] records=%d image=%u inline=%u alias=%u null=%u adds=%u material=%u techset=%u localize=%u\n",
+            count,
+            imageRecords,
+            imageInline,
+            imageAlias,
+            imageNull,
+            g_switchImageAdds,
+            materialRecords,
+            techsetRecords,
+            localizeRecords);
+        Switch_LogWrite(trace);
+    }
+#endif
 #else
     XAsset *var;
     int32_t i;
