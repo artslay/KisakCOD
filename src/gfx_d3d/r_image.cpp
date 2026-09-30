@@ -46,6 +46,8 @@ static bool R_GLImageFormat(_D3DFORMAT f, GLenum &i, GLenum &u, GLenum &t, bool 
     }
 }
 static uint32_t R_GLFullMipCount(uint32_t w,uint32_t h,uint32_t d){uint32_t n=1;while(w>1||h>1||d>1){w=std::max(1u,w>>1);h=std::max(1u,h>>1);d=std::max(1u,d>>1);++n;}return n;}
+static uint32_t s_switchGLAllocTraceCount = 0;
+static uint32_t s_switchGLUploadTraceCount = 0;
 static void R_GLAllocTexture(
     KisakGLTexture *x,
     GLenum target,
@@ -115,7 +117,36 @@ static void R_GLAllocTexture(
         Switch_LogWrite(trace);
     }
 
+    const bool traceAlloc = s_switchGLAllocTraceCount < 24;
+    const uint32_t traceAllocIndex = s_switchGLAllocTraceCount++;
+    if (traceAlloc)
+    {
+        char trace[240];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH GLCRASH] alloc%u bind begin object=%u target=%x format=%08x size=%ux%ux%u levels=%u compressed=%u\\n",
+            (unsigned)traceAllocIndex,
+            (unsigned)x->object,
+            (unsigned)target,
+            (unsigned)f,
+            (unsigned)w,
+            (unsigned)h,
+            (unsigned)d,
+            (unsigned)levels,
+            compressed ? 1u : 0u);
+        Switch_LogWrite(trace);
+    }
+
     glBindTexture(target, x->object);
+    const GLenum bindError = glGetError();
+    if (traceAlloc)
+    {
+        char trace[128];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH GLCRASH] alloc%u bind end gl=%04x\\n",
+            (unsigned)traceAllocIndex, (unsigned)bindError);
+        Switch_LogWrite(trace);
+    }
     glTexParameteri(target, GL_TEXTURE_MIN_FILTER,
         levels > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
     glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -136,12 +167,25 @@ static void R_GLAllocTexture(
             // Compressed DXT formats do not have a meaningful external
             // format/type pair for glTexImage*. Allocate immutable storage
             // instead; the actual blocks are uploaded by glCompressedTexSubImage*.
+            if (traceAlloc)
+                Switch_LogWrite("[SWITCH GLCRASH] storage begin\\n");
+
             if (target == GL_TEXTURE_3D)
                 glTexStorage3D(GL_TEXTURE_3D, levels, i, w, h, d);
             else if (target == GL_TEXTURE_CUBE_MAP)
                 glTexStorage2D(GL_TEXTURE_CUBE_MAP, levels, i, w, h);
             else
                 glTexStorage2D(target, levels, i, w, h);
+
+            const GLenum storageError = glGetError();
+            if (traceAlloc)
+            {
+                char trace[128];
+                std::snprintf(trace, sizeof(trace),
+                    "[SWITCH GLCRASH] storage end gl=%04x\\n",
+                    (unsigned)storageError);
+                Switch_LogWrite(trace);
+            }
             break;
         }
 
@@ -173,6 +217,27 @@ static void R_GLUploadTexture(
     bool compressed;
     if (!R_GLImageFormat(f, i, u, t, compressed))
         return;
+
+    const bool traceUpload = s_switchGLUploadTraceCount < 24;
+    const uint32_t traceUploadIndex = s_switchGLUploadTraceCount++;
+
+    if (traceUpload)
+    {
+        char trace[240];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH GLCRASH] upload%u begin image=%s object=%u target=%x format=%08x mip=%u size=%ux%ux%u\\n",
+            (unsigned)traceUploadIndex,
+            image->name ? image->name : "<null>",
+            (unsigned)x->object,
+            (unsigned)x->target,
+            (unsigned)f,
+            (unsigned)l,
+            (unsigned)(std::max(1u, (uint32_t)image->width >> l)),
+            (unsigned)(std::max(1u, (uint32_t)image->height >> l)),
+            (unsigned)(std::max(1u, (uint32_t)image->depth >> l)));
+        Switch_LogWrite(trace);
+    }
 
     glBindTexture(x->target, x->object);
     const GLenum glBindError = glGetError();
@@ -212,6 +277,16 @@ static void R_GLUploadTexture(
             GL_TEXTURE_2D, l, 0, 0, w, h, u, t, src);
 
     const GLenum glUploadError = glGetError();
+    if (traceUpload)
+    {
+        char trace[128];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH GLCRASH] upload%u end bind=%04x upload=%04x\\n",
+            (unsigned)traceUploadIndex,
+            (unsigned)glBindError,
+            (unsigned)glUploadError);
+        Switch_LogWrite(trace);
+    }
     if (glBindError != GL_NO_ERROR || glUploadError != GL_NO_ERROR)
     {
         char trace[320];
