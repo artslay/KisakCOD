@@ -39,8 +39,42 @@ void __cdecl Load_DelayStream()
 uintptr_t __cdecl DB_ConvertOffsetToPointerValue(uint32_t offset)
 {
     iassert(offset && offset != UINT32_MAX && offset != UINT32_MAX - 1);
+
     const uint32_t block = (offset - 1) >> 28;
-    const uint32_t blockOffset = (offset - 1) & 0xFFFFFFF;
+    const uint32_t blockOffset = (offset - 1) & 0x0FFFFFFF;
+
+#ifdef __SWITCH__
+    if (block >= ARRAY_COUNT(g_streamPosArray))
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH OFFSET INVALID] token=%08x block=%u offset=%08x size=0\n",
+            offset,
+            block,
+            blockOffset);
+        Switch_LogWrite(trace);
+        return 0;
+    }
+
+    if (!g_streamBlocks[block].data ||
+        blockOffset >= g_streamBlocks[block].size)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH OFFSET INVALID] token=%08x block=%u offset=%08x size=%u\n",
+            offset,
+            block,
+            blockOffset,
+            g_streamBlocks[block].size);
+        Switch_LogWrite(trace);
+        return 0;
+    }
+#endif
+
     return reinterpret_cast<uintptr_t>(
         &g_streamBlocks[block].data[blockOffset]);
 }
