@@ -583,7 +583,7 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 
 #ifdef __SWITCH__
         for (int32_t traceIndex = 1120;
-             traceIndex <= 1200 && traceIndex < count;
+             traceIndex <= 1240 && traceIndex < count;
              ++traceIndex)
         {
             char trace[160];
@@ -654,12 +654,12 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         varXAssetHeader = &varXAsset->header;
 
 #ifdef __SWITCH__
-        if (i >= 1120 && i <= 1200)
+        if (i >= 1120 && i <= 1240)
             Switch_LogWrite("[SWITCH ASSET RETURN] before header\n");
 #endif
         Load_XAssetHeader(0);
 #ifdef __SWITCH__
-        if (i >= 1120 && i <= 1200)
+        if (i >= 1120 && i <= 1240)
             Switch_LogWrite("[SWITCH ASSET RETURN] after header\n");
 #endif
 
