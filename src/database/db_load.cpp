@@ -7641,21 +7641,32 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         uint32_t header;
     };
 
+    std::vector<SerializedXAsset> serializedAssets(static_cast<size_t>(count));
+    if (count > 0)
+    {
+        const uint32_t serializedSize =
+            static_cast<uint32_t>(
+                sizeof(SerializedXAsset) * static_cast<size_t>(count));
+
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(serializedAssets.data()),
+            serializedSize);
+        DB_IncStreamPos(static_cast<int32_t>(serializedSize));
+    }
+
     XAsset *var = varXAsset;
     for (int32_t i = 0; i < count; ++i)
     {
-        SerializedXAsset serialized{};
-        DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
-        DB_IncStreamPos(sizeof(serialized));
+        const SerializedXAsset &serialized =
+            serializedAssets[static_cast<size_t>(i)];
 
         varXAsset = var;
         memset(varXAsset, 0, sizeof(*varXAsset));
         varXAsset->type = static_cast<XAssetType>(serialized.type);
         memcpy(&varXAsset->header, &serialized.header, sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
+
         Load_XAssetHeader(0);
-
-
         ++var;
     }
 #else
