@@ -535,6 +535,76 @@ bool OpenGLBackend::InitContext(const GfxWindowParms* wndParms)
 #endif
 }
 
+#ifdef __SWITCH__
+
+bool Switch_GLBeginDatabaseContext()
+{
+    if (s_display == EGL_NO_DISPLAY ||
+        s_context == EGL_NO_CONTEXT ||
+        s_config == nullptr)
+        return false;
+
+    if (eglGetCurrentContext() == s_databaseContext &&
+        s_databaseContext != EGL_NO_CONTEXT)
+        return true;
+
+    if (eglGetCurrentContext() != EGL_NO_CONTEXT)
+        return true;
+
+    if (s_databaseContext == EGL_NO_CONTEXT)
+    {
+        static const EGLint contextAttributes[] =
+        {
+            EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR,
+            EGL_CONTEXT_OPENGL_MAJOR_VERSION_KHR, 4,
+            EGL_CONTEXT_OPENGL_MINOR_VERSION_KHR, 3,
+            EGL_NONE
+        };
+
+        s_databaseContext = eglCreateContext(
+            s_display, s_config, s_context, contextAttributes);
+        if (s_databaseContext == EGL_NO_CONTEXT)
+            return false;
+    }
+
+    if (s_databaseSurface == EGL_NO_SURFACE)
+    {
+        static const EGLint pbufferAttributes[] =
+        {
+            EGL_WIDTH, 1,
+            EGL_HEIGHT, 1,
+            EGL_NONE
+        };
+
+        s_databaseSurface = eglCreatePbufferSurface(
+            s_display, s_config, pbufferAttributes);
+        if (s_databaseSurface == EGL_NO_SURFACE)
+            return false;
+    }
+
+    return eglMakeCurrent(
+        s_display,
+        s_databaseSurface,
+        s_databaseSurface,
+        s_databaseContext) == EGL_TRUE;
+}
+
+void Switch_GLEndDatabaseContext()
+{
+    if (s_display == EGL_NO_DISPLAY ||
+        s_databaseContext == EGL_NO_CONTEXT)
+        return;
+
+    if (eglGetCurrentContext() == s_databaseContext)
+        eglMakeCurrent(
+            s_display,
+            EGL_NO_SURFACE,
+            EGL_NO_SURFACE,
+            EGL_NO_CONTEXT);
+}
+
+#endif
+
 bool OpenGLBackend::InitCapabilities()
 {
 #ifdef __SWITCH__
