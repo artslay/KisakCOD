@@ -1799,6 +1799,56 @@ void __cdecl Load_snd_alias_tArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_snd_alias_list_t(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedSndAliasList
+    {
+        uint32_t aliasName;
+        uint32_t head;
+        int32_t count;
+    };
+    static_assert(sizeof(SerializedSndAliasList) == 12);
+
+    if (atStreamStart)
+    {
+        SerializedSndAliasList serialized{};
+        Load_Stream(true, reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+
+        varsnd_alias_list_t->aliasName =
+            reinterpret_cast<const char *>(static_cast<uintptr_t>(serialized.aliasName));
+        varsnd_alias_list_t->head =
+            reinterpret_cast<snd_alias_t *>(static_cast<uintptr_t>(serialized.head));
+        varsnd_alias_list_t->count = serialized.count;
+    }
+
+    DB_PushStreamPos(4);
+    varXString = &varsnd_alias_list_t->aliasName;
+    Load_XString(0);
+
+    const uint32_t headValue = static_cast<uint32_t>(
+        reinterpret_cast<uintptr_t>(varsnd_alias_list_t->head));
+
+    if (headValue)
+    {
+        if (headValue == UINT32_MAX)
+        {
+            varsnd_alias_list_t->head =
+                reinterpret_cast<snd_alias_t *>(Hunk_Alloc(
+                    static_cast<uint32_t>(
+                        sizeof(snd_alias_t) * static_cast<size_t>(varsnd_alias_list_t->count)),
+                    "SwitchSndAliasArray",
+                    22));
+            varSndAlias_t = nullptr;
+            varsnd_alias_t = varsnd_alias_list_t->head;
+            Load_snd_alias_tArray(1, varsnd_alias_list_t->count);
+        }
+        else
+        {
+            varsnd_alias_list_t->head = reinterpret_cast<snd_alias_t *>(
+                DB_ConvertOffsetToPointerValue(headValue));
+        }
+    }
+    DB_PopStreamPos();
+#else
     Load_Stream(atStreamStart, (uint8_t *)varsnd_alias_list_t, 12);
     DB_PushStreamPos(4);
     varXString = &varsnd_alias_list_t->aliasName;
@@ -1817,6 +1867,7 @@ void __cdecl Load_snd_alias_list_t(bool atStreamStart)
         }
     }
     DB_PopStreamPos();
+#endif
 }
 
 void __cdecl Load_snd_alias_list_ptr(bool atStreamStart)
@@ -1824,6 +1875,57 @@ void __cdecl Load_snd_alias_list_ptr(bool atStreamStart)
     const void **inserted; // [esp+0h] [ebp-Ch]
     uint32_t value; // [esp+4h] [ebp-8h]
 
+#ifdef __SWITCH__
+    uint32_t serialized = 0;
+    if (atStreamStart)
+    {
+        Load_Stream(true, reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+    }
+    else
+    {
+        std::memcpy(
+            &serialized,
+            reinterpret_cast<const uint8_t *>(varsnd_alias_list_ptr),
+            sizeof(serialized));
+    }
+
+    DB_PushStreamPos(0);
+    if (serialized)
+    {
+        if (serialized == UINT32_MAX || serialized == UINT32_MAX - 1)
+        {
+            snd_alias_list_t *nativeList =
+                reinterpret_cast<snd_alias_list_t *>(Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(snd_alias_list_t)),
+                    "SwitchSndAliasList",
+                    22));
+
+            if (serialized == UINT32_MAX - 1)
+                inserted = DB_InsertPointer();
+            else
+                inserted = 0;
+
+            *varsnd_alias_list_ptr = nativeList;
+            varsnd_alias_list_t = nativeList;
+            std::memset(nativeList, 0, sizeof(*nativeList));
+
+            Load_snd_alias_list_t(1);
+            Load_snd_alias_list_Asset((XAssetHeader *)varsnd_alias_list_ptr);
+            if (inserted)
+                *inserted = *varsnd_alias_list_ptr;
+        }
+        else
+        {
+            const uintptr_t aliasValue =
+                DB_ConvertOffsetToPointerValue(serialized);
+            std::memcpy(
+                reinterpret_cast<uint8_t *>(varsnd_alias_list_ptr),
+                &aliasValue,
+                sizeof(aliasValue));
+        }
+    }
+    DB_PopStreamPos();
+#else
     Load_Stream(atStreamStart, (unsigned char*)varsnd_alias_list_ptr, 4);
     DB_PushStreamPos(0);
     if (*varsnd_alias_list_ptr)
@@ -1848,6 +1950,7 @@ void __cdecl Load_snd_alias_list_ptr(bool atStreamStart)
         }
     }
     DB_PopStreamPos();
+#endif
 }
 
 void __cdecl Load_SndAliasCustom(snd_alias_list_t **var)
