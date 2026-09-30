@@ -124,7 +124,7 @@ static void R_GLAllocTexture(
         char trace[240];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH GLCRASH] alloc%u bind begin object=%u target=%x format=%08x size=%ux%ux%u levels=%u compressed=%u\\n",
+            "[SWITCH GLCRASH] alloc%u bind begin object=%u target=%x format=%08x size=%ux%ux%u levels=%u compressed=%u\n",
             (unsigned)traceAllocIndex,
             (unsigned)x->object,
             (unsigned)target,
@@ -143,7 +143,7 @@ static void R_GLAllocTexture(
     {
         char trace[128];
         std::snprintf(trace, sizeof(trace),
-            "[SWITCH GLCRASH] alloc%u bind end gl=%04x\\n",
+            "[SWITCH GLCRASH] alloc%u bind end gl=%04x\n",
             (unsigned)traceAllocIndex, (unsigned)bindError);
         Switch_LogWrite(trace);
     }
@@ -168,7 +168,7 @@ static void R_GLAllocTexture(
             // format/type pair for glTexImage*. Allocate immutable storage
             // instead; the actual blocks are uploaded by glCompressedTexSubImage*.
             if (traceAlloc)
-                Switch_LogWrite("[SWITCH GLCRASH] storage begin\\n");
+                Switch_LogWrite("[SWITCH GLCRASH] storage begin\n");
 
             if (target == GL_TEXTURE_3D)
                 glTexStorage3D(GL_TEXTURE_3D, levels, i, w, h, d);
@@ -182,7 +182,7 @@ static void R_GLAllocTexture(
             {
                 char trace[128];
                 std::snprintf(trace, sizeof(trace),
-                    "[SWITCH GLCRASH] storage end gl=%04x\\n",
+                    "[SWITCH GLCRASH] storage end gl=%04x\n",
                     (unsigned)storageError);
                 Switch_LogWrite(trace);
             }
@@ -226,7 +226,7 @@ static void R_GLUploadTexture(
         char trace[240];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH GLCRASH] upload%u begin image=%s object=%u target=%x format=%08x mip=%u size=%ux%ux%u\\n",
+            "[SWITCH GLCRASH] upload%u begin image=%s object=%u target=%x format=%08x mip=%u size=%ux%ux%u\n",
             (unsigned)traceUploadIndex,
             image->name ? image->name : "<null>",
             (unsigned)x->object,
@@ -281,7 +281,7 @@ static void R_GLUploadTexture(
     {
         char trace[128];
         std::snprintf(trace, sizeof(trace),
-            "[SWITCH GLCRASH] upload%u end bind=%04x upload=%04x\\n",
+            "[SWITCH GLCRASH] upload%u end bind=%04x upload=%04x\n",
             (unsigned)traceUploadIndex,
             (unsigned)glBindError,
             (unsigned)glUploadError);
