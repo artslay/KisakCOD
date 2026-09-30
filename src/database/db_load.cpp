@@ -3159,7 +3159,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH TECHSET RAW] name=%08x stream=%u pos=%p\\n",
+            "[SWITCH TECHSET RAW] name=%08x stream=%u pos=%p\n",
             serialized.name,
             g_streamPosIndex,
             static_cast<void *>(DB_GetStreamPos()));
@@ -3191,12 +3191,8 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH TECHSET RAW] resolved name=%p first=%02x\\n",
-            static_cast<const void *>(varMaterialTechniqueSet->name),
-            varMaterialTechniqueSet->name
-                ? static_cast<unsigned>(
-                    static_cast<uint8_t>(*varMaterialTechniqueSet->name))
-                : 0u);
+            "[SWITCH TECHSET RAW] resolved name=%p\\n",
+            static_cast<const void *>(varMaterialTechniqueSet->name));
         Switch_LogWrite(trace);
     }
 #endif
