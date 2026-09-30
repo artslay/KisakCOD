@@ -592,7 +592,16 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 
         varXAsset = var;
         memset(varXAsset, 0, sizeof(*varXAsset));
-        varXAsset->type = static_cast<XAssetType>(serialized.type);
+
+        // The Switch SP runtime has an extra MaterialPixelShader asset slot,
+        // while CoD4 PC fastfiles use the original PC asset numbering.
+        uint32_t runtimeType = serialized.type;
+#ifdef KISAK_SP
+        if (runtimeType >= 5)
+            ++runtimeType;
+#endif
+
+        varXAsset->type = static_cast<XAssetType>(runtimeType);
         memcpy(&varXAsset->header, &serialized.header,
             sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
@@ -600,18 +609,19 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 #ifdef __SWITCH__
         if (i < 8)
         {
-            char trace[160];
+            char trace[192];
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH XASSET] load begin index=%d type=%u header=%08x\n",
+                "[SWITCH XASSET MAP] idx=%d raw=%u runtime=%u header=%08x\n",
                 i,
-                serialized.type,
+                static_cast<unsigned>(serialized.type),
+                static_cast<unsigned>(runtimeType),
                 serialized.header);
             Switch_LogWrite(trace);
         }
 
-        if (serialized.type == ASSET_TYPE_MATERIAL)
+        if (runtimeType == ASSET_TYPE_MATERIAL)
         {
             char trace[192];
             std::snprintf(
