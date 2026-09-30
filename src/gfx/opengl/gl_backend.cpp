@@ -565,8 +565,8 @@ bool Switch_GLBeginDatabaseContext()
         static const EGLint contextAttributes[] =
         {
             EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR,
-            EGL_CONTEXT_OPENGL_MAJOR_VERSION_KHR, 4,
-            EGL_CONTEXT_OPENGL_MINOR_VERSION_KHR, 3,
+            EGL_CONTEXT_MAJOR_VERSION_KHR, 4,
+            EGL_CONTEXT_MINOR_VERSION_KHR, 3,
             EGL_NONE
         };
 
