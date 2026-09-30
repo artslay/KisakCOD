@@ -92,6 +92,7 @@ OpenGLBackend::~OpenGLBackend()
 
 #ifdef __SWITCH__
 extern void Switch_LogRaw(const char *msg);
+extern void Switch_LogWrite(const char *msg);
 extern void Switch_LogReleaseScreen();
 #endif
 
