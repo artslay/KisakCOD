@@ -3155,15 +3155,44 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
 
 #ifdef __SWITCH__
     {
-        char trace[256];
+        char trace[320];
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH TECHSET RAW] name=%08x stream=%u pos=%p\n",
+            "[SWITCH TECHSET RAW] name=%08x meta=%02x%02x%02x%02x pos=%p\n",
             serialized.name,
-            g_streamPosIndex,
+            serialized.pad[3],
+            serialized.pad[2],
+            serialized.pad[1],
+            serialized.worldVertFormat,
             static_cast<void *>(DB_GetStreamPos()));
+
         Switch_LogWrite(trace);
+
+        for (int base = 0; base < 26; base += 6)
+        {
+            char row[256];
+            int written = std::snprintf(
+                row,
+                sizeof(row),
+                "[SWITCH TECHSET PTRS] %d:",
+                base);
+
+            for (int i = base; i < base + 6 && i < 26; ++i)
+            {
+                written += std::snprintf(
+                    row + written,
+                    sizeof(row) - static_cast<size_t>(written),
+                    " %08x",
+                    serialized.techniques[i]);
+            }
+
+            std::snprintf(
+                row + written,
+                sizeof(row) - static_cast<size_t>(written),
+                "\n");
+            Switch_LogWrite(row);
+        }
     }
 #endif
 
@@ -3191,7 +3220,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH TECHSET RAW] resolved name=%p\\n",
+            "[SWITCH TECHSET RAW] resolved name=%p\n",
             static_cast<const void *>(varMaterialTechniqueSet->name));
         Switch_LogWrite(trace);
     }
