@@ -21,6 +21,7 @@
 #include <stringed/stringed_hooks.h>
 
 extern void Sys_Print(const char *text);
+extern void Switch_LogWrite(const char *msg);
 
 const dvar_t *fs_remotePCDirectory = nullptr;
 const dvar_t *fs_remotePCName = nullptr;
@@ -72,6 +73,8 @@ struct SwitchZipHandle
 static std::vector<SwitchIwdArchive> g_iwdArchives;
 static std::unordered_map<std::string, SwitchIwdEntry> g_iwdEntries;
 static SwitchZipHandle g_zipHandles[65] = {};
+
+static int AllocHandle();
 
 static std::string SwitchNormalizePath(const char *path)
 {
