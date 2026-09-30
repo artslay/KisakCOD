@@ -2771,6 +2771,60 @@ void __cdecl Load_GfxImageLoadDef(bool atStreamStart)
 
 void __cdecl Load_GfxImage(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        struct SerializedGfxImage
+        {
+            uint32_t mapType;
+            uint32_t texture;
+            uint8_t picmip[2];
+            uint8_t noPicmip;
+            uint8_t semantic;
+            uint8_t track;
+            uint8_t pad[3];
+            CardMemory cardMemory;
+            uint16_t width;
+            uint16_t height;
+            uint16_t depth;
+            uint8_t category;
+            uint8_t delayLoadPixels;
+            uint32_t name;
+        };
+
+        static_assert(sizeof(SerializedGfxImage) == 36);
+
+        SerializedGfxImage serialized{};
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+        DB_IncStreamPos(sizeof(serialized));
+
+#ifdef __SWITCH__
+        {
+            char trace[256];
+            const uint32_t nameBlock = serialized.name
+                ? ((serialized.name - 1) >> 28)
+                : 0;
+            const uint32_t nameOffset = serialized.name
+                ? ((serialized.name - 1) & 0xFFFFFFF)
+                : 0;
+            std::snprintf(trace, sizeof(trace),
+                "[SWITCH IMAGE] raw map=%u texture=%08x width=%u height=%u depth=%u category=%u delay=%u name=%08x block=%u offset=%08x blockSize=%u\n",
+                serialized.mapType,
+                serialized.texture,
+                serialized.width,
+                serialized.height,
+                serialized.depth,
+                serialized.category,
+                serialized.delayLoadPixels,
+                serialized.name,
+                nameBlock,
+                nameOffset,
+                nameBlock < 9 ? g_streamZoneMem->blocks[nameBlock].size : 0);
+            Switch_LogWrite(trace);
+        }
+#endif
 
         varGfxImage->mapType = static_cast<MapType>(serialized.mapType);
         varGfxImage->texture.basemap =
@@ -2809,7 +2863,13 @@ void __cdecl Load_GfxImage(bool atStreamStart)
         }
 
         varGfxTextureLoad = &varGfxImage->texture;
+#ifdef __SWITCH__
+        Switch_LogWrite("[SWITCH IMAGE] Image before Load_GfxTextureLoad\n");
+#endif
         Load_GfxTextureLoad(0);
+#ifdef __SWITCH__
+        Switch_LogWrite("[SWITCH IMAGE] Image after Load_GfxTextureLoad\n");
+#endif
 
         DB_PopStreamPos();
         return;
@@ -2829,6 +2889,135 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
 {
     const void **inserted = nullptr;
 
+#ifdef __SWITCH__
+    // CoD4 fastfiles serialize asset pointers as 32-bit values.  The native
+    // Switch XAssetHeader/GfxImage* fields are 64-bit, so never read or write
+    // the serialized 4-byte header through a GfxImage** lvalue.
+    uint32_t value = 0;
+    std::memcpy(
+        &value,
+        reinterpret_cast<const uint8_t *>(varGfxImagePtr),
+        sizeof(value));
+
+    DB_PushStreamPos(0);
+
+    if (value)
+    {
+        if (value == UINT32_MAX || value == UINT32_MAX - 1)
+        {
+            GfxImage *nativeImage =
+                reinterpret_cast<GfxImage *>(Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(GfxImage)),
+                    "SwitchGfxImage",
+                    22));
+
+            varGfxImage = nativeImage;
+            std::memset(nativeImage, 0, sizeof(GfxImage));
+
+            {
+                char trace[192];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH IMAGE ABI] alloc serialized=%08x native=%p slot=%p\n",
+                    value,
+                    static_cast<void *>(nativeImage),
+                    static_cast<void *>(varGfxImagePtr));
+                Switch_LogWrite(trace);
+            }
+
+            if (value == UINT32_MAX - 1)
+                inserted = DB_InsertPointer();
+
+            Switch_LogWrite("[SWITCH IMAGE] Ptr before Load_GfxImage\n");
+            Load_GfxImage(1);
+            Switch_LogWrite("[SWITCH IMAGE] Ptr after Load_GfxImage\n");
+            Switch_LogWrite("[SWITCH IMAGE] Ptr before Load_GfxImageAsset\n");
+
+            // Keep the native pointer in a local variable.  Do not reload it
+            // from the serialized/native slot after Load_GfxImage(), because
+            // that slot may only have contained the original 32-bit sentinel.
+            XAssetHeader imageHeader{};
+            imageHeader.image = nativeImage;
+
+            {
+                char trace[192];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH IMAGE ABI] asset native=%p name=%p\n",
+                    static_cast<void *>(imageHeader.image),
+                    imageHeader.image
+                        ? static_cast<const void *>(imageHeader.image->name)
+                        : nullptr);
+                Switch_LogWrite(trace);
+            }
+
+            Load_GfxImageAsset(&imageHeader);
+
+            // Store the fully widened native pointer back into the runtime
+            // XAsset header slot only after all serialized image reads are done.
+            std::memcpy(
+                reinterpret_cast<uint8_t *>(varGfxImagePtr),
+                &imageHeader.image,
+                sizeof(imageHeader.image));
+
+            {
+                char trace[192];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH IMAGE ABI] stored image=%p slot=%p\n",
+                    static_cast<void *>(imageHeader.image),
+                    static_cast<void *>(varGfxImagePtr));
+                Switch_LogWrite(trace);
+            }
+
+            if (inserted)
+                *inserted = imageHeader.image;
+
+            Switch_LogWrite("[SWITCH IMAGE] Ptr after Load_GfxImageAsset\n");
+        }
+        else
+        {
+            // Existing native alias slots already contain widened pointers.
+            // Resolve their serialized 32-bit token explicitly.
+            const uintptr_t aliasValue =
+                DB_ConvertOffsetToPointerValue(value);
+            if (aliasValue)
+            {
+                std::memcpy(
+                    reinterpret_cast<uint8_t *>(varGfxImagePtr),
+                    &aliasValue,
+                    sizeof(aliasValue));
+            }
+        }
+    }
+
+    DB_PopStreamPos();
+#else
+    uint32_t value;
+    Load_Stream(atStreamStart, (uint8_t *)varGfxImagePtr, 4);
+    if (*varGfxImagePtr)
+    {
+        value = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(*varGfxImagePtr));
+        if (value == -1 || value == -2)
+        {
+            *varGfxImagePtr = (GfxImage *)AllocLoad_FxElemVisStateSample();
+            varGfxImage = *varGfxImagePtr;
+            if (value == -2)
+                inserted = DB_InsertPointer();
+            Load_GfxImage(1);
+            Load_GfxImageAsset((XAssetHeader *)varGfxImagePtr);
+            if (inserted)
+                *inserted = *varGfxImagePtr;
+        }
+        else
+            DB_ConvertOffsetToAlias((uint32_t *)varGfxImagePtr);
+    }
+    DB_PopStreamPos();
+#endif
 }
 
 void __cdecl Mark_GfxImagePtr()
