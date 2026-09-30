@@ -1919,6 +1919,20 @@ void __cdecl Load_SoundFile(bool atStreamStart)
 void __cdecl Load_SndCurve(bool atStreamStart)
 {
 #ifdef __SWITCH__
+    const bool switchSndCurveTrace =
+        (g_switchCurrentAssetRawType == 8u &&
+         g_switchCurrentAssetIndex >= 1200 &&
+         g_switchCurrentAssetIndex <= 1240);
+    if (switchSndCurveTrace)
+    {
+        char trace[128];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH SNDCURVE] begin asset=%d rawType=%u\n",
+            g_switchCurrentAssetIndex, g_switchCurrentAssetRawType);
+        Switch_LogWrite(trace);
+    }
+
     struct SerializedSndCurve
     {
         uint32_t filename;
@@ -1942,12 +1956,32 @@ void __cdecl Load_SndCurve(bool atStreamStart)
             varSndCurve->knots,
             serialized.knots,
             sizeof(serialized.knots));
+#ifdef __SWITCH__
+        if (switchSndCurveTrace)
+        {
+            char trace[192];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH SNDCURVE] raw filename=%08x knots=%d pos=%p\n",
+                serialized.filename, serialized.knotCount,
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
+#endif
     }
 
     DB_PushStreamPos(4);
     varXString = &varSndCurve->filename;
     Load_XString(0);
+#ifdef __SWITCH__
+    if (switchSndCurveTrace)
+        Switch_LogWrite("[SWITCH SNDCURVE] name done\n");
+#endif
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (switchSndCurveTrace)
+        Switch_LogWrite("[SWITCH SNDCURVE] pop done\n");
+#endif
 #else
     Load_Stream(atStreamStart, (uint8_t *)varSndCurve, 72);
     DB_PushStreamPos(4);
