@@ -9332,7 +9332,7 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         varXAssetHeader = &varXAsset->header;
 
 #ifdef __SWITCH__
-        if (i < 8)
+        if (i < 32)
         {
             char trace[192];
             std::snprintf(
@@ -9381,7 +9381,7 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         Load_XAssetHeader(0);
 
 #ifdef __SWITCH__
-        if (i < 8)
+        if (i < 32)
             Switch_LogWrite("[SWITCH XASSET] load done\n");
 #endif
 
