@@ -1500,11 +1500,30 @@ XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *na
     XAssetEntryPoolEntry *assetEntry; // [esp+8h] [ebp-4h]
 
     const uint32_t hash = DB_HashForName(name, type);
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_MATERIAL && name && !I_stricmp(name, "$default"))
+    {
+        char trace[192];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH DBLOOKUP] material $default hash=%u first=%u\\n",
+            hash, static_cast<unsigned>(db_hashTable[hash]));
+        Switch_LogWrite(trace);
+    }
+#endif
+    uint32_t guard = 0;
     for (assetEntryIndex = db_hashTable[hash];
         assetEntryIndex;
         assetEntryIndex = assetEntry->entry.nextHash)
     {
-if (assetEntryIndex >= 0x8000)
+        if (++guard > 0x8000)
+        {
+#ifdef __SWITCH__
+            if (type == ASSET_TYPE_MATERIAL)
+                Switch_LogWrite("[SWITCH DBLOOKUP] hash chain overflow\\n");
+#endif
+            return 0;
+        }
+        if (assetEntryIndex >= 0x8000)
             return 0;
         assetEntry = &g_assetEntryPool[assetEntryIndex];
         if (assetEntry->entry.asset.type == type)
