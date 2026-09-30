@@ -1,6 +1,10 @@
 #include <universal/q_shared.h>
 #include "database.h"
 
+#ifdef __SWITCH__
+extern int32_t g_switchAssetIndex;
+#endif
+
 #include <qcommon/files.h>
 #ifdef __SWITCH__
 #include <cstdio>
@@ -2292,12 +2296,51 @@ XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
     XAssetEntryPoolEntry *existingEntry;
     XAssetEntryPoolEntry newEntry;
 
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH DBADD] index=%d BEGIN type=%d header=%p\n",
+               g_switchAssetIndex,
+               static_cast<int>(type),
+               header.data);
+#endif
+
     newEntry.entry.asset.type = type;
     newEntry.entry.asset.header = header;
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH DBADD] index=%d BEFORE Lock\n",
+               g_switchAssetIndex);
+#endif
     Sys_LockWrite(&db_hashCritSect);
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH DBADD] index=%d AFTER Lock BEFORE Link\n",
+               g_switchAssetIndex);
+#endif
     existingEntry = DB_LinkXAssetEntry(&newEntry, 0);
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH DBADD] index=%d AFTER Link BEFORE Unlock entry=%p\n",
+               g_switchAssetIndex,
+               (void *)existingEntry);
+#endif
     Sys_UnlockWrite(&db_hashCritSect);
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH DBADD] index=%d AFTER Unlock BEFORE Sync\n",
+               g_switchAssetIndex);
+#endif
     DB_SyncLostDevice();
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH DBADD] index=%d END\n",
+               g_switchAssetIndex);
+#endif
     return existingEntry->entry.asset.header;
 }
 
@@ -2317,13 +2360,42 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     uint16_t *pOverrideAssetEntryIndex;
     XAssetSize assetSize;
 
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH DBLINK] index=%d BEFORE GetName type=%d\n",
+               g_switchAssetIndex,
+               static_cast<int>(newEntry->entry.asset.type));
+#endif
     name = DB_GetXAssetName(&newEntry->entry.asset);
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH DBLINK] index=%d AFTER GetName name=%p\n",
+               g_switchAssetIndex,
+               (const void *)name);
+#endif
+
     v2 = *name;
     isStubAsset = v2 == ',';
     if (v2 == ',')
         ++name;
     type = newEntry->entry.asset.type;
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH DBLINK] index=%d BEFORE HashName name=%p\n",
+               g_switchAssetIndex,
+               (const void *)name);
+#endif
     hash = DB_HashForName(name, type);
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH DBLINK] index=%d AFTER HashName hash=%u\n",
+               g_switchAssetIndex,
+               hash);
+#endif
+
     existingEntry = NULL;
 
     for (existingEntryIndex = db_hashTable[hash]; existingEntryIndex; existingEntryIndex = existingEntry->entry.nextHash)
