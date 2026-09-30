@@ -2507,8 +2507,26 @@ void __cdecl Load_MaterialVertexShader(bool atStreamStart)
     DB_AllocStreamPos(3);
 
     SerializedMaterialVertexShader serialized{};
+    const uint8_t *vertexShaderStart = DB_GetStreamPos();
     DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
     DB_IncStreamPos(sizeof(serialized));
+
+#ifdef __SWITCH__
+    {
+        char trace[320];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH VERTEXSHADER RAW] pos=%p name=%08x shader=%08x program=%08x size=%u renderer=%u after=%p\n",
+            static_cast<const void *>(vertexShaderStart),
+            serialized.name,
+            serialized.shader,
+            serialized.program,
+            static_cast<unsigned>(serialized.programSize),
+            static_cast<unsigned>(serialized.loadForRenderer),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+#endif
 
     memset(varMaterialVertexShader, 0, sizeof(*varMaterialVertexShader));
 
