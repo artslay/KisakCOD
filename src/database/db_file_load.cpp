@@ -635,11 +635,6 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 
         Load_XAssetHeader(0);
 
-#ifdef __SWITCH__
-        if (i < 8 || serialized.type != ASSET_TYPE_LOCALIZE_ENTRY)
-            Switch_LogWrite("[SWITCH XASSET] load done\n");
-#endif
-
         ++var;
     }
 
