@@ -2243,6 +2243,32 @@ void __cdecl Load_GfxImage(bool atStreamStart)
             sizeof(serialized));
         DB_IncStreamPos(sizeof(serialized));
 
+#ifdef __SWITCH__
+        {
+            char trace[256];
+            const uint32_t nameBlock = serialized.name
+                ? ((serialized.name - 1) >> 28)
+                : 0;
+            const uint32_t nameOffset = serialized.name
+                ? ((serialized.name - 1) & 0xFFFFFFF)
+                : 0;
+            std::snprintf(trace, sizeof(trace),
+                "[SWITCH IMAGE] raw map=%u texture=%08x width=%u height=%u depth=%u category=%u delay=%u name=%08x block=%u offset=%08x blockSize=%u\n",
+                serialized.mapType,
+                serialized.texture,
+                serialized.width,
+                serialized.height,
+                serialized.depth,
+                serialized.category,
+                serialized.delayLoadPixels,
+                serialized.name,
+                nameBlock,
+                nameOffset,
+                nameBlock < 9 ? g_streamZoneMem->blocks[nameBlock].size : 0);
+            Switch_LogWrite(trace);
+        }
+#endif
+
         varGfxImage->mapType = static_cast<MapType>(serialized.mapType);
         varGfxImage->texture.basemap =
             reinterpret_cast<IDirect3DBaseTexture9 *>(
