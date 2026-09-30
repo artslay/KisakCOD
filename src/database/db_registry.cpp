@@ -2408,7 +2408,10 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     if (newEntry->entry.asset.type == ASSET_TYPE_IMAGE)
         Switch_LogWrite("[SWITCH IMAGE] DB_Link before DB_GetXAssetName\n");
 #endif
-    name = DB_GetXAssetName(&newEntry->entry.asset);
+    if (newEntry->entry.asset.type == ASSET_TYPE_IMAGE)
+        name = newEntry->entry.asset.header.image->name;
+    else
+        name = DB_GetXAssetName(&newEntry->entry.asset);
 #ifdef __SWITCH__
     if (newEntry->entry.asset.type == ASSET_TYPE_TECHNIQUE_SET)
     {
@@ -2445,7 +2448,10 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         existingEntry = &g_assetEntryPool[existingEntryIndex];
         if (existingEntry->entry.asset.type == type)
         {
-            XAssetName = DB_GetXAssetName(&existingEntry->entry.asset);
+            if (type == ASSET_TYPE_IMAGE)
+                XAssetName = existingEntry->entry.asset.header.image->name;
+            else
+                XAssetName = DB_GetXAssetName(&existingEntry->entry.asset);
             if (!I_stricmp(XAssetName, name))
                 break;
         }
