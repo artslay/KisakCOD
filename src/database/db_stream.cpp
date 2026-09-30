@@ -99,11 +99,12 @@ void __cdecl DB_IncStreamPos(int32_t size)
 
 const void **__cdecl DB_InsertPointer()
 {
-    const void **pData; // [esp+0h] [ebp-4h]
+    const void **pData;
 
     DB_PushStreamPos(4);
-    pData = (const void **)DB_AllocStreamPos(3);
-    DB_IncStreamPos(4);
+    pData = reinterpret_cast<const void **>(DB_AllocStreamPos(
+        static_cast<int32_t>(sizeof(void *) - 1)));
+    DB_IncStreamPos(static_cast<int32_t>(sizeof(void *)));
     DB_PopStreamPos();
     return pData;
 }
