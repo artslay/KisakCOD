@@ -2,6 +2,10 @@
 #include <universal/q_shared.h>
 #include "database.h"
 
+#ifdef __SWITCH__
+extern void Switch_LogWrite(const char *msg);
+#endif
+
 uint32_t g_streamDelayIndex;
 XBlock * g_streamBlocks;
 uint8_t *g_streamPosArray[9];
@@ -129,7 +133,6 @@ void __cdecl DB_PopStreamPos()
             (unsigned)g_streamPosStackIndex,
             (unsigned)g_streamPosIndex,
             static_cast<void *>(g_streamPos));
-        extern void Switch_LogWrite(const char *msg);
         Switch_LogWrite(trace);
         return;
     }
