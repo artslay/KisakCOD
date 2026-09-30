@@ -2609,11 +2609,10 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
     }
     else if (serialized.name == UINT32_MAX)
     {
-        varMaterialTechniqueSet->name =
-            reinterpret_cast<const char *>(AllocLoad_raw_byte());
-        Load_XStringCustom(
-            const_cast<char **>(
-                reinterpret_cast<const char **>(&varMaterialTechniqueSet->name)));
+        char *nameBuffer =
+            reinterpret_cast<char *>(AllocLoad_raw_byte());
+        Load_XStringCustom(&nameBuffer);
+        varMaterialTechniqueSet->name = nameBuffer;
     }
     else
     {
@@ -2703,8 +2702,12 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
             Load_MaterialTechniqueSet(1);
 #ifdef __SWITCH__
             Switch_LogWrite("[SWITCH TECHSETPTR] AFTER LOAD TECHSET\n");
+            Switch_LogWrite("[SWITCH TECHSETPTR] BEFORE ASSET REGISTER\n");
 #endif
             Load_MaterialTechniqueSetAsset((XAssetHeader *)varMaterialTechniqueSetPtr);
+#ifdef __SWITCH__
+            Switch_LogWrite("[SWITCH TECHSETPTR] AFTER ASSET REGISTER\n");
+#endif
             if (inserted)
                 *inserted = *varMaterialTechniqueSetPtr;
         }
