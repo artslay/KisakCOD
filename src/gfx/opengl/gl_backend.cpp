@@ -604,7 +604,7 @@ bool Switch_GLBeginDatabaseContext()
         char trace[192];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH GLCTX] database ready ctx=%p dpy=%p surf=%p\\n",
+            "[SWITCH GLCTX] database ready ctx=%p dpy=%p surf=%p\n",
             (void *)s_databaseContext,
             (void *)s_display,
             (void *)s_databaseSurface);
