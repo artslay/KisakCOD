@@ -1834,15 +1834,15 @@ static XAssetHeader __cdecl DB_AllocMaterial(void *arg)
 {
     XAssetHeader *pool = (XAssetHeader*)arg;
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBMAT] ENTER allocator\\n");
+    Switch_LogWrite("[SWITCH DBMAT] ENTER allocator\n");
 #endif
     Material_DirtySort();
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBMAT] AFTER Material_DirtySort\\n");
+    Switch_LogWrite("[SWITCH DBMAT] AFTER Material_DirtySort\n");
 #endif
     XAssetHeader result = DB_AllocXAsset_StringTable_(pool);
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBMAT] AFTER pool allocator\\n");
+    Switch_LogWrite("[SWITCH DBMAT] AFTER pool allocator\n");
 #endif
     return result;
 }
@@ -2302,29 +2302,29 @@ XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
     XAssetEntryPoolEntry newEntry;
 
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBADD] ENTER\\n");
+    Switch_LogWrite("[SWITCH DBADD] ENTER\n");
 #endif
     newEntry.entry.asset.type = type;
     newEntry.entry.asset.header = header;
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBADD] BEFORE LOCK\\n");
+    Switch_LogWrite("[SWITCH DBADD] BEFORE LOCK\n");
 #endif
     Sys_LockWrite(&db_hashCritSect);
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBADD] AFTER LOCK\\n");
-    Switch_LogWrite("[SWITCH DBADD] BEFORE LINK\\n");
+    Switch_LogWrite("[SWITCH DBADD] AFTER LOCK\n");
+    Switch_LogWrite("[SWITCH DBADD] BEFORE LINK\n");
 #endif
     existingEntry = DB_LinkXAssetEntry(&newEntry, 0);
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBADD] AFTER LINK\\n");
+    Switch_LogWrite("[SWITCH DBADD] AFTER LINK\n");
 #endif
     Sys_UnlockWrite(&db_hashCritSect);
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBADD] AFTER UNLOCK\\n");
+    Switch_LogWrite("[SWITCH DBADD] AFTER UNLOCK\n");
 #endif
     DB_SyncLostDevice();
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBADD] AFTER SYNC\\n");
+    Switch_LogWrite("[SWITCH DBADD] AFTER SYNC\n");
 #endif
     return existingEntry->entry.asset.header;
 }
@@ -2337,7 +2337,7 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     uint32_t hash;
     uint32_t existingEntryIndex;
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBLINK] ENTER\\n");
+    Switch_LogWrite("[SWITCH DBLINK] ENTER\n");
 #endif
     XAssetEntryPoolEntry *overrideAssetEntry;
     XAsset asset;
@@ -2349,11 +2349,11 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     XAssetSize assetSize;
 
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBLINK] BEFORE NAME\\n");
+    Switch_LogWrite("[SWITCH DBLINK] BEFORE NAME\n");
 #endif
     name = DB_GetXAssetName(&newEntry->entry.asset);
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBLINK] AFTER NAME\\n");
+    Switch_LogWrite("[SWITCH DBLINK] AFTER NAME\n");
 #endif
     v2 = *name;
     isStubAsset = v2 == ',';
@@ -2361,11 +2361,11 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         ++name;
     type = newEntry->entry.asset.type;
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBLINK] BEFORE HASH\\n");
+    Switch_LogWrite("[SWITCH DBLINK] BEFORE HASH\n");
 #endif
     hash = DB_HashForName(name, type);
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH DBLINK] AFTER HASH\\n");
+    Switch_LogWrite("[SWITCH DBLINK] AFTER HASH\n");
 #endif
     existingEntry = NULL;
 
@@ -2397,16 +2397,16 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         asset.type = newEntry->entry.asset.type;
         asset.header = newEntry->entry.asset.header;
 #ifdef __SWITCH__
-        Switch_LogWrite("[SWITCH DBLINK] BEFORE ENTRY ALLOC\\n");
+        Switch_LogWrite("[SWITCH DBLINK] BEFORE ENTRY ALLOC\n");
 #endif
         newEntry = DB_AllocXAssetEntry(asset.type, g_zoneIndex);
 #ifdef __SWITCH__
-        Switch_LogWrite("[SWITCH DBLINK] AFTER ENTRY ALLOC\\n");
-        Switch_LogWrite("[SWITCH DBLINK] BEFORE CLONE\\n");
+        Switch_LogWrite("[SWITCH DBLINK] AFTER ENTRY ALLOC\n");
+        Switch_LogWrite("[SWITCH DBLINK] BEFORE CLONE\n");
 #endif
         DB_CloneXAssetInternal(&asset, &newEntry->entry.asset);
 #ifdef __SWITCH__
-        Switch_LogWrite("[SWITCH DBLINK] AFTER CLONE\\n");
+        Switch_LogWrite("[SWITCH DBLINK] AFTER CLONE\n");
 #endif
     }
 
