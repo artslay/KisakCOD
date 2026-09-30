@@ -456,6 +456,7 @@ void Load_XAssetListCustom()
 
     SerializedXAssetList serialized{};
     DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
+    DB_IncStreamPos(static_cast<int32_t>(sizeof(serialized)));
 
     varXAssetList = &g_varXAssetList;
     memset(varXAssetList, 0, sizeof(*varXAssetList));
