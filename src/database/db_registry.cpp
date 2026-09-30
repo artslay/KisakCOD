@@ -921,7 +921,15 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
     }
 
 
+#ifdef __SWITCH__
+    if (traceDefaultMaterial)
+        Switch_LogWrite("[SWITCH DBLOOKUP] before write lock\n");
+#endif
     Sys_LockWrite(&db_hashCritSect);
+#ifdef __SWITCH__
+    if (traceDefaultMaterial)
+        Switch_LogWrite("[SWITCH DBLOOKUP] after write lock\n");
+#endif
 
     // Re-check after acquiring the writer lock, matching the upstream double-check.
     XAssetEntryPoolEntry *existing = DB_FindXAssetEntry(type, name);
@@ -940,7 +948,15 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
     }
 
 
+#ifdef __SWITCH__
+    if (traceDefaultMaterial)
+        Switch_LogWrite("[SWITCH DBLOOKUP] before DB_CreateDefaultEntry\n");
+#endif
     newEntry = DB_CreateDefaultEntry(type, (char *)name);
+#ifdef __SWITCH__
+    if (traceDefaultMaterial)
+        Switch_LogWrite("[SWITCH DBLOOKUP] after DB_CreateDefaultEntry\n");
+#endif
     Sys_UnlockWrite(&db_hashCritSect);
 
 
@@ -1501,12 +1517,16 @@ XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *na
 
     const uint32_t hash = DB_HashForName(name, type);
 #ifdef __SWITCH__
-    if (type == ASSET_TYPE_MATERIAL && name && !I_stricmp(name, "$default"))
+    const bool traceDefaultMaterial =
+        type == ASSET_TYPE_MATERIAL && name && !I_stricmp(name, "$default");
+    if (traceDefaultMaterial)
     {
         char trace[192];
         std::snprintf(trace, sizeof(trace),
-            "[SWITCH DBLOOKUP] material $default hash=%u first=%u\\n",
-            hash, static_cast<unsigned>(db_hashTable[hash]));
+            "[SWITCH DBLOOKUP] material $default hash=%u first=%u write=%u\\n",
+            hash,
+            static_cast<unsigned>(db_hashTable[hash]),
+            static_cast<unsigned>(db_hashCritSect.writeCount));
         Switch_LogWrite(trace);
     }
 #endif
