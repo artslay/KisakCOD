@@ -9344,7 +9344,8 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         varXAssetHeader = &varXAsset->header;
 
 #ifdef __SWITCH__
-        const bool traceAsset = (i & 63) == 0 || i == count - 1;
+        const bool traceAsset =
+            (i & 63) == 0 || i == count - 1 || (i >= 1125 && i <= 1132);
         if (traceAsset)
         {
             char trace[192];
