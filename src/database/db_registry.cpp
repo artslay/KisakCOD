@@ -377,6 +377,10 @@ static void __cdecl DB_RemoveGfxWorld(XAssetHeader ass);
 static void __cdecl DB_DynamicCloneMenu(XAssetHeader from, XAssetHeader to, int32_t swag = 0);
 static void __cdecl DB_RemoveWindowFocus(windowDef_t *window);
 static XAssetHeader __cdecl DB_AllocMaterial(void *arg);
+#ifdef KISAK_SP
+static XAssetHeader __cdecl DB_AllocPixelShader(void *arg);
+static void __cdecl DB_FreePixelShader(void *arg, XAssetHeader header);
+#endif
 static void __cdecl DB_FreeMaterial(void *pool, XAssetHeader header);
 static void __cdecl DB_Sleep(uint32_t msec);
 static void __cdecl DB_LogMissingAsset(XAssetType type, const char *name);
@@ -762,6 +766,9 @@ void(__cdecl *DB_RemoveXAssetHandler[ASSET_TYPE_COUNT])(XAssetHeader) =
   NULL,
   NULL,
   NULL,
+#ifdef KISAK_SP
+  NULL,
+#endif
   (void(*)(XAssetHeader)) & Material_ReleaseTechniqueSet,
   (void(*)(XAssetHeader)) & Image_Free,
   NULL,
@@ -1842,6 +1849,39 @@ static XAssetHeader __cdecl DB_AllocXAsset_StringTable_(void *arg)
     return header;
 }
 
+#ifdef KISAK_SP
+static XAssetHeader __cdecl DB_AllocPixelShader(void *arg)
+{
+    auto *pool =
+        static_cast<XAssetPool<MaterialPixelShader, POOLSIZE_PIXELSHADER> *>(
+            arg);
+    XAssetHeader header{};
+    if (pool->freeHead)
+    {
+        auto *entry = pool->freeHead;
+        pool->freeHead = entry->next;
+        header.pixelShader = &entry->entry;
+    }
+    return header;
+}
+
+static void __cdecl DB_FreePixelShader(void *arg, XAssetHeader header)
+{
+    auto *pool =
+        static_cast<XAssetPool<MaterialPixelShader, POOLSIZE_PIXELSHADER> *>(
+            arg);
+    if (!header.pixelShader)
+        return;
+
+    auto *entry =
+        reinterpret_cast<XAssetPoolEntry<MaterialPixelShader> *>(
+            header.pixelShader);
+    entry->next = pool->freeHead;
+    pool->freeHead = entry;
+}
+
+#endif
+
 static XAssetHeader __cdecl DB_AllocMaterial(void *arg)
 {
     XAssetHeader *pool = (XAssetHeader*)arg;
@@ -1864,6 +1904,9 @@ XAssetHeader(__cdecl *DB_AllocXAssetHeaderHandler[ASSET_TYPE_COUNT])(void *) =
   &DB_AllocXAsset_StringTable_,
   &DB_AllocXAsset_StringTable_,
   &DB_AllocMaterial,
+#ifdef KISAK_SP
+  &DB_AllocPixelShader,
+#endif
   &DB_AllocXAsset_StringTable_,
   &DB_AllocXAsset_StringTable_,
   &DB_AllocXAsset_StringTable_,
@@ -1915,6 +1958,9 @@ void(__cdecl *DB_FreeXAssetHeaderHandler[ASSET_TYPE_COUNT])(void *, XAssetHeader
   DB_FreeXAssetHeader_StringTable_,
   DB_FreeXAssetHeader_StringTable_,
   DB_FreeMaterial,
+#ifdef KISAK_SP
+  DB_FreePixelShader,
+#endif
   DB_FreeXAssetHeader_StringTable_,
   DB_FreeXAssetHeader_StringTable_,
   DB_FreeXAssetHeader_StringTable_,
