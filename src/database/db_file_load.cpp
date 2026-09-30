@@ -659,7 +659,7 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 #endif
         Load_XAssetHeader(0);
 #ifdef __SWITCH__
-        if (i >= 1120 && i <= 1132)
+        if (i >= 1120 && i <= 1140)
             Switch_LogWrite("[SWITCH ASSET RETURN] after header\n");
 #endif
 
