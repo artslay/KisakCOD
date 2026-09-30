@@ -25,6 +25,10 @@ extern void Switch_LogRaw(const char *msg);
 #endif
 
 #ifdef __SWITCH__
+static int32_t g_switchAssetIndex = -1;
+#endif
+
+#ifdef __SWITCH__
 extern void Switch_LogWrite(const char *msg);
 
 enum weapPositionAnimNum_t : __int32
@@ -5607,44 +5611,171 @@ void __cdecl Mark_MenuListPtr()
 
 void __cdecl Load_LocalizeEntry(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH LOCALIZE] index=%d BEGIN entry=%p stream=%p\n",
+               g_switchAssetIndex,
+               (void *)varLocalizeEntry,
+               (void *)DB_GetStreamPos());
+#endif
+
     Load_Stream(atStreamStart, (uint8_t *)varLocalizeEntry, 8);
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH LOCALIZE] index=%d AFTER_HEADER entry=%p\n",
+               g_switchAssetIndex,
+               (void *)varLocalizeEntry);
+#endif
+
     DB_PushStreamPos(4);
+
+#ifdef __SWITCH__
+    uint32_t rawValue = *reinterpret_cast<uint32_t *>(&varLocalizeEntry->value);
+    uint32_t rawName = *reinterpret_cast<uint32_t *>(&varLocalizeEntry->name);
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH LOCALIZE] index=%d raw value=%08x name=%08x\n",
+               g_switchAssetIndex,
+               rawValue,
+               rawName);
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH LOCALIZE] index=%d BEFORE value\n",
+               g_switchAssetIndex);
+#endif
+
     varXString = &varLocalizeEntry->value;
     Load_XString(0);
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH LOCALIZE] index=%d AFTER value ptr=%p\n",
+               g_switchAssetIndex,
+               (void *)varLocalizeEntry->value);
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH LOCALIZE] index=%d BEFORE name\n",
+               g_switchAssetIndex);
+#endif
+
     varXString = &varLocalizeEntry->name;
     Load_XString(0);
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH LOCALIZE] index=%d AFTER name ptr=%p\n",
+               g_switchAssetIndex,
+               (void *)varLocalizeEntry->name);
+#endif
+
     DB_PopStreamPos();
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH LOCALIZE] index=%d END\n",
+               g_switchAssetIndex);
+#endif
 }
 
 void __cdecl Load_LocalizeEntryPtr(bool atStreamStart)
 {
-    const void **inserted; // [esp+0h] [ebp-Ch]
-    uint32_t value; // [esp+4h] [ebp-8h]
+    const void **inserted;
+    uint32_t value;
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH LOCALIZE PTR] index=%d BEGIN ptr=%p\n",
+               g_switchAssetIndex,
+               (void *)varLocalizeEntryPtr);
+#endif
 
     Load_Stream(atStreamStart, (uint8_t *)varLocalizeEntryPtr, 4);
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH LOCALIZE PTR] index=%d AFTER PTR LOAD raw=%08x\n",
+               g_switchAssetIndex,
+               static_cast<uint32_t>(
+                   reinterpret_cast<uintptr_t>(*varLocalizeEntryPtr)));
+#endif
+
     DB_PushStreamPos(0);
+
     if (*varLocalizeEntryPtr)
     {
-        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varLocalizeEntryPtr));
+        value = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(*varLocalizeEntryPtr));
+
+#ifdef __SWITCH__
+        Com_Printf(CON_CHANNEL_FILES,
+                   "[SWITCH LOCALIZE PTR] index=%d value=%08x\n",
+                   g_switchAssetIndex,
+                   value);
+#endif
+
         if (value == -1 || value == -2)
         {
-            *varLocalizeEntryPtr = (LocalizeEntry *)AllocLoad_FxElemVisStateSample();
+#ifdef __SWITCH__
+            Com_Printf(CON_CHANNEL_FILES,
+                       "[SWITCH LOCALIZE PTR] index=%d INLINE marker=%08x\n",
+                       g_switchAssetIndex,
+                       value);
+#endif
+
+            *varLocalizeEntryPtr =
+                (LocalizeEntry *)AllocLoad_FxElemVisStateSample();
+
             varLocalizeEntry = *varLocalizeEntryPtr;
+
             if (value == -2)
                 inserted = DB_InsertPointer();
             else
                 inserted = 0;
+
+#ifdef __SWITCH__
+            Com_Printf(CON_CHANNEL_FILES,
+                       "[SWITCH LOCALIZE PTR] index=%d BEFORE Load_LocalizeEntry\n",
+                       g_switchAssetIndex);
+#endif
+
             Load_LocalizeEntry(1);
+
+#ifdef __SWITCH__
+            Com_Printf(CON_CHANNEL_FILES,
+                       "[SWITCH LOCALIZE PTR] index=%d AFTER Load_LocalizeEntry\n",
+                       g_switchAssetIndex);
+            Com_Printf(CON_CHANNEL_FILES,
+                       "[SWITCH LOCALIZE PTR] index=%d BEFORE Load_LocalizeEntryAsset\n",
+                       g_switchAssetIndex);
+#endif
+
             Load_LocalizeEntryAsset((XAssetHeader *)varLocalizeEntryPtr);
+
+#ifdef __SWITCH__
+            Com_Printf(CON_CHANNEL_FILES,
+                       "[SWITCH LOCALIZE PTR] index=%d AFTER Load_LocalizeEntryAsset\n",
+                       g_switchAssetIndex);
+#endif
+
             if (inserted)
                 *inserted = *varLocalizeEntryPtr;
         }
         else
         {
+#ifdef __SWITCH__
+            Com_Printf(CON_CHANNEL_FILES,
+                       "[SWITCH LOCALIZE PTR] index=%d OFFSET\n",
+                       g_switchAssetIndex);
+#endif
             DB_ConvertOffsetToAlias((uint32_t *)varLocalizeEntryPtr);
         }
     }
+
     DB_PopStreamPos();
+
+#ifdef __SWITCH__
+    Com_Printf(CON_CHANNEL_FILES,
+               "[SWITCH LOCALIZE PTR] index=%d END\n",
+               g_switchAssetIndex);
+#endif
 }
 
 void __cdecl Mark_LocalizeEntryPtr()
@@ -7639,15 +7770,27 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         memcpy(&varXAsset->header, &serialized.header, sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
 
-        Load_XAssetHeader(0);
 #ifdef __SWITCH__
-        if (i < 16)
+        g_switchAssetIndex = i;
+        if (i < 32)
         {
             Com_Printf(CON_CHANNEL_FILES,
-                       "Switch DB: asset[%d] type=%d header=%p\n",
+                       "[SWITCH ASSET] BEGIN index=%d type=%d raw=%08x\n",
                        i,
-                       static_cast<int>(varXAsset->type),
-                       varXAsset->header.data);
+                       static_cast<int>(serialized.type),
+                       serialized.header);
+        }
+#endif
+
+        Load_XAssetHeader(0);
+
+#ifdef __SWITCH__
+        if (i < 32)
+        {
+            Com_Printf(CON_CHANNEL_FILES,
+                       "[SWITCH ASSET] END index=%d type=%d\n",
+                       i,
+                       static_cast<int>(serialized.type));
         }
 #endif
         ++var;
