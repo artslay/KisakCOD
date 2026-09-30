@@ -2652,22 +2652,56 @@ void __cdecl Load_GfxImageAsset(XAssetHeader *image)
 {
 #ifdef __SWITCH__
     {
-        char trace[256];
+        char trace[192];
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH IMAGE ABI] hdr=%zu asset=%zu entry=%zu pool=%zu image=%p name=%p\n",
-            sizeof(XAssetHeader),
-            sizeof(XAsset),
-            sizeof(XAssetEntry),
-            sizeof(XAssetEntryPoolEntry),
-            image ? static_cast<void *>(image->image) : nullptr,
-            image && image->image ? static_cast<const void *>(image->image->name) : nullptr);
+            "[SWITCH IMAGE ABI] enter imageArg=%p hdr=%u asset=%u entry=%u pool=%u\n",
+            static_cast<void *>(image),
+            static_cast<unsigned>(sizeof(XAssetHeader)),
+            static_cast<unsigned>(sizeof(XAsset)),
+            static_cast<unsigned>(sizeof(XAssetEntry)),
+            static_cast<unsigned>(sizeof(XAssetEntryPoolEntry)));
+        Switch_LogWrite(trace);
+    }
+
+    if (!image)
+    {
+        Switch_LogWrite("[SWITCH IMAGE ABI] null header\n");
+        return;
+    }
+
+    {
+        const uintptr_t imagePtr =
+            reinterpret_cast<uintptr_t>(image->image);
+        char trace[192];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH IMAGE ABI] imagePtr=%p\n",
+            reinterpret_cast<void *>(imagePtr));
+        Switch_LogWrite(trace);
+    }
+
+    {
+        const GfxImage *gfxImage = image->image;
+        const uintptr_t namePtr =
+            gfxImage ? reinterpret_cast<uintptr_t>(gfxImage->name) : 0;
+        char trace[192];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH IMAGE ABI] gfxImage=%p namePtr=%p\n",
+            static_cast<const void *>(gfxImage),
+            reinterpret_cast<const void *>(namePtr));
         Switch_LogWrite(trace);
     }
 #endif
-    image->xmodelPieces = DB_AddXAsset(ASSET_TYPE_IMAGE, (XAssetHeader)image->xmodelPieces).xmodelPieces;
+
+    image->xmodelPieces =
+        DB_AddXAsset(ASSET_TYPE_IMAGE, (XAssetHeader)image->xmodelPieces).xmodelPieces;
 }
+
 
 void __cdecl Mark_GfxImageAsset(GfxImage *image)
 {
