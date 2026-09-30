@@ -2656,7 +2656,7 @@ void __cdecl Load_GfxImageAsset(XAssetHeader *image)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH IMAGE ABI] hdr=%zu asset=%zu entry=%zu pool=%zu image=%p name=%p\\n",
+            "[SWITCH IMAGE ABI] hdr=%zu asset=%zu entry=%zu pool=%zu image=%p name=%p\n",
             sizeof(XAssetHeader),
             sizeof(XAsset),
             sizeof(XAssetEntry),
