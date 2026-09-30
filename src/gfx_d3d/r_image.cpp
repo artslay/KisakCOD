@@ -23,9 +23,6 @@
 
 #ifdef __SWITCH__
 extern void Switch_LogWrite(const char *msg);
-{
-    Switch_LogWrite(msg);
-}
 #endif
 
 #ifdef __SWITCH__
