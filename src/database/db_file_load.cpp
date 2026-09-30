@@ -376,9 +376,6 @@ void __cdecl DB_LoadXFileInternal()
         varXAssetList->assets =
             reinterpret_cast<XAsset *>(DB_AllocStreamPos(3));
         varXAsset = varXAssetList->assets;
-        if (varXAssetList->assetCount > 0)
-            DB_IncStreamPos(static_cast<int32_t>(
-                sizeof(XAsset) * static_cast<size_t>(varXAssetList->assetCount)));
         Load_XAssetArrayCustom(varXAssetList->assetCount);
     }
     DB_PopStreamPos();
@@ -564,21 +561,6 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 #ifdef __SWITCH__
         if (serialized.type == ASSET_TYPE_MATERIAL)
             Switch_LogWrite("[SWITCH XASSET] material Load_XAssetHeader done\n");
-#endif
-
-#ifdef __SWITCH__
-        if (serialized.type == ASSET_TYPE_MATERIAL
-            && serialized.header != 0
-            && serialized.header != UINT32_MAX
-            && serialized.header != UINT32_MAX - 1
-            && varXAsset->header.material)
-        {
-            varXAsset->header.material->info.name = "$default";
-            Switch_LogWrite("[SWITCH XASSET] material name restored as $default\n");
-            varXAsset->header =
-                DB_AddXAsset(ASSET_TYPE_MATERIAL, varXAsset->header);
-            Switch_LogWrite("[SWITCH XASSET] material registered\n");
-        }
 #endif
 
 #ifdef __SWITCH__
