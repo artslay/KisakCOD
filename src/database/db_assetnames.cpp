@@ -7,14 +7,29 @@
 const char *__cdecl DB_StringTableGetName(const XAssetHeader *header);
 const char *__cdecl DB_LocalizeEntryGetName(const XAssetHeader *header);
 const char *__cdecl DB_ImageGetName(const XAssetHeader *header);
+#ifdef KISAK_SP
+const char *__cdecl DB_PixelShaderGetName(const XAssetHeader *header)
+{
+    return header->pixelShader->name;
+}
 
-const char *(__cdecl *DB_XAssetGetNameHandler[33])(const XAssetHeader *) =
+void __cdecl DB_PixelShaderSetName(XAssetHeader *header, const char *name)
+{
+    header->pixelShader->name = name;
+}
+
+#endif
+
+const char *(__cdecl *DB_XAssetGetNameHandler[ASSET_TYPE_COUNT])(const XAssetHeader *) =
 {
     // KISAKTODO: these got Identical COMDAT folded into 1 function because name is usually the 1st field.
     DB_StringTableGetName,
     DB_StringTableGetName,
     DB_StringTableGetName,
     DB_StringTableGetName,
+#ifdef KISAK_SP
+    DB_PixelShaderGetName,
+#endif
     DB_StringTableGetName,
     DB_StringTableGetName,
     DB_ImageGetName,
@@ -50,13 +65,16 @@ void __cdecl DB_StringTableSetName(XAssetHeader *header, const char *name);
 void __cdecl DB_ImageSetName(XAssetHeader *header, const char *name);
 void __cdecl DB_LocalizeEntrySetName(XAssetHeader *header, const char *name);
 
-void(__cdecl *DB_XAssetSetNameHandler[33])(XAssetHeader *, const char *) =
+void(__cdecl *DB_XAssetSetNameHandler[ASSET_TYPE_COUNT])(XAssetHeader *, const char *) =
 {
     DB_StringTableSetName,
     DB_StringTableSetName,
     DB_StringTableSetName,
     DB_StringTableSetName,
     DB_StringTableSetName,
+#ifdef KISAK_SP
+    DB_PixelShaderSetName,
+#endif
     DB_StringTableSetName,
     DB_ImageSetName,
     DB_StringTableSetName,
@@ -109,6 +127,13 @@ int32_t __cdecl DB_SizeofXAsset_Material_()
 {
     return sizeof(Material);
 }
+#ifdef KISAK_SP
+int32_t __cdecl DB_SizeofXAsset_MaterialPixelShader_()
+{
+    return sizeof(MaterialPixelShader);
+}
+#endif
+
 int32_t __cdecl DB_SizeofXAsset_MaterialTechniqueSet_()
 {
     return sizeof(MaterialTechniqueSet);
@@ -153,13 +178,16 @@ int32_t __cdecl DB_SizeofXAsset_FxEffectDef_()
 {
     return sizeof(FxEffectDef);
 }
-int(__cdecl *DB_GetXAssetSizeHandler[33])() =
+int(__cdecl *DB_GetXAssetSizeHandler[ASSET_TYPE_COUNT])() =
 {
     DB_SizeofXAsset_RawFile_,
     DB_SizeofXAsset_GameWorldSp_,
     DB_SizeofXAsset_XAnimParts_,
     DB_SizeofXAsset_XModel_,
     DB_SizeofXAsset_Material_,
+#ifdef KISAK_SP
+    DB_SizeofXAsset_MaterialPixelShader_,
+#endif
     DB_SizeofXAsset_MaterialTechniqueSet_,
     DB_SizeofXAsset_GfxImage_,
     DB_SizeofXAsset_RawFile_,
