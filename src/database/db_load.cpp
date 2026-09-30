@@ -2791,9 +2791,12 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
         uint8_t perObjArgCount;
         uint8_t stableArgCount;
         uint8_t customSamplerFlags;
+        uint8_t precompiledIndex;
+        uint8_t materialType;
+        uint8_t pad[2];
         uint32_t args;
     };
-    static_assert(sizeof(SerializedMaterialPass) == 20);
+    static_assert(sizeof(SerializedMaterialPass) == 24);
 
     iassert(atStreamStart);
     SerializedMaterialPass serialized{};
@@ -3087,10 +3090,9 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
         uint8_t worldVertFormat;
         uint8_t hasBeenUploaded;
         uint8_t unused[2];
-        uint32_t remappedTechniqueSet;
-        uint32_t techniques[TECHNIQUE_COUNT];
+        uint32_t techniques[26];
     };
-    static_assert(sizeof(SerializedMaterialTechniqueSet) == 148);
+    static_assert(sizeof(SerializedMaterialTechniqueSet) == 112);
 
     SerializedMaterialTechniqueSet serialized{};
     DB_LoadXFileData(
@@ -3124,21 +3126,45 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
                 DB_ConvertOffsetToPointerValue(serialized.name));
     }
 
-    varMaterialTechniqueSet->remappedTechniqueSet =
-        reinterpret_cast<MaterialTechniqueSet *>(
-            static_cast<uintptr_t>(serialized.remappedTechniqueSet));
+    varMaterialTechniqueSet->remappedTechniqueSet = nullptr;
 
-    for (int i = 0; i < TECHNIQUE_COUNT; ++i)
+    for (int i = 0; i < 26; ++i)
     {
-        varMaterialTechniqueSet->techniques[i] =
-            reinterpret_cast<MaterialTechnique *>(
-                static_cast<uintptr_t>(serialized.techniques[i]));
+        const uint32_t value = serialized.techniques[i];
+
+        if (!value)
+        {
+            varMaterialTechniqueSet->techniques[i] = nullptr;
+        }
+        else if (value == UINT32_MAX)
+        {
+            varMaterialTechniqueSet->techniques[i] =
+                reinterpret_cast<MaterialTechnique *>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(
+                            sizeof(MaterialTechnique) +
+                            sizeof(MaterialPass) * 63),
+                        "SwitchMaterialTechnique",
+                        22));
+            varMaterialTechnique =
+                varMaterialTechniqueSet->techniques[i];
+            memset(
+                varMaterialTechnique,
+                0,
+                sizeof(MaterialTechnique) +
+                    sizeof(MaterialPass) * 63);
+            Load_MaterialTechnique(1);
+        }
+        else
+        {
+            varMaterialTechniqueSet->techniques[i] =
+                reinterpret_cast<MaterialTechnique *>(
+                    DB_ConvertOffsetToPointerValue(value));
+        }
     }
 
-    DB_PushStreamPos(4);
-    varMaterialTechniquePtr = varMaterialTechniqueSet->techniques;
-    Load_MaterialTechniquePtrArray(0, TECHNIQUE_COUNT);
-    DB_PopStreamPos();
+    for (int i = 26; i < TECHNIQUE_COUNT; ++i)
+        varMaterialTechniqueSet->techniques[i] = nullptr;
 
 #else
     Load_Stream(atStreamStart, (uint8_t *)varMaterialTechniqueSet, 148);
@@ -3222,7 +3248,7 @@ void __cdecl Load_Material(bool atStreamStart)
         uint32_t surfaceTypeBits;
         uint16_t hashIndex;
         uint16_t infoPad;
-        uint8_t stateBitsEntry[TECHNIQUE_COUNT];
+        uint8_t stateBitsEntry[26];
         uint8_t textureCount;
         uint8_t constantCount;
         uint8_t stateBitsCount;
@@ -3235,7 +3261,7 @@ void __cdecl Load_Material(bool atStreamStart)
         uint32_t stateBitsTable;
     };
 
-    static_assert(sizeof(SerializedMaterial) == 80);
+    static_assert(sizeof(SerializedMaterial) == 72);
 
     SerializedMaterial serialized{};
     uint8_t *materialStreamPos = DB_GetStreamPos();
