@@ -492,6 +492,8 @@ XAssetList g_varXAssetList{};
 int32_t g_switchCurrentAssetIndex = -1;
 uint32_t g_switchCurrentAssetRawType = UINT32_MAX;
 uint32_t g_switchCurrentAssetHeader = 0;
+static uint32_t g_switchAssetTraceCount = 0;
+static uint32_t g_switchImagePtrTraceCount = 0;
 #endif
 
 void *varint;
@@ -2895,12 +2897,39 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
 
             Load_GfxImageAsset(&imageHeader);
 
+#ifdef __SWITCH__
+            if (g_switchImagePtrTraceCount < 32)
+            {
+                char trace[192];
+                std::snprintf(
+                    trace, sizeof(trace),
+                    "[SWITCH IMAGEPTR] %u after Load_GfxImageAsset image=%p name=%s\\n",
+                    (unsigned)g_switchImagePtrTraceCount,
+                    static_cast<void *>(imageHeader.image),
+                    imageHeader.image && imageHeader.image->name ? imageHeader.image->name : "<null>");
+                Switch_LogWrite(trace);
+            }
+#endif
+
             // Store the fully widened native pointer back into the runtime
             // XAsset header slot only after all serialized image reads are done.
             std::memcpy(
                 reinterpret_cast<uint8_t *>(varGfxImagePtr),
                 &imageHeader.image,
                 sizeof(imageHeader.image));
+
+#ifdef __SWITCH__
+            if (g_switchImagePtrTraceCount < 32)
+            {
+                char trace[128];
+                std::snprintf(
+                    trace, sizeof(trace),
+                    "[SWITCH IMAGEPTR] %u after header store slot=%p\\n",
+                    (unsigned)g_switchImagePtrTraceCount,
+                    static_cast<void *>(varGfxImagePtr));
+                Switch_LogWrite(trace);
+            }
+#endif
 
             if (inserted)
                 *inserted = imageHeader.image;
@@ -2922,6 +2951,18 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
         }
     }
 
+#ifdef __SWITCH__
+    if (g_switchImagePtrTraceCount < 32)
+    {
+        char trace[128];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH IMAGEPTR] %u before PopStreamPos\\n",
+            (unsigned)g_switchImagePtrTraceCount);
+        Switch_LogWrite(trace);
+    }
+    ++g_switchImagePtrTraceCount;
+#endif
     DB_PopStreamPos();
 #else
     uint32_t value;
@@ -9238,8 +9279,39 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
 
+#ifdef __SWITCH__
+        const bool traceAsset = g_switchAssetTraceCount < 64;
+        if (traceAsset)
+        {
+            char trace[192];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH ASSET] %u begin rawType=%u runtimeType=%u header=%08x ptr=%p\\n",
+                (unsigned)g_switchAssetTraceCount,
+                serialized.type,
+                runtimeType,
+                serialized.header,
+                static_cast<void *>(varXAsset));
+            Switch_LogWrite(trace);
+        }
+#endif
+
         Load_XAssetHeader(0);
 
+#ifdef __SWITCH__
+        if (traceAsset)
+        {
+            char trace[160];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH ASSET] %u end rawType=%u runtimeType=%u\\n",
+                (unsigned)g_switchAssetTraceCount,
+                serialized.type,
+                runtimeType);
+            Switch_LogWrite(trace);
+        }
+        ++g_switchAssetTraceCount;
+#endif
 
         ++var;
     }
