@@ -25,7 +25,7 @@ extern void Switch_LogRaw(const char *msg);
 #endif
 
 #ifdef __SWITCH__
-static int32_t g_switchAssetIndex = -1;
+int32_t g_switchAssetIndex = -1;
 #endif
 
 #ifdef __SWITCH__
