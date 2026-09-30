@@ -580,6 +580,26 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
                 sizeof(SerializedXAsset) * static_cast<size_t>(count)));
         DB_IncStreamPos(static_cast<int32_t>(
             sizeof(SerializedXAsset) * static_cast<size_t>(count)));
+
+#ifdef __SWITCH__
+        for (int32_t traceIndex = 1120;
+             traceIndex <= 1132 && traceIndex < count;
+             ++traceIndex)
+        {
+            char trace[160];
+            const SerializedXAsset &traceAsset =
+                serializedAssets[static_cast<size_t>(traceIndex)];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XASSET RAW] %d type=%u header=%08x runtime=%u\n",
+                traceIndex,
+                traceAsset.type,
+                traceAsset.header,
+                traceAsset.type >= 5 ? traceAsset.type + 1 : traceAsset.type);
+            Switch_LogWrite(trace);
+        }
+#endif
     }
 
     XAsset *var = varXAsset;
@@ -633,9 +653,15 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
 
-
+#ifdef __SWITCH__
+        if (i >= 1120 && i <= 1132)
+            Switch_LogWrite("[SWITCH ASSET RETURN] before header\n");
+#endif
         Load_XAssetHeader(0);
-
+#ifdef __SWITCH__
+        if (i >= 1120 && i <= 1132)
+            Switch_LogWrite("[SWITCH ASSET RETURN] after header\n");
+#endif
 
         ++var;
     }
