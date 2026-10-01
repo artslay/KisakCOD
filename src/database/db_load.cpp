@@ -6260,7 +6260,7 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
                     varFxEffectDef->elemDefCountEmission +
                         varFxEffectDef->elemDefCountOneShot +
                         varFxEffectDef->elemDefCountLooping,
-                    static_cast<void *>(varFxEffectDef->elemDefs));
+                    static_cast<const void *>(varFxEffectDef->elemDefs));
                 Switch_LogWrite(trace);
             }
 #endif
