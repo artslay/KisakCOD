@@ -6102,6 +6102,230 @@ void __cdecl Load_FxTrailDef(bool atStreamStart)
 
 void __cdecl Load_FxElemDef(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        struct SerializedFxElemDef
+        {
+            int32_t flags;
+            FxSpawnDef spawn;
+            FxFloatRange spawnRange;
+            FxFloatRange fadeInRange;
+            FxFloatRange fadeOutRange;
+            float spawnFrustumCullRadius;
+            FxIntRange spawnDelayMsec;
+            FxIntRange lifeSpanMsec;
+            FxFloatRange spawnOrigin[3];
+            FxFloatRange spawnOffsetRadius;
+            FxFloatRange spawnOffsetHeight;
+            FxFloatRange spawnAngles[3];
+            FxFloatRange angularVelocity[3];
+            FxFloatRange initialRotation;
+            FxFloatRange gravity;
+            FxFloatRange reflectionFactor;
+            FxElemAtlas atlas;
+            uint8_t elemType;
+            uint8_t visualCount;
+            uint8_t velIntervalCount;
+            uint8_t visStateIntervalCount;
+            uint32_t velSamples;
+            uint32_t visSamples;
+            uint32_t visuals;
+            float collMins[3];
+            float collMaxs[3];
+            uint32_t effectOnImpact;
+            uint32_t effectOnDeath;
+            uint32_t effectEmitted;
+            FxFloatRange emitDist;
+            FxFloatRange emitDistVariance;
+            uint32_t trailDef;
+            uint8_t sortOrder;
+            uint8_t lightingFrac;
+            uint8_t useItemClip;
+            uint8_t unused[1];
+        };
+
+        static_assert(sizeof(SerializedFxElemDef) == 252);
+        static_assert(sizeof(FxElemDef) == 288);
+
+        SerializedFxElemDef serialized{};
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+        DB_IncStreamPos(sizeof(serialized));
+
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1224)
+        {
+            char trace[320];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XASSET TRACE] fx elem flags=%08x type=%u visuals=%u velTok=%08x visTok=%08x visualTok=%08x impact=%08x death=%08x emit=%08x trail=%08x stream=%u pos=%p\n",
+                (unsigned)serialized.flags,
+                (unsigned)serialized.elemType,
+                (unsigned)serialized.visualCount,
+                serialized.velSamples,
+                serialized.visSamples,
+                serialized.visuals,
+                serialized.effectOnImpact,
+                serialized.effectOnDeath,
+                serialized.effectEmitted,
+                serialized.trailDef,
+                (unsigned)g_streamPosIndex,
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
+#endif
+
+        std::memset(varFxElemDef, 0, sizeof(FxElemDef));
+
+        varFxElemDef->flags = serialized.flags;
+        varFxElemDef->spawn = serialized.spawn;
+        varFxElemDef->spawnRange = serialized.spawnRange;
+        varFxElemDef->fadeInRange = serialized.fadeInRange;
+        varFxElemDef->fadeOutRange = serialized.fadeOutRange;
+        varFxElemDef->spawnFrustumCullRadius = serialized.spawnFrustumCullRadius;
+        varFxElemDef->spawnDelayMsec = serialized.spawnDelayMsec;
+        varFxElemDef->lifeSpanMsec = serialized.lifeSpanMsec;
+        std::memcpy(
+            varFxElemDef->spawnOrigin,
+            serialized.spawnOrigin,
+            sizeof(serialized.spawnOrigin));
+        varFxElemDef->spawnOffsetRadius = serialized.spawnOffsetRadius;
+        varFxElemDef->spawnOffsetHeight = serialized.spawnOffsetHeight;
+        std::memcpy(
+            varFxElemDef->spawnAngles,
+            serialized.spawnAngles,
+            sizeof(serialized.spawnAngles));
+        std::memcpy(
+            varFxElemDef->angularVelocity,
+            serialized.angularVelocity,
+            sizeof(serialized.angularVelocity));
+        varFxElemDef->initialRotation = serialized.initialRotation;
+        varFxElemDef->gravity = serialized.gravity;
+        varFxElemDef->reflectionFactor = serialized.reflectionFactor;
+        varFxElemDef->atlas = serialized.atlas;
+        varFxElemDef->elemType = serialized.elemType;
+        varFxElemDef->visualCount = serialized.visualCount;
+        varFxElemDef->velIntervalCount = serialized.velIntervalCount;
+        varFxElemDef->visStateIntervalCount = serialized.visStateIntervalCount;
+
+        varFxElemDef->velSamples =
+            reinterpret_cast<FxElemVelStateSample *>(
+                static_cast<uintptr_t>(serialized.velSamples));
+        varFxElemDef->visSamples =
+            reinterpret_cast<FxElemVisStateSample *>(
+                static_cast<uintptr_t>(serialized.visSamples));
+
+        std::memcpy(
+            &varFxElemDef->visuals,
+            &serialized.visuals,
+            sizeof(serialized.visuals));
+
+        std::memcpy(
+            varFxElemDef->collMins,
+            serialized.collMins,
+            sizeof(serialized.collMins));
+        std::memcpy(
+            varFxElemDef->collMaxs,
+            serialized.collMaxs,
+            sizeof(serialized.collMaxs));
+
+        std::memcpy(
+            &varFxElemDef->effectOnImpact,
+            &serialized.effectOnImpact,
+            sizeof(serialized.effectOnImpact));
+        std::memcpy(
+            &varFxElemDef->effectOnDeath,
+            &serialized.effectOnDeath,
+            sizeof(serialized.effectOnDeath));
+        std::memcpy(
+            &varFxElemDef->effectEmitted,
+            &serialized.effectEmitted,
+            sizeof(serialized.effectEmitted));
+
+        varFxElemDef->emitDist = serialized.emitDist;
+        varFxElemDef->emitDistVariance = serialized.emitDistVariance;
+        varFxElemDef->trailDef =
+            reinterpret_cast<FxTrailDef *>(
+                static_cast<uintptr_t>(serialized.trailDef));
+        varFxElemDef->sortOrder = serialized.sortOrder;
+        varFxElemDef->lightingFrac = serialized.lightingFrac;
+        varFxElemDef->useItemClip = serialized.useItemClip;
+        varFxElemDef->unused[0] = serialized.unused[0];
+
+        if (varFxElemDef->velSamples)
+        {
+            if (serialized.velSamples == UINT32_MAX)
+            {
+                varFxElemDef->velSamples =
+                    (FxElemVelStateSample *)AllocLoad_FxElemVisStateSample();
+                varFxElemVelStateSample = varFxElemDef->velSamples;
+                Load_FxElemVelStateSampleArray(
+                    1,
+                    varFxElemDef->velIntervalCount + 1);
+            }
+            else
+            {
+                varFxElemDef->velSamples =
+                    reinterpret_cast<FxElemVelStateSample *>(
+                        DB_ConvertOffsetToPointerValue(
+                            serialized.velSamples));
+            }
+        }
+
+        if (varFxElemDef->visSamples)
+        {
+            if (serialized.visSamples == UINT32_MAX)
+            {
+                varFxElemDef->visSamples =
+                    (FxElemVisStateSample *)AllocLoad_FxElemVisStateSample();
+                varFxElemVisStateSample = varFxElemDef->visSamples;
+                Load_FxElemVisStateSampleArray(
+                    1,
+                    varFxElemDef->visStateIntervalCount + 1);
+            }
+            else
+            {
+                varFxElemDef->visSamples =
+                    reinterpret_cast<FxElemVisStateSample *>(
+                        DB_ConvertOffsetToPointerValue(
+                            serialized.visSamples));
+            }
+        }
+
+        varFxElemDefVisuals = &varFxElemDef->visuals;
+        Load_FxElemDefVisuals(0);
+
+        varFxEffectDefRef = &varFxElemDef->effectOnImpact;
+        Load_FxEffectDefRef(0);
+        varFxEffectDefRef = &varFxElemDef->effectOnDeath;
+        Load_FxEffectDefRef(0);
+        varFxEffectDefRef = &varFxElemDef->effectEmitted;
+        Load_FxEffectDefRef(0);
+
+        if (varFxElemDef->trailDef)
+        {
+            if (serialized.trailDef == UINT32_MAX)
+            {
+                varFxElemDef->trailDef =
+                    (FxTrailDef *)AllocLoad_FxElemVisStateSample();
+                varFxTrailDef = varFxElemDef->trailDef;
+                Load_FxTrailDef(1);
+            }
+            else
+            {
+                varFxElemDef->trailDef =
+                    reinterpret_cast<FxTrailDef *>(
+                        DB_ConvertOffsetToPointerValue(
+                            serialized.trailDef));
+            }
+        }
+        return;
+    }
+#endif
+
     Load_Stream(atStreamStart, (uint8_t *)varFxElemDef, 252);
     if (varFxElemDef->velSamples)
     {
@@ -6133,6 +6357,24 @@ void __cdecl Load_FxElemDef(bool atStreamStart)
 
 void __cdecl Load_FxElemDefArray(bool atStreamStart, int32_t count)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        // The fastfile stores each FxElemDef as a 252-byte 32-bit-pointer
+        // structure. Native ARM64 FxElemDef is larger because its pointer
+        // fields are 64-bit, so decode each element into a separately
+        // allocated native object instead of writing 252 bytes into the
+        // expanded runtime layout.
+        FxElemDef *var = varFxElemDef;
+        for (int32_t i = 0; i < count; ++i)
+        {
+            varFxElemDef = &var[i];
+            Load_FxElemDef(1);
+        }
+        return;
+    }
+#endif
+
     FxElemDef *var; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
 
@@ -6247,8 +6489,22 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
                 Switch_LogWrite("[SWITCH XASSET TRACE] fx payload before elem alloc\n");
 #endif
             varFxEffectDef->elemDefs =
-                (const FxElemDef *)AllocLoad_FxElemVisStateSample();
+                (const FxElemDef *)Hunk_Alloc(
+                    static_cast<uint32_t>(
+                        sizeof(FxElemDef) *
+                        (varFxEffectDef->elemDefCountEmission +
+                         varFxEffectDef->elemDefCountOneShot +
+                         varFxEffectDef->elemDefCountLooping)),
+                    "SwitchFxElemDef",
+                    22);
             varFxElemDef = (FxElemDef *)varFxEffectDef->elemDefs;
+            std::memset(
+                const_cast<FxElemDef *>(varFxEffectDef->elemDefs),
+                0,
+                sizeof(FxElemDef) *
+                    (varFxEffectDef->elemDefCountEmission +
+                     varFxEffectDef->elemDefCountOneShot +
+                     varFxEffectDef->elemDefCountLooping));
 #ifdef __SWITCH__
             if (g_switchCurrentAssetIndex == 1224)
             {
