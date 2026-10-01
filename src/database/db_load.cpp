@@ -19,6 +19,7 @@
 #include <gfx_d3d/r_sky.h>
 #include <gfx_d3d/r_primarylights.h>
 #include <game/g_bsp.h>
+#include <vector>
 
 #ifdef __SWITCH__
 extern void Switch_LogRaw(const char *msg);
