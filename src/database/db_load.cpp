@@ -1915,7 +1915,19 @@ void __cdecl Load_LoadedSoundPtr(bool atStreamStart)
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varLoadedSoundPtr));
         if (value == -1 || value == -2)
         {
+#ifdef __SWITCH__
+            // LoadedSound is 48 bytes natively on AArch64 (8-byte pointers), while the
+            // CoD4 fastfile serializes only 44 bytes. Do not place the native object directly
+            // in the stream buffer: the subsequent raw PCM payload starts after 44 serialized
+            // bytes and would overwrite the upper half of sound.data.
+            *varLoadedSoundPtr = reinterpret_cast<LoadedSound *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(LoadedSound)),
+                    "SwitchLoadedSound",
+                    22));
+#else
             *varLoadedSoundPtr = (LoadedSound *)AllocLoad_FxElemVisStateSample();
+#endif
             varLoadedSound = *varLoadedSoundPtr;
 #ifdef __SWITCH__
             if (switchLoadedSoundTrace)
