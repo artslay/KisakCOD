@@ -22,6 +22,8 @@ extern FILE *FS_SwitchOpenRootFile(const char *path);
 extern void __cdecl NET_Sleep(int msec);
 extern void Switch_LogWrite(const char *msg);
 extern uint32_t g_switchImageAdds;
+extern int32_t g_switchCurrentAssetIndex;
+extern uint32_t g_switchCurrentAssetRawType;
 #endif
 #include <qcommon/com_bsp.h>
 #include <gfx_d3d/r_init.h>
