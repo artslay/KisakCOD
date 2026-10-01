@@ -2575,7 +2575,7 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         char trace[256];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH IMAGE1363] DB_Link image=%p name=%p text=%s\n",
+            "[SWITCH XASSET TRACE] IMAGE1363 DB_Link image=%p name=%p text=%s\n",
             static_cast<void *>(newEntry->entry.asset.header.image),
             static_cast<const void *>(name),
             name ? name : "<null>");
@@ -2622,7 +2622,7 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         char trace[192];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH IMAGE1363] DB_Link before name deref name=%p\n",
+            "[SWITCH XASSET TRACE] IMAGE1363 DB_Link before name deref name=%p\n",
             static_cast<const void *>(name));
         Switch_LogWrite(trace);
     }
