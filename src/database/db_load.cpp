@@ -5153,23 +5153,11 @@ void __cdecl Load_GfxLightDefPtr(bool atStreamStart)
     const void **inserted; // [esp+0h] [ebp-Ch]
     uint32_t value; // [esp+4h] [ebp-8h]
 
-#ifdef __SWITCH__
-    const bool trace = g_switchCurrentAssetIndex == 1226;
-#endif
-    Load_Stream(atStreamStart, (uint8_t *)varGfxLightDefPtr, 4);
+Load_Stream(atStreamStart, (uint8_t *)varGfxLightDefPtr, 4);
     DB_PushStreamPos(0);
     if (*varGfxLightDefPtr)
     {
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varGfxLightDefPtr));
-#ifdef __SWITCH__
-        if (trace)
-        {
-            char t[160];
-            std::snprintf(t, sizeof(t),
-                "[SWITCH LIGHTDEF] ptr value=%08x\n", value);
-            Switch_LogWrite(t);
-        }
-#endif
         if (value == -1 || value == -2)
         {
             *varGfxLightDefPtr =
@@ -5180,55 +5168,24 @@ void __cdecl Load_GfxLightDefPtr(bool atStreamStart)
                         22));
             varGfxLightDef = *varGfxLightDefPtr;
             std::memset(varGfxLightDef, 0, sizeof(GfxLightDef));
-#ifdef __SWITCH__
-            if (trace)
-        {
-                char t[160];
-                std::snprintf(t, sizeof(t),
-                    "[SWITCH LIGHTDEF] allocated obj=%p inserted=%d\n",
-                    static_cast<void *>(varGfxLightDef),
-                    value == -2 ? 1 : 0);
-                Switch_LogWrite(t);
-            }
-#endif
             if (value == -2)
                 inserted = DB_InsertPointer();
             else
                 inserted = 0;
             Load_GfxLightDef(1);
-#ifdef __SWITCH__
-            if (trace)
-                Switch_LogWrite("[SWITCH LIGHTDEF] Load_GfxLightDef done\n");
-#endif
             Load_LightDefAsset((XAssetHeader *)varGfxLightDefPtr);
-#ifdef __SWITCH__
-            if (trace)
-                Switch_LogWrite("[SWITCH LIGHTDEF] Load_LightDefAsset done\n");
-#endif
             if (inserted)
                 *inserted = *varGfxLightDefPtr;
         }
         else
         {
             DB_ConvertOffsetToAlias((uint32_t *)varGfxLightDefPtr);
-#ifdef __SWITCH__
-            if (trace)
-                Switch_LogWrite("[SWITCH LIGHTDEF] alias done\n");
-#endif
         }
     }
     else
     {
-#ifdef __SWITCH__
-        if (trace)
-            Switch_LogWrite("[SWITCH LIGHTDEF] null ptr\n");
-#endif
     }
     DB_PopStreamPos();
-#ifdef __SWITCH__
-    if (trace)
-        Switch_LogWrite("[SWITCH LIGHTDEF] pop done\n");
-#endif
 }
 
 void __cdecl Load_GfxLight(bool atStreamStart)
