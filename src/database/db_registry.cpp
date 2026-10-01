@@ -1997,7 +1997,7 @@ XAssetHeader(__cdecl *DB_AllocXAssetHeaderHandler[ASSET_TYPE_COUNT])(void *) =
   NULL,
   &DB_AllocXAsset_StringTable_,
   &DB_AllocXAsset_StringTable_,
-  NULL,
+  &DB_AllocXAsset_StringTable_,
   NULL,
   NULL,
   NULL,
