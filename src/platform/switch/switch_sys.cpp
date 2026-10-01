@@ -26,6 +26,20 @@ static bool g_switchScreenLog = false;
 
 void Switch_LogWrite(const char *msg);
 
+static bool Switch_LogPrefixAllowed(const char *msg)
+{
+    if (!msg)
+        return false;
+
+    // Keep only the diagnostics that are still useful for Switch bring-up.
+    // The old image/material/stream/sound-asset trace spam is intentionally
+    // suppressed here without touching the underlying loading code.
+    return std::strncmp(msg, "[SWITCH LOADEDSOUND", 20) == 0 ||
+           std::strncmp(msg, "[SWITCH CRASH]", 14) == 0 ||
+           std::strncmp(msg, "[SWITCH IWD]", 13) == 0 ||
+           std::strncmp(msg, "[SWITCH GLCTX]", 15) == 0;
+}
+
 /*
  * libnx enters this handler on its dedicated exception stack after capturing
  * the faulting CPU context. Keep the stack deliberately larger than libnx's
@@ -107,6 +121,10 @@ extern "C" void __libnx_exception_handler(ThreadExceptionDump *ctx)
 void Switch_LogWrite(const char *msg)
 {
     if (!msg || !*msg)
+        return;
+
+    if (std::strncmp(msg, "[SWITCH ", 8) == 0 &&
+        !Switch_LogPrefixAllowed(msg))
         return;
 
     const size_t len = std::strlen(msg);
