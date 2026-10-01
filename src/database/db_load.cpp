@@ -4870,7 +4870,7 @@ void __cdecl Load_GfxLightDef(bool atStreamStart)
             int32_t lmapLookupStart;
         };
         static_assert(sizeof(SerializedGfxLightDef) == 16);
-        static_assert(sizeof(GfxLightDef) == 24);
+        static_assert(sizeof(GfxLightDef) == 32);
 
         SerializedGfxLightDef serialized{};
         Load_Stream(
