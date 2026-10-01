@@ -3266,35 +3266,6 @@ void __cdecl Load_GfxImage(bool atStreamStart)
         SerializedGfxImage serialized{};
         DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
-#ifdef __SWITCH__
-        if (g_switchCurrentAssetIndex == 1363)
-        {
-            char trace[320];
-            std::snprintf(
-                trace, sizeof(trace),
-                "[SWITCH XASSET TRACE] IMAGE1363 serialized map=%u tex=%08x name=%08x "
-                "picmip=%u,%u noPic=%u semantic=%u track=%u mem=%d,%d "
-                "dim=%u,%u,%u cat=%u delay=%u pos=%p\n",
-                static_cast<unsigned>(serialized.mapType),
-                serialized.texture,
-                serialized.name,
-                static_cast<unsigned>(serialized.picmip[0]),
-                static_cast<unsigned>(serialized.picmip[1]),
-                static_cast<unsigned>(serialized.noPicmip),
-                static_cast<unsigned>(serialized.semantic),
-                static_cast<unsigned>(serialized.track),
-                serialized.cardMemory.platform[0],
-                serialized.cardMemory.platform[1],
-                static_cast<unsigned>(serialized.width),
-                static_cast<unsigned>(serialized.height),
-                static_cast<unsigned>(serialized.depth),
-                static_cast<unsigned>(serialized.category),
-                static_cast<unsigned>(serialized.delayLoadPixels),
-                static_cast<void *>(DB_GetStreamPos()));
-            Switch_LogWrite(trace);
-        }
-#endif
-
         varGfxImage->mapType = static_cast<MapType>(serialized.mapType);
         varGfxImage->texture.basemap =
             reinterpret_cast<IDirect3DBaseTexture9 *>(
@@ -3439,20 +3410,6 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
     // Switch XAssetHeader/GfxImage* fields are 64-bit, so never read or write
     // the serialized 4-byte header through a GfxImage** lvalue.
     uint32_t value = 0;
-#ifdef __SWITCH__
-    if (g_switchCurrentAssetIndex == 1363)
-    {
-        char trace[256];
-        std::snprintf(
-            trace,
-            sizeof(trace),
-            "[SWITCH XASSET TRACE] IMAGE1363 ptr pre-read slot=%p varImage=%p hdr=%p\n",
-            static_cast<void *>(varGfxImagePtr),
-            static_cast<void *>(varGfxImage),
-            static_cast<void *>(varXAssetHeader));
-        Switch_LogWrite(trace);
-    }
-#endif
     std::memcpy(
         &value,
         reinterpret_cast<const uint8_t *>(varGfxImagePtr),
@@ -3506,24 +3463,6 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
             Load_GfxImage(1);
 
 #ifdef __SWITCH__
-            if (g_switchCurrentAssetIndex == 1363)
-            {
-                char trace[256];
-                std::snprintf(
-                    trace, sizeof(trace),
-                    "[SWITCH XASSET TRACE] IMAGE1363 loaded image=%p name=%p text=%s "
-                    "map=%u semantic=%u cat=%u tex=%p pos=%p\n",
-                    static_cast<void *>(nativeImage),
-                    static_cast<const void *>(nativeImage->name),
-                    nativeImage->name ? nativeImage->name : "<null>",
-                    static_cast<unsigned>(nativeImage->mapType),
-                    static_cast<unsigned>(nativeImage->semantic),
-                    static_cast<unsigned>(nativeImage->category),
-                    static_cast<void *>(nativeImage->texture.basemap),
-                    static_cast<void *>(DB_GetStreamPos()));
-                Switch_LogWrite(trace);
-                Switch_LogWrite("[SWITCH XASSET TRACE] IMAGE1363 before Load_GfxImageAsset\n");
-            }
             if (g_switchCurrentAssetIndex == 1360)
             {
                 char trace[224];
@@ -8912,7 +8851,7 @@ void __cdecl Mark_FxImpactTablePtr()
 #ifdef __SWITCH__
 static constexpr uint16_t kSwitchWeaponDefPointerOffsets[] =
 {
-    0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 148, 152, 156, 160, 164, 168, 172, 176, 180, 184, 188, 192, 196, 200, 204, 208, 212, 332, 336, 340, 344, 348, 352, 356, 360, 364, 368, 372, 376, 380, 384, 388, 392, 396, 400, 404, 408, 412, 416, 420, 424, 428, 432, 436, 440, 444, 448, 452, 456, 460, 464, 468, 472, 476, 480, 484, 488, 492, 496, 500, 504, 508, 512, 516, 520, 524, 528, 532, 536, 540, 544, 700, 704, 708, 712, 716, 720, 724, 728, 732, 736, 740, 744, 748, 752, 756, 760, 764, 768, 772, 776, 780, 788, 804, 812, 832, 1072, 1076, 1304, 1316, 1340, 1412, 1420, 1428, 1432, 1436, 1704, 1732, 1736, 1900, 1904, 1908, 1912, 1916, 1920, 2012, 2016, 2036, 2152, 2156
+    0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 148, 152, 156, 160, 164, 168, 172, 176, 180, 184, 188, 192, 196, 200, 204, 208, 212, 332, 336, 340, 344, 348, 352, 356, 360, 364, 368, 372, 376, 380, 384, 388, 392, 396, 400, 404, 408, 412, 416, 420, 424, 428, 432, 436, 440, 444, 448, 452, 456, 460, 464, 468, 472, 476, 480, 484, 488, 492, 496, 500, 504, 508, 512, 516, 520, 524, 528, 532, 536, 540, 544, 700, 704, 708, 712, 716, 720, 724, 728, 732, 736, 740, 744, 748, 752, 756, 760, 764, 768, 772, 776, 780, 788, 804, 812, 832, 1072, 1076, 1304, 1316, 1340, 1412, 1420, 1428, 1432, 1436, 1704, 1732, 1736, 1900, 1904, 1908, 1912, 1916, 1920, 2012, 2016, 2036, 2152, 2156
 };
 
 static void Switch_TranslateWeaponDefSerialized(WeaponDef *weaponDef)
