@@ -24,6 +24,11 @@ void __cdecl DB_PixelShaderSetName(XAssetHeader *header, const char *name)
 
 #endif
 
+static const char *__cdecl DB_LightDefGetName(const XAssetHeader *header)
+{
+    return header->lightDef->name;
+}
+
 const char *(__cdecl *DB_XAssetGetNameHandler[ASSET_TYPE_COUNT])(const XAssetHeader *) =
 {
     // KISAKTODO: these got Identical COMDAT folded into 1 function because name is usually the 1st field.
@@ -325,7 +330,16 @@ const char *__cdecl DB_GetXAssetHeaderName(int32_t type, const XAssetHeader *hea
         Switch_LogWrite("[SWITCH IMAGE NAME] after data assert\n");
 #endif
 
-    name = DB_XAssetGetNameHandler[type](header);
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_LIGHT_DEF)
+    {
+        name = DB_LightDefGetName(header);
+    }
+    else
+#endif
+    {
+        name = DB_XAssetGetNameHandler[type](header);
+    }
 
 #ifdef __SWITCH__
     if (type == ASSET_TYPE_IMAGE)
