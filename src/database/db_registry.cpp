@@ -2461,7 +2461,10 @@ extern "C" XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(XAssetType type, XAsset
     newEntry.entry.asset.header = header;
 
 #ifdef __SWITCH__
-    const bool traceImpactFx = false;
+    const bool traceImpactFx =
+        type == ASSET_TYPE_IMPACT_FX;
+    if (traceImpactFx)
+        Switch_LogWrite("[SWITCH IMPACTFX ADD] pre lock\n");
 #endif
 
 #ifdef __SWITCH__
@@ -2484,6 +2487,10 @@ extern "C" XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(XAssetType type, XAsset
 #endif
 
     existingEntry = DB_LinkXAssetEntry(&newEntry, 0);
+
+#ifdef __SWITCH__
+    if (traceImpactFx)
+        Switch_LogWrite("[SWITCH IMPACTFX ADD] after link\n");
 
 #ifdef __SWITCH__
     if (traceImpactFx)
