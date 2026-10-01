@@ -2083,8 +2083,20 @@ static void __cdecl DB_InitSingleton(void *pool, int32_t size)
 
 static XAssetHeader __cdecl DB_AllocXAssetHeader(XAssetType type)
 {
-    XAssetHeader header;
-    header.data = DB_AllocXAssetHeaderHandler[type](DB_XAssetPool[type]).data;
+    XAssetHeader header{};
+
+#ifdef __SWITCH__
+    // LightDef uses an ARM64-native 32-byte object and must not depend on the
+    // generic function-pointer table for allocation.
+    if (type == ASSET_TYPE_LIGHT_DEF)
+    {
+        header = DB_AllocGfxLightDef(DB_XAssetPool[type]);
+    }
+    else
+#endif
+    {
+        header.data = DB_AllocXAssetHeaderHandler[type](DB_XAssetPool[type]).data;
+    }
     if (!header.data)
     {
         Sys_UnlockWrite(&db_hashCritSect);
