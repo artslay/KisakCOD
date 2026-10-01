@@ -196,8 +196,9 @@ static void __cdecl DB_InitPool(void *arg, int32_t size)
 
 static void __cdecl DB_InitSingleton(void *pool, int32_t size);
 #ifdef __SWITCH__
-__attribute__((visibility("hidden"), noinline))
-extern "C" XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(XAssetType type, XAssetHeader header);
+static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
+    XAssetType type,
+    XAssetHeader header);
 #endif
 
 void(__cdecl *DB_InitPoolHeaderHandler[ASSET_TYPE_COUNT])(void *, int) =
@@ -2451,8 +2452,10 @@ __attribute__((visibility("hidden")))
 XAssetHeader (*g_switchDBAddXAsset)(XAssetType type, XAssetHeader header) = nullptr;
 #endif
 
-__attribute__((visibility("hidden"), noinline))
-extern "C" XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(XAssetType type, XAssetHeader header)
+#ifdef __SWITCH__
+static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
+    XAssetType type,
+    XAssetHeader header)
 {
     XAssetEntryPoolEntry *existingEntry;
     XAssetEntryPoolEntry newEntry;
