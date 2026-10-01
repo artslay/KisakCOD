@@ -237,6 +237,7 @@ void __cdecl Load_DelayStream();
 void __cdecl DB_ConvertOffsetToAlias(void *data);
 uintptr_t __cdecl DB_ConvertOffsetToPointerValue(uint32_t offset);
 void __cdecl DB_ConvertOffsetToPointer(void *data);
+void __cdecl DB_LoadSwitchSerialized(void *dst, uint32_t size);
 void __cdecl Load_XStringCustom(char **str);
 void __cdecl Load_TempStringCustom(char **str);
 
