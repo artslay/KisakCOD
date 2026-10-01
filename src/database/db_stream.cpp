@@ -17,6 +17,53 @@ uint8_t *g_streamPos;
 StreamPosInfo g_streamPosStack[64];
 uint32_t g_streamPosStackIndex;
 
+#ifdef __SWITCH__
+static uintptr_t g_switchStreamHighWater[9] = {};
+static uint32_t g_switchStreamRegressionCount = 0;
+
+static void Switch_CheckStreamRegression(
+    uint32_t index,
+    uint8_t *pos,
+    const char *where)
+{
+    if (index >= ARRAY_COUNT(g_streamPosArray) ||
+        !g_streamBlocks ||
+        !g_streamBlocks[index].data ||
+        !pos)
+        return;
+
+    const uintptr_t base =
+        reinterpret_cast<uintptr_t>(g_streamBlocks[index].data);
+    const uintptr_t ptr = reinterpret_cast<uintptr_t>(pos);
+    if (ptr < base ||
+        ptr > base + g_streamBlocks[index].size)
+        return;
+
+    const uintptr_t offset = ptr - base;
+    if (offset < g_switchStreamHighWater[index] &&
+        g_switchStreamRegressionCount < 32)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH STREAM REGRESS] #%u where=%s stream=%u old=%08x new=%08x stack=%u current=%u\n",
+            g_switchStreamRegressionCount,
+            where,
+            index,
+            static_cast<unsigned>(g_switchStreamHighWater[index]),
+            static_cast<unsigned>(offset),
+            static_cast<unsigned>(g_streamPosStackIndex),
+            static_cast<unsigned>(g_streamPosIndex));
+        Switch_LogWrite(trace);
+        ++g_switchStreamRegressionCount;
+    }
+
+    if (offset > g_switchStreamHighWater[index])
+        g_switchStreamHighWater[index] = offset;
+}
+#endif
+
 // --- file-local forward declarations (moved out of database.h) ---
 static void __cdecl DB_SetStreamIndex(uint32_t index);
 
@@ -30,6 +77,10 @@ void __cdecl DB_InitStreams(XZoneMemory *zoneMem)
     g_streamPosIndex = 0;
     g_streamDelayIndex = 0;
     g_streamPosStackIndex = 0;
+#ifdef __SWITCH__
+    std::memset(g_switchStreamHighWater, 0, sizeof(g_switchStreamHighWater));
+    g_switchStreamRegressionCount = 0;
+#endif
     for (i = 0; i < 9; ++i)
         g_streamPosArray[i] = zoneMem->blocks[i].data;
 }
@@ -59,6 +110,12 @@ void __cdecl DB_SetStreamIndex(uint32_t index)
 {
     if (index != g_streamPosIndex)
     {
+#ifdef __SWITCH__
+        Switch_CheckStreamRegression(
+            g_streamPosIndex,
+            g_streamPos,
+            "DB_SetStreamIndex:save");
+#endif
         if (g_streamPosIndex == 7)
         {
             DB_CloneStreamData(g_streamZoneMem->lockedVertexData);
@@ -148,6 +205,12 @@ void __cdecl DB_PopStreamPos()
             Switch_LogWrite("[SWITCH STREAMPOP TRAP] after index restore\n");
 
         g_streamPos = g_streamPosArray[savedIndex];
+#ifdef __SWITCH__
+        Switch_CheckStreamRegression(
+            savedIndex,
+            g_streamPos,
+            "DB_PopStreamPos:special-restore");
+#endif
         if (tracePop)
         {
             char trace[160];
