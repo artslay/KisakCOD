@@ -7589,6 +7589,33 @@ void __cdecl Mark_LocalizeEntryPtr()
 
 void __cdecl Load_FxImpactEntry(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        uint32_t serializedHandles[33]{};
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(serializedHandles),
+            sizeof(serializedHandles));
+        DB_IncStreamPos(sizeof(serializedHandles));
+
+        std::memset(varFxImpactEntry, 0, sizeof(FxImpactEntry));
+
+        const FxEffectDef **handles =
+            reinterpret_cast<const FxEffectDef **>(varFxImpactEntry);
+        for (int32_t i = 0; i < 33; ++i)
+        {
+            handles[i] = reinterpret_cast<const FxEffectDef *>(
+                static_cast<uintptr_t>(serializedHandles[i]));
+        }
+
+        varFxEffectDefHandle = handles;
+        Load_FxEffectDefHandleArray(0, 29);
+        varFxEffectDefHandle = handles + 29;
+        Load_FxEffectDefHandleArray(0, 4);
+        return;
+    }
+#endif
+
     Load_Stream(atStreamStart, (uint8_t *)varFxImpactEntry, 132);
     varFxEffectDefHandle = (const FxEffectDef **)varFxImpactEntry;
     Load_FxEffectDefHandleArray(0, 29);
@@ -7598,6 +7625,20 @@ void __cdecl Load_FxImpactEntry(bool atStreamStart)
 
 void __cdecl Load_FxImpactEntryArray(bool atStreamStart, int32_t count)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        FxImpactEntry *var = varFxImpactEntry;
+        for (int32_t i = 0; i < count; ++i)
+        {
+            varFxImpactEntry = var;
+            Load_FxImpactEntry(1);
+            ++var;
+        }
+        return;
+    }
+#endif
+
     FxImpactEntry *var; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
 
@@ -7613,6 +7654,53 @@ void __cdecl Load_FxImpactEntryArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_FxImpactTable(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        uint32_t serializedName = 0;
+        uint32_t serializedTable = 0;
+
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(&serializedName),
+            sizeof(serializedName));
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(&serializedTable),
+            sizeof(serializedTable));
+        DB_IncStreamPos(8);
+
+        std::memset(varFxImpactTable, 0, sizeof(FxImpactTable));
+
+        varFxImpactTable->name = reinterpret_cast<const char *>(
+            static_cast<uintptr_t>(serializedName));
+        varFxImpactTable->table = reinterpret_cast<FxImpactEntry *>(
+            static_cast<uintptr_t>(serializedTable));
+
+        DB_PushStreamPos(4);
+
+        varXString = &varFxImpactTable->name;
+        Load_XString(0);
+
+        if (serializedTable)
+        {
+            varFxImpactTable->table = reinterpret_cast<FxImpactEntry *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(
+                        sizeof(FxImpactEntry) * 12u),
+                    "SwitchFxImpactEntry",
+                    22));
+            std::memset(
+                varFxImpactTable->table,
+                0,
+                sizeof(FxImpactEntry) * 12u);
+            varFxImpactEntry = varFxImpactTable->table;
+            Load_FxImpactEntryArray(1, 12);
+        }
+
+        DB_PopStreamPos();
+        return;
+    }
+#endif
+
     Load_Stream(atStreamStart, (uint8_t *)varFxImpactTable, 8);
     DB_PushStreamPos(4);
     varXString = &varFxImpactTable->name;
@@ -7638,7 +7726,17 @@ void __cdecl Load_FxImpactTablePtr(bool atStreamStart)
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varFxImpactTablePtr));
         if (value == -1 || value == -2)
         {
-            *varFxImpactTablePtr = (FxImpactTable *)AllocLoad_FxElemVisStateSample();
+#ifdef __SWITCH__
+            *varFxImpactTablePtr = reinterpret_cast<FxImpactTable *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(FxImpactTable)),
+                    "SwitchFxImpactTable",
+                    22));
+            std::memset(*varFxImpactTablePtr, 0, sizeof(FxImpactTable));
+#else
+            *varFxImpactTablePtr =
+                (FxImpactTable *)AllocLoad_FxElemVisStateSample();
+#endif
             varFxImpactTable = *varFxImpactTablePtr;
             if (value == -2)
                 inserted = DB_InsertPointer();
