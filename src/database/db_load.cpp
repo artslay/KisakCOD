@@ -8319,7 +8319,7 @@ void __cdecl Load_FxImpactTablePtr(bool atStreamStart)
                   "memory");
 
             XAssetHeader addedHeader;
-            addedHeader.data = reinterpret_cast<void *>(switchHeaderArg);
+            addedHeader.data = reinterpret_cast<void *>(switchTypeArg);
 
             *varFxImpactTablePtr =
                 reinterpret_cast<FxImpactTable *>(addedHeader.data);
