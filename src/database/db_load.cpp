@@ -3439,6 +3439,20 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
     // Switch XAssetHeader/GfxImage* fields are 64-bit, so never read or write
     // the serialized 4-byte header through a GfxImage** lvalue.
     uint32_t value = 0;
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex == 1363)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH IMAGE1363] ptr pre-read slot=%p varImage=%p hdr=%p\n",
+            static_cast<void *>(varGfxImagePtr),
+            static_cast<void *>(varGfxImage),
+            static_cast<void *>(varXAssetHeader));
+        Switch_LogWrite(trace);
+    }
+#endif
     std::memcpy(
         &value,
         reinterpret_cast<const uint8_t *>(varGfxImagePtr),
@@ -10727,6 +10741,21 @@ void __cdecl Load_XAssetHeader(bool atStreamStart)
         varMaterialTechniqueSetPtr = (MaterialTechniqueSet **)varXAssetHeader;
         Load_MaterialTechniqueSetPtr(atStreamStart);
         break;
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1363)
+        {
+            char trace[256];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH IMAGE1363] header image case hdr=%p data=%p type=%u atStream=%u\n",
+                static_cast<void *>(varXAssetHeader),
+                varXAssetHeader ? static_cast<void *>(varXAssetHeader->data) : nullptr,
+                static_cast<unsigned>(varXAsset->type),
+                static_cast<unsigned>(atStreamStart));
+            Switch_LogWrite(trace);
+        }
+#endif
     case ASSET_TYPE_IMAGE:
         varGfxImagePtr = (GfxImage **)varXAssetHeader;
         Load_GfxImagePtr(atStreamStart);
