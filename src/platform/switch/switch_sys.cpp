@@ -24,6 +24,8 @@ static int g_switchLogFd = -1;
 static const char *const kSwitchLogPath = "sdmc:/switch/KisakCOD/kisakcod.log";
 static bool g_switchScreenLog = false;
 
+void Switch_LogWrite(const char *msg);
+
 /*
  * libnx enters this handler on its dedicated exception stack after capturing
  * the faulting CPU context. Keep the stack deliberately larger than libnx's
@@ -69,20 +71,29 @@ extern "C" void __libnx_exception_handler(ThreadExceptionDump *ctx)
         (ctx->esr >> 26) & 0x3f);
     Switch_LogCrashLine(line);
 
-    for (int i = 0; i < 29; ++i)
+    for (int i = 0; i < 29; i += 2)
     {
-        std::snprintf(
-            line,
-            sizeof(line),
-            "[KisakCOD][CRASH] x%-2d=0x%016llx x%-2d=0x%016llx\\n",
-            i,
-            static_cast<unsigned long long>(ctx->cpu_gprs[i].x),
-            i + 1,
-            i + 1 < 29
-                ? static_cast<unsigned long long>(ctx->cpu_gprs[i + 1].x)
-                : 0ull);
+        if (i + 1 < 29)
+        {
+            std::snprintf(
+                line,
+                sizeof(line),
+                "[KisakCOD][CRASH] x%-2d=0x%016llx x%-2d=0x%016llx\\n",
+                i,
+                static_cast<unsigned long long>(ctx->cpu_gprs[i].x),
+                i + 1,
+                static_cast<unsigned long long>(ctx->cpu_gprs[i + 1].x));
+        }
+        else
+        {
+            std::snprintf(
+                line,
+                sizeof(line),
+                "[KisakCOD][CRASH] x%-2d=0x%016llx\\n",
+                i,
+                static_cast<unsigned long long>(ctx->cpu_gprs[i].x));
+        }
         Switch_LogCrashLine(line);
-        ++i;
     }
 
     Switch_LogCrashLine("[KisakCOD][CRASH] ========================================\\n");
