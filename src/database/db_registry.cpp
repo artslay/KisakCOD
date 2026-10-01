@@ -2051,7 +2051,7 @@ static XAssetEntryPoolEntry *__cdecl DB_AllocXAssetEntry(XAssetType type, uint8_
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH LOADEDSOUND ALLOC] type=%u head=%p next=%p sizeEntry=%zu sizeSound=%zu\\n",
+            "[SWITCH LOADEDSOUND ALLOC] type=%u head=%p next=%p sizeEntry=%zu sizeSound=%zu\n",
             static_cast<unsigned>(type),
             static_cast<void *>(freeHead),
             freeHead ? static_cast<void *>(freeHead->next) : nullptr,
@@ -2075,7 +2075,7 @@ static XAssetEntryPoolEntry *__cdecl DB_AllocXAssetEntry(XAssetType type, uint8_
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH LOADEDSOUND ALLOC] after pop newHead=%p\\n",
+            "[SWITCH LOADEDSOUND ALLOC] after pop newHead=%p\n",
             static_cast<void *>(g_freeAssetEntryHead));
         Switch_LogWrite(trace);
     }
