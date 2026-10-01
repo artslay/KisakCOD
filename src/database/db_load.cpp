@@ -3233,12 +3233,40 @@ void __cdecl Load_GfxImage(bool atStreamStart)
 
         if (switchImageTrace)
         {
-            char trace[256];
-            std::snprintf(
-                trace, sizeof(trace),
-                "[SWITCH XASSET TRACE] gfximage name=%p text=%s\n",
+            const uintptr_t namePtr =
+                reinterpret_cast<uintptr_t>(varGfxImage->name);
+            const uintptr_t block4Base =
+                reinterpret_cast<uintptr_t>(g_streamBlocks[4].data);
+            char trace[512];
+            int written = std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XASSET TRACE] gfximage name=%p text=%s block4=%p off=%08x stream4=%p bytes=",
                 static_cast<const void *>(varGfxImage->name),
-                varGfxImage->name ? varGfxImage->name : "<null>");
+                varGfxImage->name ? varGfxImage->name : "<null>",
+                static_cast<void *>(g_streamBlocks[4].data),
+                namePtr >= block4Base
+                    ? static_cast<unsigned>(namePtr - block4Base)
+                    : 0u,
+                static_cast<void *>(g_streamPosArray[4]));
+            if (namePtr >= block4Base &&
+                namePtr + 24 <= block4Base + g_streamBlocks[4].size)
+            {
+                const uint8_t *bytes =
+                    reinterpret_cast<const uint8_t *>(namePtr);
+                for (int i = 0; i < 24; ++i)
+                {
+                    written += std::snprintf(
+                        trace + written,
+                        sizeof(trace) - static_cast<size_t>(written),
+                        "%02x",
+                        static_cast<unsigned>(bytes[i]));
+                }
+            }
+            std::snprintf(
+                trace + written,
+                sizeof(trace) - static_cast<size_t>(written),
+                "\n");
             Switch_LogWrite(trace);
         }
 
@@ -4691,9 +4719,9 @@ void __cdecl Load_Material(bool atStreamStart)
             serialized.textureTable,
             serialized.constantTable,
             serialized.stateBitsTable,
-            static_cast<unsigned>(serialized.textureCount) |
-                (static_cast<unsigned>(serialized.constantCount) << 8) |
-                (static_cast<unsigned>(serialized.stateBitsCount) << 16));
+            static_cast<unsigned>(serialized.textureCount),
+            static_cast<unsigned>(serialized.constantCount),
+            static_cast<unsigned>(serialized.stateBitsCount));
         Switch_LogWrite(trace);
     }
 
