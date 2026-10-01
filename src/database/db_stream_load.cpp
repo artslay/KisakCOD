@@ -134,24 +134,6 @@ void __cdecl DB_ConvertOffsetToPointer(void *data)
 
 void __cdecl DB_LoadSwitchSerialized(void *dst, uint32_t size)
 {
-#ifdef __SWITCH__
-    iassert(dst);
-    iassert(size);
-    uint8_t *streamPos = DB_GetStreamPos();
-    if (g_switchCurrentAssetIndex == 1363)
-    {
-        char trace[320];
-        std::snprintf(
-            trace,
-            sizeof(trace),
-            "[SWITCH XASSET TRACE] IMAGE1363 serialized copy dst=%p size=%u stream=%u pos=%p ra=%p\n",
-            dst,
-            static_cast<unsigned>(size),
-            static_cast<unsigned>(g_streamPosIndex),
-            static_cast<void *>(streamPos),
-            __builtin_return_address(0));
-        Switch_LogWrite(trace);
-    }
     DB_LoadXFileData(streamPos, size);
     std::memcpy(dst, streamPos, size);
     DB_IncStreamPos(static_cast<int32_t>(size));
