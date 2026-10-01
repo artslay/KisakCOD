@@ -2143,6 +2143,7 @@ void __cdecl Load_SndCurve(bool atStreamStart)
         float knots[8][2];
     };
     static_assert(sizeof(SerializedSndCurve) == 72);
+    static_assert(sizeof(SndCurve) == 80);
 
     if (atStreamStart)
     {
@@ -2206,7 +2207,16 @@ void __cdecl Load_SndCurvePtr(bool atStreamStart)
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varSndCurvePtr));
         if (value == -1 || value == -2)
         {
+#ifdef __SWITCH__
+            *varSndCurvePtr = reinterpret_cast<SndCurve *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(SndCurve)),
+                    "SwitchSndCurve",
+                    22));
+            std::memset(*varSndCurvePtr, 0, sizeof(SndCurve));
+#else
             *varSndCurvePtr = (SndCurve *)AllocLoad_FxElemVisStateSample();
+#endif
             varSndCurve = *varSndCurvePtr;
             if (value == -2)
                 inserted = DB_InsertPointer();
