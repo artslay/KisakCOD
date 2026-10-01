@@ -4852,7 +4852,7 @@ void __cdecl Load_GfxLightDef(bool atStreamStart)
 #ifdef __SWITCH__
     const bool trace = g_switchCurrentAssetIndex == 1226;
     if (trace)
-        Switch_LogWrite("[SWITCH LIGHTDEF] Load_GfxLightDef enter\\n");
+        Switch_LogWrite("[SWITCH LIGHTDEF] Load_GfxLightDef enter\n");
 #endif
     Load_Stream(atStreamStart, (uint8_t *)varGfxLightDef, 16);
 #ifdef __SWITCH__
@@ -4860,7 +4860,7 @@ void __cdecl Load_GfxLightDef(bool atStreamStart)
     {
         char t[192];
         std::snprintf(t, sizeof(t),
-            "[SWITCH LIGHTDEF] raw name=%p attenuation=%p pos=%p\\n",
+            "[SWITCH LIGHTDEF] raw name=%p attenuation=%p pos=%p\n",
             static_cast<const void *>(varGfxLightDef->name),
             static_cast<void *>(varGfxLightDef->attenuation.image),
             static_cast<void *>(DB_GetStreamPos()));
@@ -4872,18 +4872,18 @@ void __cdecl Load_GfxLightDef(bool atStreamStart)
     Load_XString(0);
 #ifdef __SWITCH__
     if (trace)
-        Switch_LogWrite("[SWITCH LIGHTDEF] name done\\n");
+        Switch_LogWrite("[SWITCH LIGHTDEF] name done\n");
 #endif
     varGfxLightImage = &varGfxLightDef->attenuation;
     Load_GfxLightImage(0);
 #ifdef __SWITCH__
     if (trace)
-        Switch_LogWrite("[SWITCH LIGHTDEF] attenuation done\\n");
+        Switch_LogWrite("[SWITCH LIGHTDEF] attenuation done\n");
 #endif
     DB_PopStreamPos();
 #ifdef __SWITCH__
     if (trace)
-        Switch_LogWrite("[SWITCH LIGHTDEF] pop done\\n");
+        Switch_LogWrite("[SWITCH LIGHTDEF] pop done\n");
 #endif
 }
 
@@ -4905,7 +4905,7 @@ void __cdecl Load_GfxLightDefPtr(bool atStreamStart)
         {
             char t[160];
             std::snprintf(t, sizeof(t),
-                "[SWITCH LIGHTDEF] ptr value=%08x\\n", value);
+                "[SWITCH LIGHTDEF] ptr value=%08x\n", value);
             Switch_LogWrite(t);
         }
 #endif
@@ -4918,7 +4918,7 @@ void __cdecl Load_GfxLightDefPtr(bool atStreamStart)
         {
                 char t[160];
                 std::snprintf(t, sizeof(t),
-                    "[SWITCH LIGHTDEF] allocated obj=%p inserted=%d\\n",
+                    "[SWITCH LIGHTDEF] allocated obj=%p inserted=%d\n",
                     static_cast<void *>(varGfxLightDef),
                     value == -2 ? 1 : 0);
                 Switch_LogWrite(t);
@@ -4931,12 +4931,12 @@ void __cdecl Load_GfxLightDefPtr(bool atStreamStart)
             Load_GfxLightDef(1);
 #ifdef __SWITCH__
             if (trace)
-                Switch_LogWrite("[SWITCH LIGHTDEF] Load_GfxLightDef done\\n");
+                Switch_LogWrite("[SWITCH LIGHTDEF] Load_GfxLightDef done\n");
 #endif
             Load_LightDefAsset((XAssetHeader *)varGfxLightDefPtr);
 #ifdef __SWITCH__
             if (trace)
-                Switch_LogWrite("[SWITCH LIGHTDEF] Load_LightDefAsset done\\n");
+                Switch_LogWrite("[SWITCH LIGHTDEF] Load_LightDefAsset done\n");
 #endif
             if (inserted)
                 *inserted = *varGfxLightDefPtr;
@@ -4946,7 +4946,7 @@ void __cdecl Load_GfxLightDefPtr(bool atStreamStart)
             DB_ConvertOffsetToAlias((uint32_t *)varGfxLightDefPtr);
 #ifdef __SWITCH__
             if (trace)
-                Switch_LogWrite("[SWITCH LIGHTDEF] alias done\\n");
+                Switch_LogWrite("[SWITCH LIGHTDEF] alias done\n");
 #endif
         }
     }
@@ -4954,13 +4954,13 @@ void __cdecl Load_GfxLightDefPtr(bool atStreamStart)
     {
 #ifdef __SWITCH__
         if (trace)
-            Switch_LogWrite("[SWITCH LIGHTDEF] null ptr\\n");
+            Switch_LogWrite("[SWITCH LIGHTDEF] null ptr\n");
 #endif
     }
     DB_PopStreamPos();
 #ifdef __SWITCH__
     if (trace)
-        Switch_LogWrite("[SWITCH LIGHTDEF] pop done\\n");
+        Switch_LogWrite("[SWITCH LIGHTDEF] pop done\n");
 #endif
 }
 
@@ -10214,6 +10214,21 @@ void __cdecl Mark_FontHandle()
 
 void __cdecl Load_XAssetHeader(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex >= 1224 &&
+        g_switchCurrentAssetIndex <= 1226)
+    {
+        char trace[256];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH XHEADER] enter asset=%d raw=%u type=%u header=%p\n",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            static_cast<unsigned>(varXAsset ? varXAsset->type : ASSET_TYPE_COUNT),
+            varXAssetHeader ? static_cast<void *>(varXAssetHeader->data) : nullptr);
+        Switch_LogWrite(trace);
+    }
+#endif
     switch (varXAsset->type)
     {
 #ifdef KISAK_SP
