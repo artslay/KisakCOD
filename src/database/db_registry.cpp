@@ -2452,7 +2452,6 @@ __attribute__((visibility("hidden")))
 XAssetHeader (*g_switchDBAddXAsset)(XAssetType type, XAssetHeader header) = nullptr;
 #endif
 
-#ifdef __SWITCH__
 static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
     XAssetType type,
     XAssetHeader header)
