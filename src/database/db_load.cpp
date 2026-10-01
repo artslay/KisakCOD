@@ -4860,6 +4860,7 @@ void __cdecl Load_GfxLightDef(bool atStreamStart)
             int32_t lmapLookupStart;
         };
         static_assert(sizeof(SerializedGfxLightDef) == 16);
+        static_assert(sizeof(GfxLightDef) == 24);
 
         SerializedGfxLightDef serialized{};
         Load_Stream(
@@ -4946,8 +4947,14 @@ void __cdecl Load_GfxLightDefPtr(bool atStreamStart)
 #endif
         if (value == -1 || value == -2)
         {
-            *varGfxLightDefPtr = (GfxLightDef *)AllocLoad_FxElemVisStateSample();
+            *varGfxLightDefPtr =
+                reinterpret_cast<GfxLightDef *>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(sizeof(GfxLightDef)),
+                        "SwitchGfxLightDef",
+                        22));
             varGfxLightDef = *varGfxLightDefPtr;
+            std::memset(varGfxLightDef, 0, sizeof(GfxLightDef));
 #ifdef __SWITCH__
             if (trace)
         {
