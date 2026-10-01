@@ -2480,18 +2480,66 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         ++name;
     hash = DB_HashForName(name, type);
 
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_LOADED_SOUND)
+    {
+        char trace[192];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH LOADEDSOUND HASH] hash=%u first=%u name=%p
+",
+            hash,
+            static_cast<unsigned>(db_hashTable[hash]),
+            static_cast<const void *>(name));
+        Switch_LogWrite(trace);
+    }
+#endif
 
     existingEntry = NULL;
 
     for (existingEntryIndex = db_hashTable[hash]; existingEntryIndex; existingEntryIndex = existingEntry->entry.nextHash)
     {
         existingEntry = &g_assetEntryPool[existingEntryIndex];
+
+#ifdef __SWITCH__
+        if (type == ASSET_TYPE_LOADED_SOUND)
+        {
+            char trace[192];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH LOADEDSOUND HASH] existing index=%u entry=%p assetType=%u
+",
+                existingEntryIndex,
+                static_cast<void *>(existingEntry),
+                static_cast<unsigned>(existingEntry->entry.asset.type));
+            Switch_LogWrite(trace);
+        }
+#endif
+
         if (existingEntry->entry.asset.type == type)
         {
             if (type == ASSET_TYPE_IMAGE)
                 XAssetName = existingEntry->entry.asset.header.image->name;
             else
                 XAssetName = DB_GetXAssetName(&existingEntry->entry.asset);
+
+#ifdef __SWITCH__
+            if (type == ASSET_TYPE_LOADED_SOUND)
+            {
+                char trace[192];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH LOADEDSOUND HASH] existing name=%p new name=%p
+",
+                    static_cast<const void *>(XAssetName),
+                    static_cast<const void *>(name));
+                Switch_LogWrite(trace);
+            }
+#endif
+
             if (!I_stricmp(XAssetName, name))
                 break;
         }
