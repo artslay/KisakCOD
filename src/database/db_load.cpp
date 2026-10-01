@@ -8482,18 +8482,24 @@ void __cdecl Load_FxImpactTablePtr(bool atStreamStart)
 
             
 
-            if (!g_switchDBAddXAsset)
+            if (g_switchDBAddXAsset)
             {
-                return;
+                XAssetHeader addedHeader =
+                    g_switchDBAddXAsset(
+                        ASSET_TYPE_IMPACT_FX,
+                        impactHeader);
+
+                *varFxImpactTablePtr =
+                    reinterpret_cast<FxImpactTable *>(addedHeader.data);
             }
-
-            XAssetHeader addedHeader =
-                g_switchDBAddXAsset(
-                    ASSET_TYPE_IMPACT_FX,
-                    impactHeader);
-
-            *varFxImpactTablePtr =
-                reinterpret_cast<FxImpactTable *>(addedHeader.data);
+            else
+            {
+                // Keep the stream stack balanced when the optional Switch
+                // callback is unavailable. The original direct asset path
+                // still performs the required DB registration.
+                Load_FxImpactTableAsset(
+                    reinterpret_cast<XAssetHeader *>(varFxImpactTablePtr));
+            }
 
             
 #else
