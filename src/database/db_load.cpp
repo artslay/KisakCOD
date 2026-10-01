@@ -9281,6 +9281,83 @@ void __cdecl Load_GlyphArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_Font(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        struct SerializedFont
+        {
+            uint32_t fontName;
+            int32_t pixelHeight;
+            int32_t glyphCount;
+            uint32_t material;
+            uint32_t glowMaterial;
+            uint32_t glyphs;
+        };
+
+        static_assert(sizeof(SerializedFont) == 24);
+
+        SerializedFont serialized{};
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+        DB_IncStreamPos(sizeof(serialized));
+
+        std::memset(varFont, 0, sizeof(Font_s));
+
+        varFont->pixelHeight = serialized.pixelHeight;
+        varFont->glyphCount = serialized.glyphCount;
+
+        DB_PushStreamPos(4);
+
+        if (!serialized.fontName)
+        {
+            varFont->fontName = nullptr;
+        }
+        else if (serialized.fontName == UINT32_MAX)
+        {
+            char *nameBuffer =
+                reinterpret_cast<char *>(AllocLoad_raw_byte());
+            Load_XStringCustom(&nameBuffer);
+            varFont->fontName = nameBuffer;
+        }
+        else
+        {
+            varFont->fontName =
+                reinterpret_cast<const char *>(
+                    DB_ConvertOffsetToPointerValue(serialized.fontName));
+        }
+
+        varMaterialHandle = &varFont->material;
+        varFont->material = reinterpret_cast<Material *>(
+            static_cast<uintptr_t>(serialized.material));
+        Load_MaterialHandle(0);
+
+        varMaterialHandle = &varFont->glowMaterial;
+        varFont->glowMaterial = reinterpret_cast<Material *>(
+            static_cast<uintptr_t>(serialized.glowMaterial));
+        Load_MaterialHandle(0);
+
+        if (serialized.glyphs)
+        {
+            if (serialized.glyphs == UINT32_MAX)
+            {
+                varFont->glyphs = reinterpret_cast<Glyph *>(
+                    AllocLoad_FxElemVisStateSample());
+                varGlyph = varFont->glyphs;
+                Load_GlyphArray(1, varFont->glyphCount);
+            }
+            else
+            {
+                varFont->glyphs = reinterpret_cast<Glyph *>(
+                    DB_ConvertOffsetToPointerValue(serialized.glyphs));
+            }
+        }
+
+        DB_PopStreamPos();
+        return;
+    }
+#endif
+
     Load_Stream(atStreamStart, (uint8_t *)varFont, 24);
     DB_PushStreamPos(4);
     varXString = &varFont->fontName;
@@ -9317,7 +9394,16 @@ void __cdecl Load_FontHandle(bool atStreamStart)
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varFontHandle));
         if (value == -1 || value == -2)
         {
+#ifdef __SWITCH__
+            *varFontHandle = reinterpret_cast<Font_s *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(Font_s)),
+                    "SwitchFont",
+                    22));
+            std::memset(*varFontHandle, 0, sizeof(Font_s));
+#else
             *varFontHandle = (Font_s *)AllocLoad_FxElemVisStateSample();
+#endif
             varFont = *varFontHandle;
             if (value == -2)
                 inserted = DB_InsertPointer();
