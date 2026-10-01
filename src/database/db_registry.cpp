@@ -2430,6 +2430,12 @@ void DB_SyncLostDevice()
 #ifdef __SWITCH__
 __attribute__((visibility("hidden")))
 #endif
+#ifdef __SWITCH__
+__attribute__((visibility("hidden")))
+XAssetHeader (*g_switchDBAddXAsset)(XAssetType type, XAssetHeader header) =
+    &DB_AddXAsset;
+#endif
+
 XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
 {
     XAssetEntryPoolEntry *existingEntry;

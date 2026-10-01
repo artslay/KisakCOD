@@ -8289,8 +8289,23 @@ void __cdecl Load_FxImpactTablePtr(bool atStreamStart)
             XAssetHeader impactHeader;
             impactHeader.data = *varFxImpactTablePtr;
 
+            if (g_switchCurrentAssetIndex == 1225)
+            {
+                char trace[256];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH XASSET TRACE] DB_AddXAsset ptr=%p type=%u header=%p data=%p\n",
+                    reinterpret_cast<void *>(
+                        reinterpret_cast<uintptr_t>(g_switchDBAddXAsset)),
+                    static_cast<unsigned>(ASSET_TYPE_IMPACT_FX),
+                    static_cast<void *>(&impactHeader),
+                    impactHeader.data);
+                Switch_LogWrite(trace);
+            }
+
             XAssetHeader addedHeader =
-                DB_AddXAsset(ASSET_TYPE_IMPACT_FX, impactHeader);
+                g_switchDBAddXAsset(ASSET_TYPE_IMPACT_FX, impactHeader);
 
             *varFxImpactTablePtr =
                 reinterpret_cast<FxImpactTable *>(addedHeader.data);

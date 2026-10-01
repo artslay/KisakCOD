@@ -133,6 +133,11 @@ XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *na
 __attribute__((visibility("hidden")))
 #endif
 XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header);
+
+#ifdef __SWITCH__
+extern __attribute__((visibility("hidden")))
+XAssetHeader (*g_switchDBAddXAsset)(XAssetType type, XAssetHeader header);
+#endif
 void __cdecl DB_Update();
 void __cdecl DB_SetInitializing(bool inUse);
 bool __cdecl DB_IsXAssetDefault(XAssetType type, const char *name);
