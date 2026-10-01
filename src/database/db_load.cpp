@@ -4063,8 +4063,10 @@ void __cdecl Load_MaterialArgumentDef(bool atStreamStart)
         {
             if (varMaterialArgumentDef->codeSampler == -1)
             {
-                varMaterialArgumentDef->codeSampler = (MaterialTextureSource)static_cast<uint32_t>(reinterpret_cast<uintptr_t>(AllocLoad_FxElemVisStateSample()));
-                varfloat = (float *)varMaterialArgumentDef->codeSampler;
+                float *literalConst =
+                    reinterpret_cast<float *>(AllocLoad_FxElemVisStateSample());
+                varMaterialArgumentDef->literalConst = literalConst;
+                varfloat = literalConst;
                 Load_floatArray(1, 4);
             }
             else
@@ -4107,6 +4109,41 @@ void __cdecl Load_MaterialShaderArgument(bool atStreamStart)
 
 void __cdecl Load_MaterialShaderArgumentArray(bool atStreamStart, int32_t count)
 {
+#ifdef __SWITCH__
+    struct SerializedMaterialShaderArgument
+    {
+        uint16_t type;
+        uint16_t dest;
+        uint32_t u;
+    };
+    static_assert(sizeof(SerializedMaterialShaderArgument) == 8);
+    static_assert(sizeof(MaterialArgumentDef) == 8);
+    static_assert(sizeof(MaterialShaderArgument) == 16);
+
+    (void)atStreamStart;
+    MaterialShaderArgument *var = varMaterialShaderArgument;
+
+    // The fastfile contains a packed 8-byte record for each argument.
+    // The native ARM64 structure is 16 bytes because MaterialArgumentDef may
+    // contain a 64-bit literal-constant pointer. Read the complete serialized
+    // array first, then resolve any nested inline data.
+    for (int32_t i = 0; i < count; ++i)
+    {
+        SerializedMaterialShaderArgument serialized{};
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+        var[i].type = serialized.type;
+        var[i].dest = serialized.dest;
+        var[i].u.nameHash = serialized.u;
+    }
+
+    for (int32_t i = 0; i < count; ++i)
+    {
+        varMaterialShaderArgument = &var[i];
+        varMaterialArgumentDef = &varMaterialShaderArgument->u;
+        Load_MaterialArgumentDef(0);
+    }
+#else
     MaterialShaderArgument *var; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
 
@@ -4118,6 +4155,7 @@ void __cdecl Load_MaterialShaderArgumentArray(bool atStreamStart, int32_t count)
         Load_MaterialShaderArgument(0);
         ++var;
     }
+#endif
 }
 
 void __cdecl Load_GfxStateBitsArray(bool atStreamStart, int32_t count)
