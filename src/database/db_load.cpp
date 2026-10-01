@@ -8304,24 +8304,16 @@ void __cdecl Load_FxImpactTablePtr(bool atStreamStart)
                 Switch_LogWrite(trace);
             }
 
-            register uintptr_t switchTypeArg __asm__("x0") =
-                static_cast<uintptr_t>(ASSET_TYPE_IMPACT_FX);
-            register uintptr_t switchHeaderArg __asm__("x1") =
-                reinterpret_cast<uintptr_t>(impactHeader.data);
-            register uintptr_t switchFnArg __asm__("x16") =
-                reinterpret_cast<uintptr_t>(g_switchDBAddXAsset);
+            if (!g_switchDBAddXAsset)
+            {
+                Switch_LogWrite("[SWITCH XASSET TRACE] DB_AddXAsset runtime ptr is null\n");
+                return;
+            }
 
-            __asm__ volatile(
-                "blr x16"
-                : "+r"(switchTypeArg), "+r"(switchHeaderArg), "+r"(switchFnArg)
-                :
-                : "x2", "x3", "x4", "x5", "x6", "x7",
-                  "x8", "x9", "x10", "x11", "x12", "x13",
-                  "x14", "x15", "x17", "x18", "x30",
-                  "memory");
-
-            XAssetHeader addedHeader;
-            addedHeader.data = reinterpret_cast<void *>(switchTypeArg);
+            XAssetHeader addedHeader =
+                g_switchDBAddXAsset(
+                    ASSET_TYPE_IMPACT_FX,
+                    impactHeader);
 
             *varFxImpactTablePtr =
                 reinterpret_cast<FxImpactTable *>(addedHeader.data);
