@@ -19,6 +19,7 @@
 #include <dr_libs/dr_mp3.h>
 #include <AL/efx-presets.h>
 #include <fstream>
+#include <cstdio>
 
 AlLocal alGlob;
 
@@ -1544,14 +1545,35 @@ void __cdecl SND_SetHWND(HWND hwnd)
 
 void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData)
 {
-    // dr_wav (see SND_LoadFromBuffer, snd_driver_load_obj.cpp) always decodes to 16-bit PCM
-    // for us, so unlike the Miles branch above there's no ADPCM format to worry about here.
+#ifdef __SWITCH__
+    const bool switchSoundTrace =
+        (g_switchCurrentAssetRawType == 7u &&
+         g_switchCurrentAssetIndex >= 1202 &&
+         g_switchCurrentAssetIndex <= 1212);
+    if (switchSoundTrace)
+    {
+        char trace[256];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH SNDDATA] begin sound=%p src=%p len=%u rate=%u playback=%u channels=%u samples=%u\n",
+            (void *)mssSound,
+            srcData,
+            (unsigned)mssSound->info.data_len,
+            (unsigned)mssSound->info.rate,
+            (unsigned)g_snd.playback_rate,
+            (unsigned)mssSound->info.channels,
+            (unsigned)mssSound->info.samples);
+        Switch_LogWrite(trace);
+    }
+#endif
+
+    // dr_wav (see SND_LoadFromBuffer, snd_driver_load_obj.cpp) always decoded to 16-bit PCM
+    // for us, so unlike the Miles branch above there is no ADPCM format to worry about here.
     if (mssSound->info.rate > g_snd.playback_rate)
     {
-        // Resample down to g_snd.playback_rate via simple decimation (nearest-frame
-        // resample), matching the halving loop in the Miles branch above. A real
-        // low-pass-filtered resample would sound better, but this matches WORK.md Phase 3's
-        // stated scope - revisit if downsampled loaded sounds turn out to sound too aliased.
+#ifdef __SWITCH__
+        if (switchSoundTrace)
+            Switch_LogWrite("[SWITCH SNDDATA] resample branch\n");
+#endif
         uint32_t srcFrameCount = mssSound->info.samples;
         uint32_t channels = mssSound->info.channels;
         uint32_t rate = mssSound->info.rate;
@@ -1564,7 +1586,21 @@ void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData)
         }
 
         uint32_t newDataLen = frameCount * channels * sizeof(int16_t);
+#ifdef __SWITCH__
+        if (switchSoundTrace)
+            Switch_LogWrite("[SWITCH SNDDATA] alloc begin\n");
+#endif
         mssSound->data = MSS_Alloc(newDataLen, rate);
+#ifdef __SWITCH__
+        if (switchSoundTrace)
+        {
+            char trace[128];
+            std::snprintf(trace, sizeof(trace),
+                "[SWITCH SNDDATA] alloc done dst=%p size=%u\n",
+                (void *)mssSound->data, (unsigned)newDataLen);
+            Switch_LogWrite(trace);
+        }
+#endif
 
         const int16_t *src16 = (const int16_t *)srcData;
         int16_t *dst16 = (int16_t *)mssSound->data;
@@ -1574,6 +1610,10 @@ void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData)
             for (uint32_t c = 0; c < channels; ++c)
                 dst16[i * channels + c] = src16[srcFrame * channels + c];
         }
+#ifdef __SWITCH__
+        if (switchSoundTrace)
+            Switch_LogWrite("[SWITCH SNDDATA] resample copy done\n");
+#endif
 
         mssSound->info.rate = rate;
         mssSound->info.samples = frameCount;
@@ -1581,14 +1621,36 @@ void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData)
     }
     else
     {
+#ifdef __SWITCH__
+        if (switchSoundTrace)
+            Switch_LogWrite("[SWITCH SNDDATA] direct branch\n");
+#endif
         mssSound->data = MSS_Alloc(mssSound->info.data_len, mssSound->info.rate);
+#ifdef __SWITCH__
+        if (switchSoundTrace)
+        {
+            char trace[128];
+            std::snprintf(trace, sizeof(trace),
+                "[SWITCH SNDDATA] alloc done dst=%p size=%u\n",
+                (void *)mssSound->data,
+                (unsigned)mssSound->info.data_len);
+            Switch_LogWrite(trace);
+        }
+#endif
         Com_Memcpy(mssSound->data, srcData, mssSound->info.data_len);
+#ifdef __SWITCH__
+        if (switchSoundTrace)
+            Switch_LogWrite("[SWITCH SNDDATA] memcpy done\n");
+#endif
     }
 
     mssSound->info.data_ptr = mssSound->data;
     mssSound->info.initial_ptr = mssSound->data;
+#ifdef __SWITCH__
+    if (switchSoundTrace)
+        Switch_LogWrite("[SWITCH SNDDATA] end\n");
+#endif
 }
-
 #ifdef KISAK_SP
 void SND_SetEqLerp(double lerp)
 {
