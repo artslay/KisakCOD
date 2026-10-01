@@ -312,6 +312,22 @@ const char *__cdecl DB_GetXAssetHeaderName(int32_t type, const XAssetHeader *hea
     }
 #endif
 
+    iassert(header->data);
+
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+        Switch_LogWrite("[SWITCH TECHSET NAME] after data assert\n");
+    if (type == ASSET_TYPE_IMAGE)
+        Switch_LogWrite("[SWITCH IMAGE NAME] after data assert\n");
+
+    // SP LightDef has no generic name handler at slot 18.
+    // Resolve the native ARM64 object directly before checking the table.
+    if (type == ASSET_TYPE_LIGHT_DEF)
+    {
+        return DB_LightDefGetName(header);
+    }
+#endif
+
     iassert(DB_XAssetGetNameHandler[type]);
 
 #ifdef __SWITCH__
@@ -321,25 +337,7 @@ const char *__cdecl DB_GetXAssetHeaderName(int32_t type, const XAssetHeader *hea
         Switch_LogWrite("[SWITCH IMAGE NAME] after handler assert\n");
 #endif
 
-    iassert(header->data);
-
-#ifdef __SWITCH__
-    if (type == ASSET_TYPE_TECHNIQUE_SET)
-        Switch_LogWrite("[SWITCH TECHSET NAME] after data assert\n");
-    if (type == ASSET_TYPE_IMAGE)
-        Switch_LogWrite("[SWITCH IMAGE NAME] after data assert\n");
-#endif
-
-#ifdef __SWITCH__
-    if (type == ASSET_TYPE_LIGHT_DEF)
-    {
-        name = DB_LightDefGetName(header);
-    }
-    else
-#endif
-    {
-        name = DB_XAssetGetNameHandler[type](header);
-    }
+    name = DB_XAssetGetNameHandler[type](header);
 
 #ifdef __SWITCH__
     if (type == ASSET_TYPE_IMAGE)
