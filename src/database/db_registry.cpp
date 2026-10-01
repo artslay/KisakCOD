@@ -2462,12 +2462,6 @@ static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
     newEntry.entry.asset.type = type;
     newEntry.entry.asset.header = header;
 
-#ifdef __SWITCH__
-    const bool traceImpactFx =
-        type == ASSET_TYPE_IMPACT_FX;
-    if (traceImpactFx)
-        Switch_LogWrite("[SWITCH IMPACTFX ADD] pre lock\n");
-#endif
 
 #ifdef __SWITCH__
     if (type == ASSET_TYPE_TECHNIQUE_SET)
@@ -2480,8 +2474,6 @@ static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
 #endif
     Sys_LockWrite(&db_hashCritSect);
 #ifdef __SWITCH__
-    if (traceImpactFx)
-        Switch_LogWrite("[SWITCH IMPACTFX ADD] after lock\n");
     if (type == ASSET_TYPE_TECHNIQUE_SET)
         Switch_LogWrite("[SWITCH TECHSET ADD] after write lock\n");
     if (type == ASSET_TYPE_IMAGE)
@@ -2491,25 +2483,6 @@ static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
     existingEntry = DB_LinkXAssetEntry(&newEntry, 0);
 
 #ifdef __SWITCH__
-    if (traceImpactFx)
-        Switch_LogWrite("[SWITCH IMPACTFX ADD] after link\n");
-
-    if (traceImpactFx)
-    {
-        char trace[256];
-        std::snprintf(
-            trace,
-            sizeof(trace),
-            "[SWITCH IMPACTFX ADD] after link entry=%p existingData=%p existingType=%u\n",
-            static_cast<const void *>(existingEntry),
-            existingEntry
-                ? static_cast<const void *>(existingEntry->entry.asset.header.data)
-                : nullptr,
-            existingEntry
-                ? static_cast<unsigned>(existingEntry->entry.asset.type)
-                : 0u);
-        Switch_LogWrite(trace);
-    }
     if (type == ASSET_TYPE_TECHNIQUE_SET)
         Switch_LogWrite("[SWITCH TECHSET ADD] after link\n");
     if (type == ASSET_TYPE_IMAGE)
@@ -2519,8 +2492,6 @@ static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
     Sys_UnlockWrite(&db_hashCritSect);
 
 #ifdef __SWITCH__
-    if (traceImpactFx)
-        Switch_LogWrite("[SWITCH IMPACTFX ADD] after unlock\n");
     if (type == ASSET_TYPE_TECHNIQUE_SET)
         Switch_LogWrite("[SWITCH TECHSET ADD] after unlock\n");
     if (type == ASSET_TYPE_IMAGE)
@@ -2529,10 +2500,6 @@ static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
 
     DB_SyncLostDevice();
 
-#ifdef __SWITCH__
-    if (traceImpactFx)
-        Switch_LogWrite("[SWITCH IMPACTFX ADD] after sync\n");
-#endif
 
     return existingEntry->entry.asset.header;
 }
