@@ -4110,38 +4110,93 @@ void __cdecl Load_MaterialTextureDefInfo(bool atStreamStart)
 
 void __cdecl Load_MaterialTextureDef(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    // Serialized CoD4 MaterialTextureDef is 12 bytes. The native ARM64
+    // structure is 16 bytes because the image/water pointer union is 8 bytes.
+    struct SerializedMaterialTextureDef
+    {
+        uint32_t nameHash;
+        uint8_t samplerState;
+        uint8_t semantic;
+        uint8_t padding[2];
+        uint32_t info;
+    };
+    static_assert(sizeof(SerializedMaterialTextureDef) == 12);
+    static_assert(sizeof(MaterialTextureDef) == 16);
+
+    if (atStreamStart)
+    {
+        SerializedMaterialTextureDef serialized{};
+        Load_Stream(
+            true,
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+
+        varMaterialTextureDef->nameHash = serialized.nameHash;
+        varMaterialTextureDef->nameStart = static_cast<char>(0);
+        varMaterialTextureDef->nameEnd = static_cast<char>(0);
+        varMaterialTextureDef->samplerState = serialized.samplerState;
+        varMaterialTextureDef->semantic = serialized.semantic;
+        varMaterialTextureDef->u.image =
+            reinterpret_cast<GfxImage *>(
+                static_cast<uintptr_t>(serialized.info));
+    }
+    else
+    {
+        // The native element has already been populated by the caller.
+        // Resolve its nested 32-bit serialized asset token.
+    }
+
+    varMaterialTextureDefInfo =
+        reinterpret_cast<water_t **>(&varMaterialTextureDef->u);
+    Load_MaterialTextureDefInfo(0);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varMaterialTextureDef, 12);
     varMaterialTextureDefInfo = (water_t**)&varMaterialTextureDef->u;
     Load_MaterialTextureDefInfo(0);
+#endif
 }
 
 void __cdecl Load_MaterialTextureDefArray(bool atStreamStart, int32_t count)
 {
-    MaterialTextureDef *var; // [esp+0h] [ebp-8h]
-    int32_t i; // [esp+4h] [ebp-4h]
+    MaterialTextureDef *var = varMaterialTextureDef;
+    int32_t i;
 
-    Load_Stream(atStreamStart, (uint8_t *)varMaterialTextureDef, 12 * count);
-    var = varMaterialTextureDef;
+#ifdef __SWITCH__
+    static_assert(sizeof(MaterialTextureDef) == 16);
+
+    // Never bulk-load 12-byte serialized records into native 16-byte elements:
+    // doing so makes every following element begin four bytes too early and the
+    // 8-byte pointer in u then overlaps the next record.
+    for (i = 0; i < count; ++i)
+    {
+        varMaterialTextureDef = var;
+        Load_MaterialTextureDef(1);
+        ++var;
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1360)
+        {
+            char trace[192];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH XASSET TRACE] mat tex i=%d semantic=%u sampler=%u image=%p name=%p\n",
+                i,
+                static_cast<unsigned>(var[-1].semantic),
+                static_cast<unsigned>(var[-1].samplerState),
+                static_cast<void *>(var[-1].u.image),
+                static_cast<void *>(var[-1].u.image ? var[-1].u.image->name : nullptr));
+            Switch_LogWrite(trace);
+        }
+#endif
+    }
+#else
+    Load_Stream(atStreamStart, (uint8_t *)var, 12 * count);
     for (i = 0; i < count; ++i)
     {
         varMaterialTextureDef = var;
         Load_MaterialTextureDef(0);
         ++var;
-#ifdef __SWITCH__
-        if (g_switchTextureReturnTraceCount < 24)
-        {
-            char trace[128];
-            std::snprintf(
-                trace, sizeof(trace),
-                "[SWITCH TEXRETURN] texturedef item=%d done\n",
-                i);
-            Switch_LogWrite(trace);
-        }
-#endif
     }
-#ifdef __SWITCH__
-    if (g_switchTextureReturnTraceCount < 24)
-        Switch_LogWrite("[SWITCH TEXRETURN] texturedef array end\n");
 #endif
 }
 
@@ -4603,10 +4658,28 @@ void __cdecl Load_Material(bool atStreamStart)
                 reinterpret_cast<uintptr_t>(varMaterial->textureTable));
         if (textureTableValue == UINT32_MAX)
         {
+#ifdef __SWITCH__
+            varMaterial->textureTable =
+                reinterpret_cast<MaterialTextureDef *>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(
+                            sizeof(MaterialTextureDef) *
+                            static_cast<size_t>(varMaterial->textureCount)),
+                        "SwitchMaterialTextureDef",
+                        22));
+            varMaterialTextureDef = varMaterial->textureTable;
+            std::memset(
+                varMaterialTextureDef,
+                0,
+                sizeof(MaterialTextureDef) *
+                    static_cast<size_t>(varMaterial->textureCount));
+            Load_MaterialTextureDefArray(0, varMaterial->textureCount);
+#else
             varMaterial->textureTable =
                 (MaterialTextureDef *)AllocLoad_FxElemVisStateSample();
             varMaterialTextureDef = varMaterial->textureTable;
             Load_MaterialTextureDefArray(1, varMaterial->textureCount);
+#endif
         }
         else
         {
