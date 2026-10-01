@@ -5881,12 +5881,28 @@ void __cdecl Load_FxEffectDefHandle(bool atStreamStart)
         reinterpret_cast<uintptr_t>(*varFxEffectDefHandle));
 #endif
 
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex == 1224)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XASSET TRACE] fx top handle value=%08x slot=%p\n",
+            value,
+            static_cast<void *>(varFxEffectDefHandle));
+        Switch_LogWrite(trace);
+    }
+#endif
+
     DB_PushStreamPos(0);
     if (value)
     {
         if (value == -1 || value == -2)
         {
 #ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1224)
+                Switch_LogWrite("[SWITCH XASSET TRACE] fx top before alloc\n");
             *varFxEffectDefHandle = reinterpret_cast<const FxEffectDef *>(
                 Hunk_Alloc(
                     static_cast<uint32_t>(sizeof(FxEffectDef)),
@@ -5896,6 +5912,16 @@ void __cdecl Load_FxEffectDefHandle(bool atStreamStart)
                 const_cast<FxEffectDef *>(*varFxEffectDefHandle),
                 0,
                 sizeof(FxEffectDef));
+            if (g_switchCurrentAssetIndex == 1224)
+            {
+                char trace[256];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH XASSET TRACE] fx top after alloc obj=%p\n",
+                    static_cast<const void *>(*varFxEffectDefHandle));
+                Switch_LogWrite(trace);
+            }
 #else
             *varFxEffectDefHandle =
                 (const FxEffectDef *)AllocLoad_FxElemVisStateSample();
@@ -5905,8 +5931,20 @@ void __cdecl Load_FxEffectDefHandle(bool atStreamStart)
                 inserted = DB_InsertPointer();
             else
                 inserted = 0;
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1224)
+                Switch_LogWrite("[SWITCH XASSET TRACE] fx top before payload\n");
+#endif
             Load_FxEffectDef(1);
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1224)
+                Switch_LogWrite("[SWITCH XASSET TRACE] fx top after payload\n");
+#endif
             Load_FxEffectDefAsset((XAssetHeader *)varFxEffectDefHandle);
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1224)
+                Switch_LogWrite("[SWITCH XASSET TRACE] fx top after add\n");
+#endif
             if (inserted)
                 *inserted = *varFxEffectDefHandle;
         }
