@@ -1689,6 +1689,19 @@ XAssetHeader __cdecl DB_FindXAssetDefaultHeaderInternal(XAssetType type)
         if (assetEntry->entry.asset.type == type)
         {
             XAssetName = DB_GetXAssetName(&assetEntry->entry.asset);
+#ifdef __SWITCH__
+            if (type == ASSET_TYPE_LOADED_SOUND)
+            {
+                char trace[192];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH LOADEDSOUND LINK] compare existing=%p new=%p\n",
+                    static_cast<const void *>(XAssetName),
+                    static_cast<const void *>(name));
+                Switch_LogWrite(trace);
+            }
+#endif
             if (!I_stricmp(XAssetName, name))
                 break;
         }
@@ -2415,11 +2428,25 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     if (newEntry->entry.asset.type == ASSET_TYPE_IMAGE)
         Switch_LogWrite("[SWITCH IMAGE] DB_Link before DB_GetXAssetName\n");
 #endif
+#ifdef __SWITCH__
+    if (newEntry->entry.asset.type == ASSET_TYPE_LOADED_SOUND)
+        Switch_LogWrite("[SWITCH LOADEDSOUND LINK] before DB_GetXAssetName\n");
+#endif
     if (newEntry->entry.asset.type == ASSET_TYPE_IMAGE)
         name = newEntry->entry.asset.header.image->name;
     else
         name = DB_GetXAssetName(&newEntry->entry.asset);
 #ifdef __SWITCH__
+    if (newEntry->entry.asset.type == ASSET_TYPE_LOADED_SOUND)
+    {
+        char trace[192];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH LOADEDSOUND LINK] name=%p\n",
+            static_cast<const void *>(name));
+        Switch_LogWrite(trace);
+    }
     if (newEntry->entry.asset.type == ASSET_TYPE_TECHNIQUE_SET)
     {
         char trace[192];
@@ -2439,6 +2466,10 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
 #endif
 
 
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_LOADED_SOUND)
+        Switch_LogWrite("[SWITCH LOADEDSOUND LINK] before name dereference\n");
+#endif
     v2 = *name;
     isStubAsset = v2 == ',';
     if (v2 == ',')
@@ -2737,7 +2768,45 @@ void __cdecl Mark_SndCurveAsset(SndCurve *sndCurve)
 
 void __cdecl Load_LoadedSoundAsset(XAssetHeader *loadSnd)
 {
-    loadSnd->xmodelPieces = DB_AddXAsset(ASSET_TYPE_LOADED_SOUND, (XAssetHeader)loadSnd->xmodelPieces).xmodelPieces;
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 7u &&
+        g_switchCurrentAssetIndex >= 1202 &&
+        g_switchCurrentAssetIndex <= 1212)
+    {
+        char trace[256];
+        LoadedSound *sound =
+            loadSnd ? reinterpret_cast<LoadedSound *>(loadSnd->xmodelPieces) : nullptr;
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH LOADEDSOUND ASSET] begin slot=%p obj=%p name=%p data=%p\n",
+            static_cast<void *>(loadSnd),
+            static_cast<void *>(sound),
+            static_cast<const void *>(sound ? sound->name : nullptr),
+            static_cast<void *>(sound ? sound->sound.data : nullptr));
+        Switch_LogWrite(trace);
+    }
+#endif
+
+    loadSnd->xmodelPieces =
+        DB_AddXAsset(
+            ASSET_TYPE_LOADED_SOUND,
+            (XAssetHeader)loadSnd->xmodelPieces).xmodelPieces;
+
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 7u &&
+        g_switchCurrentAssetIndex >= 1202 &&
+        g_switchCurrentAssetIndex <= 1212)
+    {
+        char trace[160];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH LOADEDSOUND ASSET] after DB_AddXAsset obj=%p\n",
+            static_cast<void *>(loadSnd->xmodelPieces));
+        Switch_LogWrite(trace);
+    }
+#endif
 }
 
 void __cdecl Mark_LoadedSoundAsset(LoadedSound *loadSnd)
