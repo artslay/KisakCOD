@@ -20,6 +20,97 @@ uint32_t g_streamPosStackIndex;
 #ifdef __SWITCH__
 static uintptr_t g_switchStreamHighWater[9] = {};
 static uint32_t g_switchStreamRegressionCount = 0;
+static uint32_t g_switchStreamMismatchCount = 0;
+
+static int32_t Switch_StreamOwner(
+    const uint8_t *pos,
+    uintptr_t *offsetOut)
+{
+    if (!pos || !g_streamBlocks)
+        return -1;
+
+    const uintptr_t ptr = reinterpret_cast<uintptr_t>(pos);
+    for (uint32_t i = 0; i < ARRAY_COUNT(g_streamPosArray); ++i)
+    {
+        if (!g_streamBlocks[i].data)
+            continue;
+
+        const uintptr_t base =
+            reinterpret_cast<uintptr_t>(g_streamBlocks[i].data);
+        const uintptr_t end = base + g_streamBlocks[i].size;
+        if (ptr >= base && ptr <= end)
+        {
+            if (offsetOut)
+                *offsetOut = ptr - base;
+            return static_cast<int32_t>(i);
+        }
+    }
+
+    return -1;
+}
+
+static void Switch_CheckStreamCursor(const char *where)
+{
+    if (!g_streamPos)
+        return;
+
+    uintptr_t offset = 0;
+    const int32_t owner = Switch_StreamOwner(g_streamPos, &offset);
+    if (owner == static_cast<int32_t>(g_streamPosIndex))
+        return;
+
+    if (g_switchStreamMismatchCount >= 32)
+        return;
+
+    char trace[320];
+    std::snprintf(
+        trace,
+        sizeof(trace),
+        "[SWITCH STREAM MISMATCH] #%u where=%s current=%u owner=%d offset=%08x pos=%p stack=%u\n",
+        g_switchStreamMismatchCount,
+        where,
+        static_cast<unsigned>(g_streamPosIndex),
+        owner,
+        static_cast<unsigned>(offset),
+        static_cast<void *>(g_streamPos),
+        static_cast<unsigned>(g_streamPosStackIndex));
+    Switch_LogWrite(trace);
+    ++g_switchStreamMismatchCount;
+}
+
+static void Switch_CheckStreamArrayEntry(
+    uint32_t index,
+    const char *where)
+{
+    if (index >= ARRAY_COUNT(g_streamPosArray) ||
+        !g_streamPosArray[index])
+        return;
+
+    uintptr_t offset = 0;
+    const int32_t owner =
+        Switch_StreamOwner(g_streamPosArray[index], &offset);
+    if (owner == static_cast<int32_t>(index))
+        return;
+
+    if (g_switchStreamMismatchCount >= 32)
+        return;
+
+    char trace[320];
+    std::snprintf(
+        trace,
+        sizeof(trace),
+        "[SWITCH STREAM ARRAY MISMATCH] #%u where=%s index=%u owner=%d offset=%08x pos=%p stack=%u current=%u\n",
+        g_switchStreamMismatchCount,
+        where,
+        static_cast<unsigned>(index),
+        owner,
+        static_cast<unsigned>(offset),
+        static_cast<void *>(g_streamPosArray[index]),
+        static_cast<unsigned>(g_streamPosStackIndex),
+        static_cast<unsigned>(g_streamPosIndex));
+    Switch_LogWrite(trace);
+    ++g_switchStreamMismatchCount;
+}
 
 static void Switch_CheckStreamRegression(
     uint32_t index,
@@ -83,6 +174,11 @@ void __cdecl DB_InitStreams(XZoneMemory *zoneMem)
 #endif
     for (i = 0; i < 9; ++i)
         g_streamPosArray[i] = zoneMem->blocks[i].data;
+#ifdef __SWITCH__
+    Switch_CheckStreamCursor("DB_InitStreams:initial");
+    for (i = 0; i < 9; ++i)
+        Switch_CheckStreamArrayEntry(i, "DB_InitStreams:array");
+#endif
 }
 
 void __cdecl DB_PushStreamPos(uint32_t index)
@@ -95,6 +191,9 @@ void __cdecl DB_PushStreamPos(uint32_t index)
     DB_SetStreamIndex(index);
 
     g_streamPosStack[g_streamPosStackIndex++].pos = g_streamPos;
+#ifdef __SWITCH__
+    Switch_CheckStreamCursor("DB_PushStreamPos:after");
+#endif
 }
 
 void __cdecl DB_CloneStreamData(uint8_t *destStart)
@@ -126,8 +225,15 @@ void __cdecl DB_SetStreamIndex(uint32_t index)
         }
         iassert(index < arr_cnt(g_streamPosArray));
         g_streamPosArray[g_streamPosIndex] = g_streamPos;
+#ifdef __SWITCH__
+        Switch_CheckStreamArrayEntry(g_streamPosIndex, "DB_SetStreamIndex:saved");
+        Switch_CheckStreamArrayEntry(index, "DB_SetStreamIndex:target");
+#endif
         g_streamPosIndex = index;
         g_streamPos = g_streamPosArray[index];
+#ifdef __SWITCH__
+        Switch_CheckStreamCursor("DB_SetStreamIndex:after");
+#endif
     }
 }
 
@@ -206,6 +312,8 @@ void __cdecl DB_PopStreamPos()
 
         g_streamPos = g_streamPosArray[savedIndex];
 #ifdef __SWITCH__
+        Switch_CheckStreamArrayEntry(savedIndex, "DB_PopStreamPos:special-target");
+        Switch_CheckStreamCursor("DB_PopStreamPos:special-restore");
         Switch_CheckStreamRegression(
             savedIndex,
             g_streamPos,
@@ -251,6 +359,9 @@ void __cdecl DB_IncStreamPos(int32_t size)
     iassert(g_streamPos + size <= g_streamZoneMem->blocks[g_streamPosIndex].data + g_streamZoneMem->blocks[g_streamPosIndex].size);
 
     g_streamPos += size;
+#ifdef __SWITCH__
+    Switch_CheckStreamCursor("DB_IncStreamPos:after");
+#endif
 }
 
 const void **__cdecl DB_InsertPointer()
