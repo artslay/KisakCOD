@@ -487,7 +487,7 @@ void __cdecl DB_LoadXFileInternal()
     }
     DB_PopStreamPos();
     DB_FinishGeometryBlocks(g_load.zoneMem);
-    --g_loadingAssets;
+    __atomic_sub_fetch(&g_loadingAssets, 1u, __ATOMIC_SEQ_CST);
 #ifdef __SWITCH__
     g_switchDbStage = "delay_stream";
 #endif
