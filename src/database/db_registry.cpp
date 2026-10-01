@@ -2461,6 +2461,9 @@ extern "C" XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(XAssetType type, XAsset
     newEntry.entry.asset.header = header;
 
 #ifdef __SWITCH__
+    if (type == ASSET_TYPE_IMPACT_FX)
+        Switch_LogWrite("[SWITCH IMPACTFX ADD] entered helper\n");
+
     const bool traceImpactFx =
         type == ASSET_TYPE_IMPACT_FX;
     if (traceImpactFx)
