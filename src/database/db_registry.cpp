@@ -2043,12 +2043,44 @@ static void __cdecl DB_FreeXAssetHeader(XAssetType type, XAssetHeader header)
 static XAssetEntryPoolEntry *__cdecl DB_AllocXAssetEntry(XAssetType type, uint8_t zoneIndex)
 {
     XAssetEntryPoolEntry *freeHead = g_freeAssetEntryHead;
+
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_LOADED_SOUND)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH LOADEDSOUND ALLOC] type=%u head=%p next=%p sizeEntry=%zu sizeSound=%zu\\n",
+            static_cast<unsigned>(type),
+            static_cast<void *>(freeHead),
+            freeHead ? static_cast<void *>(freeHead->next) : nullptr,
+            sizeof(XAssetEntryPoolEntry),
+            sizeof(LoadedSound));
+        Switch_LogWrite(trace);
+    }
+#endif
+
     if (!freeHead)
     {
         Sys_UnlockWrite(&db_hashCritSect);
         Com_Error(ERR_DROP, "Could not allocate asset - increase XASSET_ENTRY_POOL_SIZE");
     }
     g_freeAssetEntryHead = freeHead->next;
+
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_LOADED_SOUND)
+    {
+        char trace[192];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH LOADEDSOUND ALLOC] after pop newHead=%p\\n",
+            static_cast<void *>(g_freeAssetEntryHead));
+        Switch_LogWrite(trace);
+    }
+#endif
+
     freeHead->entry.asset.type = type;
     freeHead->entry.asset.header = DB_AllocXAssetHeader(type);
     freeHead->entry.zoneIndex = zoneIndex;
