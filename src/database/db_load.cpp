@@ -4116,9 +4116,10 @@ void __cdecl Load_MaterialTextureDef(bool atStreamStart)
     struct SerializedMaterialTextureDef
     {
         uint32_t nameHash;
+        char nameStart;
+        char nameEnd;
         uint8_t samplerState;
         uint8_t semantic;
-        uint8_t padding[2];
         uint32_t info;
     };
     static_assert(sizeof(SerializedMaterialTextureDef) == 12);
@@ -4133,8 +4134,8 @@ void __cdecl Load_MaterialTextureDef(bool atStreamStart)
             sizeof(serialized));
 
         varMaterialTextureDef->nameHash = serialized.nameHash;
-        varMaterialTextureDef->nameStart = static_cast<char>(0);
-        varMaterialTextureDef->nameEnd = static_cast<char>(0);
+        varMaterialTextureDef->nameStart = serialized.nameStart;
+        varMaterialTextureDef->nameEnd = serialized.nameEnd;
         varMaterialTextureDef->samplerState = serialized.samplerState;
         varMaterialTextureDef->semantic = serialized.semantic;
         varMaterialTextureDef->u.image =
@@ -4163,17 +4164,54 @@ void __cdecl Load_MaterialTextureDefArray(bool atStreamStart, int32_t count)
     int32_t i;
 
 #ifdef __SWITCH__
+    // The fastfile stores the entire MaterialTextureDef array contiguously,
+    // followed by the inline payloads referenced by its 32-bit pointer tokens.
+    // Therefore the serialized 12-byte records must all be consumed first;
+    // only after that may Load_MaterialTextureDefInfo() consume nested images.
+    struct SerializedMaterialTextureDef
+    {
+        uint32_t nameHash;
+        char nameStart;
+        char nameEnd;
+        uint8_t samplerState;
+        uint8_t semantic;
+        uint32_t info;
+    };
+    static_assert(sizeof(SerializedMaterialTextureDef) == 12);
     static_assert(sizeof(MaterialTextureDef) == 16);
 
-    // Never bulk-load 12-byte serialized records into native 16-byte elements:
-    // doing so makes every following element begin four bytes too early and the
-    // 8-byte pointer in u then overlaps the next record.
+    (void)atStreamStart;
+
+    // Phase 1: consume the contiguous serialized 12-byte array and expand each
+    // record into its native 16-byte ARM64 representation.
     for (i = 0; i < count; ++i)
     {
-        varMaterialTextureDef = var;
-        Load_MaterialTextureDef(1);
-        ++var;
-#ifdef __SWITCH__
+        SerializedMaterialTextureDef serialized{};
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+        DB_IncStreamPos(sizeof(serialized));
+
+        varMaterialTextureDef = &var[i];
+        varMaterialTextureDef->nameHash = serialized.nameHash;
+        varMaterialTextureDef->nameStart = serialized.nameStart;
+        varMaterialTextureDef->nameEnd = serialized.nameEnd;
+        varMaterialTextureDef->samplerState = serialized.samplerState;
+        varMaterialTextureDef->semantic = serialized.semantic;
+        varMaterialTextureDef->u.image =
+            reinterpret_cast<GfxImage *>(
+                static_cast<uintptr_t>(serialized.info));
+    }
+
+    // Phase 2: resolve nested image/water pointers. Inline payloads are located
+    // after the complete serialized array, matching the original 32-bit loader.
+    for (i = 0; i < count; ++i)
+    {
+        varMaterialTextureDef = &var[i];
+        varMaterialTextureDefInfo =
+            reinterpret_cast<water_t **>(&varMaterialTextureDef->u);
+        Load_MaterialTextureDefInfo(0);
+
         if (g_switchCurrentAssetIndex == 1360)
         {
             char trace[192];
@@ -4181,13 +4219,12 @@ void __cdecl Load_MaterialTextureDefArray(bool atStreamStart, int32_t count)
                 trace, sizeof(trace),
                 "[SWITCH XASSET TRACE] mat tex i=%d semantic=%u sampler=%u image=%p name=%p\n",
                 i,
-                static_cast<unsigned>(var[-1].semantic),
-                static_cast<unsigned>(var[-1].samplerState),
-                static_cast<void *>(var[-1].u.image),
-                static_cast<const void *>(var[-1].u.image ? var[-1].u.image->name : nullptr));
+                static_cast<unsigned>(var[i].semantic),
+                static_cast<unsigned>(var[i].samplerState),
+                static_cast<void *>(var[i].u.image),
+                static_cast<const void *>(var[i].u.image ? var[i].u.image->name : nullptr));
             Switch_LogWrite(trace);
         }
-#endif
     }
 #else
     Load_Stream(atStreamStart, (uint8_t *)var, 12 * count);
