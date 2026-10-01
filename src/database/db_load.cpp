@@ -8284,12 +8284,29 @@ void __cdecl Load_FxImpactTablePtr(bool atStreamStart)
             if (g_switchCurrentAssetIndex == 1225)
                 Switch_LogWrite("[SWITCH XASSET TRACE] impact ptr after table load\n");
             if (g_switchCurrentAssetIndex == 1225)
-                Switch_LogWrite("[SWITCH XASSET TRACE] impact ptr before asset add\n");
-#endif
-            Load_FxImpactTableAsset((XAssetHeader *)varFxImpactTablePtr);
-#ifdef __SWITCH__
+                Switch_LogWrite("[SWITCH XASSET TRACE] impact ptr before direct asset add\n");
+
+            XAssetHeader impactHeader;
+            impactHeader.data = *varFxImpactTablePtr;
+
+            XAssetHeader addedHeader =
+                DB_AddXAsset(ASSET_TYPE_IMPACT_FX, impactHeader);
+
+            *varFxImpactTablePtr =
+                reinterpret_cast<FxImpactTable *>(addedHeader.data);
+
             if (g_switchCurrentAssetIndex == 1225)
-                Switch_LogWrite("[SWITCH XASSET TRACE] impact ptr after asset add\n");
+            {
+                char trace[192];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH XASSET TRACE] impact ptr direct add done=%p\n",
+                    static_cast<void *>(addedHeader.data));
+                Switch_LogWrite(trace);
+            }
+#else
+            Load_FxImpactTableAsset((XAssetHeader *)varFxImpactTablePtr);
 #endif
             if (inserted)
                 *inserted = *varFxImpactTablePtr;
