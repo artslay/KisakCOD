@@ -2427,6 +2427,9 @@ void DB_SyncLostDevice()
     }
 }
 
+#ifdef __SWITCH__
+__attribute__((visibility("hidden")))
+#endif
 XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
 {
     XAssetEntryPoolEntry *existingEntry;
