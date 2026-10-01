@@ -2560,15 +2560,15 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         g_switchCurrentAssetRawType == 23u &&
         type == ASSET_TYPE_WEAPON;
     if (switchTraceWeapon1506)
-        Switch_LogWrite("[SWITCH WEAPON1506] DB_Link before DB_GetXAssetName\\n");
+        Switch_LogWrite("[SWITCH WEAPON1506] DB_Link before DB_GetXAssetName\n");
     if (newEntry->entry.asset.type == ASSET_TYPE_TECHNIQUE_SET)
-        Switch_LogWrite("[SWITCH TECHSET LINK] before DB_GetXAssetName\\n");
+        Switch_LogWrite("[SWITCH TECHSET LINK] before DB_GetXAssetName\n");
     if (newEntry->entry.asset.type == ASSET_TYPE_IMAGE)
-        Switch_LogWrite("[SWITCH IMAGE] DB_Link before DB_GetXAssetName\\n");
+        Switch_LogWrite("[SWITCH IMAGE] DB_Link before DB_GetXAssetName\n");
 #endif
 #ifdef __SWITCH__
     if (newEntry->entry.asset.type == ASSET_TYPE_LOADED_SOUND)
-        Switch_LogWrite("[SWITCH LOADEDSOUND LINK] before DB_GetXAssetName\\n");
+        Switch_LogWrite("[SWITCH LOADEDSOUND LINK] before DB_GetXAssetName\n");
 #endif
     if (newEntry->entry.asset.type == ASSET_TYPE_IMAGE)
         name = newEntry->entry.asset.header.image->name;
@@ -2581,7 +2581,7 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH WEAPON1506] DB_Link name=%p header=%p type=%u\\n",
+            "[SWITCH WEAPON1506] DB_Link name=%p header=%p type=%u\n",
             static_cast<const void *>(name),
             static_cast<void *>(newEntry->entry.asset.header.data),
             static_cast<unsigned>(type));
