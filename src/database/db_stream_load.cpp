@@ -10,35 +10,10 @@ extern uint32_t g_switchCurrentAssetHeader;
 #endif
 
 
-#ifdef __SWITCH__
-static inline void Switch_TraceSuspiciousLoad(void *dst, uint32_t size)
-{
-    const uintptr_t address = reinterpret_cast<uintptr_t>(dst);
-    if (address && address < 0x100000000ULL)
-    {
-        char trace[320];
-        std::snprintf(
-            trace,
-            sizeof(trace),
-            "[SWITCH XASSET TRACE] LOW LOAD dst=%p size=%u stream=%u pos=%p asset=%d raw=%u header=%08x ra=%p\\n",
-            dst,
-            static_cast<unsigned>(size),
-            static_cast<unsigned>(g_streamPosIndex),
-            static_cast<void *>(DB_GetStreamPos()),
-            g_switchCurrentAssetIndex,
-            g_switchCurrentAssetRawType,
-            g_switchCurrentAssetHeader,
-            __builtin_return_address(0));
-        Switch_LogWrite(trace);
-    }
-}
-#endif
+
 
 void __cdecl Load_Stream(bool atStreamStart, uint8_t *ptr, int32_t size)
 {
-#ifdef __SWITCH__
-    Switch_TraceSuspiciousLoad(ptr, static_cast<uint32_t>(size > 0 ? size : 0));
-#endif
     iassert(atStreamStart == (ptr == DB_GetStreamPos()));
     if (atStreamStart && size)
     {
@@ -163,8 +138,20 @@ void __cdecl DB_LoadSwitchSerialized(void *dst, uint32_t size)
     iassert(dst);
     iassert(size);
     uint8_t *streamPos = DB_GetStreamPos();
-// Also trace direct serialized copies; nested loaders can bypass Load_Stream.
-    Switch_TraceSuspiciousLoad(dst, size);
+    if (g_switchCurrentAssetIndex == 1363)
+    {
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XASSET TRACE] IMAGE1363 serialized copy dst=%p size=%u stream=%u pos=%p ra=%p\n",
+            dst,
+            static_cast<unsigned>(size),
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(streamPos),
+            __builtin_return_address(0));
+        Switch_LogWrite(trace);
+    }
     DB_LoadXFileData(streamPos, size);
     std::memcpy(dst, streamPos, size);
     DB_IncStreamPos(static_cast<int32_t>(size));
