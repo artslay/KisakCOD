@@ -155,6 +155,11 @@ int32_t __cdecl DB_SizeofXAsset_LoadedSound_()
 {
     return sizeof(LoadedSound);
 }
+
+int32_t __cdecl DB_SizeofXAsset_GfxLightDef_()
+{
+    return sizeof(GfxLightDef);
+}
 int32_t __cdecl DB_SizeofXAsset_menuDef_t_()
 {
     return sizeof(menuDef_t);
@@ -209,7 +214,7 @@ int(__cdecl *DB_GetXAssetSizeHandler[ASSET_TYPE_COUNT])() =
     DB_SizeofXAsset_GameWorldMp_,
     DB_SizeofXAsset_RawFile_,
     DB_SizeofXAsset_GfxWorld_,
-    DB_SizeofXAsset_StringTable_,
+    DB_SizeofXAsset_GfxLightDef_,
     0,
     DB_SizeofXAsset_Font_s_,
     DB_SizeofXAsset_RawFile_,

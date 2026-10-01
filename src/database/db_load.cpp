@@ -4850,41 +4850,76 @@ void __cdecl Load_GfxLightImage(bool atStreamStart)
 void __cdecl Load_GfxLightDef(bool atStreamStart)
 {
 #ifdef __SWITCH__
-    const bool trace = g_switchCurrentAssetIndex == 1226;
-    if (trace)
-        Switch_LogWrite("[SWITCH LIGHTDEF] Load_GfxLightDef enter\n");
-#endif
-    Load_Stream(atStreamStart, (uint8_t *)varGfxLightDef, 16);
-#ifdef __SWITCH__
-    if (trace)
+    if (atStreamStart)
     {
-        char t[192];
-        std::snprintf(t, sizeof(t),
-            "[SWITCH LIGHTDEF] raw name=%p attenuation=%p pos=%p\n",
-            static_cast<const void *>(varGfxLightDef->name),
-            static_cast<void *>(varGfxLightDef->attenuation.image),
-            static_cast<void *>(DB_GetStreamPos()));
-        Switch_LogWrite(t);
+        struct SerializedGfxLightDef
+        {
+            uint32_t name;
+            uint32_t attenuationImage;
+            uint32_t attenuationSamplerState;
+            int32_t lmapLookupStart;
+        };
+        static_assert(sizeof(SerializedGfxLightDef) == 16);
+
+        SerializedGfxLightDef serialized{};
+        Load_Stream(
+            true,
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+
+        std::memset(varGfxLightDef, 0, sizeof(*varGfxLightDef));
+        varGfxLightDef->name =
+            reinterpret_cast<const char *>(
+                static_cast<uintptr_t>(serialized.name));
+        varGfxLightDef->attenuation.image =
+            reinterpret_cast<GfxImage *>(
+                static_cast<uintptr_t>(serialized.attenuationImage));
+        varGfxLightDef->attenuation.samplerState =
+            static_cast<uint8_t>(serialized.attenuationSamplerState);
+        varGfxLightDef->lmapLookupStart =
+            serialized.lmapLookupStart;
+
+        const bool trace = g_switchCurrentAssetIndex == 1226;
+        if (trace)
+        {
+            char t[224];
+            std::snprintf(
+                t,
+                sizeof(t),
+                "[SWITCH LIGHTDEF] serialized name=%08x image=%08x sampler=%08x lmap=%d obj=%p\n",
+                serialized.name,
+                serialized.attenuationImage,
+                serialized.attenuationSamplerState,
+                serialized.lmapLookupStart,
+                static_cast<void *>(varGfxLightDef));
+            Switch_LogWrite(t);
+        }
+
+        DB_PushStreamPos(4);
+        varXString = &varGfxLightDef->name;
+        Load_XString(0);
+        if (trace)
+            Switch_LogWrite("[SWITCH LIGHTDEF] name done\n");
+
+        varGfxImagePtr = &varGfxLightDef->attenuation.image;
+        Load_GfxImagePtr(0);
+        if (trace)
+            Switch_LogWrite("[SWITCH LIGHTDEF] attenuation image done\n");
+
+        DB_PopStreamPos();
+        if (trace)
+            Switch_LogWrite("[SWITCH LIGHTDEF] load done\n");
+        return;
     }
 #endif
+
+    Load_Stream(atStreamStart, (uint8_t *)varGfxLightDef, 16);
     DB_PushStreamPos(4);
     varXString = &varGfxLightDef->name;
     Load_XString(0);
-#ifdef __SWITCH__
-    if (trace)
-        Switch_LogWrite("[SWITCH LIGHTDEF] name done\n");
-#endif
     varGfxLightImage = &varGfxLightDef->attenuation;
     Load_GfxLightImage(0);
-#ifdef __SWITCH__
-    if (trace)
-        Switch_LogWrite("[SWITCH LIGHTDEF] attenuation done\n");
-#endif
     DB_PopStreamPos();
-#ifdef __SWITCH__
-    if (trace)
-        Switch_LogWrite("[SWITCH LIGHTDEF] pop done\n");
-#endif
 }
 
 void __cdecl Load_GfxLightDefPtr(bool atStreamStart)

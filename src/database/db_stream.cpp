@@ -122,6 +122,43 @@ void __cdecl DB_PopStreamPos()
             static_cast<void *>(g_streamPos));
         Switch_LogWrite(trace);
     }
+
+    if (savedIndex >= ARRAY_COUNT(g_streamPosArray))
+    {
+        char trace[160];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH STREAMPOP FAIL] savedIndex=%u stack=%u currentIndex=%u pos=%p\n",
+            (unsigned)savedIndex,
+            (unsigned)g_streamPosStackIndex,
+            (unsigned)g_streamPosIndex,
+            static_cast<void *>(g_streamPos));
+        Switch_LogWrite(trace);
+        return;
+    }
+
+    if (g_streamPosIndex == 0 && savedIndex != 0)
+    {
+        g_streamPosArray[0] = g_streamPos;
+        if (tracePop)
+            Switch_LogWrite("[SWITCH STREAMPOP TRAP] after stream0 save\n");
+
+        g_streamPosIndex = savedIndex;
+        if (tracePop)
+            Switch_LogWrite("[SWITCH STREAMPOP TRAP] after index restore\n");
+
+        g_streamPos = g_streamPosArray[savedIndex];
+        if (tracePop)
+        {
+            char trace[160];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH STREAMPOP TRAP] after pos restore pos=%p\n",
+                static_cast<void *>(g_streamPos));
+            Switch_LogWrite(trace);
+        }
+        return;
+    }
 #endif
 
     if (!g_streamPosIndex)

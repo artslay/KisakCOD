@@ -1889,36 +1889,6 @@ static XAssetHeader __cdecl DB_AllocXAsset_StringTable_(void *arg)
     return header;
 }
 
-static XAssetHeader __cdecl DB_AllocImpactFx(void *arg)
-{
-    auto *pool =
-        static_cast<XAssetPool<FxImpactTable, POOLSIZE_IMPACT_FX> *>(arg);
-    XAssetHeader header{};
-
-    if (pool->freeHead)
-    {
-        auto *entry = pool->freeHead;
-        pool->freeHead = entry->next;
-        header.data = &entry->entry;
-    }
-
-    return header;
-}
-
-static void __cdecl DB_FreeImpactFx(void *arg, XAssetHeader header)
-{
-    auto *pool =
-        static_cast<XAssetPool<FxImpactTable, POOLSIZE_IMPACT_FX> *>(arg);
-
-    if (!header.data)
-        return;
-
-    auto *entry =
-        reinterpret_cast<XAssetPoolEntry<FxImpactTable> *>(header.data);
-    entry->next = pool->freeHead;
-    pool->freeHead = entry;
-}
-
 #ifdef KISAK_SP
 static XAssetHeader __cdecl DB_AllocPixelShader(void *arg)
 {
@@ -2028,7 +1998,7 @@ XAssetHeader(__cdecl *DB_AllocXAssetHeaderHandler[ASSET_TYPE_COUNT])(void *) =
   &DB_AllocXAsset_StringTable_,
   &DB_AllocXAsset_StringTable_,
   &DB_AllocXAsset_StringTable_,
-  &DB_AllocImpactFx,
+  NULL,
   NULL,
   NULL,
   &DB_AllocXAsset_StringTable_,
@@ -2081,7 +2051,7 @@ void(__cdecl *DB_FreeXAssetHeaderHandler[ASSET_TYPE_COUNT])(void *, XAssetHeader
   NULL,
   DB_FreeXAssetHeader_StringTable_,
   DB_FreeXAssetHeader_StringTable_,
-  DB_FreeImpactFx,
+  NULL,
   NULL,
   NULL,
   NULL,
