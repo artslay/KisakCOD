@@ -574,12 +574,17 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 
     if (count > 0)
     {
-        DB_LoadXFileData(
-            reinterpret_cast<uint8_t *>(serializedAssets.data()),
-            static_cast<uint32_t>(
-                sizeof(SerializedXAsset) * static_cast<size_t>(count)));
-        DB_IncStreamPos(static_cast<int32_t>(
-            sizeof(SerializedXAsset) * static_cast<size_t>(count)));
+        // Keep the original serialized XAsset records in block 4. Other
+        // serialized pointers/offsets may legally refer back into this array.
+        uint8_t *serializedStreamPos = DB_GetStreamPos();
+        const uint32_t serializedSize = static_cast<uint32_t>(
+            sizeof(SerializedXAsset) * static_cast<size_t>(count));
+        DB_LoadXFileData(serializedStreamPos, serializedSize);
+        std::memcpy(
+            serializedAssets.data(),
+            serializedStreamPos,
+            serializedSize);
+        DB_IncStreamPos(static_cast<int32_t>(serializedSize));
 
 #ifdef __SWITCH__
         for (int32_t traceIndex = 1200;
