@@ -3187,6 +3187,33 @@ void __cdecl Load_GfxImage(bool atStreamStart)
         varGfxImage->category = serialized.category;
         varGfxImage->delayLoadPixels = serialized.delayLoadPixels != 0;
 
+        const bool switchImageTrace = g_switchCurrentAssetIndex == 1360;
+        if (switchImageTrace)
+        {
+            char trace[320];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH XASSET TRACE] gfximage raw pos=%p map=%u tex=%08x picmip=%u,%u noPic=%u semantic=%u track=%u mem=%d,%d dim=%u,%u,%u cat=%u delay=%u name=%08x after=%p\n",
+                static_cast<void *>(DB_GetStreamPos()),
+                static_cast<unsigned>(serialized.mapType),
+                serialized.texture,
+                static_cast<unsigned>(serialized.picmip[0]),
+                static_cast<unsigned>(serialized.picmip[1]),
+                static_cast<unsigned>(serialized.noPicmip),
+                static_cast<unsigned>(serialized.semantic),
+                static_cast<unsigned>(serialized.track),
+                serialized.cardMemory.platform[0],
+                serialized.cardMemory.platform[1],
+                static_cast<unsigned>(serialized.width),
+                static_cast<unsigned>(serialized.height),
+                static_cast<unsigned>(serialized.depth),
+                static_cast<unsigned>(serialized.category),
+                static_cast<unsigned>(serialized.delayLoadPixels),
+                serialized.name,
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
+
         DB_PushStreamPos(4);
 
         if (!serialized.name)
@@ -3207,8 +3234,33 @@ void __cdecl Load_GfxImage(bool atStreamStart)
                     DB_ConvertOffsetToPointerValue(serialized.name));
         }
 
+        if (switchImageTrace)
+        {
+            char trace[256];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH XASSET TRACE] gfximage name=%p text=%s\n",
+                static_cast<const void *>(varGfxImage->name),
+                varGfxImage->name ? varGfxImage->name : "<null>");
+            Switch_LogWrite(trace);
+        }
+
         varGfxTextureLoad = &varGfxImage->texture;
         Load_GfxTextureLoad(0);
+
+        if (switchImageTrace)
+        {
+            char trace[256];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH XASSET TRACE] gfximage texture=%p delay=%u card=%d,%d afterTexture=%p\n",
+                static_cast<void *>(varGfxImage->texture.basemap),
+                static_cast<unsigned>(varGfxImage->delayLoadPixels),
+                varGfxImage->cardMemory.platform[0],
+                varGfxImage->cardMemory.platform[1],
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
 
         DB_PopStreamPos();
         return;
@@ -3240,6 +3292,21 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
 
     DB_PushStreamPos(0);
 
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex == 1360)
+    {
+        char trace[224];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH XASSET TRACE] gfximageptr slot=%p token=%08x stream=%u pos=%p\n",
+            static_cast<void *>(varGfxImagePtr),
+            value,
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+#endif
+
     if (value)
     {
         if (value == UINT32_MAX || value == UINT32_MAX - 1)
@@ -3257,6 +3324,22 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
                 inserted = DB_InsertPointer();
 
             Load_GfxImage(1);
+
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1360)
+            {
+                char trace[224];
+                std::snprintf(
+                    trace, sizeof(trace),
+                    "[SWITCH XASSET TRACE] gfximageptr loaded image=%p name=%p text=%s texture=%p after=%p\n",
+                    static_cast<void *>(nativeImage),
+                    static_cast<const void *>(nativeImage->name),
+                    nativeImage->name ? nativeImage->name : "<null>",
+                    static_cast<void *>(nativeImage->texture.basemap),
+                    static_cast<void *>(DB_GetStreamPos()));
+                Switch_LogWrite(trace);
+            }
+#endif
 
             // Keep the native pointer in a local variable.  Do not reload it
             // from the serialized/native slot after Load_GfxImage(), because
@@ -4620,13 +4703,16 @@ void __cdecl Load_Material(bool atStreamStart)
         char trace[256];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH MATERIAL RAW] pos=%p name=%08x tech=%08x tex=%08x const=%08x state=%08x\n",
+            "[SWITCH XASSET TRACE] material raw pos=%p name=%08x tech=%08x tex=%08x const=%08x state=%08x count=%u,%u,%u\n",
             static_cast<void *>(materialStreamPos),
             serialized.name,
             serialized.techniqueSet,
             serialized.textureTable,
             serialized.constantTable,
-            serialized.stateBitsTable);
+            serialized.stateBitsTable,
+            static_cast<unsigned>(serialized.textureCount) |
+                (static_cast<unsigned>(serialized.constantCount) << 8) |
+                (static_cast<unsigned>(serialized.stateBitsCount) << 16));
         Switch_LogWrite(trace);
     }
 
