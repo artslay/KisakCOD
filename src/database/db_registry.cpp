@@ -2568,6 +2568,20 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         name = newEntry->entry.asset.header.image->name;
     else
         name = DB_GetXAssetName(&newEntry->entry.asset);
+
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_IMAGE && g_switchCurrentAssetIndex == 1363)
+    {
+        char trace[256];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH IMAGE1363] DB_Link image=%p name=%p text=%s\n",
+            static_cast<void *>(newEntry->entry.asset.header.image),
+            static_cast<const void *>(name),
+            name ? name : "<null>");
+        Switch_LogWrite(trace);
+    }
+#endif
 #ifdef __SWITCH__
     if (newEntry->entry.asset.type == ASSET_TYPE_LOADED_SOUND)
     {
@@ -2601,6 +2615,17 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
 #ifdef __SWITCH__
     if (type == ASSET_TYPE_LOADED_SOUND)
         Switch_LogWrite("[SWITCH LOADEDSOUND LINK] before name dereference\n");
+#endif
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_IMAGE && g_switchCurrentAssetIndex == 1363)
+    {
+        char trace[192];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH IMAGE1363] DB_Link before name deref name=%p\n",
+            static_cast<const void *>(name));
+        Switch_LogWrite(trace);
+    }
 #endif
     v2 = *name;
     isStubAsset = v2 == ',';
