@@ -7608,10 +7608,42 @@ void __cdecl Load_FxImpactEntry(bool atStreamStart)
                 static_cast<uintptr_t>(serializedHandles[i]));
         }
 
+        if (g_switchCurrentAssetIndex == 1225)
+        {
+            Switch_LogWrite("[SWITCH XASSET TRACE] impact entry begin handles=33\\n");
+        }
+
         varFxEffectDefHandle = handles;
-        Load_FxEffectDefHandleArray(0, 29);
-        varFxEffectDefHandle = handles + 29;
-        Load_FxEffectDefHandleArray(0, 4);
+        for (int32_t i = 0; i < 33; ++i)
+        {
+            if (g_switchCurrentAssetIndex == 1225)
+            {
+                char trace[192];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH XASSET TRACE] impact handle i=%d raw=%08x before ptr=%p\\n",
+                    i,
+                    serializedHandles[i],
+                    static_cast<const void *>(handles[i]));
+                Switch_LogWrite(trace);
+            }
+
+            varFxEffectDefHandle = handles + i;
+            Load_FxEffectDefHandle(0);
+
+            if (g_switchCurrentAssetIndex == 1225)
+            {
+                char trace[192];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH XASSET TRACE] impact handle i=%d after ptr=%p\\n",
+                    i,
+                    static_cast<const void *>(handles[i]));
+                Switch_LogWrite(trace);
+            }
+        }
         return;
     }
 #endif
