@@ -963,6 +963,9 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
 #endif
     Sys_LockWrite(&db_hashCritSect);
 #ifdef __SWITCH__
+    if (traceImpactFx)
+        Switch_LogWrite("[SWITCH IMPACTFX ADD] after lock
+");
     if (traceDefaultMaterial)
         Switch_LogWrite("[SWITCH DBLOOKUP] after write lock\n");
 #endif
@@ -2435,6 +2438,22 @@ XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
     newEntry.entry.asset.type = type;
     newEntry.entry.asset.header = header;
 #ifdef __SWITCH__
+    const bool traceImpactFx = (type == ASSET_TYPE_IMPACT_FX &&
+                                g_switchCurrentAssetIndex == 1225);
+    if (traceImpactFx)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH IMPACTFX ADD] enter header=%p data=%p
+",
+            static_cast<const void *>(&header),
+            header.data);
+        Switch_LogWrite(trace);
+    }
+#endif
+#ifdef __SWITCH__
     if (type == ASSET_TYPE_TECHNIQUE_SET)
         Switch_LogWrite("[SWITCH TECHSET ADD] before write lock\n");
     if (type == ASSET_TYPE_IMAGE)
@@ -2452,6 +2471,19 @@ XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
 #endif
     existingEntry = DB_LinkXAssetEntry(&newEntry, 0);
 #ifdef __SWITCH__
+    if (traceImpactFx)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH IMPACTFX ADD] after link entry=%p existingData=%p existingType=%u
+",
+            static_cast<void *>(existingEntry),
+            existingEntry ? existingEntry->entry.asset.header.data : nullptr,
+            existingEntry ? static_cast<unsigned>(existingEntry->entry.asset.type) : 0u);
+        Switch_LogWrite(trace);
+    }
     if (type == ASSET_TYPE_TECHNIQUE_SET)
         Switch_LogWrite("[SWITCH TECHSET ADD] after link\n");
     if (type == ASSET_TYPE_IMAGE)
@@ -2459,12 +2491,20 @@ XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
 #endif
     Sys_UnlockWrite(&db_hashCritSect);
 #ifdef __SWITCH__
+    if (traceImpactFx)
+        Switch_LogWrite("[SWITCH IMPACTFX ADD] after unlock
+");
     if (type == ASSET_TYPE_TECHNIQUE_SET)
         Switch_LogWrite("[SWITCH TECHSET ADD] after unlock\n");
     if (type == ASSET_TYPE_IMAGE)
         Switch_LogWrite("[SWITCH IMAGE] DB_AddXAsset after unlock\n");
 #endif
     DB_SyncLostDevice();
+#ifdef __SWITCH__
+    if (traceImpactFx)
+        Switch_LogWrite("[SWITCH IMPACTFX ADD] after sync
+");
+#endif
     return existingEntry->entry.asset.header;
 }
 
