@@ -37,7 +37,8 @@ static bool Switch_LogPrefixAllowed(const char *msg)
     return std::strncmp(msg, "[SWITCH LOADEDSOUND", sizeof("[SWITCH LOADEDSOUND") - 1) == 0 ||
            std::strncmp(msg, "[SWITCH CRASH]", sizeof("[SWITCH CRASH]") - 1) == 0 ||
            std::strncmp(msg, "[SWITCH IWD]", sizeof("[SWITCH IWD]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH GLCTX]", sizeof("[SWITCH GLCTX]") - 1) == 0;
+           std::strncmp(msg, "[SWITCH GLCTX]", sizeof("[SWITCH GLCTX]") - 1) == 0 ||
+           std::strncmp(msg, "[SWITCH XASSET TRACE]", sizeof("[SWITCH XASSET TRACE]") - 1) == 0;
 }
 
 /*
@@ -48,6 +49,13 @@ static bool Switch_LogPrefixAllowed(const char *msg)
 extern "C" {
 alignas(16) uint8_t __nx_exception_stack[0x4000];
 uint64_t __nx_exception_stack_size = sizeof(__nx_exception_stack);
+}
+
+extern "C" {
+extern int32_t g_switchCurrentAssetIndex;
+extern uint32_t g_switchCurrentAssetRawType;
+extern uint32_t g_switchCurrentAssetHeader;
+extern const char *g_switchDbStage;
 }
 
 static void Switch_LogCrashLine(const char *line)
@@ -83,6 +91,16 @@ extern "C" void __libnx_exception_handler(ThreadExceptionDump *ctx)
         ctx->pstate,
         ctx->esr,
         (ctx->esr >> 26) & 0x3f);
+    Switch_LogCrashLine(line);
+
+    std::snprintf(
+        line,
+        sizeof(line),
+        "[KisakCOD][CRASH] db_stage=%s asset_index=%d raw_type=%u raw_header=0x%08x\n",
+        g_switchDbStage ? g_switchDbStage : "(null)",
+        g_switchCurrentAssetIndex,
+        g_switchCurrentAssetRawType,
+        g_switchCurrentAssetHeader);
     Switch_LogCrashLine(line);
 
     for (int i = 0; i < 29; i += 2)
