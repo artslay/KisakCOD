@@ -7675,10 +7675,36 @@ void __cdecl Load_FxImpactTable(bool atStreamStart)
         varFxImpactTable->table = reinterpret_cast<FxImpactEntry *>(
             static_cast<uintptr_t>(serializedTable));
 
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1225)
+        {
+            char trace[192];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH XASSET TRACE] impact table raw name=%08x table=%08x obj=%p\n",
+                serializedName,
+                serializedTable,
+                static_cast<void *>(varFxImpactTable));
+            Switch_LogWrite(trace);
+        }
+#endif
+
         DB_PushStreamPos(4);
 
         varXString = &varFxImpactTable->name;
         Load_XString(0);
+
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1225)
+        {
+            char trace[192];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH XASSET TRACE] impact table after name=%p\n",
+                static_cast<const void *>(varFxImpactTable->name));
+            Switch_LogWrite(trace);
+        }
+#endif
 
         if (serializedTable)
         {
@@ -7693,8 +7719,27 @@ void __cdecl Load_FxImpactTable(bool atStreamStart)
                 0,
                 sizeof(FxImpactEntry) * 12u);
             varFxImpactEntry = varFxImpactTable->table;
+
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1225)
+            {
+                char trace[192];
+                std::snprintf(
+                    trace, sizeof(trace),
+                    "[SWITCH XASSET TRACE] impact table entries=%p first=%p\n",
+                    static_cast<void *>(varFxImpactTable->table),
+                    static_cast<void *>(varFxImpactEntry));
+                Switch_LogWrite(trace);
+            }
+#endif
+
             Load_FxImpactEntryArray(1, 12);
         }
+
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1225)
+            Switch_LogWrite("[SWITCH XASSET TRACE] impact table load entries done\n");
+#endif
 
         DB_PopStreamPos();
         return;
