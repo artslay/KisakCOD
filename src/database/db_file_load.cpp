@@ -476,8 +476,7 @@ void Load_XAssetListCustom()
     };
 
     SerializedXAssetList serialized{};
-    DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
-    DB_IncStreamPos(static_cast<int32_t>(sizeof(serialized)));
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
     varXAssetList = &g_varXAssetList;
     memset(varXAssetList, 0, sizeof(*varXAssetList));
@@ -496,11 +495,16 @@ void Load_XAssetListCustom()
 
         if (count)
         {
-            DB_LoadXFileData(
-                reinterpret_cast<uint8_t *>(serializedStrings.data()),
-                sizeof(uint32_t) * static_cast<size_t>(count));
-            DB_IncStreamPos(
-                static_cast<int32_t>(sizeof(uint32_t) * static_cast<size_t>(count)));
+            const uint32_t serializedSize =
+                static_cast<uint32_t>(
+                    sizeof(uint32_t) * static_cast<size_t>(count));
+            uint8_t *serializedStreamPos = DB_GetStreamPos();
+            DB_LoadXFileData(serializedStreamPos, serializedSize);
+            std::memcpy(
+                serializedStrings.data(),
+                serializedStreamPos,
+                serializedSize);
+            DB_IncStreamPos(static_cast<int32_t>(serializedSize));
         }
 
         const char **dst =
