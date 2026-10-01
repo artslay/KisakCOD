@@ -3253,24 +3253,7 @@ void __cdecl Load_GfxTextureLoad(bool atStreamStart)
             DB_ConvertOffsetToAlias((uint32_t*)varGfxTextureLoad);
         }
     }
-#ifdef __SWITCH__
-    if (g_switchTextureReturnTraceCount < 24)
-    {
-        char trace[160];
-        std::snprintf(
-            trace, sizeof(trace),
-            "[SWITCH TEXRETURN] gfxtexture before pop count=%u stream=%u pos=%p\n",
-            (unsigned)g_switchTextureReturnTraceCount,
-            (unsigned)g_streamPosIndex,
-            static_cast<void *>(g_streamPos));
-        Switch_LogWrite(trace);
-    }
-#endif
     DB_PopStreamPos();
-#ifdef __SWITCH__
-    if (g_switchTextureReturnTraceCount < 24)
-        Switch_LogWrite("[SWITCH TEXRETURN] gfxtexture after pop\n");
-#endif
 }
 
 void __cdecl Load_GfxRawTextureArray(bool atStreamStart, int32_t count)
