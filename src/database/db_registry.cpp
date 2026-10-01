@@ -2424,6 +2424,8 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     uint16_t *pOverrideAssetEntryIndex;
     XAssetSize assetSize;
 
+    type = newEntry->entry.asset.type;
+
 #ifdef __SWITCH__
     if (newEntry->entry.asset.type == ASSET_TYPE_TECHNIQUE_SET)
         Switch_LogWrite("[SWITCH TECHSET LINK] before DB_GetXAssetName\n");
@@ -2476,8 +2478,6 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     isStubAsset = v2 == ',';
     if (v2 == ',')
         ++name;
-    type = newEntry->entry.asset.type;
-
     hash = DB_HashForName(name, type);
 
 
