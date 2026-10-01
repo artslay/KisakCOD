@@ -63,6 +63,12 @@ const char *g_switchDbStage = "idle";
 #endif
 
 #ifdef __SWITCH__
+extern int32_t g_switchCurrentAssetIndex;
+extern uint32_t g_switchCurrentAssetRawType;
+extern uint32_t g_switchCurrentAssetHeader;
+#endif
+
+#ifdef __SWITCH__
 static void Switch_CheckLoadDestination(
     const uint8_t *pos,
     uint32_t size,
@@ -122,11 +128,7 @@ static void Switch_CheckLoadDestination(
 
 
 extern XAssetList g_varXAssetList;
-#ifdef __SWITCH__
-extern int32_t g_switchCurrentAssetIndex;
-extern uint32_t g_switchCurrentAssetRawType;
-extern uint32_t g_switchCurrentAssetHeader;
-#endif
+
 
 // --- file-local forward declarations (moved out of database.h) ---
 static void __cdecl DB_CancelLoadXFile();
