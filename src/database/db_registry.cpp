@@ -2447,8 +2447,7 @@ static XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(XAssetType type, XAssetHead
 
 #ifdef __SWITCH__
     const bool traceImpactFx =
-        type == ASSET_TYPE_IMPACT_FX &&
-        g_switchCurrentAssetIndex == 1225;
+        type == ASSET_TYPE_IMPACT_FX;
     if (traceImpactFx)
     {
         char trace[256];
