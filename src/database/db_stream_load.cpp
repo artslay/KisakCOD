@@ -127,6 +127,21 @@ void __cdecl DB_ConvertOffsetToPointer(void *data)
 #endif
 }
 
+void __cdecl DB_LoadSwitchSerialized(void *dst, uint32_t size)
+{
+#ifdef __SWITCH__
+    iassert(dst);
+    iassert(size);
+    uint8_t *streamPos = DB_GetStreamPos();
+    DB_LoadXFileData(streamPos, size);
+    std::memcpy(dst, streamPos, size);
+    DB_IncStreamPos(static_cast<int32_t>(size));
+#else
+    (void)dst;
+    (void)size;
+#endif
+}
+
 void __cdecl Load_XStringCustom(char **str)
 {
     uint8_t *pos; // [esp+0h] [ebp-8h]
