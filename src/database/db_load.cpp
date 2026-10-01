@@ -3432,17 +3432,7 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
             Load_GfxImageAsset(&imageHeader);
 
 #ifdef __SWITCH__
-            if (g_switchImagePtrTraceCount < 32)
-            {
-                char trace[192];
-                std::snprintf(
-                    trace, sizeof(trace),
-                    "[SWITCH IMAGEPTR] %u after Load_GfxImageAsset image=%p name=%s\n",
-                    (unsigned)g_switchImagePtrTraceCount,
-                    static_cast<void *>(imageHeader.image),
-                    imageHeader.image && imageHeader.image->name ? imageHeader.image->name : "<null>");
-                Switch_LogWrite(trace);
-            }
+            
 #endif
 
             // Store the fully widened native pointer back into the runtime
@@ -3453,16 +3443,7 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
                 sizeof(imageHeader.image));
 
 #ifdef __SWITCH__
-            if (g_switchImagePtrTraceCount < 32)
-            {
-                char trace[128];
-                std::snprintf(
-                    trace, sizeof(trace),
-                    "[SWITCH IMAGEPTR] %u after header store slot=%p\n",
-                    (unsigned)g_switchImagePtrTraceCount,
-                    static_cast<void *>(varGfxImagePtr));
-                Switch_LogWrite(trace);
-            }
+            
 #endif
 
             if (inserted)
@@ -3486,31 +3467,11 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
     }
 
 #ifdef __SWITCH__
-    if (g_switchImagePtrTraceCount < 32)
-    {
-        char trace[128];
-        std::snprintf(
-            trace, sizeof(trace),
-            "[SWITCH IMAGEPTR] %u before PopStreamPos\n",
-            (unsigned)g_switchImagePtrTraceCount);
-        Switch_LogWrite(trace);
-    }
-    ++g_switchImagePtrTraceCount;
-    g_switchTraceNextStreamPop = true;
+    
 #endif
     DB_PopStreamPos();
 #ifdef __SWITCH__
-    if (g_switchTextureReturnTraceCount < 24)
-    {
-        char trace[160];
-        std::snprintf(
-            trace, sizeof(trace),
-            "[SWITCH TEXRETURN] imageptr exit count=%u stream=%u pos=%p\n",
-            (unsigned)g_switchTextureReturnTraceCount++,
-            (unsigned)g_streamPosIndex,
-            static_cast<void *>(g_streamPos));
-        Switch_LogWrite(trace);
-    }
+    
 #endif
 #else
     uint32_t value;
