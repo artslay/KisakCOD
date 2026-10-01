@@ -1414,7 +1414,7 @@ void DB_TryLoadXFile()
         for (j = 0; j < zoneInfoCount; ++j)
         {
             if (!DB_TryLoadXFileInternal(g_zoneInfo[j].name, g_zoneInfo[j].flags))
-                --g_loadingAssets;
+                __atomic_sub_fetch(&g_loadingAssets, 1u, __ATOMIC_SEQ_CST);
         }
         if (g_loadingZone)
             MyAssertHandler(".\\database\\db_registry.cpp", 3772, 0, "%s", "!g_loadingZone");
@@ -2337,9 +2337,9 @@ static void DB_PostLoadXZone()
         {
             remoteScreenUpdateNesting = 0;
             if (!Sys_IsMainThread()
-                || (++g_mainThreadBlocked,
+                || (__atomic_add_fetch(&g_mainThreadBlocked, 1u, __ATOMIC_SEQ_CST),
                     remoteScreenUpdateNesting = R_PopRemoteScreenUpdate(),
-                    --g_mainThreadBlocked,
+                    __atomic_sub_fetch(&g_mainThreadBlocked, 1u, __ATOMIC_SEQ_CST),
                     g_copyInfoCount))
             {
                 DB_ArchiveAssets();
