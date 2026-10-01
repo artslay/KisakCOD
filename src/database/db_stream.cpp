@@ -21,6 +21,8 @@ uint32_t g_streamPosStackIndex;
 static uintptr_t g_switchStreamHighWater[9] = {};
 static uint32_t g_switchStreamRegressionCount = 0;
 static uint32_t g_switchStreamMismatchCount = 0;
+uint32_t g_switchPointerInsertCount = 0;
+uint32_t g_switchPointerInsertExtraBytes = 0;
 
 static int32_t Switch_StreamOwner(
     const uint8_t *pos,
@@ -171,6 +173,8 @@ void __cdecl DB_InitStreams(XZoneMemory *zoneMem)
 #ifdef __SWITCH__
     std::memset(g_switchStreamHighWater, 0, sizeof(g_switchStreamHighWater));
     g_switchStreamRegressionCount = 0;
+    g_switchPointerInsertCount = 0;
+    g_switchPointerInsertExtraBytes = 0;
 #endif
     for (i = 0; i < 9; ++i)
         g_streamPosArray[i] = zoneMem->blocks[i].data;
@@ -309,10 +313,38 @@ const void **__cdecl DB_InsertPointer()
 {
     const void **pData; // [esp+0h] [ebp-4h]
 
+#ifdef __SWITCH__
+    const uint32_t traceIndex = g_switchCurrentAssetIndex < 0
+        ? UINT32_MAX
+        : static_cast<uint32_t>(g_switchCurrentAssetIndex);
+    const uint32_t beforeCount = g_switchPointerInsertCount;
+    const uintptr_t beforePos =
+        reinterpret_cast<uintptr_t>(g_streamPos);
+#endif
+
     DB_PushStreamPos(4);
 #ifdef __SWITCH__
     pData = reinterpret_cast<const void **>(DB_AllocStreamPos(7));
     DB_IncStreamPos(static_cast<int32_t>(sizeof(void *)));
+    ++g_switchPointerInsertCount;
+    g_switchPointerInsertExtraBytes +=
+        static_cast<uint32_t>(sizeof(void *) - 4);
+
+    if (traceIndex >= 1190u && traceIndex <= 1210u)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH PTR INSERT] asset=%u #%u extra=%u before=%p after=%p slot=%p\n",
+            traceIndex,
+            beforeCount,
+            g_switchPointerInsertExtraBytes,
+            reinterpret_cast<void *>(beforePos),
+            reinterpret_cast<void *>(g_streamPos),
+            static_cast<void *>(pData));
+        Switch_LogWrite(trace);
+    }
 #else
     pData = (const void **)DB_AllocStreamPos(3);
     DB_IncStreamPos(4);
