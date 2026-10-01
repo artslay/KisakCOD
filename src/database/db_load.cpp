@@ -8304,8 +8304,9 @@ void __cdecl Load_FxImpactTablePtr(bool atStreamStart)
                 Switch_LogWrite(trace);
             }
 
-            uintptr_t switchTypeArg = static_cast<uintptr_t>(ASSET_TYPE_IMPACT_FX);
-            uintptr_t switchHeaderArg =
+            register uintptr_t switchTypeArg __asm__("x0") =
+                static_cast<uintptr_t>(ASSET_TYPE_IMPACT_FX);
+            register uintptr_t switchHeaderArg __asm__("x1") =
                 reinterpret_cast<uintptr_t>(impactHeader.data);
 
             __asm__ volatile(
