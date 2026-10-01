@@ -1922,6 +1922,21 @@ static void __cdecl DB_FreePixelShader(void *arg, XAssetHeader header)
 
 #endif
 
+static XAssetHeader __cdecl DB_AllocGfxLightDef(void *arg)
+{
+    auto *pool =
+        static_cast<XAssetPool<GfxLightDef, POOLSIZE_LIGHT_DEF> *>(arg);
+    XAssetHeader header{};
+
+    if (!pool->freeHead)
+        return header;
+
+    auto *entry = pool->freeHead;
+    pool->freeHead = entry->next;
+    header.data = &entry->entry;
+    return header;
+}
+
 static XAssetHeader __cdecl DB_AllocLoadedSound(void *arg)
 {
     auto *pool =
@@ -1987,7 +2002,7 @@ XAssetHeader(__cdecl *DB_AllocXAssetHeaderHandler[ASSET_TYPE_COUNT])(void *) =
   &node1_,
   &DB_AllocXAsset_StringTable_,
   &node1_,
-  &DB_AllocXAsset_StringTable_,
+  &DB_AllocGfxLightDef,
   NULL,
   &DB_AllocXAsset_StringTable_,
   &DB_AllocXAsset_StringTable_,
