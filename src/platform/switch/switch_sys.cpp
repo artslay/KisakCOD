@@ -45,21 +45,21 @@ extern "C" void __libnx_exception_handler(ThreadExceptionDump *ctx)
 {
     if (!ctx)
     {
-        Switch_LogCrashLine("[KisakCOD][CRASH] exception context is null\\n");
+        Switch_LogCrashLine("[KisakCOD][CRASH] exception context is null\n");
         return;
     }
 
-    char line[256];
+    char line[1024];
 
     std::snprintf(
         line,
         sizeof(line),
-        "========================================\\n"
-        "[KisakCOD][CRASH] libnx user exception\\n"
-        "[KisakCOD][CRASH] error_desc=0x%08x\\n"
-        "[KisakCOD][CRASH] pc=0x%016llx lr=0x%016llx\\n"
-        "[KisakCOD][CRASH] sp=0x%016llx fp=0x%016llx far=0x%016llx\\n"
-        "[KisakCOD][CRASH] pstate=0x%08x esr=0x%08x ec=0x%02x\\n",
+        "========================================\n"
+        "[KisakCOD][CRASH] libnx user exception\n"
+        "[KisakCOD][CRASH] error_desc=0x%08x\n"
+        "[KisakCOD][CRASH] pc=0x%016llx lr=0x%016llx\n"
+        "[KisakCOD][CRASH] sp=0x%016llx fp=0x%016llx far=0x%016llx\n"
+        "[KisakCOD][CRASH] pstate=0x%08x esr=0x%08x ec=0x%02x\n",
         ctx->error_desc,
         static_cast<unsigned long long>(ctx->pc.x),
         static_cast<unsigned long long>(ctx->lr.x),
@@ -78,7 +78,7 @@ extern "C" void __libnx_exception_handler(ThreadExceptionDump *ctx)
             std::snprintf(
                 line,
                 sizeof(line),
-                "[KisakCOD][CRASH] x%-2d=0x%016llx x%-2d=0x%016llx\\n",
+                "[KisakCOD][CRASH] x%-2d=0x%016llx x%-2d=0x%016llx\n",
                 i,
                 static_cast<unsigned long long>(ctx->cpu_gprs[i].x),
                 i + 1,
@@ -89,14 +89,14 @@ extern "C" void __libnx_exception_handler(ThreadExceptionDump *ctx)
             std::snprintf(
                 line,
                 sizeof(line),
-                "[KisakCOD][CRASH] x%-2d=0x%016llx\\n",
+                "[KisakCOD][CRASH] x%-2d=0x%016llx\n",
                 i,
                 static_cast<unsigned long long>(ctx->cpu_gprs[i].x));
         }
         Switch_LogCrashLine(line);
     }
 
-    Switch_LogCrashLine("[KisakCOD][CRASH] ========================================\\n");
+    Switch_LogCrashLine("[KisakCOD][CRASH] ========================================\n");
 
     if (g_switchLogFd >= 0)
         (void)::fsync(g_switchLogFd);
