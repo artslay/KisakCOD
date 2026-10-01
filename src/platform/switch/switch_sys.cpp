@@ -35,7 +35,9 @@ static bool Switch_LogPrefixAllowed(const char *msg)
     return std::strncmp(msg, "[SWITCH CRASH]", sizeof("[SWITCH CRASH]") - 1) == 0 ||
            std::strncmp(msg, "[SWITCH IWD]", sizeof("[SWITCH IWD]") - 1) == 0 ||
            std::strncmp(msg, "[SWITCH GLCTX]", sizeof("[SWITCH GLCTX]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH XASSET TRACE]", sizeof("[SWITCH XASSET TRACE]") - 1) == 0;
+           std::strncmp(msg, "[SWITCH XASSET TRACE]", sizeof("[SWITCH XASSET TRACE]") - 1) == 0 ||
+           std::strncmp(msg, "[SWITCH XHEADER]", sizeof("[SWITCH XHEADER]") - 1) == 0 ||
+           std::strncmp(msg, "[SWITCH LIGHTDEF]", sizeof("[SWITCH LIGHTDEF]") - 1) == 0;
 }
 
 /*
