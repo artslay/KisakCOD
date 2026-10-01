@@ -3418,18 +3418,6 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
     DB_PushStreamPos(0);
 
 #ifdef __SWITCH__
-    if (g_switchCurrentAssetIndex == 1363)
-    {
-        char trace[192];
-        std::snprintf(
-            trace, sizeof(trace),
-            "[SWITCH XASSET TRACE] IMAGE1363 ptr enter slot=%p token=%08x stream=%u pos=%p\n",
-            static_cast<void *>(varGfxImagePtr),
-            value,
-            static_cast<unsigned>(g_streamPosIndex),
-            static_cast<void *>(DB_GetStreamPos()));
-        Switch_LogWrite(trace);
-    }
     if (g_switchCurrentAssetIndex == 1360)
     {
         char trace[224];
@@ -8921,7 +8909,21 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
 {
 #ifdef __SWITCH__
     iassert(atStreamStart);
+    const uint8_t *weaponStreamEnd = DB_GetStreamPos();
     Switch_TranslateWeaponDefSerialized(varWeaponDef);
+    if (g_switchCurrentAssetRawType == 23u)
+    {
+        char trace[224];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XASSET TRACE] WeaponDef translated asset=%d native=%p size=%zu stream=%p\n",
+            g_switchCurrentAssetIndex,
+            static_cast<void *>(varWeaponDef),
+            sizeof(*varWeaponDef),
+            static_cast<const void *>(weaponStreamEnd));
+        Switch_LogWrite(trace);
+    }
     DB_PushStreamPos(4);
 #else
     Load_Stream(atStreamStart, (uint8_t *)varWeaponDef, 2168);
