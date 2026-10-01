@@ -2481,15 +2481,112 @@ void __cdecl Load_snd_alias_t(bool atStreamStart)
 void __cdecl Load_snd_alias_tArray(bool atStreamStart, int32_t count)
 {
 #ifdef __SWITCH__
+    struct SerializedSndAlias
+    {
+        uint32_t aliasName;
+        uint32_t subtitle;
+        uint32_t secondaryAliasName;
+        uint32_t chainAliasName;
+        uint32_t soundFile;
+        int32_t sequence;
+        float volMin;
+        float volMax;
+        float pitchMin;
+        float pitchMax;
+        float distMin;
+        float distMax;
+        int32_t flags;
+        float slavePercentage;
+        float probability;
+        float lfePercentage;
+        float centerPercentage;
+        int32_t startDelay;
+        uint32_t volumeFalloffCurve;
+        float envelopMin;
+        float envelopMax;
+        float envelopPercentage;
+        uint32_t speakerMap;
+    };
+    static_assert(sizeof(SerializedSndAlias) == 92);
+
+    (void)atStreamStart;
+
+    // CoD4 fastfiles store the complete serialized snd_alias_t array first.
+    // Resolve the nested XStrings/SoundFile/Curve/SpeakerMap only after all
+    // 92-byte records have been consumed, otherwise inline payload loading
+    // would start reading the following serialized alias records as data.
+    std::vector<SerializedSndAlias> serialized(
+        count > 0 ? static_cast<size_t>(count) : 0u);
+
+    if (count > 0)
+    {
+        uint8_t *serializedStreamPos = DB_GetStreamPos();
+        const uint32_t serializedSize =
+            static_cast<uint32_t>(sizeof(SerializedSndAlias) *
+                                  static_cast<size_t>(count));
+
+        DB_LoadXFileData(serializedStreamPos, serializedSize);
+        std::memcpy(
+            serialized.data(),
+            serializedStreamPos,
+            serializedSize);
+        DB_IncStreamPos(static_cast<int32_t>(serializedSize));
+    }
+
     snd_alias_t *var = varsnd_alias_t;
 
+    // Phase 1: expand all 32-bit serialized pointer fields into the native
+    // ARM64 snd_alias_t records without consuming any nested stream payloads.
+    for (int32_t i = 0; i < count; ++i)
+    {
+        const SerializedSndAlias &src = serialized[static_cast<size_t>(i)];
+        varsnd_alias_t = &var[i];
+        std::memset(varsnd_alias_t, 0, sizeof(*varsnd_alias_t));
+
+        varsnd_alias_t->aliasName =
+            reinterpret_cast<const char *>(static_cast<uintptr_t>(src.aliasName));
+        varsnd_alias_t->subtitle =
+            reinterpret_cast<const char *>(static_cast<uintptr_t>(src.subtitle));
+        varsnd_alias_t->secondaryAliasName =
+            reinterpret_cast<const char *>(static_cast<uintptr_t>(src.secondaryAliasName));
+        varsnd_alias_t->chainAliasName =
+            reinterpret_cast<const char *>(static_cast<uintptr_t>(src.chainAliasName));
+        varsnd_alias_t->soundFile =
+            reinterpret_cast<SoundFile *>(static_cast<uintptr_t>(src.soundFile));
+        varsnd_alias_t->sequence = src.sequence;
+        varsnd_alias_t->volMin = src.volMin;
+        varsnd_alias_t->volMax = src.volMax;
+        varsnd_alias_t->pitchMin = src.pitchMin;
+        varsnd_alias_t->pitchMax = src.pitchMax;
+        varsnd_alias_t->distMin = src.distMin;
+        varsnd_alias_t->distMax = src.distMax;
+        varsnd_alias_t->flags = src.flags;
+        varsnd_alias_t->slavePercentage = src.slavePercentage;
+        varsnd_alias_t->probability = src.probability;
+        varsnd_alias_t->lfePercentage = src.lfePercentage;
+        varsnd_alias_t->centerPercentage = src.centerPercentage;
+        varsnd_alias_t->startDelay = src.startDelay;
+        varsnd_alias_t->volumeFalloffCurve =
+            reinterpret_cast<SndCurve *>(
+                static_cast<uintptr_t>(src.volumeFalloffCurve));
+        varsnd_alias_t->envelopMin = src.envelopMin;
+        varsnd_alias_t->envelopMax = src.envelopMax;
+        varsnd_alias_t->envelopPercentage = src.envelopPercentage;
+        varsnd_alias_t->speakerMap =
+            reinterpret_cast<SpeakerMap *>(
+                static_cast<uintptr_t>(src.speakerMap));
+    }
+
+    // Phase 2: run the normal nested-field resolver on each already-decoded
+    // native record. Load_snd_alias_t(false) intentionally skips its raw
+    // 92-byte read and only resolves the nested fields.
     for (int32_t i = 0; i < count; ++i)
     {
         g_switchCurrentSoundAliasIndex = i;
-        varsnd_alias_t = var;
-        Load_snd_alias_t(true);
-        ++var;
+        varsnd_alias_t = &var[i];
+        Load_snd_alias_t(false);
     }
+
     g_switchCurrentSoundAliasIndex = -1;
 #else
     snd_alias_t *var; // [esp+0h] [ebp-8h]
