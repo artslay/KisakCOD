@@ -1904,6 +1904,34 @@ static void __cdecl DB_FreePixelShader(void *arg, XAssetHeader header)
 
 #endif
 
+static XAssetHeader __cdecl DB_AllocLoadedSound(void *arg)
+{
+    auto *pool =
+        static_cast<XAssetPool<LoadedSound, POOLSIZE_LOADED_SOUND> *>(arg);
+    XAssetHeader header{};
+
+    if (!pool->freeHead)
+        return header;
+
+    auto *entry = pool->freeHead;
+    pool->freeHead = entry->next;
+    header.loadSnd = &entry->entry;
+    return header;
+}
+
+static void __cdecl DB_FreeLoadedSound(void *arg, XAssetHeader header)
+{
+    auto *pool =
+        static_cast<XAssetPool<LoadedSound, POOLSIZE_LOADED_SOUND> *>(arg);
+    if (!header.loadSnd)
+        return;
+
+    auto *entry =
+        reinterpret_cast<XAssetPoolEntry<LoadedSound> *>(header.loadSnd);
+    entry->next = pool->freeHead;
+    pool->freeHead = entry;
+}
+
 static XAssetHeader __cdecl DB_AllocMaterial(void *arg)
 {
     XAssetHeader *pool = (XAssetHeader*)arg;
@@ -1932,9 +1960,9 @@ XAssetHeader(__cdecl *DB_AllocXAssetHeaderHandler[ASSET_TYPE_COUNT])(void *) =
   &DB_AllocXAsset_StringTable_,
   &DB_AllocXAsset_StringTable_,
   &DB_AllocXAsset_StringTable_,
-  &DB_AllocXAsset_StringTable_,
-  &DB_AllocXAsset_StringTable_,
+  &DB_AllocLoadedSound,
   &node1_,
+
   &node1_,
   &node1_,
   &node1_,
@@ -1986,8 +2014,8 @@ void(__cdecl *DB_FreeXAssetHeaderHandler[ASSET_TYPE_COUNT])(void *, XAssetHeader
   DB_FreeXAssetHeader_StringTable_,
   DB_FreeXAssetHeader_StringTable_,
   DB_FreeXAssetHeader_StringTable_,
-  DB_FreeXAssetHeader_StringTable_,
-  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeLoadedSound,
+  NULLSUB,
   NULLSUB,
   NULLSUB,
   NULLSUB,
