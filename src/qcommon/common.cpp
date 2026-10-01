@@ -40,6 +40,10 @@
 
 #include <setjmp.h>
 
+#ifdef __SWITCH__
+extern void Switch_LogWrite(const char *msg);
+#endif
+
 
 #ifdef KISAK_SP
 #include <game/g_local.h>
@@ -170,6 +174,13 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 	// LWSS: Punkbuster stuff
 	//PbCaptureConsoleOutput(msg, 4096);
 
+    // The Switch diagnostic log is the authoritative engine log. Capture the
+    // original message before channel filtering, color-code stripping, or
+    // platform console handling so diagnostics are not silently discarded.
+#ifdef __SWITCH__
+    Switch_LogWrite(msg);
+#endif
+
     // always print to stdout console
     fprintf(stderr, "%s", msg);
 
@@ -204,12 +215,14 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 #endif
 		if (*msg == 94 && msg[1])
 			msg += 2;
+#ifndef __SWITCH__
 		if (channel != CON_CHANNEL_LOGFILEONLY
 			&& (!com_filter_output || !com_filter_output->current.enabled
 				|| Con_IsChannelVisible(CON_DEST_CONSOLE, channel, 3)))
 		{
 			Sys_Print(msg);
 		}
+	#endif
 	#ifndef __SWITCH__
 	if (channel != CON_CHANNEL_CONSOLEONLY && com_logfile && com_logfile->current.integer)
 			Com_LogPrintMessage(channel, msg);
