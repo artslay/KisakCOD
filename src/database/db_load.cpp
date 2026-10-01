@@ -6683,14 +6683,10 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
         DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
         DB_IncStreamPos(sizeof(serialized));
 #ifdef __SWITCH__
-        if (g_switchCurrentAssetIndex == 1224)
-            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after inc\n");
 #endif
 
         std::memset(varFxEffectDef, 0, sizeof(FxEffectDef));
 #ifdef __SWITCH__
-        if (g_switchCurrentAssetIndex == 1224)
-            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after memset\n");
 #endif
 
         varFxEffectDef->name = reinterpret_cast<const char *>(
@@ -6704,23 +6700,17 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
         varFxEffectDef->elemDefs = reinterpret_cast<const FxElemDef *>(
             static_cast<uintptr_t>(serialized.elemDefs));
 #ifdef __SWITCH__
-        if (g_switchCurrentAssetIndex == 1224)
-            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload fields mapped\n");
 #endif
 
         DB_PushStreamPos(4);
         varXString = &varFxEffectDef->name;
         Load_XString(0);
 #ifdef __SWITCH__
-        if (g_switchCurrentAssetIndex == 1224)
-            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after name\n");
 #endif
 
         if (serialized.elemDefs)
         {
 #ifdef __SWITCH__
-            if (g_switchCurrentAssetIndex == 1224)
-                Switch_LogWrite("[SWITCH XASSET TRACE] fx payload before elem alloc\n");
 #endif
             varFxEffectDef->elemDefs =
                 (const FxElemDef *)Hunk_Alloc(
@@ -6745,15 +6735,11 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
                     varFxEffectDef->elemDefCountOneShot +
                     varFxEffectDef->elemDefCountLooping);
 #ifdef __SWITCH__
-            if (g_switchCurrentAssetIndex == 1224)
-                Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after elem array\n");
 #endif
         }
 
         DB_PopStreamPos();
 #ifdef __SWITCH__
-        if (g_switchCurrentAssetIndex == 1224)
-            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after pop\n");
 #endif
         return;
     }
