@@ -10607,6 +10607,22 @@ void __cdecl Mark_FontHandle()
 void __cdecl Load_XAssetHeader(bool atStreamStart)
 {
 #ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 31u &&
+        g_switchCurrentAssetIndex >= 1190 &&
+        g_switchCurrentAssetIndex <= 1210)
+    {
+        char trace[224];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XHEADER RAW31] asset=%d raw=%u runtime=%u header=%08x atStream=%u\n",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            varXAsset ? static_cast<unsigned>(varXAsset->type) : ASSET_TYPE_COUNT,
+            g_switchCurrentAssetHeader,
+            static_cast<unsigned>(atStreamStart));
+        Switch_LogWrite(trace);
+    }
     if (g_switchCurrentAssetIndex >= 1224 &&
         g_switchCurrentAssetIndex <= 1226)
     {
