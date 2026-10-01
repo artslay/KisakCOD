@@ -244,49 +244,15 @@ void __cdecl DB_SetStreamIndex(uint32_t index)
 
 void __cdecl DB_PopStreamPos()
 {
-#ifdef __SWITCH__
-    extern bool g_switchTraceNextStreamPop;
-    const bool tracePop = g_switchTraceNextStreamPop;
-    if (tracePop)
-    {
-        char trace[192];
-        std::snprintf(
-            trace, sizeof(trace),
-            "[SWITCH STREAMPOP TRAP] enter stack=%u index=%u pos=%p\n",
-            (unsigned)g_streamPosStackIndex,
-            (unsigned)g_streamPosIndex,
-            static_cast<void *>(g_streamPos));
-        Switch_LogWrite(trace);
-        g_switchTraceNextStreamPop = false;
-    }
-#endif
-
     vassert(g_streamPosStackIndex > 0, "(g_streamPosStackIndex = %d)", g_streamPosStackIndex);
 
     --g_streamPosStackIndex;
 
-#ifdef __SWITCH__
-    if (tracePop)
-    {
-        char trace[160];
-        std::snprintf(
-            trace, sizeof(trace),
-            "[SWITCH STREAMPOP TRAP] after decrement stack=%u\n",
-            (unsigned)g_streamPosStackIndex);
-        Switch_LogWrite(trace);
-    }
-
-#endif
-
     if (!g_streamPosIndex)
         g_streamPos = g_streamPosStack[g_streamPosStackIndex].pos;
     DB_SetStreamIndex(g_streamPosStack[g_streamPosStackIndex].index);
-
-#ifdef __SWITCH__
-    if (tracePop)
-        Switch_LogWrite("[SWITCH STREAMPOP TRAP] normal path done\n");
-#endif
 }
+
 uint8_t *__cdecl DB_GetStreamPos()
 {
     return g_streamPos;
