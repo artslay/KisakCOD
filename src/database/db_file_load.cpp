@@ -651,6 +651,18 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         varXAssetHeader = &varXAsset->header;
 
 #ifdef __SWITCH__
+        if (i >= 1224 && i <= 1226)
+        {
+            char trace[256];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH XASSET DISPATCH] before i=%d var=%p type=%u header=%08x\n",
+                i,
+                static_cast<void *>(varXAsset),
+                static_cast<unsigned>(varXAsset->type),
+                serialized.header);
+            Switch_LogWrite(trace);
+        }
         if (i >= 1208 && i <= 1218)
         {
             char trace[192];
@@ -667,6 +679,15 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 #endif
         Load_XAssetHeader(0);
 #ifdef __SWITCH__
+        if (i >= 1224 && i <= 1226)
+        {
+            char trace[160];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH XASSET DISPATCH] after i=%d\n",
+                i);
+            Switch_LogWrite(trace);
+        }
         if (i >= 1208 && i <= 1218)
         {
             char trace[128];
