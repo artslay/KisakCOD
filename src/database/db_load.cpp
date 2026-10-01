@@ -9335,7 +9335,23 @@ void __cdecl Load_RawFile(bool atStreamStart)
     Load_XString(0);
 #ifdef __SWITCH__
     if (switchRawFileTrace)
-        Switch_LogWrite("[SWITCH RAWFILE] name done\n");
+    {
+        const uintptr_t namePtr =
+            reinterpret_cast<uintptr_t>(varRawFile->name);
+        const uintptr_t block4Base =
+            reinterpret_cast<uintptr_t>(g_streamBlocks[4].data);
+        char trace[256];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH RAWFILE] name done ptr=%p block4off=%08x stream=%u pos=%p\n",
+            static_cast<const void *>(varRawFile->name),
+            namePtr >= block4Base
+                ? static_cast<unsigned>(namePtr - block4Base)
+                : 0u,
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
 #endif
 
     if (varRawFile->buffer)
