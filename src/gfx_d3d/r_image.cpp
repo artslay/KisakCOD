@@ -685,8 +685,51 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
                 externalDataSize = image->cardMemory.platform[0];
                 image->cardMemory.platform[0] = 0;
                 image->cardMemory.platform[1] = 0;
+
+#ifdef __SWITCH__
+                {
+                    char trace[512];
+                    std::snprintf(
+                        trace,
+                        sizeof(trace),
+                        "[SWITCH IMAGEFAIL] name=%s map=%u semantic=%u category=%u "
+                        "renderer=%d resourceSize=%u white=%p whiteTex=%p\n",
+                        image && image->name ? image->name : "<null>",
+                        image ? static_cast<unsigned>(image->mapType) : 0u,
+                        image ? static_cast<unsigned>(image->semantic) : 0u,
+                        image ? static_cast<unsigned>(image->category) : 0u,
+                        r_loadForRenderer ? r_loadForRenderer->current.enabled : 0,
+                        loadDef ? static_cast<unsigned>(loadDef->resourceSize) : 0u,
+                        static_cast<void *>(rgp.whiteImage),
+                        rgp.whiteImage
+                            ? static_cast<void *>(rgp.whiteImage->texture.basemap)
+                            : nullptr);
+                    Switch_LogWrite(trace);
+                }
+#endif
+
                 if (!Image_LoadFromFile(image))
-                    Com_Error(ERR_DROP, "Couldn't load image '%s'\n", image->name);
+                {
+#ifdef __SWITCH__
+                    Switch_LogWrite("[SWITCH IMAGEFAIL] Image_LoadFromFile failed\n");
+#endif
+
+                    const bool fallback = Image_AssignDefaultTexture(image);
+
+#ifdef __SWITCH__
+                    {
+                        char trace[256];
+                        std::snprintf(
+                            trace,
+                            sizeof(trace),
+                            "[SWITCH IMAGEFAIL] fallback=%d resultTex=%p\n",
+                            fallback ? 1 : 0,
+                            static_cast<void *>(image->texture.basemap));
+                        Switch_LogWrite(trace);
+                    }
+#endif
+                }
+
                 DB_LoadedExternalData(externalDataSize);
             }
         }
@@ -1440,6 +1483,33 @@ char __cdecl Image_AssignDefaultTexture(GfxImage *image)
             Radiant_FL_Log("IMGPROBE: image '%s' failed to load -> default (semantic=%d mapType=%d)",
                            image->name ? image->name : "(null)", image->semantic, image->mapType);
         }
+    }
+#endif
+#ifdef __SWITCH__
+    {
+        char trace[384];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH IMAGEFAIL] fallback enter image=%p name=%s map=%u semantic=%u "
+            "white=%p whiteTex=%p normal=%p normalTex=%p black=%p blackTex=%p\n",
+            static_cast<void *>(image),
+            image && image->name ? image->name : "<null>",
+            image ? static_cast<unsigned>(image->mapType) : 0u,
+            image ? static_cast<unsigned>(image->semantic) : 0u,
+            static_cast<void *>(rgp.whiteImage),
+            rgp.whiteImage
+                ? static_cast<void *>(rgp.whiteImage->texture.basemap)
+                : nullptr,
+            static_cast<void *>(rgp.identityNormalMapImage),
+            rgp.identityNormalMapImage
+                ? static_cast<void *>(rgp.identityNormalMapImage->texture.basemap)
+                : nullptr,
+            static_cast<void *>(rgp.blackImage),
+            rgp.blackImage
+                ? static_cast<void *>(rgp.blackImage->texture.basemap)
+                : nullptr);
+        Switch_LogWrite(trace);
     }
 #endif
     if (image->mapType != MAPTYPE_2D)
