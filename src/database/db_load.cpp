@@ -3549,8 +3549,7 @@ void __cdecl Load_MaterialVertexShader(bool atStreamStart)
 
     SerializedMaterialVertexShader serialized{};
     const uint8_t *vertexShaderStart = DB_GetStreamPos();
-    DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
-    DB_IncStreamPos(sizeof(serialized));
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
 #ifdef __SWITCH__
     {
@@ -3656,8 +3655,7 @@ void __cdecl Load_MaterialPixelShader(bool atStreamStart)
 
     SerializedMaterialPixelShader serialized{};
     const uint8_t *pixelShaderStart = DB_GetStreamPos();
-    DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
-    DB_IncStreamPos(sizeof(serialized));
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
 #ifdef __SWITCH__
     Switch_LogRawDwords(
@@ -3822,8 +3820,7 @@ void __cdecl Load_MaterialVertexDeclaration(bool atStreamStart)
 
     iassert(atStreamStart);
     SerializedMaterialVertexDeclaration serialized{};
-    DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
-    DB_IncStreamPos(sizeof(serialized));
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
     memset(varMaterialVertexDeclaration, 0, sizeof(*varMaterialVertexDeclaration));
     varMaterialVertexDeclaration->streamCount = serialized.streamCount;
@@ -3946,10 +3943,7 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
     iassert(atStreamStart);
     const uint8_t *passStart = DB_GetStreamPos();
     SerializedMaterialPass serialized{};
-    DB_LoadXFileData(
-        reinterpret_cast<uint8_t *>(&serialized),
-        sizeof(serialized));
-    DB_IncStreamPos(sizeof(serialized));
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
     memset(varMaterialPass, 0, sizeof(*varMaterialPass));
     varMaterialPass->perPrimArgCount = serialized.perPrimArgCount;
@@ -4102,8 +4096,7 @@ void __cdecl Load_MaterialTechnique(bool atStreamStart)
 
     SerializedMaterialTechnique serialized{};
     const uint8_t *techniqueStart = DB_GetStreamPos();
-    DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
-    DB_IncStreamPos(sizeof(serialized));
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
 #ifdef __SWITCH__
     {
@@ -4267,10 +4260,7 @@ void __cdecl Load_MaterialTextureDefArray(bool atStreamStart, int32_t count)
     for (i = 0; i < count; ++i)
     {
         SerializedMaterialTextureDef serialized{};
-        DB_LoadXFileData(
-            reinterpret_cast<uint8_t *>(&serialized),
-            sizeof(serialized));
-        DB_IncStreamPos(sizeof(serialized));
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
         varMaterialTextureDef = &var[i];
         varMaterialTextureDef->nameHash = serialized.nameHash;
@@ -4406,10 +4396,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
 
     SerializedMaterialTechniqueSet serialized{};
     const uint8_t *techniqueSetStart = DB_GetStreamPos();
-    DB_LoadXFileData(
-        reinterpret_cast<uint8_t *>(&serialized),
-        sizeof(serialized));
-    DB_IncStreamPos(sizeof(serialized));
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
     Switch_LogRawDwords(
         "[SWITCH TECHSET WORDS]",
@@ -4684,10 +4671,7 @@ void __cdecl Load_Material(bool atStreamStart)
 
     SerializedMaterial serialized{};
     uint8_t *materialStreamPos = DB_GetStreamPos();
-    DB_LoadXFileData(
-        reinterpret_cast<uint8_t *>(&serialized),
-        sizeof(serialized));
-    DB_IncStreamPos(sizeof(serialized));
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
 #ifdef __SWITCH__
     Switch_LogRawDwords(
@@ -6469,10 +6453,7 @@ void __cdecl Load_FxElemDef(bool atStreamStart)
         static_assert(sizeof(FxElemDef) == 288);
 
         SerializedFxElemDef serialized{};
-        DB_LoadXFileData(
-            reinterpret_cast<uint8_t *>(&serialized),
-            sizeof(serialized));
-        DB_IncStreamPos(sizeof(serialized));
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
 #ifdef __SWITCH__
         if (g_switchCurrentAssetIndex == 1224)
@@ -8289,10 +8270,7 @@ void __cdecl Load_LocalizeEntry(bool atStreamStart)
     iassert(atStreamStart);
 
     SerializedLocalizeEntry serialized{};
-    DB_LoadXFileData(
-        reinterpret_cast<uint8_t *>(&serialized),
-        sizeof(serialized));
-    DB_IncStreamPos(sizeof(serialized));
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
     varLocalizeEntry->value = reinterpret_cast<const char *>(
         static_cast<uintptr_t>(serialized.value));
@@ -10314,10 +10292,7 @@ void __cdecl Load_Font(bool atStreamStart)
         static_assert(sizeof(SerializedFont) == 24);
 
         SerializedFont serialized{};
-        DB_LoadXFileData(
-            reinterpret_cast<uint8_t *>(&serialized),
-            sizeof(serialized));
-        DB_IncStreamPos(sizeof(serialized));
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
         std::memset(varFont, 0, sizeof(Font_s));
 
@@ -10785,8 +10760,7 @@ void Load_XAssetListCustom()
     };
 
     SerializedXAssetList serialized{};
-    DB_LoadXFileData(reinterpret_cast<uint8_t *>(&serialized), sizeof(serialized));
-    DB_IncStreamPos(sizeof(serialized));
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
     varXAssetList = &g_varXAssetList;
     memset(varXAssetList, 0, sizeof(*varXAssetList));
