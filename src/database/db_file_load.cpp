@@ -152,6 +152,22 @@ void __cdecl DB_LoadXFileData(uint8_t *pos, uint32_t size)
     iassert(g_load.f);
     iassert(!g_load.stream.avail_out);
 
+#ifdef __SWITCH__
+    bool switchProbeTarget = false;
+    uintptr_t switchProbeTargetPtr = 0;
+    if (g_load.zoneMem && g_load.zoneMem->blocks[4].data &&
+        g_load.zoneMem->blocks[4].size > 0x2b0ac)
+    {
+        switchProbeTargetPtr =
+            reinterpret_cast<uintptr_t>(g_load.zoneMem->blocks[4].data) +
+            0x2b0ac;
+        const uintptr_t dstStart = reinterpret_cast<uintptr_t>(pos);
+        const uintptr_t dstEnd = dstStart + static_cast<uintptr_t>(size);
+        switchProbeTarget = dstStart <= switchProbeTargetPtr &&
+                            switchProbeTargetPtr < dstEnd;
+    }
+#endif
+
     g_load.stream.next_out = pos;
     g_load.stream.avail_out = size;
     while (1)
@@ -188,6 +204,40 @@ void __cdecl DB_LoadXFileData(uint8_t *pos, uint32_t size)
         DB_WaitXFileStage();
         DB_ReadXFileStage();
     }
+
+#ifdef __SWITCH__
+    if (switchProbeTarget)
+    {
+        const uint8_t *probe =
+            reinterpret_cast<const uint8_t *>(switchProbeTargetPtr);
+        char trace[384];
+        int written = std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XASSET TRACE] block4 target fill asset=%d rawType=%u header=%08x stream=%u request=%p size=%u target=%p off=%08x bytes=",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            static_cast<unsigned>(g_switchCurrentAssetHeader),
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(pos),
+            size,
+            reinterpret_cast<void *>(switchProbeTargetPtr),
+            0x2b0ac);
+        for (int i = 0; i < 24 && written < static_cast<int>(sizeof(trace)); ++i)
+        {
+            written += std::snprintf(
+                trace + written,
+                sizeof(trace) - static_cast<size_t>(written),
+                "%02x",
+                static_cast<unsigned>(probe[i]));
+        }
+        std::snprintf(
+            trace + written,
+            sizeof(trace) - static_cast<size_t>(written),
+            "\n");
+        Switch_LogWrite(trace);
+    }
+#endif
 }
 
 void DB_ReadXFileStage()
