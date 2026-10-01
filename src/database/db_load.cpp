@@ -8232,10 +8232,20 @@ void __cdecl Load_FxImpactTable(bool atStreamStart)
 
 #ifdef __SWITCH__
         if (g_switchCurrentAssetIndex == 1225)
+        {
+            extern bool g_switchTraceNextStreamPop;
             Switch_LogWrite("[SWITCH XASSET TRACE] impact table load entries done\n");
+            Switch_LogWrite("[SWITCH XASSET TRACE] impact table before inner pop\n");
+            g_switchTraceNextStreamPop = true;
+        }
 #endif
 
         DB_PopStreamPos();
+
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1225)
+            Switch_LogWrite("[SWITCH XASSET TRACE] impact table after inner pop\n");
+#endif
         return;
     }
 #endif
@@ -8281,8 +8291,22 @@ void __cdecl Load_FxImpactTablePtr(bool atStreamStart)
                 inserted = DB_InsertPointer();
             else
                 inserted = 0;
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1225)
+                Switch_LogWrite("[SWITCH XASSET TRACE] impact ptr before table load\n");
+#endif
             Load_FxImpactTable(1);
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1225)
+                Switch_LogWrite("[SWITCH XASSET TRACE] impact ptr after table load\n");
+            if (g_switchCurrentAssetIndex == 1225)
+                Switch_LogWrite("[SWITCH XASSET TRACE] impact ptr before asset add\n");
+#endif
             Load_FxImpactTableAsset((XAssetHeader *)varFxImpactTablePtr);
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1225)
+                Switch_LogWrite("[SWITCH XASSET TRACE] impact ptr after asset add\n");
+#endif
             if (inserted)
                 *inserted = *varFxImpactTablePtr;
         }
@@ -8291,7 +8315,19 @@ void __cdecl Load_FxImpactTablePtr(bool atStreamStart)
             DB_ConvertOffsetToAlias((uint32_t *)varFxImpactTablePtr);
         }
     }
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex == 1225)
+    {
+        extern bool g_switchTraceNextStreamPop;
+        Switch_LogWrite("[SWITCH XASSET TRACE] impact ptr before outer pop\n");
+        g_switchTraceNextStreamPop = true;
+    }
+#endif
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex == 1225)
+        Switch_LogWrite("[SWITCH XASSET TRACE] impact ptr after outer pop\n");
+#endif
 }
 
 void __cdecl Mark_FxImpactEntry()
