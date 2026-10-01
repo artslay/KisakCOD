@@ -611,13 +611,12 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         if (serialized.type == ASSET_TYPE_IMAGE)
         {
             ++imageRecords;
-            if (serialized.header == UINT32_MAX ||
-                serialized.header == UINT32_MAX - 1)
+            if (serialized.header == UINT32_MAX)
                 ++imageInline;
-            else if (serialized.header)
-                ++imageAlias;
-            else
+            else if (!serialized.header)
                 ++imageNull;
+            else
+                ++imageAlias;
         }
         else if (serialized.type == ASSET_TYPE_MATERIAL)
         {
@@ -640,8 +639,6 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 #endif
         memset(varXAsset, 0, sizeof(*varXAsset));
 
-        // The Switch SP runtime has an extra MaterialPixelShader asset slot,
-        // while CoD4 PC fastfiles use the original PC asset numbering.
         uint32_t runtimeType = serialized.type;
 #ifdef KISAK_SP
         if (runtimeType >= 5)
@@ -654,13 +651,32 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         varXAssetHeader = &varXAsset->header;
 
 #ifdef __SWITCH__
-        if (i >= 1200 && i <= 1240)
-            Switch_LogWrite("[SWITCH ASSET RETURN] before header\n");
+        if (i >= 1208 && i <= 1218)
+        {
+            char trace[192];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XASSET TRACE] i=%d rawType=%u runtimeType=%u header=%08x before\n",
+                i,
+                serialized.type,
+                static_cast<unsigned>(varXAsset->type),
+                serialized.header);
+            Switch_LogWrite(trace);
+        }
 #endif
         Load_XAssetHeader(0);
 #ifdef __SWITCH__
-        if (i >= 1200 && i <= 1240)
-            Switch_LogWrite("[SWITCH ASSET RETURN] after header\n");
+        if (i >= 1208 && i <= 1218)
+        {
+            char trace[128];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XASSET TRACE] i=%d after\n",
+                i);
+            Switch_LogWrite(trace);
+        }
 #endif
 
         ++var;
