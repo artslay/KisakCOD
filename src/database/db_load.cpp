@@ -6170,9 +6170,38 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
         DB_LoadXFileData(
             reinterpret_cast<uint8_t *>(&serialized),
             sizeof(serialized));
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1224)
+        {
+            char trace[320];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XASSET TRACE] fx payload name=%08x flags=%d total=%d loopLife=%d loop=%d one=%d emit=%d elemDefs=%08x stream=%u pos=%p\\n",
+                serialized.name,
+                serialized.flags,
+                serialized.totalSize,
+                serialized.msecLoopingLife,
+                serialized.elemDefCountLooping,
+                serialized.elemDefCountOneShot,
+                serialized.elemDefCountEmission,
+                serialized.elemDefs,
+                (unsigned)g_streamPosIndex,
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
+#endif
         DB_IncStreamPos(sizeof(serialized));
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1224)
+            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after inc\\n");
+#endif
 
         std::memset(varFxEffectDef, 0, sizeof(FxEffectDef));
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1224)
+            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after memset\\n");
+#endif
 
         varFxEffectDef->name = reinterpret_cast<const char *>(
             static_cast<uintptr_t>(serialized.name));
@@ -6184,24 +6213,73 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
         varFxEffectDef->elemDefCountEmission = serialized.elemDefCountEmission;
         varFxEffectDef->elemDefs = reinterpret_cast<const FxElemDef *>(
             static_cast<uintptr_t>(serialized.elemDefs));
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1224)
+            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload fields mapped\\n");
+#endif
 
         DB_PushStreamPos(4);
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1224)
+        {
+            char trace[192];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XASSET TRACE] fx payload before name token=%08x stream=%u pos=%p\\n",
+                serialized.name,
+                (unsigned)g_streamPosIndex,
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
+#endif
         varXString = &varFxEffectDef->name;
         Load_XString(0);
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1224)
+            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after name\\n");
+#endif
 
         if (serialized.elemDefs)
         {
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1224)
+                Switch_LogWrite("[SWITCH XASSET TRACE] fx payload before elem alloc\\n");
+#endif
             varFxEffectDef->elemDefs =
                 (const FxElemDef *)AllocLoad_FxElemVisStateSample();
             varFxElemDef = (FxElemDef *)varFxEffectDef->elemDefs;
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1224)
+            {
+                char trace[224];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH XASSET TRACE] fx payload elem count=%d ptr=%p\\n",
+                    varFxEffectDef->elemDefCountEmission +
+                        varFxEffectDef->elemDefCountOneShot +
+                        varFxEffectDef->elemDefCountLooping,
+                    static_cast<void *>(varFxEffectDef->elemDefs));
+                Switch_LogWrite(trace);
+            }
+#endif
             Load_FxElemDefArray(
                 1,
                 varFxEffectDef->elemDefCountEmission +
                     varFxEffectDef->elemDefCountOneShot +
                     varFxEffectDef->elemDefCountLooping);
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1224)
+                Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after elem array\\n");
+#endif
         }
 
         DB_PopStreamPos();
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1224)
+            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after pop\\n");
+#endif
         return;
     }
 #endif
