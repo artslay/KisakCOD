@@ -4184,7 +4184,7 @@ void __cdecl Load_MaterialTextureDefArray(bool atStreamStart, int32_t count)
                 static_cast<unsigned>(var[-1].semantic),
                 static_cast<unsigned>(var[-1].samplerState),
                 static_cast<void *>(var[-1].u.image),
-                static_cast<void *>(var[-1].u.image ? var[-1].u.image->name : nullptr));
+                static_cast<const void *>(var[-1].u.image ? var[-1].u.image->name : nullptr));
             Switch_LogWrite(trace);
         }
 #endif
