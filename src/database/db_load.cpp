@@ -6707,9 +6707,7 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
         static_assert(sizeof(FxEffectDef) == 40);
 
         SerializedFxEffectDef serialized{};
-        DB_LoadXFileData(
-            reinterpret_cast<uint8_t *>(&serialized),
-            sizeof(serialized));
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 #ifdef __SWITCH__
         if (g_switchCurrentAssetIndex == 1224)
         {
@@ -10775,8 +10773,7 @@ void Load_XAssetListCustom()
         for (uint32_t i = 0; i < serialized.stringList.count; ++i)
         {
             uint32_t stringOffset = 0;
-            DB_LoadXFileData(reinterpret_cast<uint8_t *>(&stringOffset), sizeof(stringOffset));
-            DB_IncStreamPos(sizeof(stringOffset));
+            DB_LoadSwitchSerialized(&stringOffset, sizeof(stringOffset));
 
             const char **dst = &varXAssetList->stringList.strings[i];
             if (!stringOffset)
