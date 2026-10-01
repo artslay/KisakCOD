@@ -753,11 +753,15 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH XASSET TRACE] i=%d rawType=%u runtimeType=%u header=%08x before\n",
+                "[SWITCH XASSET TRACE] i=%d rawType=%u runtimeType=%u header=%08x before stream=%u pos=%p ptrins=%u extra=%u\n",
                 i,
                 serialized.type,
                 static_cast<unsigned>(varXAsset->type),
-                serialized.header);
+                serialized.header,
+                static_cast<unsigned>(g_streamPosIndex),
+                static_cast<void *>(DB_GetStreamPos()),
+                g_switchPointerInsertCount,
+                g_switchPointerInsertExtraBytes);
             Switch_LogWrite(trace);
         }
 #endif
@@ -791,8 +795,12 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH XASSET TRACE] i=%d after\n",
-                i);
+                "[SWITCH XASSET TRACE] i=%d after stream=%u pos=%p ptrins=%u extra=%u\n",
+                i,
+                static_cast<unsigned>(g_streamPosIndex),
+                static_cast<void *>(DB_GetStreamPos()),
+                g_switchPointerInsertCount,
+                g_switchPointerInsertExtraBytes);
             Switch_LogWrite(trace);
         }
 #endif
