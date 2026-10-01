@@ -5858,16 +5858,48 @@ void __cdecl Mark_GameWorldMpPtr()
 void __cdecl Load_FxEffectDefHandle(bool atStreamStart)
 {
     const void **inserted; // [esp+0h] [ebp-Ch]
-    uint32_t value; // [esp+4h] [ebp-8h]
+    uint32_t value = 0; // [esp+4h] [ebp-8h]
 
-    Load_Stream(atStreamStart, (uint8_t *)varFxEffectDefHandle, 4);
-    DB_PushStreamPos(0);
-    if (*varFxEffectDefHandle)
+#ifdef __SWITCH__
+    if (atStreamStart)
     {
-        value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varFxEffectDefHandle));
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(&value),
+            sizeof(value));
+        DB_IncStreamPos(sizeof(value));
+        *varFxEffectDefHandle = reinterpret_cast<const FxEffectDef *>(
+            static_cast<uintptr_t>(value));
+    }
+    else
+    {
+        value = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(*varFxEffectDefHandle));
+    }
+#else
+    Load_Stream(atStreamStart, (uint8_t *)varFxEffectDefHandle, 4);
+    value = static_cast<uint32_t>(
+        reinterpret_cast<uintptr_t>(*varFxEffectDefHandle));
+#endif
+
+    DB_PushStreamPos(0);
+    if (value)
+    {
         if (value == -1 || value == -2)
         {
-            *varFxEffectDefHandle = (const FxEffectDef *)AllocLoad_FxElemVisStateSample();
+#ifdef __SWITCH__
+            *varFxEffectDefHandle = reinterpret_cast<const FxEffectDef *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(FxEffectDef)),
+                    "SwitchFxEffectDef",
+                    22));
+            std::memset(
+                const_cast<FxEffectDef *>(*varFxEffectDefHandle),
+                0,
+                sizeof(FxEffectDef));
+#else
+            *varFxEffectDefHandle =
+                (const FxEffectDef *)AllocLoad_FxElemVisStateSample();
+#endif
             varFxEffectDef = (FxEffectDef *)*varFxEffectDefHandle;
             if (value == -2)
                 inserted = DB_InsertPointer();
@@ -6078,6 +6110,64 @@ void __cdecl Load_FxElemDefArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_FxEffectDef(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        struct SerializedFxEffectDef
+        {
+            uint32_t name;
+            int32_t flags;
+            int32_t totalSize;
+            int32_t msecLoopingLife;
+            int32_t elemDefCountLooping;
+            int32_t elemDefCountOneShot;
+            int32_t elemDefCountEmission;
+            uint32_t elemDefs;
+        };
+
+        static_assert(sizeof(SerializedFxEffectDef) == 32);
+        static_assert(sizeof(FxEffectDef) == 40);
+
+        SerializedFxEffectDef serialized{};
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(&serialized),
+            sizeof(serialized));
+        DB_IncStreamPos(sizeof(serialized));
+
+        std::memset(varFxEffectDef, 0, sizeof(FxEffectDef));
+
+        varFxEffectDef->name = reinterpret_cast<const char *>(
+            static_cast<uintptr_t>(serialized.name));
+        varFxEffectDef->flags = serialized.flags;
+        varFxEffectDef->totalSize = serialized.totalSize;
+        varFxEffectDef->msecLoopingLife = serialized.msecLoopingLife;
+        varFxEffectDef->elemDefCountLooping = serialized.elemDefCountLooping;
+        varFxEffectDef->elemDefCountOneShot = serialized.elemDefCountOneShot;
+        varFxEffectDef->elemDefCountEmission = serialized.elemDefCountEmission;
+        varFxEffectDef->elemDefs = reinterpret_cast<const FxElemDef *>(
+            static_cast<uintptr_t>(serialized.elemDefs));
+
+        DB_PushStreamPos(4);
+        varXString = &varFxEffectDef->name;
+        Load_XString(0);
+
+        if (serialized.elemDefs)
+        {
+            varFxEffectDef->elemDefs =
+                (const FxElemDef *)AllocLoad_FxElemVisStateSample();
+            varFxElemDef = (FxElemDef *)varFxEffectDef->elemDefs;
+            Load_FxElemDefArray(
+                1,
+                varFxEffectDef->elemDefCountEmission +
+                    varFxEffectDef->elemDefCountOneShot +
+                    varFxEffectDef->elemDefCountLooping);
+        }
+
+        DB_PopStreamPos();
+        return;
+    }
+#endif
+
     Load_Stream(atStreamStart, (uint8_t *)varFxEffectDef, 32);
     DB_PushStreamPos(4);
     varXString = &varFxEffectDef->name;
@@ -7610,7 +7700,7 @@ void __cdecl Load_FxImpactEntry(bool atStreamStart)
 
         if (g_switchCurrentAssetIndex == 1225)
         {
-            Switch_LogWrite("[SWITCH XASSET TRACE] impact entry begin handles=33\\n");
+            Switch_LogWrite("[SWITCH XASSET TRACE] impact entry begin handles=33\n");
         }
 
         varFxEffectDefHandle = handles;
@@ -7622,7 +7712,7 @@ void __cdecl Load_FxImpactEntry(bool atStreamStart)
                 std::snprintf(
                     trace,
                     sizeof(trace),
-                    "[SWITCH XASSET TRACE] impact handle i=%d raw=%08x before ptr=%p\\n",
+                    "[SWITCH XASSET TRACE] impact handle i=%d raw=%08x before ptr=%p\n",
                     i,
                     serializedHandles[i],
                     static_cast<const void *>(handles[i]));
@@ -7638,7 +7728,7 @@ void __cdecl Load_FxImpactEntry(bool atStreamStart)
                 std::snprintf(
                     trace,
                     sizeof(trace),
-                    "[SWITCH XASSET TRACE] impact handle i=%d after ptr=%p\\n",
+                    "[SWITCH XASSET TRACE] impact handle i=%d after ptr=%p\n",
                     i,
                     static_cast<const void *>(handles[i]));
                 Switch_LogWrite(trace);
