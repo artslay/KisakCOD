@@ -271,7 +271,6 @@ void __cdecl DB_PopStreamPos()
         Switch_LogWrite(trace);
     }
 
-    const uint32_t savedIndex = g_streamPosStack[g_streamPosStackIndex].index;
 #endif
 
     if (!g_streamPosIndex)
