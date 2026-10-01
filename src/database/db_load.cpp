@@ -3266,6 +3266,35 @@ void __cdecl Load_GfxImage(bool atStreamStart)
         SerializedGfxImage serialized{};
         DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1363)
+        {
+            char trace[320];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH IMAGE1363] serialized map=%u tex=%08x name=%08x "
+                "picmip=%u,%u noPic=%u semantic=%u track=%u mem=%d,%d "
+                "dim=%u,%u,%u cat=%u delay=%u pos=%p\n",
+                static_cast<unsigned>(serialized.mapType),
+                serialized.texture,
+                serialized.name,
+                static_cast<unsigned>(serialized.picmip[0]),
+                static_cast<unsigned>(serialized.picmip[1]),
+                static_cast<unsigned>(serialized.noPicmip),
+                static_cast<unsigned>(serialized.semantic),
+                static_cast<unsigned>(serialized.track),
+                serialized.cardMemory.platform[0],
+                serialized.cardMemory.platform[1],
+                static_cast<unsigned>(serialized.width),
+                static_cast<unsigned>(serialized.height),
+                static_cast<unsigned>(serialized.depth),
+                static_cast<unsigned>(serialized.category),
+                static_cast<unsigned>(serialized.delayLoadPixels),
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
+#endif
+
         varGfxImage->mapType = static_cast<MapType>(serialized.mapType);
         varGfxImage->texture.basemap =
             reinterpret_cast<IDirect3DBaseTexture9 *>(
@@ -3282,7 +3311,9 @@ void __cdecl Load_GfxImage(bool atStreamStart)
         varGfxImage->category = serialized.category;
         varGfxImage->delayLoadPixels = serialized.delayLoadPixels != 0;
 
-        const bool switchImageTrace = g_switchCurrentAssetIndex == 1360;
+        const bool switchImageTrace =
+            g_switchCurrentAssetIndex == 1360 ||
+            g_switchCurrentAssetIndex == 1363;
         if (switchImageTrace)
         {
             char trace[320];
@@ -3416,6 +3447,18 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
     DB_PushStreamPos(0);
 
 #ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex == 1363)
+    {
+        char trace[192];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH IMAGE1363] ptr enter slot=%p token=%08x stream=%u pos=%p\n",
+            static_cast<void *>(varGfxImagePtr),
+            value,
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
     if (g_switchCurrentAssetIndex == 1360)
     {
         char trace[224];
@@ -3449,6 +3492,24 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
             Load_GfxImage(1);
 
 #ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1363)
+            {
+                char trace[256];
+                std::snprintf(
+                    trace, sizeof(trace),
+                    "[SWITCH IMAGE1363] loaded image=%p name=%p text=%s "
+                    "map=%u semantic=%u cat=%u tex=%p pos=%p\n",
+                    static_cast<void *>(nativeImage),
+                    static_cast<const void *>(nativeImage->name),
+                    nativeImage->name ? nativeImage->name : "<null>",
+                    static_cast<unsigned>(nativeImage->mapType),
+                    static_cast<unsigned>(nativeImage->semantic),
+                    static_cast<unsigned>(nativeImage->category),
+                    static_cast<void *>(nativeImage->texture.basemap),
+                    static_cast<void *>(DB_GetStreamPos()));
+                Switch_LogWrite(trace);
+                Switch_LogWrite("[SWITCH IMAGE1363] before Load_GfxImageAsset\n");
+            }
             if (g_switchCurrentAssetIndex == 1360)
             {
                 char trace[224];
