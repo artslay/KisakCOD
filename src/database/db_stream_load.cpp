@@ -10,6 +10,30 @@ extern uint32_t g_switchCurrentAssetHeader;
 #endif
 
 
+#ifdef __SWITCH__
+static inline void Switch_TraceSuspiciousLoad(void *dst, uint32_t size)
+{
+    const uintptr_t address = reinterpret_cast<uintptr_t>(dst);
+    if (address && address < 0x100000000ULL)
+    {
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XASSET TRACE] LOW LOAD dst=%p size=%u stream=%u pos=%p asset=%d raw=%u header=%08x ra=%p\\n",
+            dst,
+            static_cast<unsigned>(size),
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(DB_GetStreamPos()),
+            g_switchCurrentAssetIndex,
+            g_switchCurrentAssetRawType,
+            g_switchCurrentAssetHeader,
+            __builtin_return_address(0));
+        Switch_LogWrite(trace);
+    }
+}
+#endif
+
 void __cdecl Load_Stream(bool atStreamStart, uint8_t *ptr, int32_t size)
 {
 #ifdef __SWITCH__
@@ -131,29 +155,7 @@ void __cdecl DB_ConvertOffsetToPointer(void *data)
 #endif
 }
 
-#ifdef __SWITCH__
-static inline void Switch_TraceSuspiciousLoad(void *dst, uint32_t size)
-{
-    const uintptr_t address = reinterpret_cast<uintptr_t>(dst);
-    if (address && address < 0x100000000ULL)
-    {
-        char trace[320];
-        std::snprintf(
-            trace,
-            sizeof(trace),
-            "[SWITCH XASSET TRACE] LOW LOAD dst=%p size=%u stream=%u pos=%p asset=%d raw=%u header=%08x ra=%p\\n",
-            dst,
-            static_cast<unsigned>(size),
-            static_cast<unsigned>(g_streamPosIndex),
-            static_cast<void *>(DB_GetStreamPos()),
-            g_switchCurrentAssetIndex,
-            g_switchCurrentAssetRawType,
-            g_switchCurrentAssetHeader,
-            __builtin_return_address(0));
-        Switch_LogWrite(trace);
-    }
-}
-#endif
+
 
 void __cdecl DB_LoadSwitchSerialized(void *dst, uint32_t size)
 {
@@ -161,10 +163,8 @@ void __cdecl DB_LoadSwitchSerialized(void *dst, uint32_t size)
     iassert(dst);
     iassert(size);
     uint8_t *streamPos = DB_GetStreamPos();
-#ifdef __SWITCH__
-    // Also trace direct serialized copies; nested loaders can bypass Load_Stream.
+// Also trace direct serialized copies; nested loaders can bypass Load_Stream.
     Switch_TraceSuspiciousLoad(dst, size);
-#endif
     DB_LoadXFileData(streamPos, size);
     std::memcpy(dst, streamPos, size);
     DB_IncStreamPos(static_cast<int32_t>(size));
@@ -195,7 +195,7 @@ void __cdecl Load_TempStringCustom(char **str)
 
     Load_XStringCustom(str);
     if (*str)
-        string = (const char*)SL_GetString(*str, 4u); // KISAKTODO: this seems way wrong but it's what the decomp is showing
+        string = reinterpret_cast<const char *>(static_cast<uintptr_t>(SL_GetString(*str, 4u))); // KISAKTODO: this seems way wrong but it's what the decomp is showing
     else
         string= 0;
     *str = (char *)string;
