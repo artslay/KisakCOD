@@ -4919,23 +4919,6 @@ void __cdecl Load_Material(bool atStreamStart)
         sizeof(serialized));
 #endif
 
-    {
-        char trace[256];
-        std::snprintf(
-            trace, sizeof(trace),
-            "[SWITCH XASSET TRACE] material raw pos=%p name=%08x tech=%08x tex=%08x const=%08x state=%08x count=%u,%u,%u\n",
-            static_cast<void *>(materialStreamPos),
-            serialized.name,
-            serialized.techniqueSet,
-            serialized.textureTable,
-            serialized.constantTable,
-            serialized.stateBitsTable,
-            static_cast<unsigned>(serialized.textureCount),
-            static_cast<unsigned>(serialized.constantCount),
-            static_cast<unsigned>(serialized.stateBitsCount));
-        Switch_LogWrite(trace);
-    }
-
     memset(varMaterial, 0, sizeof(*varMaterial));
 
     varMaterial->info.name =
