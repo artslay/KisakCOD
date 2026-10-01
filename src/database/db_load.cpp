@@ -6740,7 +6740,6 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
 
         SerializedFxEffectDef serialized{};
         DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
-        DB_IncStreamPos(sizeof(serialized));
 #ifdef __SWITCH__
 #endif
 
