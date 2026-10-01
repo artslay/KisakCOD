@@ -3338,35 +3338,7 @@ void __cdecl Load_GfxImage(bool atStreamStart)
         varGfxImage->depth = serialized.depth;
         varGfxImage->category = serialized.category;
         varGfxImage->delayLoadPixels = serialized.delayLoadPixels != 0;
-
-        const bool switchImageTrace =
-            g_switchCurrentAssetIndex == 1360 ||
-            g_switchCurrentAssetIndex == 1363;
-        if (switchImageTrace)
-        {
-            char trace[320];
-            std::snprintf(
-                trace, sizeof(trace),
-                "[SWITCH XASSET TRACE] gfximage raw pos=%p map=%u tex=%08x picmip=%u,%u noPic=%u semantic=%u track=%u mem=%d,%d dim=%u,%u,%u cat=%u delay=%u name=%08x after=%p\n",
-                static_cast<void *>(DB_GetStreamPos()),
-                static_cast<unsigned>(serialized.mapType),
-                serialized.texture,
-                static_cast<unsigned>(serialized.picmip[0]),
-                static_cast<unsigned>(serialized.picmip[1]),
-                static_cast<unsigned>(serialized.noPicmip),
-                static_cast<unsigned>(serialized.semantic),
-                static_cast<unsigned>(serialized.track),
-                serialized.cardMemory.platform[0],
-                serialized.cardMemory.platform[1],
-                static_cast<unsigned>(serialized.width),
-                static_cast<unsigned>(serialized.height),
-                static_cast<unsigned>(serialized.depth),
-                static_cast<unsigned>(serialized.category),
-                static_cast<unsigned>(serialized.delayLoadPixels),
-                serialized.name,
-                static_cast<void *>(DB_GetStreamPos()));
-            Switch_LogWrite(trace);
-        }
+        
 
         DB_PushStreamPos(4);
 
@@ -3388,61 +3360,12 @@ void __cdecl Load_GfxImage(bool atStreamStart)
                     DB_ConvertOffsetToPointerValue(serialized.name));
         }
 
-        if (switchImageTrace)
-        {
-            const uintptr_t namePtr =
-                reinterpret_cast<uintptr_t>(varGfxImage->name);
-            const uintptr_t block4Base =
-                reinterpret_cast<uintptr_t>(g_streamBlocks[4].data);
-            char trace[512];
-            int written = std::snprintf(
-                trace,
-                sizeof(trace),
-                "[SWITCH XASSET TRACE] gfximage name=%p text=%s block4=%p off=%08x stream4=%p bytes=",
-                static_cast<const void *>(varGfxImage->name),
-                varGfxImage->name ? varGfxImage->name : "<null>",
-                static_cast<void *>(g_streamBlocks[4].data),
-                namePtr >= block4Base
-                    ? static_cast<unsigned>(namePtr - block4Base)
-                    : 0u,
-                static_cast<void *>(g_streamPosArray[4]));
-            if (namePtr >= block4Base &&
-                namePtr + 24 <= block4Base + g_streamBlocks[4].size)
-            {
-                const uint8_t *bytes =
-                    reinterpret_cast<const uint8_t *>(namePtr);
-                for (int i = 0; i < 24; ++i)
-                {
-                    written += std::snprintf(
-                        trace + written,
-                        sizeof(trace) - static_cast<size_t>(written),
-                        "%02x",
-                        static_cast<unsigned>(bytes[i]));
-                }
-            }
-            std::snprintf(
-                trace + written,
-                sizeof(trace) - static_cast<size_t>(written),
-                "\n");
-            Switch_LogWrite(trace);
-        }
+        
 
         varGfxTextureLoad = &varGfxImage->texture;
         Load_GfxTextureLoad(0);
 
-        if (switchImageTrace)
-        {
-            char trace[256];
-            std::snprintf(
-                trace, sizeof(trace),
-                "[SWITCH XASSET TRACE] gfximage texture=%p delay=%u card=%d,%d afterTexture=%p\n",
-                static_cast<void *>(varGfxImage->texture.basemap),
-                static_cast<unsigned>(varGfxImage->delayLoadPixels),
-                varGfxImage->cardMemory.platform[0],
-                varGfxImage->cardMemory.platform[1],
-                static_cast<void *>(DB_GetStreamPos()));
-            Switch_LogWrite(trace);
-        }
+        
 
         DB_PopStreamPos();
         return;
