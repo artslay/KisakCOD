@@ -9280,8 +9280,8 @@ void __cdecl Load_RawFile(bool atStreamStart)
 #ifdef __SWITCH__
     const bool switchRawFileTrace =
         (g_switchCurrentAssetRawType == 31u &&
-         g_switchCurrentAssetIndex >= 1200 &&
-         g_switchCurrentAssetIndex <= 1200);
+         g_switchCurrentAssetIndex >= 1199 &&
+         g_switchCurrentAssetIndex <= 1199);
     if (switchRawFileTrace)
         {
         char trace[128];
@@ -9315,14 +9315,16 @@ void __cdecl Load_RawFile(bool atStreamStart)
 #ifdef __SWITCH__
         if (switchRawFileTrace)
         {
-            char trace[192];
+            char trace[256];
             std::snprintf(
                 trace, sizeof(trace),
-                "[SWITCH RAWFILE] raw name=%08x len=%d buffer=%08x pos=%p\n",
+                "[SWITCH RAWFILE] raw name=%08x len=%d buffer=%08x pos=%p stream=%u array4=%p\n",
                 serialized.name,
                 serialized.len,
                 serialized.buffer,
-                static_cast<void *>(DB_GetStreamPos()));
+                static_cast<void *>(DB_GetStreamPos()),
+                static_cast<unsigned>(g_streamPosIndex),
+                static_cast<void *>(g_streamPosArray[4]));
             Switch_LogWrite(trace);
         }
 #endif
@@ -9354,7 +9356,41 @@ void __cdecl Load_RawFile(bool atStreamStart)
         Load_ConstCharArray(1, varRawFile->len + 1);
 #ifdef __SWITCH__
         if (switchRawFileTrace)
-            Switch_LogWrite("[SWITCH RAWFILE] buffer done\n");
+        {
+            const uintptr_t bufferPtr =
+                reinterpret_cast<uintptr_t>(varRawFile->buffer);
+            const uintptr_t block4Base =
+                reinterpret_cast<uintptr_t>(g_streamBlocks[4].data);
+            char trace[384];
+            int written = std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH RAWFILE] buffer done ptr=%p block4off=%08x stream=%u pos=%p bytes=",
+                static_cast<const void *>(varRawFile->buffer),
+                bufferPtr >= block4Base
+                    ? static_cast<unsigned>(bufferPtr - block4Base)
+                    : 0u,
+                static_cast<unsigned>(g_streamPosIndex),
+                static_cast<void *>(DB_GetStreamPos()));
+            if (bufferPtr >= block4Base &&
+                bufferPtr + 24 <= block4Base + g_streamBlocks[4].size)
+            {
+                const uint8_t *bytes =
+                    reinterpret_cast<const uint8_t *>(bufferPtr);
+                for (int i = 0; i < 24; ++i)
+                {
+                    written += std::snprintf(
+                        trace + written,
+                        sizeof(trace) - static_cast<size_t>(written),
+                        "%02x",
+                        static_cast<unsigned>(bytes[i]));
+                }
+            }
+            std::snprintf(
+                trace + written,
+                sizeof(trace) - static_cast<size_t>(written),
+                "\n");
+            Switch_LogWrite(trace);
+        }
 #endif
     }
 #ifdef __SWITCH__
