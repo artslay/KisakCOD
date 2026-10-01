@@ -34,10 +34,10 @@ static bool Switch_LogPrefixAllowed(const char *msg)
     // Keep only the diagnostics that are still useful for Switch bring-up.
     // The old image/material/stream/sound-asset trace spam is intentionally
     // suppressed here without touching the underlying loading code.
-    return std::strncmp(msg, "[SWITCH LOADEDSOUND", 20) == 0 ||
-           std::strncmp(msg, "[SWITCH CRASH]", 14) == 0 ||
-           std::strncmp(msg, "[SWITCH IWD]", 13) == 0 ||
-           std::strncmp(msg, "[SWITCH GLCTX]", 15) == 0;
+    return std::strncmp(msg, "[SWITCH LOADEDSOUND", sizeof("[SWITCH LOADEDSOUND") - 1) == 0 ||
+           std::strncmp(msg, "[SWITCH CRASH]", sizeof("[SWITCH CRASH]") - 1) == 0 ||
+           std::strncmp(msg, "[SWITCH IWD]", sizeof("[SWITCH IWD]") - 1) == 0 ||
+           std::strncmp(msg, "[SWITCH GLCTX]", sizeof("[SWITCH GLCTX]") - 1) == 0;
 }
 
 /*
