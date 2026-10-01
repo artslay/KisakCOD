@@ -2431,12 +2431,13 @@ void DB_SyncLostDevice()
 __attribute__((visibility("hidden")))
 #endif
 #ifdef __SWITCH__
+static XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(XAssetType type, XAssetHeader header);
 __attribute__((visibility("hidden")))
 XAssetHeader (*g_switchDBAddXAsset)(XAssetType type, XAssetHeader header) =
-    &DB_AddXAsset;
+    &DB_AddXAsset_SwitchLocal;
 #endif
 
-XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
+static XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(XAssetType type, XAssetHeader header)
 {
     XAssetEntryPoolEntry *existingEntry;
     XAssetEntryPoolEntry newEntry;
@@ -2524,6 +2525,11 @@ XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
 #endif
 
     return existingEntry->entry.asset.header;
+}
+
+XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
+{
+    return DB_AddXAsset_SwitchLocal(type, header);
 }
 
 XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry, int32_t allowOverride)
