@@ -6167,10 +6167,7 @@ void __cdecl Load_FxEffectDefHandle(bool atStreamStart)
 #ifdef __SWITCH__
     if (atStreamStart)
     {
-        DB_LoadXFileData(
-            reinterpret_cast<uint8_t *>(&value),
-            sizeof(value));
-        DB_IncStreamPos(sizeof(value));
+        DB_LoadSwitchSerialized(&value, sizeof(value));
         *varFxEffectDefHandle = reinterpret_cast<const FxEffectDef *>(
             static_cast<uintptr_t>(value));
     }
@@ -8353,10 +8350,7 @@ void __cdecl Load_FxImpactEntry(bool atStreamStart)
     if (atStreamStart)
     {
         uint32_t serializedHandles[33]{};
-        DB_LoadXFileData(
-            reinterpret_cast<uint8_t *>(serializedHandles),
-            sizeof(serializedHandles));
-        DB_IncStreamPos(sizeof(serializedHandles));
+        DB_LoadSwitchSerialized(serializedHandles, sizeof(serializedHandles));
 
         std::memset(varFxImpactEntry, 0, sizeof(FxImpactEntry));
 
@@ -8436,13 +8430,18 @@ void __cdecl Load_FxImpactTable(bool atStreamStart)
         uint32_t serializedName = 0;
         uint32_t serializedTable = 0;
 
-        DB_LoadXFileData(
-            reinterpret_cast<uint8_t *>(&serializedName),
-            sizeof(serializedName));
-        DB_LoadXFileData(
-            reinterpret_cast<uint8_t *>(&serializedTable),
-            sizeof(serializedTable));
-        DB_IncStreamPos(8);
+        struct SerializedFxImpactTable
+        {
+            uint32_t name;
+            uint32_t table;
+        };
+        static_assert(sizeof(SerializedFxImpactTable) == 8);
+
+        SerializedFxImpactTable serialized{};
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+        const uint32_t serializedName = serialized.name;
+        const uint32_t serializedTable = serialized.table;
 
         std::memset(varFxImpactTable, 0, sizeof(FxImpactTable));
 
