@@ -2461,22 +2461,7 @@ extern "C" XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(XAssetType type, XAsset
     newEntry.entry.asset.header = header;
 
 #ifdef __SWITCH__
-    if (type == ASSET_TYPE_IMPACT_FX)
-        Switch_LogWrite("[SWITCH IMPACTFX ADD] entered helper\n");
-
-    const bool traceImpactFx =
-        type == ASSET_TYPE_IMPACT_FX;
-    if (traceImpactFx)
-    {
-        char trace[256];
-        std::snprintf(
-            trace,
-            sizeof(trace),
-            "[SWITCH IMPACTFX ADD] enter header=%p data=%p\n",
-            static_cast<const void *>(&header),
-            header.data);
-        Switch_LogWrite(trace);
-    }
+    const bool traceImpactFx = false;
 #endif
 
 #ifdef __SWITCH__
