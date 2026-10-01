@@ -2487,8 +2487,7 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH LOADEDSOUND HASH] hash=%u first=%u name=%p
-",
+            "[SWITCH LOADEDSOUND HASH] hash=%u first=%u name=%p\n",
             hash,
             static_cast<unsigned>(db_hashTable[hash]),
             static_cast<const void *>(name));
@@ -2509,8 +2508,7 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH LOADEDSOUND HASH] existing index=%u entry=%p assetType=%u
-",
+                "[SWITCH LOADEDSOUND HASH] existing index=%u entry=%p assetType=%u\n",
                 existingEntryIndex,
                 static_cast<void *>(existingEntry),
                 static_cast<unsigned>(existingEntry->entry.asset.type));
@@ -2532,8 +2530,7 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
                 std::snprintf(
                     trace,
                     sizeof(trace),
-                    "[SWITCH LOADEDSOUND HASH] existing name=%p new name=%p
-",
+                    "[SWITCH LOADEDSOUND HASH] existing name=%p new name=%p\n",
                     static_cast<const void *>(XAssetName),
                     static_cast<const void *>(name));
                 Switch_LogWrite(trace);
