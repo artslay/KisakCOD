@@ -8425,9 +8425,6 @@ void __cdecl Load_FxImpactTable(bool atStreamStart)
 #ifdef __SWITCH__
     if (atStreamStart)
     {
-        uint32_t serializedName = 0;
-        uint32_t serializedTable = 0;
-
         struct SerializedFxImpactTable
         {
             uint32_t name;
