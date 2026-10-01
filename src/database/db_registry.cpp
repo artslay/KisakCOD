@@ -1293,6 +1293,19 @@ void __cdecl DB_LoadXAssets(XZoneInfo *zoneInfo, uint32_t zoneCount, int32_t syn
 
 void DB_Init()
 {
+#ifdef __SWITCH__
+    g_switchDBAddXAsset = &DB_AddXAsset_SwitchLocal;
+    {
+        char trace[192];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH DB INIT] DB_AddXAsset local ptr=%p\\n",
+            reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(g_switchDBAddXAsset)));
+        Switch_LogWrite(trace);
+    }
+#endif
+
     for (XAssetType type = (XAssetType)0; type < ASSET_TYPE_COUNT; ++type)
         DB_InitPoolHeader(type);
 
@@ -2434,7 +2447,7 @@ __attribute__((visibility("hidden")))
 static XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(XAssetType type, XAssetHeader header);
 __attribute__((visibility("hidden")))
 XAssetHeader (*g_switchDBAddXAsset)(XAssetType type, XAssetHeader header) =
-    &DB_AddXAsset_SwitchLocal;
+    nullptr;
 #endif
 
 static XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(XAssetType type, XAssetHeader header)
