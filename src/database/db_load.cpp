@@ -3272,7 +3272,7 @@ void __cdecl Load_GfxImage(bool atStreamStart)
             char trace[320];
             std::snprintf(
                 trace, sizeof(trace),
-                "[SWITCH IMAGE1363] serialized map=%u tex=%08x name=%08x "
+                "[SWITCH XASSET TRACE] IMAGE1363 serialized map=%u tex=%08x name=%08x "
                 "picmip=%u,%u noPic=%u semantic=%u track=%u mem=%d,%d "
                 "dim=%u,%u,%u cat=%u delay=%u pos=%p\n",
                 static_cast<unsigned>(serialized.mapType),
@@ -3446,7 +3446,7 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH IMAGE1363] ptr pre-read slot=%p varImage=%p hdr=%p\n",
+            "[SWITCH XASSET TRACE] IMAGE1363 ptr pre-read slot=%p varImage=%p hdr=%p\n",
             static_cast<void *>(varGfxImagePtr),
             static_cast<void *>(varGfxImage),
             static_cast<void *>(varXAssetHeader));
@@ -3466,7 +3466,7 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
         char trace[192];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH IMAGE1363] ptr enter slot=%p token=%08x stream=%u pos=%p\n",
+            "[SWITCH XASSET TRACE] IMAGE1363 ptr enter slot=%p token=%08x stream=%u pos=%p\n",
             static_cast<void *>(varGfxImagePtr),
             value,
             static_cast<unsigned>(g_streamPosIndex),
@@ -3511,7 +3511,7 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
                 char trace[256];
                 std::snprintf(
                     trace, sizeof(trace),
-                    "[SWITCH IMAGE1363] loaded image=%p name=%p text=%s "
+                    "[SWITCH XASSET TRACE] IMAGE1363 loaded image=%p name=%p text=%s "
                     "map=%u semantic=%u cat=%u tex=%p pos=%p\n",
                     static_cast<void *>(nativeImage),
                     static_cast<const void *>(nativeImage->name),
@@ -3522,7 +3522,7 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
                     static_cast<void *>(nativeImage->texture.basemap),
                     static_cast<void *>(DB_GetStreamPos()));
                 Switch_LogWrite(trace);
-                Switch_LogWrite("[SWITCH IMAGE1363] before Load_GfxImageAsset\n");
+                Switch_LogWrite("[SWITCH XASSET TRACE] IMAGE1363 before Load_GfxImageAsset\n");
             }
             if (g_switchCurrentAssetIndex == 1360)
             {
@@ -10748,7 +10748,7 @@ void __cdecl Load_XAssetHeader(bool atStreamStart)
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH IMAGE1363] header image case hdr=%p data=%p type=%u atStream=%u\n",
+                "[SWITCH XASSET TRACE] IMAGE1363 header image case hdr=%p data=%p type=%u atStream=%u\n",
                 static_cast<void *>(varXAssetHeader),
                 varXAssetHeader ? static_cast<void *>(varXAssetHeader->data) : nullptr,
                 static_cast<unsigned>(varXAsset->type),
