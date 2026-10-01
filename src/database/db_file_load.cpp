@@ -139,6 +139,7 @@ static void Switch_CheckLoadDestination(
         static_cast<void *>(g_streamPosArray[4]),
         static_cast<void *>(g_load.zoneMem->blocks[0].data),
         static_cast<void *>(g_load.zoneMem->blocks[4].data));
+    Switch_LogWrite(trace);
 }
 #endif
 
