@@ -8308,14 +8308,16 @@ void __cdecl Load_FxImpactTablePtr(bool atStreamStart)
                 static_cast<uintptr_t>(ASSET_TYPE_IMPACT_FX);
             register uintptr_t switchHeaderArg __asm__("x1") =
                 reinterpret_cast<uintptr_t>(impactHeader.data);
+            register uintptr_t switchFnArg __asm__("x16") =
+                reinterpret_cast<uintptr_t>(g_switchDBAddXAsset);
 
             __asm__ volatile(
-                "bl DB_AddXAsset_SwitchLocal"
-                : "+r"(switchTypeArg), "+r"(switchHeaderArg)
+                "blr x16"
+                : "+r"(switchTypeArg), "+r"(switchHeaderArg), "+r"(switchFnArg)
                 :
                 : "x2", "x3", "x4", "x5", "x6", "x7",
                   "x8", "x9", "x10", "x11", "x12", "x13",
-                  "x14", "x15", "x16", "x17", "x18", "x30",
+                  "x14", "x15", "x17", "x18", "x30",
                   "memory");
 
             XAssetHeader addedHeader;
