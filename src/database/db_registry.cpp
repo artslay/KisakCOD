@@ -3175,7 +3175,54 @@ void __cdecl Load_FxEffectDefFromName(const char **name)
 
 void __cdecl Load_FxImpactTableAsset(XAssetHeader *impactFx)
 {
-    impactFx->xmodelPieces = DB_AddXAsset(ASSET_TYPE_IMPACT_FX, (XAssetHeader)impactFx->xmodelPieces).xmodelPieces;
+#ifdef __SWITCH__
+    const bool traceImpactFx =
+        g_switchCurrentAssetIndex == 1225;
+
+    if (traceImpactFx)
+        Switch_LogWrite("[SWITCH IMPACTFX ASSET] enter\\n");
+
+    if (!impactFx)
+    {
+        if (traceImpactFx)
+            Switch_LogWrite("[SWITCH IMPACTFX ASSET] null header\\n");
+        return;
+    }
+
+    XAssetHeader input = *impactFx;
+
+    if (traceImpactFx)
+    {
+        char trace[192];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH IMPACTFX ASSET] input=%p\\n",
+            static_cast<void *>(input.data));
+        Switch_LogWrite(trace);
+    }
+
+    XAssetHeader output =
+        DB_AddXAsset(ASSET_TYPE_IMPACT_FX, input);
+
+    if (traceImpactFx)
+    {
+        char trace[192];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH IMPACTFX ASSET] output=%p\\n",
+            static_cast<void *>(output.data));
+        Switch_LogWrite(trace);
+    }
+
+    *impactFx = output;
+#else
+    impactFx->xmodelPieces =
+        DB_AddXAsset(
+            ASSET_TYPE_IMPACT_FX,
+            (XAssetHeader)impactFx->xmodelPieces).xmodelPieces;
+#endif
 }
 
 void __cdecl Mark_FxImpactTableAsset(FxImpactTable *impactFx)
