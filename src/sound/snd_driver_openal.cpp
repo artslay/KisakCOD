@@ -20,6 +20,12 @@
 #include <AL/efx-presets.h>
 #include <fstream>
 #include <cstdio>
+#ifdef __SWITCH__
+extern void Switch_LogWrite(const char *msg);
+extern int32_t g_switchCurrentAssetIndex;
+extern uint32_t g_switchCurrentAssetRawType;
+#endif
+
 
 AlLocal alGlob;
 
