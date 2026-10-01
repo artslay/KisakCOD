@@ -68,80 +68,6 @@ extern uint32_t g_switchCurrentAssetRawType;
 extern uint32_t g_switchCurrentAssetHeader;
 #endif
 
-#ifdef __SWITCH__
-static void Switch_CheckLoadDestination(
-    const uint8_t *pos,
-    uint32_t size,
-    const char *where)
-{
-    if (!pos || !g_load.zoneMem)
-        return;
-
-    const uintptr_t ptr = reinterpret_cast<uintptr_t>(pos);
-    const uintptr_t cursor = reinterpret_cast<uintptr_t>(g_streamPos);
-
-    int32_t owner = -1;
-    uintptr_t offset = 0;
-    int32_t cursorOwner = -1;
-    uintptr_t cursorOffset = 0;
-
-    for (uint32_t i = 0; i < ARRAY_COUNT(g_streamPosArray); ++i)
-    {
-        const uint8_t *basePtr = g_load.zoneMem->blocks[i].data;
-        if (!basePtr)
-            continue;
-
-        const uintptr_t base = reinterpret_cast<uintptr_t>(basePtr);
-        const uintptr_t end =
-            base + static_cast<uintptr_t>(g_load.zoneMem->blocks[i].size);
-
-        if (ptr >= base && ptr < end)
-        {
-            owner = static_cast<int32_t>(i);
-            offset = ptr - base;
-        }
-
-        if (cursor >= base && cursor < end)
-        {
-            cursorOwner = static_cast<int32_t>(i);
-            cursorOffset = cursor - base;
-        }
-    }
-
-    const bool interesting =
-        (g_switchCurrentAssetIndex == 1208 &&
-         g_switchCurrentAssetRawType == 7u);
-
-    if (!interesting && owner == static_cast<int32_t>(g_streamPosIndex))
-        return;
-
-    const uintptr_t caller =
-        reinterpret_cast<uintptr_t>(__builtin_return_address(0));
-
-    char trace[640];
-    std::snprintf(
-        trace,
-        sizeof(trace),
-        "[SWITCH LOAD DEST] where=%s asset=%d rawType=%u stream=%u owner=%d pos=%p size=%u off=%08x cursor=%p cursorOwner=%d cursorOff=%08x caller=%p array0=%p array4=%p blocks0=%p blocks4=%p\n",
-        where,
-        g_switchCurrentAssetIndex,
-        static_cast<unsigned>(g_switchCurrentAssetRawType),
-        static_cast<unsigned>(g_streamPosIndex),
-        owner,
-        static_cast<const void *>(pos),
-        static_cast<unsigned>(size),
-        static_cast<unsigned>(offset),
-        static_cast<const void *>(g_streamPos),
-        cursorOwner,
-        static_cast<unsigned>(cursorOffset),
-        reinterpret_cast<void *>(caller),
-        static_cast<void *>(g_streamPosArray[0]),
-        static_cast<void *>(g_streamPosArray[4]),
-        static_cast<void *>(g_load.zoneMem->blocks[0].data),
-        static_cast<void *>(g_load.zoneMem->blocks[4].data));
-    Switch_LogWrite(trace);
-}
-#endif
 
 
 extern XAssetList g_varXAssetList;
@@ -231,7 +157,6 @@ void __cdecl DB_LoadXFileData(uint8_t *pos, uint32_t size)
     iassert(!g_load.stream.avail_out);
 
 #ifdef __SWITCH__
-    Switch_CheckLoadDestination(pos, size, "DB_LoadXFileData:entry");
     bool switchProbeTarget = false;
     uintptr_t switchProbeTargetPtr = 0;
     if (g_load.zoneMem && g_load.zoneMem->blocks[4].data &&
@@ -293,7 +218,7 @@ void __cdecl DB_LoadXFileData(uint8_t *pos, uint32_t size)
         int written = std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH XASSET TRACE] block4 target fill asset=%d rawType=%u header=%08x stream=%u request=%p size=%u target=%p off=%08x bytes=",
+            "[SWITCH XASSET TRACE] block4 target fill asset=%d rawType=%u header=%08x stream=%u request=%p size=%u target=%p off=%08x cursor=%p array0=%p array4=%p bytes=",
             g_switchCurrentAssetIndex,
             static_cast<unsigned>(g_switchCurrentAssetRawType),
             static_cast<unsigned>(g_switchCurrentAssetHeader),
@@ -301,7 +226,10 @@ void __cdecl DB_LoadXFileData(uint8_t *pos, uint32_t size)
             static_cast<void *>(pos),
             size,
             reinterpret_cast<void *>(switchProbeTargetPtr),
-            0x2b0ac);
+            0x2b0ac,
+            static_cast<void *>(g_streamPos),
+            static_cast<void *>(g_streamPosArray[0]),
+            static_cast<void *>(g_streamPosArray[4]));
         for (int i = 0; i < 24 && written < static_cast<int>(sizeof(trace)); ++i)
         {
             written += std::snprintf(
