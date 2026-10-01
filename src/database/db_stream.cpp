@@ -4,6 +4,7 @@
 
 #ifdef __SWITCH__
 extern void Switch_LogWrite(const char *msg);
+extern int32_t g_switchCurrentAssetIndex;
 #endif
 
 uint32_t g_streamDelayIndex;
