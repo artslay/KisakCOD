@@ -1,3 +1,4 @@
+#include <cstring>
 #include <universal/q_shared.h>
 #include "database.h"
 
