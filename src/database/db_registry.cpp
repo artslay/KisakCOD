@@ -2492,7 +2492,6 @@ extern "C" XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(XAssetType type, XAsset
     if (traceImpactFx)
         Switch_LogWrite("[SWITCH IMPACTFX ADD] after link\n");
 
-#ifdef __SWITCH__
     if (traceImpactFx)
     {
         char trace[256];
