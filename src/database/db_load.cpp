@@ -1950,9 +1950,24 @@ void __cdecl Load_LoadedSoundPtr(bool atStreamStart)
             Load_LoadedSound(1);
 #ifdef __SWITCH__
             if (switchLoadedSoundTrace)
-                Switch_LogWrite("[SWITCH LOADEDSOUND PTR] load done\n");
+            {
+                char trace[256];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH LOADEDSOUND PTR] load done obj=%p name=%p data=%p\n",
+                    static_cast<void *>(varLoadedSound),
+                    static_cast<const void *>(varLoadedSound ? varLoadedSound->name : nullptr),
+                    static_cast<void *>(varLoadedSound ? varLoadedSound->sound.data : nullptr));
+                Switch_LogWrite(trace);
+                Switch_LogWrite("[SWITCH LOADEDSOUND PTR] asset begin\n");
+            }
 #endif
             Load_LoadedSoundAsset((XAssetHeader *)varLoadedSoundPtr);
+#ifdef __SWITCH__
+            if (switchLoadedSoundTrace)
+                Switch_LogWrite("[SWITCH LOADEDSOUND PTR] asset done\n");
+#endif
             if (inserted)
                 *inserted = *varLoadedSoundPtr;
         }
