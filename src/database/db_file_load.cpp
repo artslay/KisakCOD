@@ -62,6 +62,65 @@ int32_t g_trackLoadProgress;
 const char *g_switchDbStage = "idle";
 #endif
 
+#ifdef __SWITCH__
+static void Switch_CheckLoadDestination(
+    const uint8_t *pos,
+    uint32_t size,
+    const char *where)
+{
+    if (!pos || !g_streamBlocks ||
+        g_streamPosIndex >= ARRAY_COUNT(g_streamPosArray) ||
+        !g_streamBlocks[g_streamPosIndex].data)
+        return;
+
+    const uintptr_t ptr = reinterpret_cast<uintptr_t>(pos);
+    int32_t owner = -1;
+    uintptr_t offset = 0;
+
+    for (uint32_t i = 0; i < ARRAY_COUNT(g_streamPosArray); ++i)
+    {
+        if (!g_streamBlocks[i].data)
+            continue;
+
+        const uintptr_t base =
+            reinterpret_cast<uintptr_t>(g_streamBlocks[i].data);
+        const uintptr_t end =
+            base + static_cast<uintptr_t>(g_streamBlocks[i].size);
+        if (ptr >= base && ptr < end)
+        {
+            owner = static_cast<int32_t>(i);
+            offset = ptr - base;
+            break;
+        }
+    }
+
+    if (owner == static_cast<int32_t>(g_streamPosIndex))
+        return;
+
+    const uintptr_t caller =
+        reinterpret_cast<uintptr_t>(__builtin_return_address(0));
+
+    char trace[448];
+    std::snprintf(
+        trace,
+        sizeof(trace),
+        "[SWITCH LOAD DEST MISMATCH] where=%s asset=%d rawType=%u stream=%u owner=%d pos=%p size=%u off=%08x caller=%p array0=%p array4=%p\n",
+        where,
+        g_switchCurrentAssetIndex,
+        static_cast<unsigned>(g_switchCurrentAssetRawType),
+        static_cast<unsigned>(g_streamPosIndex),
+        owner,
+        static_cast<const void *>(pos),
+        static_cast<unsigned>(size),
+        static_cast<unsigned>(offset),
+        reinterpret_cast<void *>(caller),
+        static_cast<void *>(g_streamPosArray[0]),
+        static_cast<void *>(g_streamPosArray[4]));
+    Switch_LogWrite(trace);
+}
+#endif
+
+
 extern XAssetList g_varXAssetList;
 #ifdef __SWITCH__
 extern int32_t g_switchCurrentAssetIndex;
@@ -153,6 +212,7 @@ void __cdecl DB_LoadXFileData(uint8_t *pos, uint32_t size)
     iassert(!g_load.stream.avail_out);
 
 #ifdef __SWITCH__
+    Switch_CheckLoadDestination(pos, size, "DB_LoadXFileData:entry");
     bool switchProbeTarget = false;
     uintptr_t switchProbeTargetPtr = 0;
     if (g_load.zoneMem && g_load.zoneMem->blocks[4].data &&
