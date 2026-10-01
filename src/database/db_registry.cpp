@@ -2495,6 +2495,23 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     }
 #endif
 
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_LOADED_SOUND)
+    {
+        char trace[192];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH LOADEDSOUND PATH] type=%u allow=%d firstChar=%d stub=%d name=%p\n",
+            static_cast<unsigned>(type),
+            allowOverride,
+            v2,
+            isStubAsset,
+            static_cast<const void *>(name));
+        Switch_LogWrite(trace);
+    }
+#endif
+
     existingEntry = NULL;
 
     for (existingEntryIndex = db_hashTable[hash]; existingEntryIndex; existingEntryIndex = existingEntry->entry.nextHash)
@@ -2550,15 +2567,50 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     {
         if (isStubAsset)
         {
+#ifdef __SWITCH__
+            if (type == ASSET_TYPE_LOADED_SOUND)
+                Switch_LogWrite("[SWITCH LOADEDSOUND PATH] entering default asset path\n");
+#endif
             if (!existingEntryIndex)
+            {
+#ifdef __SWITCH__
+                if (type == ASSET_TYPE_LOADED_SOUND)
+                    Switch_LogWrite("[SWITCH LOADEDSOUND PATH] before DB_CreateDefaultEntry\n");
+#endif
                 return (XAssetEntryPoolEntry *)DB_CreateDefaultEntry(type, (char *)name);
+            }
             iassert(existingEntry);
             return existingEntry;
         }
 
         asset.type = newEntry->entry.asset.type;
         asset.header = newEntry->entry.asset.header;
+#ifdef __SWITCH__
+        if (type == ASSET_TYPE_LOADED_SOUND)
+        {
+            char trace[192];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH LOADEDSOUND PATH] before alloc/clone source=%p\n",
+                static_cast<void *>(asset.header.data));
+            Switch_LogWrite(trace);
+        }
+#endif
         newEntry = DB_AllocXAssetEntry(asset.type, g_zoneIndex);
+#ifdef __SWITCH__
+        if (type == ASSET_TYPE_LOADED_SOUND)
+        {
+            char trace[192];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH LOADEDSOUND PATH] after alloc dest=%p entry=%p\n",
+                static_cast<void *>(newEntry->entry.asset.header.data),
+                static_cast<void *>(newEntry));
+            Switch_LogWrite(trace);
+        }
+#endif
         DB_CloneXAssetInternal(&asset, &newEntry->entry.asset);
     }
 
