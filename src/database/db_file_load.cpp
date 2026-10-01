@@ -66,6 +66,8 @@ const char *g_switchDbStage = "idle";
 extern int32_t g_switchCurrentAssetIndex;
 extern uint32_t g_switchCurrentAssetRawType;
 extern uint32_t g_switchCurrentAssetHeader;
+extern uint32_t g_switchPointerInsertCount;
+extern uint32_t g_switchPointerInsertExtraBytes;
 #endif
 
 
@@ -717,6 +719,22 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         varXAssetHeader = &varXAsset->header;
 
 #ifdef __SWITCH__
+        if (i >= 1190 && i <= 1210)
+        {
+            char trace[320];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH XASSET DISPATCH] before i=%d raw=%u runtime=%u header=%08x stream=%u pos=%p ptrins=%u extra=%u\n",
+                i,
+                serialized.type,
+                static_cast<unsigned>(varXAsset->type),
+                serialized.header,
+                static_cast<unsigned>(g_streamPosIndex),
+                static_cast<void *>(DB_GetStreamPos()),
+                g_switchPointerInsertCount,
+                g_switchPointerInsertExtraBytes);
+            Switch_LogWrite(trace);
+        }
         if (i >= 1224 && i <= 1226)
         {
             char trace[256];
@@ -745,6 +763,19 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 #endif
         Load_XAssetHeader(0);
 #ifdef __SWITCH__
+        if (i >= 1190 && i <= 1210)
+        {
+            char trace[256];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH XASSET DISPATCH] after i=%d stream=%u pos=%p ptrins=%u extra=%u\n",
+                i,
+                static_cast<unsigned>(g_streamPosIndex),
+                static_cast<void *>(DB_GetStreamPos()),
+                g_switchPointerInsertCount,
+                g_switchPointerInsertExtraBytes);
+            Switch_LogWrite(trace);
+        }
         if (i >= 1224 && i <= 1226)
         {
             char trace[160];
