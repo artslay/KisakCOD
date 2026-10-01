@@ -2893,8 +2893,45 @@ void __cdecl Load_SndAliasCustom(snd_alias_list_t **var)
 
 void __cdecl Load_snd_alias_list_name(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    const bool switchTraceWeapon1506 =
+        g_switchCurrentAssetIndex == 1506 &&
+        g_switchCurrentAssetRawType == 23u;
+    if (switchTraceWeapon1506)
+    {
+        char trace[224];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON1506] sound slot=%p raw_before=%08x\n",
+            static_cast<void *>(varsnd_alias_list_name),
+            static_cast<unsigned>(
+                *reinterpret_cast<const uint32_t *>(varsnd_alias_list_name)));
+        Switch_LogWrite(trace);
+    }
+#endif
     Load_Stream(atStreamStart, (uint8_t *)varsnd_alias_list_name, 4);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+    {
+        char trace[224];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON1506] sound slot=%p token=%08x ptr=%p\n",
+            static_cast<void *>(varsnd_alias_list_name),
+            static_cast<unsigned>(
+                static_cast<uint32_t>(
+                    reinterpret_cast<uintptr_t>(*varsnd_alias_list_name))),
+            static_cast<void *>(*varsnd_alias_list_name));
+        Switch_LogWrite(trace);
+    }
+#endif
     Load_SndAliasCustom(varsnd_alias_list_name);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] sound resolved\n");
+#endif
 }
 
 void __cdecl Load_snd_alias_list_nameArray(bool atStreamStart, int32_t count)
@@ -5684,6 +5721,24 @@ void __cdecl Load_XModelPtr(bool atStreamStart)
     const void **inserted; // [esp+0h] [ebp-Ch]
     uint32_t value; // [esp+4h] [ebp-8h]
 
+#ifdef __SWITCH__
+    const bool switchTraceWeapon1506 =
+        g_switchCurrentAssetIndex == 1506 &&
+        g_switchCurrentAssetRawType == 23u;
+    if (switchTraceWeapon1506)
+    {
+        char trace[224];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON1506] XModelPtr slot=%p raw=%08x\n",
+            static_cast<void *>(varXModelPtr),
+            static_cast<unsigned>(
+                *reinterpret_cast<const uint32_t *>(varXModelPtr)));
+        Switch_LogWrite(trace);
+    }
+#endif
+
     Load_Stream(atStreamStart, (uint8_t *)varXModelPtr, 4);
     DB_PushStreamPos(0);
     if (*varXModelPtr)
@@ -5707,6 +5762,10 @@ void __cdecl Load_XModelPtr(bool atStreamStart)
             else
                 inserted = 0;
             Load_XModel(1);
+#ifdef __SWITCH__
+            if (switchTraceWeapon1506)
+                Switch_LogWrite("[SWITCH WEAPON1506] XModelPtr inline payload done\n");
+#endif
             Load_XModelAsset((XAssetHeader *)varXModelPtr);
             if (inserted)
                 *inserted = *varXModelPtr;
@@ -8567,48 +8626,93 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
     iassert(atStreamStart);
     const uint8_t *weaponStreamEnd = DB_GetStreamPos();
     Switch_TranslateWeaponDefSerialized(varWeaponDef);
-    if (g_switchCurrentAssetRawType == 23u)
+    const bool switchTraceWeapon1506 =
+        g_switchCurrentAssetIndex == 1506 &&
+        g_switchCurrentAssetRawType == 23u;
+
+    if (switchTraceWeapon1506)
     {
-        char trace[224];
+        char trace[320];
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH XASSET TRACE] WeaponDef translated asset=%d native=%p size=%zu stream=%p\n",
-            g_switchCurrentAssetIndex,
+            "[SWITCH WEAPON1506] translated native=%p size=%zu stream=%p"
+            " internal_raw=%08x display_raw=%08x overlay_raw=%08x\n",
             static_cast<void *>(varWeaponDef),
             sizeof(*varWeaponDef),
-            static_cast<const void *>(weaponStreamEnd));
+            static_cast<const void *>(weaponStreamEnd),
+            static_cast<unsigned>(
+                static_cast<uint32_t>(
+                    reinterpret_cast<uintptr_t>(varWeaponDef->szInternalName))),
+            static_cast<unsigned>(
+                static_cast<uint32_t>(
+                    reinterpret_cast<uintptr_t>(varWeaponDef->szDisplayName))),
+            static_cast<unsigned>(
+                static_cast<uint32_t>(
+                    reinterpret_cast<uintptr_t>(varWeaponDef->szOverlayName))));
         Switch_LogWrite(trace);
     }
     DB_PushStreamPos(4);
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] begin nested fields\n");
 #else
     Load_Stream(atStreamStart, (uint8_t *)varWeaponDef, 2168);
     DB_PushStreamPos(4);
 #endif
     varXString = &varWeaponDef->szInternalName;
     Load_XString(0);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+    {
+        char trace[192];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH WEAPON1506] internalName=%p\n",
+            static_cast<const void *>(varWeaponDef->szInternalName));
+        Switch_LogWrite(trace);
+    }
+#endif
     varXString = &varWeaponDef->szDisplayName;
     Load_XString(0);
     varXString = &varWeaponDef->szOverlayName;
     Load_XString(0);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] core names done\n");
+#endif
     varXModelPtr = varWeaponDef->gunXModel;
     Load_XModelPtrArray(0, 16);
     varXModelPtr = &varWeaponDef->handXModel;
     Load_XModelPtr(0);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] xmodels done\n");
+#endif
     varXString = varWeaponDef->szXAnims;
     Load_XStringArray(0, 33);
     varXString = &varWeaponDef->szModeName;
     Load_XString(0);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] xanim strings done\n");
+#endif
     varScriptString = varWeaponDef->hideTags;
     Load_ScriptStringArray(0, 8);
     varScriptString = varWeaponDef->notetrackSoundMapKeys;
     Load_ScriptStringArray(0, 16);
     varScriptString = varWeaponDef->notetrackSoundMapValues;
     Load_ScriptStringArray(0, 16);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] script strings done\n");
+#endif
     varFxEffectDefHandle = &varWeaponDef->viewFlashEffect;
     Load_FxEffectDefHandle(0);
     varFxEffectDefHandle = &varWeaponDef->worldFlashEffect;
     Load_FxEffectDefHandle(0);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] flash FX done\n");
+#endif
     varsnd_alias_list_name = &varWeaponDef->pickupSound;
     Load_snd_alias_list_name(0);
     varsnd_alias_list_name = &varWeaponDef->pickupSoundPlayer;
@@ -8699,6 +8803,10 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
     Load_snd_alias_list_name(0);
     varsnd_alias_list_name = &varWeaponDef->putawaySoundPlayer;
     Load_snd_alias_list_name(0);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] primary sounds done\n");
+#endif
     if (varWeaponDef->bounceSound)
     {
         if (varWeaponDef->bounceSound == (snd_alias_list_t **)-1)
@@ -8720,10 +8828,18 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
     Load_FxEffectDefHandle(0);
     varFxEffectDefHandle = &varWeaponDef->worldLastShotEjectEffect;
     Load_FxEffectDefHandle(0);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] shell FX done\n");
+#endif
     varMaterialHandle = &varWeaponDef->reticleCenter;
     Load_MaterialHandle(0);
     varMaterialHandle = &varWeaponDef->reticleSide;
     Load_MaterialHandle(0);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] reticle materials done\n");
+#endif
     varXModelPtr = varWeaponDef->worldModel;
     Load_XModelPtrArray(0, 16);
     varXModelPtr = &varWeaponDef->worldClipModel;
@@ -8734,6 +8850,10 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
     Load_XModelPtr(0);
     varXModelPtr = &varWeaponDef->worldKnifeModel;
     Load_XModelPtr(0);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] world models done\n");
+#endif
     varMaterialHandle = &varWeaponDef->hudIcon;
     Load_MaterialHandle(0);
     varMaterialHandle = &varWeaponDef->ammoCounterIcon;
@@ -8752,6 +8872,10 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
     Load_MaterialHandle(0);
     varMaterialHandle = &varWeaponDef->dpadIcon;
     Load_MaterialHandle(0);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] HUD materials done\n");
+#endif
     varXString = &varWeaponDef->szAltWeaponName;
     Load_XString(0);
     varXModelPtr = &varWeaponDef->projectileModel;
@@ -8768,8 +8892,16 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
     Load_FxEffectDefHandle(0);
     varFxEffectDefHandle = &varWeaponDef->projIgnitionEffect;
     Load_FxEffectDefHandle(0);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] projectile FX done\n");
+#endif
     varsnd_alias_list_name = &varWeaponDef->projIgnitionSound;
     Load_snd_alias_list_name(0);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] projectile sounds done\n");
+#endif
     varXString = varWeaponDef->accuracyGraphName;
     Load_XString(0);
     if (varWeaponDef->accuracyGraphKnots[0])
@@ -8836,6 +8968,10 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
     Load_XString(0);
     varXString = &varWeaponDef->meleeImpactRumble;
     Load_XString(0);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] all fields done\n");
+#endif
     DB_PopStreamPos();
 }
 
