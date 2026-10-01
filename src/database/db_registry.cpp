@@ -1305,7 +1305,7 @@ void DB_Init()
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH DB INIT] DB_AddXAsset local ptr=%p\\n",
+            "[SWITCH DB INIT] DB_AddXAsset local ptr=%p\n",
             reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(g_switchDBAddXAsset)));
         Switch_LogWrite(trace);
     }
@@ -3224,12 +3224,12 @@ void __cdecl Load_FxImpactTableAsset(XAssetHeader *impactFx)
         g_switchCurrentAssetIndex == 1225;
 
     if (traceImpactFx)
-        Switch_LogWrite("[SWITCH IMPACTFX ASSET] enter\\n");
+        Switch_LogWrite("[SWITCH IMPACTFX ASSET] enter\n");
 
     if (!impactFx)
     {
         if (traceImpactFx)
-            Switch_LogWrite("[SWITCH IMPACTFX ASSET] null header\\n");
+            Switch_LogWrite("[SWITCH IMPACTFX ASSET] null header\n");
         return;
     }
 
@@ -3241,7 +3241,7 @@ void __cdecl Load_FxImpactTableAsset(XAssetHeader *impactFx)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH IMPACTFX ASSET] input=%p\\n",
+            "[SWITCH IMPACTFX ASSET] input=%p\n",
             static_cast<void *>(input.data));
         Switch_LogWrite(trace);
     }
@@ -3255,7 +3255,7 @@ void __cdecl Load_FxImpactTableAsset(XAssetHeader *impactFx)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH IMPACTFX ASSET] output=%p\\n",
+            "[SWITCH IMPACTFX ASSET] output=%p\n",
             static_cast<void *>(output.data));
         Switch_LogWrite(trace);
     }
