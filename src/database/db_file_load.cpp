@@ -765,6 +765,23 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             Switch_LogWrite(trace);
         }
 #endif
+#ifdef __SWITCH__
+        if (i == 1363)
+        {
+            char trace[256];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH IMAGE1363] array before header var=%p hdr=%p type=%u header=%08x stream=%u pos=%p\n",
+                static_cast<void *>(varXAsset),
+                static_cast<void *>(varXAssetHeader),
+                static_cast<unsigned>(varXAsset->type),
+                serialized.header,
+                static_cast<unsigned>(g_streamPosIndex),
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
+#endif
         Load_XAssetHeader(0);
 #ifdef __SWITCH__
         if (i >= 1190 && i <= 1210)
