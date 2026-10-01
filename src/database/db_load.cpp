@@ -8926,10 +8926,85 @@ void __cdecl Mark_FxImpactTablePtr()
     }
 }
 
+#ifdef __SWITCH__
+static constexpr uint16_t kSwitchWeaponDefPointerOffsets[] =
+{
+    0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 148, 152, 156, 160, 164, 168, 172, 176, 180, 184, 188, 192, 196, 200, 204, 208, 212, 332, 336, 340, 344, 348, 352, 356, 360, 364, 368, 372, 376, 380, 384, 388, 392, 396, 400, 404, 408, 412, 416, 420, 424, 428, 432, 436, 440, 444, 448, 452, 456, 460, 464, 468, 472, 476, 480, 484, 488, 492, 496, 500, 504, 508, 512, 516, 520, 524, 528, 532, 536, 540, 544, 700, 704, 708, 712, 716, 720, 724, 728, 732, 736, 740, 744, 748, 752, 756, 760, 764, 768, 772, 776, 780, 788, 804, 812, 832, 1072, 1076, 1304, 1316, 1340, 1412, 1420, 1428, 1432, 1436, 1704, 1732, 1736, 1900, 1904, 1908, 1912, 1916, 1920, 2012, 2016, 2036, 2152, 2156
+};
+
+static void Switch_TranslateWeaponDefSerialized(WeaponDef *weaponDef)
+{
+    constexpr size_t SERIALIZED_SIZE = 2168;
+    uint8_t serialized[SERIALIZED_SIZE];
+
+    iassert(weaponDef);
+    DB_LoadSwitchSerialized(serialized, SERIALIZED_SIZE);
+    std::memset(weaponDef, 0, sizeof(*weaponDef));
+
+    uint8_t *nativeBase = reinterpret_cast<uint8_t *>(weaponDef);
+    size_t src = 0;
+    size_t dst = 0;
+
+    for (uint16_t pointerOffset : kSwitchWeaponDefPointerOffsets)
+    {
+        iassert(pointerOffset >= src);
+        iassert(static_cast<size_t>(pointerOffset) + sizeof(uint32_t) <= SERIALIZED_SIZE);
+
+        const size_t scalarBytes =
+            static_cast<size_t>(pointerOffset) - src;
+        if (scalarBytes)
+        {
+            std::memcpy(nativeBase + dst, serialized + src, scalarBytes);
+            dst += scalarBytes;
+        }
+
+        dst = (dst + alignof(void *) - 1u) &
+              ~(static_cast<size_t>(alignof(void *)) - 1u);
+
+        uint32_t token = 0;
+        std::memcpy(&token, serialized + pointerOffset, sizeof(token));
+
+        const uintptr_t widenedToken = static_cast<uintptr_t>(token);
+        std::memcpy(nativeBase + dst, &widenedToken, sizeof(widenedToken));
+
+        src = static_cast<size_t>(pointerOffset) + sizeof(uint32_t);
+        dst += sizeof(widenedToken);
+    }
+
+    if (src < SERIALIZED_SIZE)
+    {
+        const size_t scalarBytes = SERIALIZED_SIZE - src;
+        std::memcpy(nativeBase + dst, serialized + src, scalarBytes);
+        dst += scalarBytes;
+    }
+
+    if (dst != sizeof(*weaponDef))
+    {
+        char trace[224];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XASSET TRACE] WeaponDef ABI mismatch serialized=%u expanded=%zu native=%zu asset=%d\n",
+            static_cast<unsigned>(SERIALIZED_SIZE),
+            dst,
+            sizeof(*weaponDef),
+            g_switchCurrentAssetIndex);
+        Switch_LogWrite(trace);
+        iassert(dst == sizeof(*weaponDef));
+    }
+}
+#endif
+
 void __cdecl Load_WeaponDef(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+    Switch_TranslateWeaponDefSerialized(varWeaponDef);
+    DB_PushStreamPos(4);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varWeaponDef, 2168);
     DB_PushStreamPos(4);
+#endif
     varXString = &varWeaponDef->szInternalName;
     Load_XString(0);
     varXString = &varWeaponDef->szDisplayName;
@@ -9196,7 +9271,16 @@ void __cdecl Load_WeaponDefPtr(bool atStreamStart)
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varWeaponDefPtr));
         if (value == -1 || value == -2)
         {
+#ifdef __SWITCH__
+            *varWeaponDefPtr = reinterpret_cast<WeaponDef *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(WeaponDef)),
+                    "SwitchWeaponDef",
+                    22));
+            std::memset(*varWeaponDefPtr, 0, sizeof(WeaponDef));
+#else
             *varWeaponDefPtr = (WeaponDef *)AllocLoad_FxElemVisStateSample();
+#endif
             varWeaponDef = *varWeaponDefPtr;
             if (value == -2)
                 inserted = DB_InsertPointer();
@@ -10779,21 +10863,6 @@ void __cdecl Load_XAssetHeader(bool atStreamStart)
         varMaterialTechniqueSetPtr = (MaterialTechniqueSet **)varXAssetHeader;
         Load_MaterialTechniqueSetPtr(atStreamStart);
         break;
-#ifdef __SWITCH__
-        if (g_switchCurrentAssetIndex == 1363)
-        {
-            char trace[256];
-            std::snprintf(
-                trace,
-                sizeof(trace),
-                "[SWITCH XASSET TRACE] IMAGE1363 header image case hdr=%p data=%p type=%u atStream=%u\n",
-                static_cast<void *>(varXAssetHeader),
-                varXAssetHeader ? static_cast<void *>(varXAssetHeader->data) : nullptr,
-                static_cast<unsigned>(varXAsset->type),
-                static_cast<unsigned>(atStreamStart));
-            Switch_LogWrite(trace);
-        }
-#endif
     case ASSET_TYPE_IMAGE:
         varGfxImagePtr = (GfxImage **)varXAssetHeader;
         Load_GfxImagePtr(atStreamStart);
