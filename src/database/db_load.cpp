@@ -3474,6 +3474,9 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
 
     DB_PushStreamPos(0);
 
+#ifdef __SWITCH__
+    
+#endif
 
     if (value)
     {
@@ -3493,6 +3496,9 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
 
             Load_GfxImage(1);
 
+#ifdef __SWITCH__
+            
+#endif
 
             // Keep the native pointer in a local variable.  Do not reload it
             // from the serialized/native slot after Load_GfxImage(), because
@@ -4430,6 +4436,63 @@ void __cdecl Load_MaterialTextureDefArray(bool atStreamStart, int32_t count)
     MaterialTextureDef *var = varMaterialTextureDef;
     int32_t i;
 
+#ifdef __SWITCH__
+    // The fastfile stores the entire MaterialTextureDef array contiguously,
+    // followed by the inline payloads referenced by its 32-bit pointer tokens.
+    // Therefore the serialized 12-byte records must all be consumed first;
+    // only after that may Load_MaterialTextureDefInfo() consume nested images.
+    struct SerializedMaterialTextureDef
+    {
+        uint32_t nameHash;
+        char nameStart;
+        char nameEnd;
+        uint8_t samplerState;
+        uint8_t semantic;
+        uint32_t info;
+    };
+    static_assert(sizeof(SerializedMaterialTextureDef) == 12);
+    static_assert(sizeof(MaterialTextureDef) == 16);
+
+    (void)atStreamStart;
+
+    // Phase 1: consume the contiguous serialized 12-byte array and expand each
+    // record into its native 16-byte ARM64 representation.
+    for (i = 0; i < count; ++i)
+    {
+        SerializedMaterialTextureDef serialized{};
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+        varMaterialTextureDef = &var[i];
+        varMaterialTextureDef->nameHash = serialized.nameHash;
+        varMaterialTextureDef->nameStart = serialized.nameStart;
+        varMaterialTextureDef->nameEnd = serialized.nameEnd;
+        varMaterialTextureDef->samplerState = serialized.samplerState;
+        varMaterialTextureDef->semantic = serialized.semantic;
+        varMaterialTextureDef->u.image =
+            reinterpret_cast<GfxImage *>(
+                static_cast<uintptr_t>(serialized.info));
+    }
+
+    // Phase 2: resolve nested image/water pointers. Inline payloads are located
+    // after the complete serialized array, matching the original 32-bit loader.
+    for (i = 0; i < count; ++i)
+    {
+        varMaterialTextureDef = &var[i];
+        varMaterialTextureDefInfo =
+            reinterpret_cast<water_t **>(&varMaterialTextureDef->u);
+        Load_MaterialTextureDefInfo(0);
+
+        
+    }
+#else
+    Load_Stream(atStreamStart, (uint8_t *)var, 12 * count);
+    for (i = 0; i < count; ++i)
+    {
+        varMaterialTextureDef = var;
+        Load_MaterialTextureDef(0);
+        ++var;
+    }
+#endif
 }
 
 void __cdecl Load_MaterialConstantDefArray(bool atStreamStart, int32_t count)
@@ -5696,8 +5759,7 @@ static void Switch_TranslateXModelSerialized(XModel *model)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH XASSET TRACE] XModel ABI mismatch serialized=%u expanded=%zu native=%zu asset=%d
-",
+            "[SWITCH XASSET TRACE] XModel ABI mismatch serialized=%u expanded=%zu native=%zu asset=%d\n",
             static_cast<unsigned>(SERIALIZED_SIZE),
             dst,
             sizeof(*model),
@@ -5706,6 +5768,7 @@ static void Switch_TranslateXModelSerialized(XModel *model)
         iassert(dst == sizeof(*model));
     }
 }
+static_assert(sizeof(XModel) == 280);
 #endif
 
 void __cdecl Load_XModel(bool atStreamStart)
@@ -6374,19 +6437,51 @@ void __cdecl Load_FxEffectDefHandle(bool atStreamStart)
         reinterpret_cast<uintptr_t>(*varFxEffectDefHandle));
 #endif
 
+#ifdef __SWITCH__
+    
+#endif
 
     DB_PushStreamPos(0);
     if (value)
     {
         if (value == -1 || value == -2)
         {
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1224)
+                Switch_LogWrite("[SWITCH XASSET TRACE] fx top before alloc\n");
+            *varFxEffectDefHandle = reinterpret_cast<const FxEffectDef *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(FxEffectDef)),
+                    "SwitchFxEffectDef",
+                    22));
+            std::memset(
+                const_cast<FxEffectDef *>(*varFxEffectDefHandle),
+                0,
+                sizeof(FxEffectDef));
+            
+#else
+            *varFxEffectDefHandle =
+                (const FxEffectDef *)AllocLoad_FxElemVisStateSample();
+#endif
             varFxEffectDef = (FxEffectDef *)*varFxEffectDefHandle;
             if (value == -2)
                 inserted = DB_InsertPointer();
             else
                 inserted = 0;
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1224)
+                Switch_LogWrite("[SWITCH XASSET TRACE] fx top before payload\n");
+#endif
             Load_FxEffectDef(1);
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1224)
+                Switch_LogWrite("[SWITCH XASSET TRACE] fx top after payload\n");
+#endif
             Load_FxEffectDefAsset((XAssetHeader *)varFxEffectDefHandle);
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1224)
+                Switch_LogWrite("[SWITCH XASSET TRACE] fx top after add\n");
+#endif
             if (inserted)
                 *inserted = *varFxEffectDefHandle;
         }
@@ -6593,6 +6688,9 @@ void __cdecl Load_FxElemDef(bool atStreamStart)
         SerializedFxElemDef serialized{};
         DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
+#ifdef __SWITCH__
+        
+#endif
 
         std::memset(varFxElemDef, 0, sizeof(FxElemDef));
 
@@ -6826,9 +6924,20 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
 
         SerializedFxEffectDef serialized{};
         DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+#ifdef __SWITCH__
+        
+#endif
         DB_IncStreamPos(sizeof(serialized));
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1224)
+            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after inc\n");
+#endif
 
         std::memset(varFxEffectDef, 0, sizeof(FxEffectDef));
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1224)
+            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after memset\n");
+#endif
 
         varFxEffectDef->name = reinterpret_cast<const char *>(
             static_cast<uintptr_t>(serialized.name));
@@ -6840,13 +6949,28 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
         varFxEffectDef->elemDefCountEmission = serialized.elemDefCountEmission;
         varFxEffectDef->elemDefs = reinterpret_cast<const FxElemDef *>(
             static_cast<uintptr_t>(serialized.elemDefs));
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1224)
+            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload fields mapped\n");
+#endif
 
         DB_PushStreamPos(4);
+#ifdef __SWITCH__
+        
+#endif
         varXString = &varFxEffectDef->name;
         Load_XString(0);
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1224)
+            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after name\n");
+#endif
 
         if (serialized.elemDefs)
         {
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1224)
+                Switch_LogWrite("[SWITCH XASSET TRACE] fx payload before elem alloc\n");
+#endif
             varFxEffectDef->elemDefs =
                 (const FxElemDef *)Hunk_Alloc(
                     static_cast<uint32_t>(
@@ -6864,14 +6988,25 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
                     (varFxEffectDef->elemDefCountEmission +
                      varFxEffectDef->elemDefCountOneShot +
                      varFxEffectDef->elemDefCountLooping));
+#ifdef __SWITCH__
+            
+#endif
             Load_FxElemDefArray(
                 1,
                 varFxEffectDef->elemDefCountEmission +
                     varFxEffectDef->elemDefCountOneShot +
                     varFxEffectDef->elemDefCountLooping);
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1224)
+                Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after elem array\n");
+#endif
         }
 
         DB_PopStreamPos();
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1224)
+            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after pop\n");
+#endif
         return;
     }
 #endif
@@ -8384,6 +8519,33 @@ void __cdecl Mark_LocalizeEntryPtr()
 
 void __cdecl Load_FxImpactEntry(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        uint32_t serializedHandles[33]{};
+        DB_LoadSwitchSerialized(serializedHandles, sizeof(serializedHandles));
+
+        std::memset(varFxImpactEntry, 0, sizeof(FxImpactEntry));
+
+        const FxEffectDef **handles =
+            reinterpret_cast<const FxEffectDef **>(varFxImpactEntry);
+        for (int32_t i = 0; i < 33; ++i)
+        {
+            handles[i] = reinterpret_cast<const FxEffectDef *>(
+                static_cast<uintptr_t>(serializedHandles[i]));
+        }
+
+        
+
+        varFxEffectDefHandle = handles;
+        for (int32_t i = 0; i < 33; ++i)
+        {
+            varFxEffectDefHandle = handles + i;
+            Load_FxEffectDefHandle(0);
+        }
+        return;
+    }
+#endif
 
     Load_Stream(atStreamStart, (uint8_t *)varFxImpactEntry, 132);
     varFxEffectDefHandle = (const FxEffectDef **)varFxImpactEntry;
@@ -8446,12 +8608,18 @@ void __cdecl Load_FxImpactTable(bool atStreamStart)
         varFxImpactTable->table = reinterpret_cast<FxImpactEntry *>(
             static_cast<uintptr_t>(serializedTable));
 
+#ifdef __SWITCH__
+        
+#endif
 
         DB_PushStreamPos(4);
 
         varXString = &varFxImpactTable->name;
         Load_XString(0);
 
+#ifdef __SWITCH__
+        
+#endif
 
         if (serializedTable)
         {
@@ -8467,13 +8635,29 @@ void __cdecl Load_FxImpactTable(bool atStreamStart)
                 sizeof(FxImpactEntry) * 12u);
             varFxImpactEntry = varFxImpactTable->table;
 
+#ifdef __SWITCH__
+            
+#endif
 
             Load_FxImpactEntryArray(1, 12);
         }
 
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1225)
+        {
+            extern bool g_switchTraceNextStreamPop;
+            Switch_LogWrite("[SWITCH XASSET TRACE] impact table load entries done\n");
+            Switch_LogWrite("[SWITCH XASSET TRACE] impact table before inner pop\n");
+            g_switchTraceNextStreamPop = true;
+        }
+#endif
 
         DB_PopStreamPos();
 
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1225)
+            Switch_LogWrite("[SWITCH XASSET TRACE] impact table after inner pop\n");
+#endif
         return;
     }
 #endif
@@ -8519,7 +8703,40 @@ void __cdecl Load_FxImpactTablePtr(bool atStreamStart)
                 inserted = DB_InsertPointer();
             else
                 inserted = 0;
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1225)
+                Switch_LogWrite("[SWITCH XASSET TRACE] impact ptr before table load\n");
+#endif
             Load_FxImpactTable(1);
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1225)
+                Switch_LogWrite("[SWITCH XASSET TRACE] impact ptr after table load\n");
+            if (g_switchCurrentAssetIndex == 1225)
+                Switch_LogWrite("[SWITCH XASSET TRACE] impact ptr before direct asset add\n");
+
+            XAssetHeader impactHeader;
+            impactHeader.data = *varFxImpactTablePtr;
+
+            
+
+            if (!g_switchDBAddXAsset)
+            {
+                Switch_LogWrite("[SWITCH XASSET TRACE] DB_AddXAsset runtime ptr is null\n");
+                return;
+            }
+
+            XAssetHeader addedHeader =
+                g_switchDBAddXAsset(
+                    ASSET_TYPE_IMPACT_FX,
+                    impactHeader);
+
+            *varFxImpactTablePtr =
+                reinterpret_cast<FxImpactTable *>(addedHeader.data);
+
+            
+#else
+            Load_FxImpactTableAsset((XAssetHeader *)varFxImpactTablePtr);
+#endif
             if (inserted)
                 *inserted = *varFxImpactTablePtr;
         }
@@ -8528,7 +8745,19 @@ void __cdecl Load_FxImpactTablePtr(bool atStreamStart)
             DB_ConvertOffsetToAlias((uint32_t *)varFxImpactTablePtr);
         }
     }
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex == 1225)
+    {
+        extern bool g_switchTraceNextStreamPop;
+        Switch_LogWrite("[SWITCH XASSET TRACE] impact ptr before outer pop\n");
+        g_switchTraceNextStreamPop = true;
+    }
+#endif
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex == 1225)
+        Switch_LogWrite("[SWITCH XASSET TRACE] impact ptr after outer pop\n");
+#endif
 }
 
 void __cdecl Mark_FxImpactEntry()
