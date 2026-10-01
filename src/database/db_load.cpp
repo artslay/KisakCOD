@@ -6177,7 +6177,7 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH XASSET TRACE] fx payload name=%08x flags=%d total=%d loopLife=%d loop=%d one=%d emit=%d elemDefs=%08x stream=%u pos=%p\\n",
+                "[SWITCH XASSET TRACE] fx payload name=%08x flags=%d total=%d loopLife=%d loop=%d one=%d emit=%d elemDefs=%08x stream=%u pos=%p\n",
                 serialized.name,
                 serialized.flags,
                 serialized.totalSize,
@@ -6194,13 +6194,13 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
         DB_IncStreamPos(sizeof(serialized));
 #ifdef __SWITCH__
         if (g_switchCurrentAssetIndex == 1224)
-            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after inc\\n");
+            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after inc\n");
 #endif
 
         std::memset(varFxEffectDef, 0, sizeof(FxEffectDef));
 #ifdef __SWITCH__
         if (g_switchCurrentAssetIndex == 1224)
-            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after memset\\n");
+            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after memset\n");
 #endif
 
         varFxEffectDef->name = reinterpret_cast<const char *>(
@@ -6215,7 +6215,7 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
             static_cast<uintptr_t>(serialized.elemDefs));
 #ifdef __SWITCH__
         if (g_switchCurrentAssetIndex == 1224)
-            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload fields mapped\\n");
+            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload fields mapped\n");
 #endif
 
         DB_PushStreamPos(4);
@@ -6226,7 +6226,7 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH XASSET TRACE] fx payload before name token=%08x stream=%u pos=%p\\n",
+                "[SWITCH XASSET TRACE] fx payload before name token=%08x stream=%u pos=%p\n",
                 serialized.name,
                 (unsigned)g_streamPosIndex,
                 static_cast<void *>(DB_GetStreamPos()));
@@ -6237,14 +6237,14 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
         Load_XString(0);
 #ifdef __SWITCH__
         if (g_switchCurrentAssetIndex == 1224)
-            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after name\\n");
+            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after name\n");
 #endif
 
         if (serialized.elemDefs)
         {
 #ifdef __SWITCH__
             if (g_switchCurrentAssetIndex == 1224)
-                Switch_LogWrite("[SWITCH XASSET TRACE] fx payload before elem alloc\\n");
+                Switch_LogWrite("[SWITCH XASSET TRACE] fx payload before elem alloc\n");
 #endif
             varFxEffectDef->elemDefs =
                 (const FxElemDef *)AllocLoad_FxElemVisStateSample();
@@ -6256,7 +6256,7 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
                 std::snprintf(
                     trace,
                     sizeof(trace),
-                    "[SWITCH XASSET TRACE] fx payload elem count=%d ptr=%p\\n",
+                    "[SWITCH XASSET TRACE] fx payload elem count=%d ptr=%p\n",
                     varFxEffectDef->elemDefCountEmission +
                         varFxEffectDef->elemDefCountOneShot +
                         varFxEffectDef->elemDefCountLooping,
@@ -6271,14 +6271,14 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
                     varFxEffectDef->elemDefCountLooping);
 #ifdef __SWITCH__
             if (g_switchCurrentAssetIndex == 1224)
-                Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after elem array\\n");
+                Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after elem array\n");
 #endif
         }
 
         DB_PopStreamPos();
 #ifdef __SWITCH__
         if (g_switchCurrentAssetIndex == 1224)
-            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after pop\\n");
+            Switch_LogWrite("[SWITCH XASSET TRACE] fx payload after pop\n");
 #endif
         return;
     }
