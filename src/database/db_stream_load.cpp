@@ -134,6 +134,11 @@ void __cdecl DB_ConvertOffsetToPointer(void *data)
 
 void __cdecl DB_LoadSwitchSerialized(void *dst, uint32_t size)
 {
+#ifdef __SWITCH__
+    iassert(dst);
+    iassert(size);
+
+    uint8_t *streamPos = DB_GetStreamPos();
     DB_LoadXFileData(streamPos, size);
     std::memcpy(dst, streamPos, size);
     DB_IncStreamPos(static_cast<int32_t>(size));
