@@ -158,21 +158,6 @@ void __cdecl DB_LoadXFileData(uint8_t *pos, uint32_t size)
     iassert(g_load.f);
     iassert(!g_load.stream.avail_out);
 
-#ifdef __SWITCH__
-    bool switchProbeTarget = false;
-    uintptr_t switchProbeTargetPtr = 0;
-    if (g_load.zoneMem && g_load.zoneMem->blocks[4].data &&
-        g_load.zoneMem->blocks[4].size > 0x2b0ac)
-    {
-        switchProbeTargetPtr =
-            reinterpret_cast<uintptr_t>(g_load.zoneMem->blocks[4].data) +
-            0x2b0ac;
-        const uintptr_t dstStart = reinterpret_cast<uintptr_t>(pos);
-        const uintptr_t dstEnd = dstStart + static_cast<uintptr_t>(size);
-        switchProbeTarget = dstStart <= switchProbeTargetPtr &&
-                            switchProbeTargetPtr < dstEnd;
-    }
-#endif
 
     g_load.stream.next_out = pos;
     g_load.stream.avail_out = size;
@@ -211,42 +196,6 @@ void __cdecl DB_LoadXFileData(uint8_t *pos, uint32_t size)
         DB_ReadXFileStage();
     }
 
-#ifdef __SWITCH__
-    if (switchProbeTarget)
-    {
-        const uint8_t *probe =
-            reinterpret_cast<const uint8_t *>(switchProbeTargetPtr);
-        char trace[384];
-        int written = std::snprintf(
-            trace,
-            sizeof(trace),
-            "[SWITCH XASSET TRACE] block4 target fill asset=%d rawType=%u header=%08x stream=%u request=%p size=%u target=%p off=%08x cursor=%p array0=%p array4=%p bytes=",
-            g_switchCurrentAssetIndex,
-            static_cast<unsigned>(g_switchCurrentAssetRawType),
-            static_cast<unsigned>(g_switchCurrentAssetHeader),
-            static_cast<unsigned>(g_streamPosIndex),
-            static_cast<void *>(pos),
-            size,
-            reinterpret_cast<void *>(switchProbeTargetPtr),
-            0x2b0ac,
-            static_cast<void *>(g_streamPos),
-            static_cast<void *>(g_streamPosArray[0]),
-            static_cast<void *>(g_streamPosArray[4]));
-        for (int i = 0; i < 24 && written < static_cast<int>(sizeof(trace)); ++i)
-        {
-            written += std::snprintf(
-                trace + written,
-                sizeof(trace) - static_cast<size_t>(written),
-                "%02x",
-                static_cast<unsigned>(probe[i]));
-        }
-        std::snprintf(
-            trace + written,
-            sizeof(trace) - static_cast<size_t>(written),
-            "\n");
-        Switch_LogWrite(trace);
-    }
-#endif
 }
 
 void DB_ReadXFileStage()
@@ -649,44 +598,6 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             serializedSize);
         DB_IncStreamPos(static_cast<int32_t>(serializedSize));
 
-#ifdef __SWITCH__
-        for (int32_t traceIndex = 1200;
-             traceIndex <= 1240 && traceIndex < count;
-             ++traceIndex)
-        {
-            char trace[160];
-            const SerializedXAsset &traceAsset =
-                serializedAssets[static_cast<size_t>(traceIndex)];
-            std::snprintf(
-                trace,
-                sizeof(trace),
-                "[SWITCH XASSET RAW] %d type=%u header=%08x runtime=%u\n",
-                traceIndex,
-                traceAsset.type,
-                traceAsset.header,
-                traceAsset.type >= 5 ? traceAsset.type + 1 : traceAsset.type);
-            Switch_LogWrite(trace);
-        }
-#endif
-#ifdef __SWITCH__
-        for (int32_t traceIndex = 1358;
-             traceIndex <= 1366 && traceIndex < count;
-             ++traceIndex)
-        {
-            const SerializedXAsset &traceAsset =
-                serializedAssets[static_cast<size_t>(traceIndex)];
-            char trace[160];
-            std::snprintf(
-                trace,
-                sizeof(trace),
-                "[SWITCH XASSET TRACE] RAW1358-1366 i=%d type=%u header=%08x runtime=%u\\n",
-                traceIndex,
-                traceAsset.type,
-                traceAsset.header,
-                traceAsset.type >= 5 ? traceAsset.type + 1 : traceAsset.type);
-            Switch_LogWrite(trace);
-        }
-#endif
     }
 
     XAsset *var = varXAsset;
@@ -737,137 +648,7 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
 
-#ifdef __SWITCH__
-        if (i >= 1190 && i <= 1210)
-        {
-            char trace[320];
-            std::snprintf(
-                trace, sizeof(trace),
-                "[SWITCH XASSET DISPATCH] before i=%d raw=%u runtime=%u header=%08x stream=%u pos=%p ptrins=%u extra=%u\n",
-                i,
-                serialized.type,
-                static_cast<unsigned>(varXAsset->type),
-                serialized.header,
-                static_cast<unsigned>(g_streamPosIndex),
-                static_cast<void *>(DB_GetStreamPos()),
-                g_switchPointerInsertCount,
-                g_switchPointerInsertExtraBytes);
-            Switch_LogWrite(trace);
-        }
-        if (i >= 1224 && i <= 1226)
-        {
-            char trace[256];
-            std::snprintf(
-                trace, sizeof(trace),
-                "[SWITCH XASSET DISPATCH] before i=%d var=%p type=%u header=%08x\n",
-                i,
-                static_cast<void *>(varXAsset),
-                static_cast<unsigned>(varXAsset->type),
-                serialized.header);
-            Switch_LogWrite(trace);
-        }
-        if (i >= 1208 && i <= 1218)
-        {
-            char trace[192];
-            std::snprintf(
-                trace,
-                sizeof(trace),
-                "[SWITCH XASSET TRACE] i=%d rawType=%u runtimeType=%u header=%08x before stream=%u pos=%p ptrins=%u extra=%u\n",
-                i,
-                serialized.type,
-                static_cast<unsigned>(varXAsset->type),
-                serialized.header,
-                static_cast<unsigned>(g_streamPosIndex),
-                static_cast<void *>(DB_GetStreamPos()),
-                g_switchPointerInsertCount,
-                g_switchPointerInsertExtraBytes);
-            Switch_LogWrite(trace);
-        }
-#endif
-#ifdef __SWITCH__
-        if (i == 1363)
-        {
-            char trace[256];
-            std::snprintf(
-                trace,
-                sizeof(trace),
-                "[SWITCH XASSET TRACE] IMAGE1363 array before header var=%p hdr=%p type=%u header=%08x stream=%u pos=%p\n",
-                static_cast<void *>(varXAsset),
-                static_cast<void *>(varXAssetHeader),
-                static_cast<unsigned>(varXAsset->type),
-                serialized.header,
-                static_cast<unsigned>(g_streamPosIndex),
-                static_cast<void *>(DB_GetStreamPos()));
-            Switch_LogWrite(trace);
-        }
-#endif
-#ifdef __SWITCH__
-        if (i == 1363)
-        {
-            char trace[256];
-            std::snprintf(
-                trace,
-                sizeof(trace),
-                "[SWITCH XASSET TRACE] IMAGE1363 dispatch before var=%p hdr=%p type=%u header=%08x stream=%u pos=%p\\n",
-                static_cast<void *>(varXAsset),
-                static_cast<void *>(varXAssetHeader),
-                static_cast<unsigned>(varXAsset->type),
-                serialized.header,
-                static_cast<unsigned>(g_streamPosIndex),
-                static_cast<void *>(DB_GetStreamPos()));
-            Switch_LogWrite(trace);
-        }
-#endif
         Load_XAssetHeader(0);
-#ifdef __SWITCH__
-        if (i == 1363)
-        {
-            char trace[192];
-            std::snprintf(
-                trace,
-                sizeof(trace),
-                "[SWITCH XASSET TRACE] IMAGE1363 dispatch after stream=%u pos=%p\\n",
-                static_cast<unsigned>(g_streamPosIndex),
-                static_cast<void *>(DB_GetStreamPos()));
-            Switch_LogWrite(trace);
-        }
-        if (i >= 1190 && i <= 1210)
-        {
-            char trace[256];
-            std::snprintf(
-                trace, sizeof(trace),
-                "[SWITCH XASSET DISPATCH] after i=%d stream=%u pos=%p ptrins=%u extra=%u\n",
-                i,
-                static_cast<unsigned>(g_streamPosIndex),
-                static_cast<void *>(DB_GetStreamPos()),
-                g_switchPointerInsertCount,
-                g_switchPointerInsertExtraBytes);
-            Switch_LogWrite(trace);
-        }
-        if (i >= 1224 && i <= 1226)
-        {
-            char trace[160];
-            std::snprintf(
-                trace, sizeof(trace),
-                "[SWITCH XASSET DISPATCH] after i=%d\n",
-                i);
-            Switch_LogWrite(trace);
-        }
-        if (i >= 1208 && i <= 1218)
-        {
-            char trace[128];
-            std::snprintf(
-                trace,
-                sizeof(trace),
-                "[SWITCH XASSET TRACE] i=%d after stream=%u pos=%p ptrins=%u extra=%u\n",
-                i,
-                static_cast<unsigned>(g_streamPosIndex),
-                static_cast<void *>(DB_GetStreamPos()),
-                g_switchPointerInsertCount,
-                g_switchPointerInsertExtraBytes);
-            Switch_LogWrite(trace);
-        }
-#endif
 
         ++var;
     }
