@@ -24,6 +24,75 @@ static int g_switchLogFd = -1;
 static const char *const kSwitchLogPath = "sdmc:/switch/KisakCOD/kisakcod.log";
 static bool g_switchScreenLog = false;
 
+/*
+ * libnx enters this handler on its dedicated exception stack after capturing
+ * the faulting CPU context. Keep the stack deliberately larger than libnx's
+ * 0x400-byte default because the diagnostic formatter uses a little stack.
+ */
+extern "C" {
+alignas(16) uint8_t __nx_exception_stack[0x4000];
+uint64_t __nx_exception_stack_size = sizeof(__nx_exception_stack);
+}
+
+static void Switch_LogCrashLine(const char *line)
+{
+    Switch_LogWrite(line);
+}
+
+extern "C" void __libnx_exception_handler(ThreadExceptionDump *ctx)
+{
+    if (!ctx)
+    {
+        Switch_LogCrashLine("[KisakCOD][CRASH] exception context is null\\n");
+        return;
+    }
+
+    char line[256];
+
+    std::snprintf(
+        line,
+        sizeof(line),
+        "========================================\\n"
+        "[KisakCOD][CRASH] libnx user exception\\n"
+        "[KisakCOD][CRASH] error_desc=0x%08x\\n"
+        "[KisakCOD][CRASH] pc=0x%016llx lr=0x%016llx\\n"
+        "[KisakCOD][CRASH] sp=0x%016llx fp=0x%016llx far=0x%016llx\\n"
+        "[KisakCOD][CRASH] pstate=0x%08x esr=0x%08x ec=0x%02x\\n",
+        ctx->error_desc,
+        static_cast<unsigned long long>(ctx->pc.x),
+        static_cast<unsigned long long>(ctx->lr.x),
+        static_cast<unsigned long long>(ctx->sp.x),
+        static_cast<unsigned long long>(ctx->fp.x),
+        static_cast<unsigned long long>(ctx->far.x),
+        ctx->pstate,
+        ctx->esr,
+        (ctx->esr >> 26) & 0x3f);
+    Switch_LogCrashLine(line);
+
+    for (int i = 0; i < 29; ++i)
+    {
+        std::snprintf(
+            line,
+            sizeof(line),
+            "[KisakCOD][CRASH] x%-2d=0x%016llx x%-2d=0x%016llx\\n",
+            i,
+            static_cast<unsigned long long>(ctx->cpu_gprs[i].x),
+            i + 1,
+            i + 1 < 29
+                ? static_cast<unsigned long long>(ctx->cpu_gprs[i + 1].x)
+                : 0ull);
+        Switch_LogCrashLine(line);
+        ++i;
+    }
+
+    Switch_LogCrashLine("[KisakCOD][CRASH] ========================================\\n");
+
+    if (g_switchLogFd >= 0)
+        (void)::fsync(g_switchLogFd);
+
+    appletRequestExitToSelf();
+}
+
 void Switch_LogWrite(const char *msg)
 {
     if (!msg || !*msg)
