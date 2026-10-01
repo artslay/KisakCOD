@@ -4218,11 +4218,7 @@ void __cdecl Load_MaterialTextureDefInfo(bool atStreamStart)
     {
         varGfxImagePtr = (GfxImage **)varMaterialTextureDefInfo;
         Load_GfxImagePtr(atStreamStart);
-#ifdef __SWITCH__
-        if (g_switchTextureReturnTraceCount < 24)
-            Switch_LogWrite("[SWITCH TEXRETURN] texturedef info returned\n");
-#endif
-    }
+}
 }
 
 void __cdecl Load_MaterialTextureDef(bool atStreamStart)
@@ -5083,35 +5079,15 @@ void __cdecl Load_GfxLightDef(bool atStreamStart)
             serialized.lmapLookupStart;
 
         const bool trace = g_switchCurrentAssetIndex == 1226;
-        if (trace)
-        {
-            char t[224];
-            std::snprintf(
-                t,
-                sizeof(t),
-                "[SWITCH LIGHTDEF] serialized name=%08x image=%08x sampler=%08x lmap=%d obj=%p\n",
-                serialized.name,
-                serialized.attenuationImage,
-                serialized.attenuationSamplerState,
-                serialized.lmapLookupStart,
-                static_cast<void *>(varGfxLightDef));
-            Switch_LogWrite(t);
-        }
 
         DB_PushStreamPos(4);
         varXString = &varGfxLightDef->name;
         Load_XString(0);
-        if (trace)
-            Switch_LogWrite("[SWITCH LIGHTDEF] name done\n");
 
         varGfxImagePtr = &varGfxLightDef->attenuation.image;
         Load_GfxImagePtr(0);
-        if (trace)
-            Switch_LogWrite("[SWITCH LIGHTDEF] attenuation image done\n");
 
         DB_PopStreamPos();
-        if (trace)
-            Switch_LogWrite("[SWITCH LIGHTDEF] load done\n");
         return;
     }
 #endif
@@ -8408,11 +8384,7 @@ void __cdecl Load_FxImpactTable(bool atStreamStart)
 
         DB_PopStreamPos();
 
-#ifdef __SWITCH__
-        if (g_switchCurrentAssetIndex == 1225)
-            Switch_LogWrite("[SWITCH XASSET TRACE] impact table after inner pop\n");
-#endif
-        return;
+return;
     }
 #endif
 
@@ -8490,14 +8462,7 @@ void __cdecl Load_FxImpactTablePtr(bool atStreamStart)
             DB_ConvertOffsetToAlias((uint32_t *)varFxImpactTablePtr);
         }
     }
-#ifdef __SWITCH__
-    if (g_switchCurrentAssetIndex == 1225)
-    {
-        extern bool g_switchTraceNextStreamPop;
-        g_switchTraceNextStreamPop = true;
-    }
-#endif
-    DB_PopStreamPos();
+DB_PopStreamPos();
 }
 
 void __cdecl Mark_FxImpactEntry()
