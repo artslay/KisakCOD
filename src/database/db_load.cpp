@@ -7982,6 +7982,74 @@ void __cdecl Load_expressionEntry_ptr(bool atStreamStart)
     }
 }
 
+#ifdef __SWITCH__
+static void Switch_LoadExpressionEntryPtrArray(
+    expressionEntry **dst,
+    int32_t count)
+{
+    if (!dst || count <= 0)
+        return;
+
+    // The pointer array is serialized as 32-bit values, even on ARM64.
+    // Keep the original stream-3 alignment before loading inline entries.
+    DB_AllocStreamPos(3);
+
+    const size_t serializedSize =
+        sizeof(uint32_t) * static_cast<size_t>(count);
+
+    std::vector<uint32_t> serializedPointers(
+        static_cast<size_t>(count));
+    DB_LoadSwitchSerialized(
+        serializedPointers.data(),
+        serializedSize);
+
+    for (int32_t i = 0; i < count; ++i)
+    {
+        const uint32_t token =
+            serializedPointers[static_cast<size_t>(i)];
+
+        dst[i] = nullptr;
+
+        if (!token)
+            continue;
+
+        if (token == UINT32_MAX || token == UINT32_MAX - 1)
+        {
+            DB_AllocStreamPos(3);
+
+            expressionEntry *entry =
+                reinterpret_cast<expressionEntry *>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(sizeof(expressionEntry)),
+                        "SwitchExpressionEntry",
+                        22));
+
+            std::memset(
+                entry,
+                0,
+                sizeof(expressionEntry));
+
+            const void **inserted = nullptr;
+            if (token == UINT32_MAX - 1)
+                inserted = DB_InsertPointer();
+
+            dst[i] = entry;
+            varexpressionEntry = entry;
+            Switch_TranslateExpressionEntrySerialized(entry);
+
+            if (inserted)
+                *inserted = dst[i];
+        }
+        else
+        {
+            dst[i] =
+                reinterpret_cast<expressionEntry *>(
+                    DB_ConvertOffsetToPointerValue(token));
+        }
+    }
+}
+#endif
+
 void __cdecl Load_expressionEntry_ptrArray(bool atStreamStart, int32_t count)
 {
 #ifdef __SWITCH__
