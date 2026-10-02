@@ -5975,6 +5975,28 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
     }
 #endif
 
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 5u &&
+        g_switchCurrentAssetIndex >= 1501 &&
+        g_switchCurrentAssetIndex <= 1502)
+    {
+        char trace[384];
+        const char *resolvedName = varMaterialTechniqueSet->name;
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH DB FIND] techset after header asset=%d nameToken=%08x namePtr=%p nameText=%s remap=%08x stream=%u pos=%p\n",
+            g_switchCurrentAssetIndex,
+            serialized.name,
+            static_cast<const void *>(resolvedName),
+            resolvedName ? resolvedName : "<null>",
+            serialized.remappedTechniqueSet,
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+#endif
+
     for (int i = 0; i < 34; ++i)
     {
         const uint32_t value = serialized.techniques[i];
