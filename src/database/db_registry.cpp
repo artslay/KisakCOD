@@ -1415,7 +1415,15 @@ void __cdecl  DB_Thread(uint32_t threadContext)
     if (setjmp(*Value))
     {
         Profile_Recover(1);
-        Com_ErrorAbort();
+#ifdef __SWITCH__
+        char errorTrace[4352];
+        std::snprintf(
+            errorTrace,
+            sizeof(errorTrace),
+            "[KisakCOD][DB FATAL] %s\\n",
+            com_errorMessage);
+        Switch_LogWrite(errorTrace);
+#endif
 #ifdef __llvm__ 
         __builtin_debugtrap();
 #else
