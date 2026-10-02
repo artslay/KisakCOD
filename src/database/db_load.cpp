@@ -6030,6 +6030,62 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
 
             Load_MaterialTechnique(1);
 
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetRawType == 5u &&
+                g_switchCurrentAssetIndex == 1502 &&
+                i < 4)
+            {
+                const uintptr_t techStart =
+                    reinterpret_cast<uintptr_t>(DB_GetStreamPos());
+                char trace[512];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH TECHSET 1502] technique[%d] sentinel=%08x name=%p passes=%u after=%p\\n",
+                    i,
+                    value,
+                    static_cast<const void *>(varMaterialTechnique->name),
+                    static_cast<unsigned>(varMaterialTechnique->passCount),
+                    reinterpret_cast<void *>(techStart));
+                Switch_LogWrite(trace);
+
+                const uintptr_t namePtr =
+                    reinterpret_cast<uintptr_t>(
+                        DB_ConvertOffsetToPointerValue(
+                            serialized.name));
+                const uint8_t *nameBytes =
+                    reinterpret_cast<const uint8_t *>(namePtr);
+                char ascii[33];
+                for (size_t j = 0; j < 32; ++j)
+                {
+                    const uint8_t c = nameBytes[j];
+                    ascii[j] =
+                        (c >= 32 && c <= 126) ? static_cast<char>(c) : '.';
+                }
+                ascii[32] = '\0';
+
+                int written = std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH TECHSET 1502] name bytes after tech[%d]:",
+                    i);
+                for (size_t j = 0; j < 16; ++j)
+                {
+                    written += std::snprintf(
+                        trace + written,
+                        sizeof(trace) - static_cast<size_t>(written),
+                        " %02x",
+                        static_cast<unsigned>(nameBytes[j]));
+                }
+                std::snprintf(
+                    trace + written,
+                    sizeof(trace) - static_cast<size_t>(written),
+                    " ascii=%s\\n",
+                    ascii);
+                Switch_LogWrite(trace);
+            }
+#endif
+
             if (inserted)
                 *inserted = *reinterpret_cast<void **>(
                     &varMaterialTechniqueSet->techniques[i]);
