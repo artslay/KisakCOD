@@ -1738,9 +1738,23 @@ static XAnimPartTrans *Switch_LoadXAnimPartTrans()
     std::memcpy(&size, base + 0, sizeof(size));
     std::memcpy(&smallTrans, base + 2, sizeof(smallTrans));
 
-    const size_t extraIndices =
-        size ? static_cast<size_t>(size) * sizeof(uint16_t) : 0u;
-    const size_t nativeSize = sizeof(XAnimPartTrans) + extraIndices;
+    const bool wideIndices = varXAnimParts->numframes >= 0x100u;
+    const uint32_t indexCount = static_cast<uint32_t>(size) + 1u;
+    const uint32_t indexBytes = indexCount * (wideIndices ? 2u : 1u);
+
+    // The runtime object has 64-bit pointers, but the serialized index array
+    // begins immediately at the native indices member. Allocate enough tail
+    // storage so code using indices._1/_2[i] sees the complete array.
+    const size_t indexOffset =
+        reinterpret_cast<size_t>(
+            reinterpret_cast<uint8_t *>(
+                &reinterpret_cast<XAnimPartTrans *>(0)->u.frames.indices))
+        ;
+    (void)indexOffset;
+
+    const size_t nativeSize =
+        sizeof(XAnimPartTrans) +
+        (indexBytes ? static_cast<size_t>(indexBytes) : 0u);
 
     XAnimPartTrans *native =
         reinterpret_cast<XAnimPartTrans *>(
@@ -1755,13 +1769,16 @@ static XAnimPartTrans *Switch_LoadXAnimPartTrans()
 
     if (!size)
     {
+        // Serialized XAnimPartTransData.frame0 is exactly one vec3_t.
         DB_LoadXFileData(
             reinterpret_cast<uint8_t *>(native->u.frame0),
-            sizeof(native->u.frame0));
-        DB_IncStreamPos(static_cast<int32_t>(sizeof(native->u.frame0)));
+            sizeof(float) * 3u);
+        DB_IncStreamPos(static_cast<int32_t>(sizeof(float) * 3u));
         return native;
     }
 
+    // Serialized XAnimPartTransFrames fixed portion:
+    // mins[3] + size[3] + frames token = 28 bytes.
     uint8_t frameHeader[28];
     DB_LoadSwitchSerialized(frameHeader, sizeof(frameHeader));
     std::memcpy(native->u.frames.mins, frameHeader + 0, 12);
@@ -1770,21 +1787,24 @@ static XAnimPartTrans *Switch_LoadXAnimPartTrans()
     uint32_t framesToken = 0;
     std::memcpy(&framesToken, frameHeader + 24, sizeof(framesToken));
 
+    // The original loader places dynamic indices immediately at the
+    // serialized indices member. On Switch the native pointer fields changed
+    // size, so copy the serialized array into the corresponding native tail.
     uint8_t *indicesDst =
         reinterpret_cast<uint8_t *>(&native->u.frames.indices);
-    const uint32_t indexBytes =
-        (static_cast<uint32_t>(size) + 1u) * sizeof(uint16_t);
     DB_LoadXFileData(indicesDst, indexBytes);
     DB_IncStreamPos(static_cast<int32_t>(indexBytes));
 
     if (framesToken)
     {
-        const uint32_t frameCount = static_cast<uint32_t>(size) + 1u;
+        const uint32_t frameCount = indexCount;
+
         if (native->smallTrans)
         {
             uint8_t *frames = DB_AllocStreamPos(0);
             native->u.frames.frames._1 =
                 reinterpret_cast<uint8_t (*)[3]>(frames);
+
             const uint32_t frameBytes = frameCount * 3u;
             DB_LoadXFileData(frames, frameBytes);
             DB_IncStreamPos(static_cast<int32_t>(frameBytes));
@@ -1794,6 +1814,7 @@ static XAnimPartTrans *Switch_LoadXAnimPartTrans()
             uint8_t *frames = DB_AllocStreamPos(3);
             native->u.frames.frames._2 =
                 reinterpret_cast<uint16_t (*)[3]>(frames);
+
             const uint32_t frameBytes = frameCount * 6u;
             DB_LoadXFileData(frames, frameBytes);
             DB_IncStreamPos(static_cast<int32_t>(frameBytes));
@@ -1809,12 +1830,15 @@ static XAnimDeltaPartQuat *Switch_LoadXAnimDeltaPartQuat()
     DB_LoadSwitchSerialized(base, sizeof(base));
 
     uint16_t size = 0;
-    std::memcpy(&size, base + 0, sizeof(size));
+    std::memcpy(&size, base, sizeof(size));
 
-    const size_t extraIndices =
-        size ? static_cast<size_t>(size) * sizeof(uint16_t) : 0u;
+    const bool wideIndices = varXAnimParts->numframes >= 0x100u;
+    const uint32_t indexCount = static_cast<uint32_t>(size) + 1u;
+    const uint32_t indexBytes = indexCount * (wideIndices ? 2u : 1u);
+
     const size_t nativeSize =
-        sizeof(XAnimDeltaPartQuat) + extraIndices;
+        sizeof(XAnimDeltaPartQuat) +
+        (indexBytes ? static_cast<size_t>(indexBytes) : 0u);
 
     XAnimDeltaPartQuat *native =
         reinterpret_cast<XAnimDeltaPartQuat *>(
@@ -1828,31 +1852,30 @@ static XAnimDeltaPartQuat *Switch_LoadXAnimDeltaPartQuat()
 
     if (!size)
     {
+        // Serialized XAnimDeltaPartQuatData.frame0 is exactly XQuat2.
         DB_LoadXFileData(
             reinterpret_cast<uint8_t *>(native->u.frame0),
-            sizeof(native->u.frame0));
-        DB_IncStreamPos(static_cast<int32_t>(sizeof(native->u.frame0)));
+            sizeof(__int16) * 2u);
+        DB_IncStreamPos(static_cast<int32_t>(sizeof(__int16) * 2u));
         return native;
     }
 
-    uint8_t frameHeader[4];
-    DB_LoadSwitchSerialized(frameHeader, sizeof(frameHeader));
+    // Serialized XAnimDeltaPartQuatDataFrames fixed portion is:
+    // frames token = 4 bytes, followed by dynamic indices.
     uint32_t framesToken = 0;
-    std::memcpy(&framesToken, frameHeader, sizeof(framesToken));
+    DB_LoadSwitchSerialized(&framesToken, sizeof(framesToken));
 
     uint8_t *indicesDst =
         reinterpret_cast<uint8_t *>(&native->u.frames.indices);
-    const uint32_t indexBytes =
-        (static_cast<uint32_t>(size) + 1u) * sizeof(uint16_t);
     DB_LoadXFileData(indicesDst, indexBytes);
     DB_IncStreamPos(static_cast<int32_t>(indexBytes));
 
     if (framesToken)
     {
-        const uint32_t frameCount = static_cast<uint32_t>(size) + 1u;
         uint8_t *frames = DB_AllocStreamPos(3);
         native->u.frames.frames =
             reinterpret_cast<__int16 (*)[2]>(frames);
+
         const uint32_t frameBytes =
             frameCount * sizeof(__int16) * 2u;
         DB_LoadXFileData(frames, frameBytes);
