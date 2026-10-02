@@ -4042,39 +4042,40 @@ void __cdecl Load_GfxStateBitsArray(bool atStreamStart, int32_t count)
     Load_Stream(atStreamStart, (uint8_t *)varGfxStateBits, 8 * count);
 }
 
-void __cdecl Load_MaterialPass(bool atStreamStart)
-{
 #ifdef __SWITCH__
-    struct SerializedMaterialPass
-    {
-        uint32_t vertexDecl;
-        uint32_t vertexShader;
-        uint32_t pixelShader;
-        uint8_t perPrimArgCount;
-        uint8_t perObjArgCount;
-        uint8_t stableArgCount;
-        uint8_t customSamplerFlags;
-        uint32_t args;
-    };
-    static_assert(sizeof(SerializedMaterialPass) == 20);
+struct SerializedMaterialPass
+{
+    uint32_t vertexDecl;
+    uint32_t vertexShader;
+    uint32_t pixelShader;
+    uint8_t perPrimArgCount;
+    uint8_t perObjArgCount;
+    uint8_t stableArgCount;
+    uint8_t customSamplerFlags;
+    uint32_t args;
+};
+static_assert(sizeof(SerializedMaterialPass) == 20);
 
-    iassert(atStreamStart);
-    const uint8_t *passStart = DB_GetStreamPos();
-    SerializedMaterialPass serialized{};
-    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+static void Switch_LoadMaterialPassSerialized(
+    MaterialPass *pass,
+    const SerializedMaterialPass &serialized,
+    const uint8_t *passStart)
+{
+    iassert(pass);
 
-    memset(varMaterialPass, 0, sizeof(*varMaterialPass));
+    varMaterialPass = pass;
+    std::memset(varMaterialPass, 0, sizeof(*varMaterialPass));
     varMaterialPass->perPrimArgCount = serialized.perPrimArgCount;
     varMaterialPass->perObjArgCount = serialized.perObjArgCount;
     varMaterialPass->stableArgCount = serialized.stableArgCount;
     varMaterialPass->customSamplerFlags = serialized.customSamplerFlags;
-#ifdef __SWITCH__
+
     {
         char trace[320];
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH PASS RAW] pos=%p decl=%08x vs=%08x ps=%08x args=%08x counts=%u/%u/%u flags=%u after=%p\n",
+            "[SWITCH PASS RAW] pos=%p decl=%08x vs=%08x ps=%08x args=%08x counts=%u/%u/%u flags=%u\n",
             static_cast<const void *>(passStart),
             serialized.vertexDecl,
             serialized.vertexShader,
@@ -4083,11 +4084,9 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
             static_cast<unsigned>(serialized.perPrimArgCount),
             static_cast<unsigned>(serialized.perObjArgCount),
             static_cast<unsigned>(serialized.stableArgCount),
-            static_cast<unsigned>(serialized.customSamplerFlags),
-            static_cast<void *>(DB_GetStreamPos()));
+            static_cast<unsigned>(serialized.customSamplerFlags));
         Switch_LogWrite(trace);
     }
-#endif
 
     if (serialized.vertexDecl == UINT32_MAX)
     {
@@ -4143,6 +4142,20 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
         else
             varMaterialPass->args = nullptr;
     }
+}
+#endif
+
+void __cdecl Load_MaterialPass(bool atStreamStart)
+{
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+    const uint8_t *passStart = DB_GetStreamPos();
+    SerializedMaterialPass serialized{};
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+    Switch_LoadMaterialPassSerialized(
+        varMaterialPass,
+        serialized,
+        passStart);
 #else
     Load_Stream(atStreamStart, (unsigned char*)varMaterialPass, 20);
     if (varMaterialPass->vertexDecl)
@@ -4176,13 +4189,42 @@ void __cdecl Load_MaterialPassArray(bool atStreamStart, int32_t count)
 {
 #ifdef __SWITCH__
     iassert(atStreamStart);
+    if (count <= 0)
+        return;
+
+    MaterialPass *base = varMaterialPass;
+    std::vector<SerializedMaterialPass> serialized(
+        static_cast<size_t>(count));
+
+    const uint8_t *arrayStart = DB_GetStreamPos();
+    const uint32_t serializedSize =
+        static_cast<uint32_t>(
+            sizeof(SerializedMaterialPass) *
+            static_cast<size_t>(count));
+
+    // The serialized fastfile keeps the complete fixed-size pass array
+    // contiguous. Consume all headers first; nested vertex declarations,
+    // shaders, and arguments follow the records and must not be allowed to
+    // split the next pass header away from this array.
+    DB_LoadSwitchSerialized(
+        serialized.data(),
+        serializedSize);
+
     for (int32_t i = 0; i < count; ++i)
     {
-        varMaterialPass =
+        MaterialPass *pass =
             reinterpret_cast<MaterialPass *>(
-                reinterpret_cast<uint8_t *>(varMaterialPass) +
+                reinterpret_cast<uint8_t *>(base) +
                 static_cast<size_t>(i) * sizeof(MaterialPass));
-        Load_MaterialPass(1);
+
+        const uint8_t *passStart =
+            arrayStart +
+            static_cast<size_t>(i) * sizeof(SerializedMaterialPass);
+
+        Switch_LoadMaterialPassSerialized(
+            pass,
+            serialized[static_cast<size_t>(i)],
+            passStart);
     }
 #else
     Load_Stream(atStreamStart, (uint8_t *)varMaterialPass, 20 * count);
@@ -4195,6 +4237,7 @@ void __cdecl Load_MaterialPassArray(bool atStreamStart, int32_t count)
     }
 #endif
 }
+
 void __cdecl Load_MaterialTechnique(bool atStreamStart)
 {
 #ifdef __SWITCH__
