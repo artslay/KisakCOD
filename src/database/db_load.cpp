@@ -10398,6 +10398,26 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
     if (switchTraceWeapon1506)
         Switch_LogWrite("[SWITCH WEAPON1506] projectile sounds done\n");
 #endif
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+    {
+        char trace[512];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON1506] graph begin stream=%u g0=%08x og0=%08x g1=%08x og1=%08x counts=%d/%d originals=%d/%d\n",
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<unsigned>(static_cast<uint32_t>(reinterpret_cast<uintptr_t>(varWeaponDef->accuracyGraphKnots[0]))),
+            static_cast<unsigned>(static_cast<uint32_t>(reinterpret_cast<uintptr_t>(varWeaponDef->originalAccuracyGraphKnots[0]))),
+            static_cast<unsigned>(static_cast<uint32_t>(reinterpret_cast<uintptr_t>(varWeaponDef->accuracyGraphKnots[1]))),
+            static_cast<unsigned>(static_cast<uint32_t>(reinterpret_cast<uintptr_t>(varWeaponDef->originalAccuracyGraphKnots[1]))),
+            varWeaponDef->accuracyGraphKnotCount[0],
+            varWeaponDef->accuracyGraphKnotCount[1],
+            varWeaponDef->originalAccuracyGraphKnotCount[0],
+            varWeaponDef->originalAccuracyGraphKnotCount[1]);
+        Switch_LogWrite(trace);
+    }
+#endif
     varXString = varWeaponDef->accuracyGraphName;
     Load_XString(0);
     if (varWeaponDef->accuracyGraphKnots[0])
