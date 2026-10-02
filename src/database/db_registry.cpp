@@ -2680,7 +2680,7 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     {
         char trace[256];
         std::snprintf(trace, sizeof(trace),
-            "[SWITCH WEAPON1506] hash=%u bucket=%u name=%s\\n",
+            "[SWITCH WEAPON1506] hash=%u bucket=%u name=%s\n",
             hash, static_cast<unsigned>(db_hashTable[hash]), name ? name : "<null>");
         Switch_LogWrite(trace);
     }
@@ -2746,7 +2746,7 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
             {
                 char trace[192];
                 std::snprintf(trace, sizeof(trace),
-                    "[SWITCH WEAPON1506] existing idx=%u entry=%p header=%p\\n",
+                    "[SWITCH WEAPON1506] existing idx=%u entry=%p header=%p\n",
                     existingEntryIndex,
                     static_cast<void *>(existingEntry),
                     static_cast<void *>(existingEntry->entry.asset.header.data));
@@ -2763,7 +2763,7 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
             {
                 char trace[192];
                 std::snprintf(trace, sizeof(trace),
-                    "[SWITCH WEAPON1506] existing name=%p\\n",
+                    "[SWITCH WEAPON1506] existing name=%p\n",
                     static_cast<const void *>(XAssetName));
                 Switch_LogWrite(trace);
             }
