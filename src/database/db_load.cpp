@@ -3971,7 +3971,6 @@ void __cdecl Load_XRigidVertList(bool atStreamStart)
 
     if (switchTraceXModel)
         g_switchDbStage = "xmodel/surf/vertlist_done";
-}
 #else
     Load_Stream(atStreamStart, (uint8_t *)varXRigidVertList, 12);
     if (varXRigidVertList->collisionTree)
