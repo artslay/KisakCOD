@@ -10457,7 +10457,6 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
             varWeaponDef->originalAccuracyGraphKnots[0] =
                 (float (*)[2])AllocLoad_FxElemVisStateSample();
             varvec2_t = varWeaponDef->originalAccuracyGraphKnots[0];
-            varvec2_t = varWeaponDef->originalAccuracyGraphKnots[0];
             Load_vec2_tArray(1, varWeaponDef->accuracyGraphKnotCount[0]);
         }
         else
