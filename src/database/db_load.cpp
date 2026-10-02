@@ -1144,88 +1144,49 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
         g_switchCurrentAssetIndex == 1506 &&
         g_switchCurrentAssetRawType == 23u;
 
-    if (switchTraceWeapon1506)
+    // Match the original loader's two distinct cases:
+    //   normal token -> direct DB offset to the final XString pointer
+    //   -1            -> inline pointer slot, followed by another serialized
+    //                    32-bit XString token and possibly inline string data.
+    //
+    // The previous Switch implementation incorrectly treated every normal
+    // token as a pointer to a second serialized token. That is not how
+    // Load_XStringPtr is serialized and caused tokens such as 0x203b2022 to be
+    // interpreted as a second-stage block-2 reference.
+    if (serialized != UINT32_MAX)
     {
-        char trace[192];
-        std::snprintf(
-            trace,
-            sizeof(trace),
-            "[SWITCH WEAPON1506] XStringPtr enter serialized=%08x var=%p\n",
-            serialized,
-            static_cast<void *>(varXStringPtr));
-        Switch_LogWrite(trace);
-    }
+        const uintptr_t resolved =
+            DB_ConvertOffsetToPointerValue(serialized);
 
-    if (switchTraceWeapon1506)
-        Switch_LogWrite("[SWITCH WEAPON1506] XStringPtr before Hunk_Alloc\n");
+        if (switchTraceWeapon1506)
+        {
+            char trace[256];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH WEAPON1506] XStringPtr direct token=%08x resolved=%p
+",
+                serialized,
+                reinterpret_cast<const void *>(resolved));
+            Switch_LogWrite(trace);
+        }
 
-    const char **nativeStringSlot =
-        reinterpret_cast<const char **>(
-            Hunk_Alloc(sizeof(const char *), "SwitchXStringPtr", 22));
-
-    if (switchTraceWeapon1506)
-    {
-        char trace[192];
-        std::snprintf(
-            trace,
-            sizeof(trace),
-            "[SWITCH WEAPON1506] XStringPtr after Hunk_Alloc slot=%p\n",
-            static_cast<void *>(nativeStringSlot));
-        Switch_LogWrite(trace);
-    }
-
-    *nativeStringSlot = nullptr;
-    *varXStringPtr = nativeStringSlot;
-
-    if (serialized == UINT32_MAX)
-    {
-        *nativeStringSlot =
-            reinterpret_cast<const char *>(AllocLoad_raw_byte());
-        varXString = nativeStringSlot;
-        Load_XString(1);
+        *varXStringPtr =
+            reinterpret_cast<const char **>(resolved);
         return;
     }
 
-    if (switchTraceWeapon1506)
-        Switch_LogWrite("[SWITCH WEAPON1506] XStringPtr before offset convert\n");
+    const char **nativeStringSlot =
+        reinterpret_cast<const char **>(
+            Hunk_Alloc(
+                static_cast<uint32_t>(sizeof(const char *)),
+                "SwitchXStringPtr",
+                22));
+    *nativeStringSlot = nullptr;
+    *varXStringPtr = nativeStringSlot;
 
-    if (switchTraceWeapon1506)
-    {
-        const uint32_t debugBlock = (serialized - 1u) >> 28;
-        const uint32_t debugOffset = (serialized - 1u) & 0x0FFFFFFFu;
-        char trace[320];
-        std::snprintf(
-            trace,
-            sizeof(trace),
-            "[SWITCH WEAPON1506] XStringPtr block=%u offset=%08x "
-            "blocks=%p data=%p size=%u\n",
-            debugBlock,
-            debugOffset,
-            static_cast<void *>(g_streamBlocks),
-            debugBlock < 9 ? static_cast<void *>(g_streamBlocks[debugBlock].data) : nullptr,
-            debugBlock < 9 ? g_streamBlocks[debugBlock].size : 0u);
-        Switch_LogWrite(trace);
-    }
-
-    const uintptr_t slotAddress =
-        DB_ConvertOffsetToPointerValue(serialized);
-
-    if (switchTraceWeapon1506)
-    {
-        char trace[224];
-        std::snprintf(
-            trace,
-            sizeof(trace),
-            "[SWITCH WEAPON1506] XStringPtr after offset convert slot=%p\n",
-            reinterpret_cast<const void *>(slotAddress));
-        Switch_LogWrite(trace);
-    }
-
-    uint32_t stringToken = 0;
-    std::memcpy(
-        &stringToken,
-        reinterpret_cast<const void *>(slotAddress),
-        sizeof(stringToken));
+    uint32_t nested = 0;
+    DB_LoadSwitchSerialized(&nested, sizeof(nested));
 
     if (switchTraceWeapon1506)
     {
@@ -1233,30 +1194,28 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH WEAPON1506] XStringPtr stringToken=%08x slot=%p\n",
-            stringToken,
-            reinterpret_cast<const void *>(slotAddress));
+            "[SWITCH WEAPON1506] XStringPtr inline nested=%08x slot=%p
+",
+            nested,
+            static_cast<void *>(nativeStringSlot));
         Switch_LogWrite(trace);
-
-        Switch_LogRawDwords(
-            "[SWITCH WEAPON1506] XStringPtr slot data",
-            reinterpret_cast<const uint8_t *>(slotAddress),
-            16);
     }
 
-    if (stringToken == UINT32_MAX)
-    {
-        *nativeStringSlot =
-            reinterpret_cast<const char *>(AllocLoad_raw_byte());
-        varXString = nativeStringSlot;
-        Load_XString(1);
-    }
-    else if (stringToken)
+    if (!nested)
+        return;
+
+    if (nested != UINT32_MAX)
     {
         *nativeStringSlot =
             reinterpret_cast<const char *>(
-                DB_ConvertOffsetToPointerValue(stringToken));
+                DB_ConvertOffsetToPointerValue(nested));
+        return;
     }
+
+    char *stringBuffer =
+        reinterpret_cast<char *>(AllocLoad_raw_byte());
+    *nativeStringSlot = stringBuffer;
+    Load_XStringCustom(&stringBuffer);
 #else
     Load_Stream(atStreamStart, (uint8_t *)varXStringPtr, 4);
     if (*varXStringPtr)
