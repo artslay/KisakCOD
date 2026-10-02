@@ -4573,9 +4573,21 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
     }
 
     // The serialized TechniqueSet header is read from the current inline
-    // stream (stream 0). Its nested name and inline techniques are loaded from
-    // the virtual stream, matching the original PC loader's DB_PushStreamPos(4).
+    // stream (stream 0). Its nested fields are loaded from the virtual stream,
+    // matching the original PC loader's DB_PushStreamPos(4).
     DB_PushStreamPos(4);
+
+    // The original loader consumes the inline name of the TechniqueSet itself
+    // before loading the 34 technique pointer records. Do not move this below
+    // the technique loop: that would make the first bytes of the name string
+    // look like a serialized technique pointer.
+    if (serialized.name == UINT32_MAX)
+    {
+        char *nameBuffer =
+            reinterpret_cast<char *>(AllocLoad_raw_byte());
+        Load_XStringCustom(&nameBuffer);
+        varMaterialTechniqueSet->name = nameBuffer;
+    }
 
     varMaterialTechniqueSet->remappedTechniqueSet = nullptr;
     if (serialized.remappedTechniqueSet)
@@ -4680,16 +4692,6 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
                 reinterpret_cast<MaterialTechnique *>(
                     DB_ConvertOffsetToPointerValue(value));
         }
-    }
-
-    // The original 32-bit loader consumes the inline TechniqueSet name only
-    // after all 34 technique entries (including their nested payloads).
-    if (serialized.name == UINT32_MAX)
-    {
-        char *nameBuffer =
-            reinterpret_cast<char *>(AllocLoad_raw_byte());
-        Load_XStringCustom(&nameBuffer);
-        varMaterialTechniqueSet->name = nameBuffer;
     }
 
 #ifdef __SWITCH__
