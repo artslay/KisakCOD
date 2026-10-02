@@ -88,6 +88,7 @@ static uintptr_t Switch_WidenSerializedPointer(
 
 #ifdef __SWITCH__
 extern void Switch_LogWrite(const char *msg);
+extern const char *g_switchDbStage;
 
 enum weapPositionAnimNum_t : __int32
 {
@@ -5901,6 +5902,9 @@ void __cdecl Load_Material(bool atStreamStart)
 
     varMaterialInfo = &varMaterial->info;
     varXString = &varMaterial->info.name;
+#ifdef __SWITCH__
+    g_switchDbStage = "material/name";
+#endif
     Load_XString(0);
 
 #ifdef __SWITCH__
@@ -5908,12 +5912,18 @@ void __cdecl Load_Material(bool atStreamStart)
 #endif
 
     varMaterialTechniqueSetPtr = &varMaterial->techniqueSet;
+#ifdef __SWITCH__
+    g_switchDbStage = "material/techset";
+#endif
     Load_MaterialTechniqueSetPtr(0);
 
 #ifdef __SWITCH__
     Switch_LogWrite("[SWITCH MATERIAL] techset done\n");
 #endif
 
+#ifdef __SWITCH__
+    g_switchDbStage = "material/textures";
+#endif
     if (varMaterial->textureTable)
     {
         const uint32_t textureTableValue =
@@ -5954,6 +5964,9 @@ void __cdecl Load_Material(bool atStreamStart)
     Switch_LogWrite("[SWITCH MATERIAL] textures done\n");
 #endif
 
+#ifdef __SWITCH__
+    g_switchDbStage = "material/constants";
+#endif
     if (varMaterial->constantTable)
     {
         const uint32_t constantTableValue =
@@ -5976,6 +5989,9 @@ void __cdecl Load_Material(bool atStreamStart)
     Switch_LogWrite("[SWITCH MATERIAL] constants done\n");
 #endif
 
+#ifdef __SWITCH__
+    g_switchDbStage = "material/statebits";
+#endif
     if (varMaterial->stateBitsTable)
     {
         const uint32_t stateBitsTableValue =
@@ -5998,6 +6014,9 @@ void __cdecl Load_Material(bool atStreamStart)
     Switch_LogWrite("[SWITCH MATERIAL] statebits done\n");
 #endif
 
+#ifdef __SWITCH__
+    g_switchDbStage = "material/pop";
+#endif
     DB_PopStreamPos();
 #else
     Load_Stream(atStreamStart, (uint8_t *)varMaterial, 80);
@@ -6076,6 +6095,9 @@ void __cdecl Load_MaterialHandle(bool atStreamStart)
             else
                 inserted = 0;
             Load_Material(1);
+#ifdef __SWITCH__
+            g_switchDbStage = "material/asset";
+#endif
             Load_MaterialAsset((XAssetHeader *)varMaterialHandle);
 #ifdef __SWITCH__
             Switch_LogWrite("[SWITCH MATERIAL] asset done\n");
@@ -13013,6 +13035,10 @@ void __cdecl Load_XAssetHeader(bool atStreamStart)
             varXAssetHeader ? static_cast<void *>(varXAssetHeader->data) : nullptr);
         Switch_LogWrite(trace);
     }
+#endif
+#ifdef __SWITCH__
+    if (varXAsset->type == ASSET_TYPE_MATERIAL)
+        g_switchDbStage = "material/header";
 #endif
     switch (varXAsset->type)
     {
