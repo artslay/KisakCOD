@@ -8135,58 +8135,162 @@ void __cdecl Load_itemDef_ptrArray(bool atStreamStart, int32_t count)
 }
 
 #ifdef __SWITCH__
+static uint32_t Switch_ReadSerializedU32(
+    const uint8_t *serialized,
+    size_t offset)
+{
+    uint32_t value = 0;
+    std::memcpy(&value, serialized + offset, sizeof(value));
+    return value;
+}
+
+static uintptr_t Switch_WidenSerializedPointer(
+    const uint8_t *serialized,
+    size_t offset)
+{
+    return static_cast<uintptr_t>(
+        Switch_ReadSerializedU32(serialized, offset));
+}
+
+static void Switch_TranslateWindowDefSerialized(
+    windowDef_t *window,
+    const uint8_t *serialized)
+{
+    constexpr size_t SERIALIZED_SIZE = 156;
+
+    std::memset(window, 0, sizeof(*window));
+
+    // windowDef_t on disk is 32-bit:
+    //   name @ 0
+    //   rect @ 4
+    //   rectClient @ 28
+    //   group @ 52
+    //   scalar tail @ 56..151
+    //   background @ 152
+    //
+    // Native ARM64 expands the three pointers to 8 bytes.
+    window->name = reinterpret_cast<const char *>(
+        Switch_WidenSerializedPointer(serialized, 0));
+
+    std::memcpy(
+        reinterpret_cast<uint8_t *>(window) + 8,
+        serialized + 4,
+        48);
+
+    window->group = reinterpret_cast<const char *>(
+        Switch_WidenSerializedPointer(serialized, 52));
+
+    std::memcpy(
+        reinterpret_cast<uint8_t *>(window) + 64,
+        serialized + 56,
+        96);
+
+    window->background = reinterpret_cast<Material *>(
+        Switch_WidenSerializedPointer(serialized, 152));
+
+    static_assert(sizeof(windowDef_t) == 168);
+    (void)SERIALIZED_SIZE;
+}
+
+static void Switch_TranslateStatementSerialized(
+    statement_s *statement,
+    const uint8_t *serialized)
+{
+    constexpr size_t SERIALIZED_SIZE = 8;
+
+    std::memset(statement, 0, sizeof(*statement));
+    std::memcpy(
+        &statement->numEntries,
+        serialized,
+        sizeof(statement->numEntries));
+
+    const uintptr_t entries =
+        Switch_WidenSerializedPointer(serialized, 4);
+
+    std::memcpy(
+        reinterpret_cast<uint8_t *>(statement) + 8,
+        &entries,
+        sizeof(entries));
+
+    static_assert(sizeof(statement_s) == 16);
+    (void)SERIALIZED_SIZE;
+}
+
 static void Switch_TranslateMenuDefSerialized(menuDef_t *menu)
 {
     constexpr size_t SERIALIZED_SIZE = 284;
-    constexpr uint16_t kPointerOffsets[] =
-    {
-        0, 40, 120, 156, 196, 200, 204, 208,
-        216, 220, 224, 268, 276, 280
-    };
 
     uint8_t serialized[SERIALIZED_SIZE];
     DB_LoadSwitchSerialized(serialized, SERIALIZED_SIZE);
+
     std::memset(menu, 0, sizeof(*menu));
 
-    uint8_t *nativeBase = reinterpret_cast<uint8_t *>(menu);
-    size_t src = 0;
-    size_t dst = 0;
+    // First translate the nested windowDef_t rather than treating its
+    // serialized pointer fields as if they were top-level menu fields.
+    Switch_TranslateWindowDefSerialized(
+        &menu->window,
+        serialized);
 
-    for (uint16_t pointerOffset : kPointerOffsets)
-    {
-        iassert(static_cast<size_t>(pointerOffset) >= src);
-        iassert(
-            static_cast<size_t>(pointerOffset) + sizeof(uint32_t) <=
-            SERIALIZED_SIZE);
+    // menuDef_t after window:
+    //   font @ 156          -> native 168
+    //   scalar tail 160..195 -> native 176..211
+    //   onOpen @ 196        -> native 216
+    //   onClose @ 200       -> native 224
+    //   onESC @ 204        -> native 232
+    //   onKey @ 208        -> native 240
+    //   visibleExp @ 212   -> native 248
+    //   allowedBinding @ 220 -> native 264
+    //   soundName @ 224    -> native 272
+    //   imageTrack @ 228  -> native 280
+    //   colors @ 232..263 -> native 284..315
+    //   rectXExp @ 264    -> native 320
+    //   rectYExp @ 272    -> native 336
+    //   items @ 280       -> native 352
 
-        const size_t scalarBytes =
-            static_cast<size_t>(pointerOffset) - src;
+    menu->font = reinterpret_cast<const char *>(
+        Switch_WidenSerializedPointer(serialized, 156));
 
-        if (scalarBytes)
-        {
-            std::memcpy(nativeBase + dst, serialized + src, scalarBytes);
-            dst += scalarBytes;
-        }
+    std::memcpy(
+        reinterpret_cast<uint8_t *>(menu) + 176,
+        serialized + 160,
+        36);
 
-        dst = (dst + alignof(void *) - 1u) &
-              ~(static_cast<size_t>(alignof(void *)) - 1u);
+    menu->onOpen = reinterpret_cast<const char *>(
+        Switch_WidenSerializedPointer(serialized, 196));
+    menu->onClose = reinterpret_cast<const char *>(
+        Switch_WidenSerializedPointer(serialized, 200));
+    menu->onESC = reinterpret_cast<const char *>(
+        Switch_WidenSerializedPointer(serialized, 204));
+    menu->onKey = reinterpret_cast<ItemKeyHandler *>(
+        Switch_WidenSerializedPointer(serialized, 208));
 
-        uint32_t token = 0;
-        std::memcpy(&token, serialized + pointerOffset, sizeof(token));
+    Switch_TranslateStatementSerialized(
+        &menu->visibleExp,
+        serialized + 212);
 
-        const uintptr_t widenedToken = static_cast<uintptr_t>(token);
-        std::memcpy(nativeBase + dst, &widenedToken, sizeof(widenedToken));
+    menu->allowedBinding = reinterpret_cast<const char *>(
+        Switch_WidenSerializedPointer(serialized, 220));
+    menu->soundName = reinterpret_cast<const char *>(
+        Switch_WidenSerializedPointer(serialized, 224));
 
-        src = static_cast<size_t>(pointerOffset) + sizeof(token);
-        dst += sizeof(widenedToken);
-    }
+    std::memcpy(
+        reinterpret_cast<uint8_t *>(menu) + 280,
+        serialized + 228,
+        36);
 
-    if (src < SERIALIZED_SIZE)
-        std::memcpy(nativeBase + dst, serialized + src, SERIALIZED_SIZE - src);
+    Switch_TranslateStatementSerialized(
+        &menu->rectXExp,
+        serialized + 264);
+    Switch_TranslateStatementSerialized(
+        &menu->rectYExp,
+        serialized + 272);
+
+    menu->items = reinterpret_cast<itemDef_s **>(
+        Switch_WidenSerializedPointer(serialized, 280));
 
     static_assert(sizeof(menuDef_t) == 360, "Switch menuDef_t ABI changed");
-    iassert(dst + (SERIALIZED_SIZE - src) <= sizeof(*menu));
 }
+
 #endif
 
 void __cdecl Load_menuDef_t(bool atStreamStart)
