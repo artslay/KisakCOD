@@ -6776,7 +6776,7 @@ void __cdecl Load_XModel(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH XMODEL1520] begin ptr=%p raw=%08x stream=%u pos=%p\\n",
+            "[SWITCH XMODEL1520] begin ptr=%p raw=%08x stream=%u pos=%p\n",
             static_cast<void *>(varXModelPtr),
             static_cast<unsigned>(static_cast<uint32_t>(
                 reinterpret_cast<uintptr_t>(*varXModelPtr))),
@@ -6956,7 +6956,7 @@ void __cdecl Load_XModel(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH XMODEL1520] physGeoms token=%08x ptr=%p\\n",
+            "[SWITCH XMODEL1520] physGeoms token=%08x ptr=%p\n",
             static_cast<unsigned>(static_cast<uint32_t>(
                 reinterpret_cast<uintptr_t>(varXModel->physGeoms))),
             static_cast<void *>(varXModel->physGeoms));
