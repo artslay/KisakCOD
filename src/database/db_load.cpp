@@ -9126,11 +9126,11 @@ void __cdecl Load_WeaponDefPtr(bool atStreamStart)
                 " current=%p off=%08x array0=%p array0off=%08x"
                 " stream=%u\n",
                 value,
-                static_cast<const void *>(current),
+                reinterpret_cast<const void *>(current),
                 block0Base && current >= block0Base
                     ? static_cast<unsigned>(current - block0Base)
                     : UINT32_MAX,
-                static_cast<const void *>(array0),
+                reinterpret_cast<const void *>(array0),
                 block0Base && array0 >= block0Base
                     ? static_cast<unsigned>(array0 - block0Base)
                     : UINT32_MAX,
