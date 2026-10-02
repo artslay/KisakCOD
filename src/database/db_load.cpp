@@ -5918,7 +5918,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
             std::snprintf(
                 fallbackTrace,
                 sizeof(fallbackTrace),
-                "[SWITCH DB FIND] techset1502 NAME FALLBACK old=%08x new=%08x offset=%08x\\n",
+                "[SWITCH DB FIND] techset1502 NAME FALLBACK old=%08x new=%08x offset=%08x\n",
                 serialized.name,
                 fallbackToken,
                 defaultOffset);
