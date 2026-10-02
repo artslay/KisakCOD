@@ -10922,7 +10922,7 @@ void __cdecl Load_menuDef_t(bool atStreamStart)
     if (traceMenu11)
     {
         g_switchDbStage = "menu/header_pre";
-        Switch_LogWrite("[SWITCH MENU11] before serialized header load\\n");
+        Switch_LogWrite("[SWITCH MENU11] before serialized header load\n");
     }
     Switch_TranslateMenuDefSerialized(varmenuDef_t);
 
@@ -11209,7 +11209,7 @@ void __cdecl Load_MenuList(bool atStreamStart)
     if (traceMenuList11)
     {
         g_switchDbStage = "menulist/header_pre";
-        Switch_LogWrite("[SWITCH MENULIST11] before serialized header load\\n");
+        Switch_LogWrite("[SWITCH MENULIST11] before serialized header load\n");
     }
     iassert(atStreamStart);
 
@@ -11238,7 +11238,7 @@ void __cdecl Load_MenuList(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH MENULIST11] header name=%08x count=%d menus=%08x after=%p stream=%u\\n",
+            "[SWITCH MENULIST11] header name=%08x count=%d menus=%08x after=%p stream=%u\n",
             serialized.name,
             serialized.menuCount,
             serialized.menus,
@@ -11348,7 +11348,7 @@ void __cdecl Load_MenuList(bool atStreamStart)
     if (traceMenuList11)
     {
         g_switchDbStage = "menulist/done";
-        Switch_LogWrite("[SWITCH MENULIST11] done\\n");
+        Switch_LogWrite("[SWITCH MENULIST11] done\n");
     }
 #endif
 #else
@@ -11382,7 +11382,7 @@ void __cdecl Load_MenuListPtr(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH MENULIST11] ptr pre atStream=%u slot=%p stream=%u pos=%p\\n",
+            "[SWITCH MENULIST11] ptr pre atStream=%u slot=%p stream=%u pos=%p\n",
             static_cast<unsigned>(atStreamStart),
             static_cast<void *>(varMenuListPtr),
             static_cast<unsigned>(g_streamPosIndex),
@@ -11404,7 +11404,7 @@ void __cdecl Load_MenuListPtr(bool atStreamStart)
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH MENULIST11] ptr token=%08x ptr=%p stream=%u pos=%p\\n",
+                "[SWITCH MENULIST11] ptr token=%08x ptr=%p stream=%u pos=%p\n",
                 value,
                 static_cast<void *>(*varMenuListPtr),
                 static_cast<unsigned>(g_streamPosIndex),
@@ -11458,7 +11458,7 @@ void __cdecl Load_MenuListPtr(bool atStreamStart)
     DB_PopStreamPos();
 #ifdef __SWITCH__
     if (traceMenuList11)
-        Switch_LogWrite("[SWITCH MENULIST11] ptr done\\n");
+        Switch_LogWrite("[SWITCH MENULIST11] ptr done\n");
 #endif
 }
 
@@ -14123,7 +14123,7 @@ void __cdecl Load_XAssetHeader(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH XHEADER11] enter raw=%u runtime=%u atStream=%u headerPtr=%p data=%p\\n",
+            "[SWITCH XHEADER11] enter raw=%u runtime=%u atStream=%u headerPtr=%p data=%p\n",
             static_cast<unsigned>(g_switchCurrentAssetRawType),
             varXAsset ? static_cast<unsigned>(varXAsset->type) : ASSET_TYPE_COUNT,
             static_cast<unsigned>(atStreamStart),
