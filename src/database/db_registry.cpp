@@ -3617,11 +3617,85 @@ void __cdecl Load_MenuAsset(XAssetHeader *menu)
     XAssetHeader header;
     int32_t i;
 
+#ifdef __SWITCH__
+    const bool traceMenu11 =
+        g_switchCurrentAssetIndex == 11 &&
+        g_switchCurrentAssetRawType == 20u;
+
+    if (traceMenu11)
+    {
+        if (menu)
+        {
+            char trace[384];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH MENU11] asset begin hdr=%p menu=%p itemCount=%d items=%p\n",
+                static_cast<void *>(menu),
+                static_cast<void *>(menu->menu),
+                menu->menu ? menu->menu->itemCount : -1,
+                menu->menu ? static_cast<void *>(menu->menu->items) : nullptr);
+            Switch_LogWrite(trace);
+        }
+        else
+        {
+            Switch_LogWrite("[SWITCH MENU11] asset begin hdr=null\n");
+        }
+        g_switchDbStage = "menu/asset_call";
+    }
+#endif
+
     header.menu = menu->menu;
     menu->menu = DB_AddXAsset(ASSET_TYPE_MENU, *menu).menu;
 
+#ifdef __SWITCH__
+    if (traceMenu11)
+    {
+        char trace[448];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH MENU11] asset return old=%p new=%p oldCount=%d oldItems=%p newCount=%d newItems=%p\n",
+            static_cast<void *>(header.menu),
+            static_cast<void *>(menu->menu),
+            header.menu ? header.menu->itemCount : -1,
+            header.menu ? static_cast<void *>(header.menu->items) : nullptr,
+            menu->menu ? menu->menu->itemCount : -1,
+            menu->menu ? static_cast<void *>(menu->menu->items) : nullptr);
+        Switch_LogWrite(trace);
+        g_switchDbStage = "menu/parent_loop";
+    }
+#endif
+
     for (i = 0; i < header.menu->itemCount; ++i)
+    {
+#ifdef __SWITCH__
+        if (traceMenu11)
+        {
+            char trace[384];
+            const itemDef_s *item =
+                header.menu->items ? header.menu->items[i] : nullptr;
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH MENU11] parent i=%d item=%p items=%p count=%d\n",
+                i,
+                static_cast<const void *>(item),
+                header.menu ? static_cast<void *>(header.menu->items) : nullptr,
+                header.menu ? header.menu->itemCount : -1);
+            Switch_LogWrite(trace);
+            g_switchDbStage = (item && menu->menu)
+                ? "menu/parent_assign"
+                : "menu/parent_bad";
+        }
+#endif
         header.menu->items[i]->parent = menu->menu;
+    }
+
+#ifdef __SWITCH__
+    if (traceMenu11)
+        g_switchDbStage = "menu/parent_done";
+#endif
 }
 
 void __cdecl Mark_MenuAsset(menuDef_t *menu)
