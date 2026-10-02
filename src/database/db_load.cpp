@@ -10088,9 +10088,41 @@ static void Switch_LoadExpressionEntryPtrArray(
 
     std::vector<uint32_t> serializedPointers(
         static_cast<size_t>(count));
+    const uint8_t *serializedPos = DB_GetStreamPos();
     DB_LoadSwitchSerialized(
         serializedPointers.data(),
         serializedSize);
+
+    const bool traceMenu11Item87 =
+        g_switchCurrentAssetIndex == 11 &&
+        g_switchCurrentAssetRawType == 20u &&
+        g_switchCurrentMenuItemIndex == 87;
+
+    if (traceMenu11Item87)
+    {
+        char trace[768];
+        int written = std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH MENU11 ITEM87] ptrarray count=%d pre=%p post=%p tokens:",
+            count,
+            static_cast<const void *>(serializedPos),
+            static_cast<const void *>(DB_GetStreamPos()));
+        const int dumpCount = count < 12 ? count : 12;
+        for (int32_t i = 0; i < dumpCount; ++i)
+        {
+            written += std::snprintf(
+                trace + written,
+                sizeof(trace) - static_cast<size_t>(written),
+                " %08x",
+                serializedPointers[static_cast<size_t>(i)]);
+        }
+        std::snprintf(
+            trace + written,
+            sizeof(trace) - static_cast<size_t>(written),
+            "\n");
+        Switch_LogWrite(trace);
+    }
 
     for (int32_t i = 0; i < count; ++i)
     {
@@ -11078,7 +11110,7 @@ void __cdecl Load_menuDef_ptr(bool atStreamStart)
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH MENU11] ptr token=%08x stream=%u pos=%p\\n",
+                "[SWITCH MENU11] ptr token=%08x stream=%u pos=%p\n",
                 value,
                 static_cast<unsigned>(g_streamPosIndex),
                 static_cast<const void *>(DB_GetStreamPos()));
