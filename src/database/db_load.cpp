@@ -7923,9 +7923,60 @@ void __cdecl Load_Window(bool atStreamStart)
     Load_windowDef_t(0);
 }
 
+#ifdef __SWITCH__
+static void Switch_TranslateItemKeyHandlerSerialized(ItemKeyHandler *handler)
+{
+    constexpr size_t SERIALIZED_SIZE = 12;
+    constexpr uint16_t kPointerOffsets[] = { 4, 8 };
+
+    uint8_t serialized[SERIALIZED_SIZE];
+    DB_LoadSwitchSerialized(serialized, SERIALIZED_SIZE);
+    std::memset(handler, 0, sizeof(*handler));
+
+    uint8_t *nativeBase = reinterpret_cast<uint8_t *>(handler);
+    size_t src = 0;
+    size_t dst = 0;
+
+    for (uint16_t pointerOffset : kPointerOffsets)
+    {
+        const size_t scalarBytes =
+            static_cast<size_t>(pointerOffset) - src;
+
+        if (scalarBytes)
+        {
+            std::memcpy(nativeBase + dst, serialized + src, scalarBytes);
+            dst += scalarBytes;
+        }
+
+        dst = (dst + alignof(void *) - 1u) &
+              ~(static_cast<size_t>(alignof(void *)) - 1u);
+
+        uint32_t token = 0;
+        std::memcpy(&token, serialized + pointerOffset, sizeof(token));
+
+        const uintptr_t widenedToken = static_cast<uintptr_t>(token);
+        std::memcpy(nativeBase + dst, &widenedToken, sizeof(widenedToken));
+
+        src = static_cast<size_t>(pointerOffset) + sizeof(token);
+        dst += sizeof(widenedToken);
+    }
+
+    if (src < SERIALIZED_SIZE)
+        std::memcpy(
+            nativeBase + dst,
+            serialized + src,
+            SERIALIZED_SIZE - src);
+}
+#endif
+
 void __cdecl Load_ItemKeyHandler(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+        Switch_TranslateItemKeyHandlerSerialized(varItemKeyHandler);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varItemKeyHandler, 12);
+#endif
     varXString = &varItemKeyHandler->action;
     Load_XString(0);
     if (varItemKeyHandler->next)
@@ -8057,9 +8108,69 @@ void __cdecl Load_itemDef_ptrArray(bool atStreamStart, int32_t count)
     }
 }
 
+#ifdef __SWITCH__
+static void Switch_TranslateMenuDefSerialized(menuDef_t *menu)
+{
+    constexpr size_t SERIALIZED_SIZE = 284;
+    constexpr uint16_t kPointerOffsets[] =
+    {
+        0, 40, 120, 156, 196, 200, 204, 208,
+        216, 220, 224, 268, 276, 280
+    };
+
+    uint8_t serialized[SERIALIZED_SIZE];
+    DB_LoadSwitchSerialized(serialized, SERIALIZED_SIZE);
+    std::memset(menu, 0, sizeof(*menu));
+
+    uint8_t *nativeBase = reinterpret_cast<uint8_t *>(menu);
+    size_t src = 0;
+    size_t dst = 0;
+
+    for (uint16_t pointerOffset : kPointerOffsets)
+    {
+        iassert(static_cast<size_t>(pointerOffset) >= src);
+        iassert(
+            static_cast<size_t>(pointerOffset) + sizeof(uint32_t) <=
+            SERIALIZED_SIZE);
+
+        const size_t scalarBytes =
+            static_cast<size_t>(pointerOffset) - src;
+
+        if (scalarBytes)
+        {
+            std::memcpy(nativeBase + dst, serialized + src, scalarBytes);
+            dst += scalarBytes;
+        }
+
+        dst = (dst + alignof(void *) - 1u) &
+              ~(static_cast<size_t>(alignof(void *)) - 1u);
+
+        uint32_t token = 0;
+        std::memcpy(&token, serialized + pointerOffset, sizeof(token));
+
+        const uintptr_t widenedToken = static_cast<uintptr_t>(token);
+        std::memcpy(nativeBase + dst, &widenedToken, sizeof(widenedToken));
+
+        src = static_cast<size_t>(pointerOffset) + sizeof(token);
+        dst += sizeof(widenedToken);
+    }
+
+    if (src < SERIALIZED_SIZE)
+        std::memcpy(nativeBase + dst, serialized + src, SERIALIZED_SIZE - src);
+
+    static_assert(sizeof(menuDef_t) == 360, "Switch menuDef_t ABI changed");
+    iassert(dst + (SERIALIZED_SIZE - src) <= sizeof(*menu));
+}
+#endif
+
 void __cdecl Load_menuDef_t(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+    Switch_TranslateMenuDefSerialized(varmenuDef_t);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varmenuDef_t, 284);
+#endif
     DB_PushStreamPos(4);
     varWindow = &varmenuDef_t->window;
     Load_Window(0);
@@ -8129,8 +8240,35 @@ void __cdecl Load_menuDef_ptr(bool atStreamStart)
 
 void __cdecl Load_menuDef_ptrArray(bool atStreamStart, int32_t count)
 {
-    menuDef_t **var; // [esp+0h] [ebp-8h]
-    int32_t i; // [esp+4h] [ebp-4h]
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        std::vector<uint32_t> serialized(
+            count > 0 ? static_cast<size_t>(count) : 0u);
+
+        if (count > 0)
+        {
+            DB_LoadSwitchSerialized(
+                serialized.data(),
+                static_cast<uint32_t>(
+                    sizeof(uint32_t) * static_cast<size_t>(count)));
+        }
+
+        menuDef_t **base = varmenuDef_ptr;
+        for (int32_t i = 0; i < count; ++i)
+        {
+            varmenuDef_ptr = base + i;
+            *varmenuDef_ptr = reinterpret_cast<menuDef_t *>(
+                static_cast<uintptr_t>(
+                    serialized[static_cast<size_t>(i)]));
+            Load_menuDef_ptr(0);
+        }
+        return;
+    }
+#endif
+
+    menuDef_t **var;
+    int32_t i;
 
     Load_Stream(atStreamStart, (uint8_t *)varmenuDef_ptr, 4 * count);
     var = varmenuDef_ptr;
@@ -8144,17 +8282,65 @@ void __cdecl Load_menuDef_ptrArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_MenuList(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedMenuList
+    {
+        uint32_t name;
+        int32_t menuCount;
+        uint32_t menus;
+    };
+
+    static_assert(sizeof(SerializedMenuList) == 12);
+    iassert(atStreamStart);
+
+    SerializedMenuList serialized{};
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    std::memset(varMenuList, 0, sizeof(*varMenuList));
+
+    varMenuList->name = reinterpret_cast<const char *>(
+        static_cast<uintptr_t>(serialized.name));
+    varMenuList->menuCount = serialized.menuCount;
+
+    DB_PushStreamPos(4);
+
+    varXString = &varMenuList->name;
+    Load_XString(0);
+
+    if (serialized.menus && varMenuList->menuCount > 0)
+    {
+        const size_t count = static_cast<size_t>(varMenuList->menuCount);
+        varMenuList->menus =
+            reinterpret_cast<menuDef_t **>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(menuDef_t *) * count),
+                    "SwitchMenuList",
+                    22));
+
+        std::memset(
+            varMenuList->menus,
+            0,
+            sizeof(menuDef_t *) * count);
+
+        varmenuDef_ptr = varMenuList->menus;
+        Load_menuDef_ptrArray(1, varMenuList->menuCount);
+    }
+
+    DB_PopStreamPos();
+#else
     Load_Stream(atStreamStart, (uint8_t *)varMenuList, 12);
     DB_PushStreamPos(4);
     varXString = &varMenuList->name;
     Load_XString(0);
     if (varMenuList->menus)
     {
-        varMenuList->menus = (menuDef_t **)AllocLoad_FxElemVisStateSample();
+        varMenuList->menus =
+            (menuDef_t **)AllocLoad_FxElemVisStateSample();
         varmenuDef_ptr = varMenuList->menus;
         Load_menuDef_ptrArray(1, varMenuList->menuCount);
     }
     DB_PopStreamPos();
+#endif
 }
 
 void __cdecl Load_MenuListPtr(bool atStreamStart)
