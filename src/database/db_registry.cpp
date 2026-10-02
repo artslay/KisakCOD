@@ -1646,8 +1646,13 @@ XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *na
         if (assetEntry->entry.asset.type == type)
         {
             XAssetName = DB_GetXAssetName(&assetEntry->entry.asset);
+#ifdef __SWITCH__
             if (Switch_IstricmpAssetName(XAssetName, name) == 0)
                 return &g_assetEntryPool[assetEntryIndex];
+#else
+            if (!I_stricmp(XAssetName, name))
+                return &g_assetEntryPool[assetEntryIndex];
+#endif
         }
     }
     return 0;
