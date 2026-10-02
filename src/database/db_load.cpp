@@ -88,7 +88,7 @@ static uintptr_t Switch_WidenSerializedPointer(
 
 #ifdef __SWITCH__
 extern void Switch_LogWrite(const char *msg);
-extern const char *g_switchDbStage;
+extern const char * volatile g_switchDbStage;
 
 enum weapPositionAnimNum_t : __int32
 {
