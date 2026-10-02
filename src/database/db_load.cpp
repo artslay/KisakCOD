@@ -6057,7 +6057,7 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varMaterialTechniqueSetPtr));
 #ifdef __SWITCH__
         const bool traceCinematic =
-            g_switchCurrentAssetRawType == ASSET_TYPE_TECHNIQUE_SET &&
+            g_switchCurrentAssetRawType == 5u &&
             g_switchCurrentAssetIndex >= 1498 &&
             g_switchCurrentAssetIndex <= 1505;
 
