@@ -2675,6 +2675,16 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     if (v2 == ',')
         ++name;
     hash = DB_HashForName(name, type);
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+    {
+        char trace[256];
+        std::snprintf(trace, sizeof(trace),
+            "[SWITCH WEAPON1506] hash=%u bucket=%u name=%s\\n",
+            hash, static_cast<unsigned>(db_hashTable[hash]), name ? name : "<null>");
+        Switch_LogWrite(trace);
+    }
+#endif
 
 #ifdef __SWITCH__
     if (type == ASSET_TYPE_LOADED_SOUND)
@@ -2731,12 +2741,32 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
 
         if (existingEntry->entry.asset.type == type)
         {
+#ifdef __SWITCH__
+            if (switchTraceWeapon1506)
+            {
+                char trace[192];
+                std::snprintf(trace, sizeof(trace),
+                    "[SWITCH WEAPON1506] existing idx=%u entry=%p header=%p\\n",
+                    existingEntryIndex,
+                    static_cast<void *>(existingEntry),
+                    static_cast<void *>(existingEntry->entry.asset.header.data));
+                Switch_LogWrite(trace);
+            }
+#endif
             if (type == ASSET_TYPE_IMAGE)
                 XAssetName = existingEntry->entry.asset.header.image->name;
             else
                 XAssetName = DB_GetXAssetName(&existingEntry->entry.asset);
 
 #ifdef __SWITCH__
+            if (switchTraceWeapon1506)
+            {
+                char trace[192];
+                std::snprintf(trace, sizeof(trace),
+                    "[SWITCH WEAPON1506] existing name=%p\\n",
+                    static_cast<const void *>(XAssetName));
+                Switch_LogWrite(trace);
+            }
             if (type == ASSET_TYPE_LOADED_SOUND)
             {
                 char trace[192];
