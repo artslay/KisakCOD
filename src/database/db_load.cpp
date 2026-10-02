@@ -8387,23 +8387,38 @@ void __cdecl Load_MenuList(bool atStreamStart)
     DB_PushStreamPos(4);
 
     const uint8_t *beforeName = DB_GetStreamPos();
+    if (g_switchCurrentAssetIndex == 1504 &&
+        g_switchCurrentAssetRawType == 20u)
+    {
+        Switch_LogRawDwords(
+            "[SWITCH XASSET STREAM]",
+            beforeName,
+            64);
+    }
+
     varXString = &varMenuList->name;
     Load_XString(0);
 
     if (g_switchCurrentAssetIndex == 1504 &&
         g_switchCurrentAssetRawType == 20u)
     {
-        char trace[320];
+        char trace[384];
         const uint8_t *afterName = DB_GetStreamPos();
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH MENULIST1504] nameToken=%08x namePos=%p->%p delta=%td\n",
+            "[SWITCH XASSET STREAM] MenuList1504 name token=%08x pos=%p->%p delta=%td next=%p\n",
             serialized.name,
             static_cast<const void *>(beforeName),
             static_cast<const void *>(afterName),
-            afterName - beforeName);
+            afterName - beforeName,
+            static_cast<const void *>(afterName));
         Switch_LogWrite(trace);
+
+        Switch_LogRawDwords(
+            "[SWITCH XASSET STREAM]",
+            afterName,
+            64);
     }
 
     if (serialized.menus && varMenuList->menuCount > 0)
