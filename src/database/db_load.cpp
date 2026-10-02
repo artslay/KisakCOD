@@ -5906,7 +5906,34 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
     // The serialized TechniqueSet header is read from the current inline
     // stream (stream 0). Its nested fields are loaded from the virtual stream,
     // matching the original PC loader's DB_PushStreamPos(4).
+#ifdef __SWITCH__
+    const uintptr_t traceStream0PosBeforePush =
+        reinterpret_cast<uintptr_t>(DB_GetStreamPos());
+    const uint32_t traceStream0IndexBeforePush = g_streamPosIndex;
+#endif
     DB_PushStreamPos(4);
+#ifdef __SWITCH__
+    if (traceRawType == 5u &&
+        traceAssetIndex == 1502)
+    {
+        char trace[384];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH DB FIND] techset stream switch asset=1502 before=%p stream0=%u after=%p stream4=%u base4=%p delta4=%lld\n",
+            reinterpret_cast<void *>(traceStream0PosBeforePush),
+            static_cast<unsigned>(traceStream0IndexBeforePush),
+            static_cast<void *>(DB_GetStreamPos()),
+            static_cast<unsigned>(g_streamPosIndex),
+            g_streamBlocks[4].data,
+            g_streamBlocks[4].data
+                ? static_cast<long long>(
+                      reinterpret_cast<uintptr_t>(DB_GetStreamPos()) -
+                      reinterpret_cast<uintptr_t>(g_streamBlocks[4].data))
+                : 0LL);
+        Switch_LogWrite(trace);
+    }
+#endif
 
     // The original loader consumes the inline name of the TechniqueSet itself
     // before loading the 34 technique pointer records. Do not move this below
