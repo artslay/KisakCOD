@@ -6041,7 +6041,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
                 std::snprintf(
                     trace,
                     sizeof(trace),
-                    "[SWITCH TECHSET 1502] technique[%d] sentinel=%08x name=%p passes=%u after=%p\\n",
+                    "[SWITCH TECHSET 1502] technique[%d] sentinel=%08x name=%p passes=%u after=%p\n",
                     i,
                     value,
                     static_cast<const void *>(varMaterialTechnique->name),
@@ -6080,7 +6080,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
                 std::snprintf(
                     trace + written,
                     sizeof(trace) - static_cast<size_t>(written),
-                    " ascii=%s\\n",
+                    " ascii=%s\n",
                     ascii);
                 Switch_LogWrite(trace);
             }
