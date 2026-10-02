@@ -700,7 +700,9 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
                 serialized.header,
                 postStreamIndex,
                 static_cast<const void *>(postStreamPos),
-                postStreamPos && preStreamPos
+                postStreamPos &&
+                preStreamPos &&
+                postStreamIndex == preStreamIndex
                     ? static_cast<long>(postStreamPos - preStreamPos)
                     : 0L);
             Switch_LogWrite(trace);
