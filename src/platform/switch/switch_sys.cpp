@@ -24,6 +24,35 @@ static int g_switchLogFd = -1;
 static const char *const kSwitchLogPath = "sdmc:/switch/KisakCOD/kisakcod.log";
 static bool g_switchScreenLog = false;
 
+static char g_switchDeferredDiag[1024 * 1024];
+static size_t g_switchDeferredDiagUsed = 0;
+
+static void Switch_LogFlushDeferred()
+{
+    if (!g_switchDeferredDiagUsed)
+        return;
+
+    const size_t len = g_switchDeferredDiagUsed;
+    (void)::write(STDOUT_FILENO, g_switchDeferredDiag, len);
+
+    if (g_switchLogFd >= 0)
+    {
+        size_t written = 0;
+        while (written < len)
+        {
+            const ssize_t n = ::write(
+                g_switchLogFd,
+                g_switchDeferredDiag + written,
+                len - written);
+            if (n <= 0)
+                break;
+            written += static_cast<size_t>(n);
+        }
+    }
+
+    g_switchDeferredDiagUsed = 0;
+}
+
 void Switch_LogWrite(const char *msg);
 
 static bool Switch_LogPrefixAllowed(const char *msg)
@@ -145,15 +174,31 @@ void Switch_LogWrite(const char *msg)
     if (!msg || !*msg)
         return;
 
-    if (std::strncmp(msg, "[SWITCH ", 8) == 0 &&
-        !Switch_LogPrefixAllowed(msg))
+    const bool isSwitchDiag =
+        std::strncmp(msg, "[SWITCH ", 8) == 0;
+
+    if (isSwitchDiag && !Switch_LogPrefixAllowed(msg))
         return;
 
     const size_t len = std::strlen(msg);
 
-    // Use POSIX write() instead of stdio/fflush. Multiple engine threads can
-    // emit logs during asynchronous DB loading; stdio locks/flushes here must
-    // never be part of the renderer bootstrap critical path.
+    // DB/render bootstrap diagnostics stay in RAM while the loader is active.
+    // Writing each line directly to SD can stall the single DB thread and alter
+    // the stream-loading timing. The deferred buffer is flushed in one batch
+    // at safe points and from the exception handler.
+    if (isSwitchDiag)
+    {
+        if (len <= sizeof(g_switchDeferredDiag) - g_switchDeferredDiagUsed)
+        {
+            std::memcpy(
+                g_switchDeferredDiag + g_switchDeferredDiagUsed,
+                msg,
+                len);
+            g_switchDeferredDiagUsed += len;
+        }
+        return;
+    }
+
     (void)::write(STDOUT_FILENO, msg, len);
 
     if (g_switchLogFd >= 0)
@@ -171,7 +216,6 @@ void Switch_LogWrite(const char *msg)
         }
     }
 }
-
 void Switch_LogInit()
 {
     g_switchScreenLog = false;
