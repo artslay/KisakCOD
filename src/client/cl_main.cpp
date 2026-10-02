@@ -1078,7 +1078,7 @@ static void CL_SetFastFileNames(GfxConfiguration *config, bool dedicatedServer)
     config->codeFastFileName = "code_post_gfx";
     config->uiFastFileName = "ui";
     config->commonFastFileName = "common";
-    config->localizedCodeFastFileName = "localized_code_post_gfx";
+    config->localizedCodeFastFileName = NULL;
     config->localizedCommonFastFileName = NULL;
     config->modFastFileName = DB_ModFileExists() != 0 ? "mod" : NULL;
 }
