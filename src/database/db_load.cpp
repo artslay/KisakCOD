@@ -5908,6 +5908,23 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
             defaultOffset,
             cinematicOffset);
         Switch_LogWrite(trace);
+
+        if (defaultOffset != UINT32_MAX &&
+            serialized.name == 0x4004ddddu)
+        {
+            const uint32_t fallbackToken =
+                0x40000000u + defaultOffset + 1u;
+            char fallbackTrace[256];
+            std::snprintf(
+                fallbackTrace,
+                sizeof(fallbackTrace),
+                "[SWITCH DB FIND] techset1502 NAME FALLBACK old=%08x new=%08x offset=%08x\\n",
+                serialized.name,
+                fallbackToken,
+                defaultOffset);
+            Switch_LogWrite(fallbackTrace);
+            serialized.name = fallbackToken;
+        }
     }
 #endif
 
