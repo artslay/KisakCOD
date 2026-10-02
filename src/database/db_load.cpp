@@ -5900,7 +5900,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH DB FIND] techset1502 raw-name=%08x remap=%08x block4=%p size=%u defaultOff=%08x cinematicOff=%08x\\n",
+            "[SWITCH DB FIND] techset1502 raw-name=%08x remap=%08x block4=%p size=%u defaultOff=%08x cinematicOff=%08x\n",
             serialized.name,
             serialized.remappedTechniqueSet,
             static_cast<const void *>(block4),
