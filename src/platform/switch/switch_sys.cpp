@@ -31,9 +31,9 @@ static bool Switch_LogPrefixAllowed(const char *msg)
     if (!msg)
         return false;
 
-    // Keep only low-volume filesystem/graphics diagnostics.
-    return std::strncmp(msg, "[SWITCH IWD]", sizeof("[SWITCH IWD]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH GLCTX]", sizeof("[SWITCH GLCTX]") - 1) == 0;
+    // Crash diagnostics use the separate [KisakCOD][CRASH] path.
+    // Suppress all regular [SWITCH ...] diagnostic spam.
+    return false;
 }
 
 /*
