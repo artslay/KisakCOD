@@ -1710,7 +1710,20 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
 
 #ifdef __SWITCH__
     if (type == ASSET_TYPE_TECHNIQUE_SET)
+    {
         g_switchDbStage = "asset/default_header";
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH DEFAULT TECHSET] enter type=%u requested=%s currentAsset=%d raw=%u header=%08x\\n",
+            static_cast<unsigned>(type),
+            name ? name : "<null>",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            g_switchCurrentAssetHeader);
+        Switch_LogWrite(trace);
+    }
 #endif
     asset.header = DB_FindXAssetDefaultHeaderInternal(type);
 #ifdef __SWITCH__
@@ -1750,9 +1763,7 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
     ++g_defaultAssetCount;
 #ifdef __SWITCH__
     const bool traceDefaultTechset =
-        type == ASSET_TYPE_TECHNIQUE_SET &&
-        name &&
-        !I_stricmp(name, "default");
+        type == ASSET_TYPE_TECHNIQUE_SET;
     if (traceDefaultTechset)
     {
         g_switchDbStage = "asset/default_alloc";
