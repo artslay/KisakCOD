@@ -1706,7 +1706,20 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
     asset.header = DB_FindXAssetDefaultHeaderInternal(type);
 #ifdef __SWITCH__
     if (type == ASSET_TYPE_TECHNIQUE_SET)
+    {
         g_switchDbStage = "asset/default_header_done";
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH DB FIND] default type=%u name=%s hash=%u bucket=%u result=%p\n",
+            static_cast<unsigned>(type),
+            g_defaultAssetName[type] ? g_defaultAssetName[type] : "<null>",
+            DB_HashForName(g_defaultAssetName[type], type),
+            static_cast<unsigned>(db_hashTable[DB_HashForName(g_defaultAssetName[type], type)]),
+            static_cast<void *>(asset.header.data));
+        Switch_LogWrite(trace);
+    }
 #endif
     if (!asset.header.data)
     {
@@ -2887,13 +2900,14 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH DB FIND] begin asset=%d raw=%u type=%u hash=%u bucket=%u name=%p\n",
+            "[SWITCH DB FIND] begin asset=%d raw=%u type=%u hash=%u bucket=%u name=%p text=%s\n",
             g_switchCurrentAssetIndex,
             static_cast<unsigned>(g_switchCurrentAssetRawType),
             static_cast<unsigned>(type),
             hash,
             static_cast<unsigned>(db_hashTable[hash]),
-            static_cast<const void *>(name));
+            static_cast<const void *>(name),
+            name ? name : "<null>");
         Switch_LogWrite(trace);
     }
 #endif
