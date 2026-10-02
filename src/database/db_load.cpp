@@ -7039,14 +7039,56 @@ static_assert(sizeof(XModel) == 280);
 void __cdecl Load_XModel(bool atStreamStart)
 {
 #ifdef __SWITCH__
+    const bool switchTraceXModel =
+        g_switchCurrentAssetIndex == 1520 &&
+        g_switchCurrentAssetRawType == 3u;
     iassert(atStreamStart);
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/translate";
     Switch_TranslateXModelSerialized(varXModel);
+    if (switchTraceXModel)
+    {
+        char trace[512];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH XMODEL1520] model=%p bones=%u roots=%u surfs=%u coll=%d"
+            " name=%p boneNames=%p parent=%p quats=%p trans=%p part=%p base=%p"
+            " surfsPtr=%p mats=%p collPtr=%p boneInfo=%p physPreset=%p physGeoms=%p\n",
+            static_cast<void *>(varXModel),
+            static_cast<unsigned>(varXModel->numBones),
+            static_cast<unsigned>(varXModel->numRootBones),
+            static_cast<unsigned>(varXModel->numsurfs),
+            varXModel->numCollSurfs,
+            static_cast<const void *>(varXModel->name),
+            static_cast<void *>(varXModel->boneNames),
+            static_cast<void *>(varXModel->parentList),
+            static_cast<void *>(varXModel->quats),
+            static_cast<void *>(varXModel->trans),
+            static_cast<void *>(varXModel->partClassification),
+            static_cast<void *>(varXModel->baseMat),
+            static_cast<void *>(varXModel->surfs),
+            static_cast<void *>(varXModel->materialHandles),
+            static_cast<void *>(varXModel->collSurfs),
+            static_cast<void *>(varXModel->boneInfo),
+            static_cast<void *>(varXModel->physPreset),
+            static_cast<void *>(varXModel->physGeoms));
+        Switch_LogWrite(trace);
+        g_switchDbStage = "xmodel/translated";
+    }
 #else
     Load_Stream(atStreamStart, (uint8_t *)varXModel, 220);
+#endif
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/name";
 #endif
     DB_PushStreamPos(4);
     varXString = &varXModel->name;
     Load_XString(0);
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/bonenames";
+#endif
     if (varXModel->boneNames)
     {
         if (varXModel->boneNames == (uint16_t *)-1)
@@ -7060,6 +7102,10 @@ void __cdecl Load_XModel(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)&varXModel->boneNames);
         }
     }
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/parent";
+#endif
     if (varXModel->parentList)
     {
         if (varXModel->parentList == (uint8_t *)-1)
@@ -7073,6 +7119,10 @@ void __cdecl Load_XModel(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)&varXModel->parentList);
         }
     }
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/quats";
+#endif
     if (varXModel->quats)
     {
         if (varXModel->quats == (__int16 *)-1)
@@ -7086,6 +7136,10 @@ void __cdecl Load_XModel(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)&varXModel->quats);
         }
     }
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/trans";
+#endif
     if (varXModel->trans)
     {
         if (varXModel->trans == (float *)-1)
@@ -7099,6 +7153,10 @@ void __cdecl Load_XModel(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)&varXModel->trans);
         }
     }
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/part";
+#endif
     if (varXModel->partClassification)
     {
         if (varXModel->partClassification == (uint8_t *)-1)
@@ -7112,6 +7170,10 @@ void __cdecl Load_XModel(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)&varXModel->partClassification);
         }
     }
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/basemat";
+#endif
     if (varXModel->baseMat)
     {
         if (varXModel->baseMat == (DObjAnimMat *)-1)
@@ -7125,6 +7187,10 @@ void __cdecl Load_XModel(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)&varXModel->baseMat);
         }
     }
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surfs";
+#endif
     if (varXModel->surfs)
     {
 #ifdef __SWITCH__
@@ -7146,7 +7212,15 @@ void __cdecl Load_XModel(bool atStreamStart)
 #endif
         varXSurface = varXModel->surfs;
         Load_XSurfaceArray(1, varXModel->numsurfs);
+#ifdef __SWITCH__
+        if (switchTraceXModel)
+            g_switchDbStage = "xmodel/surfs_done";
+#endif
     }
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/materials";
+#endif
     if (varXModel->materialHandles)
     {
 #ifdef __SWITCH__
@@ -7168,7 +7242,15 @@ void __cdecl Load_XModel(bool atStreamStart)
 #endif
         varMaterialHandle = varXModel->materialHandles;
         Load_MaterialHandleArray(1, varXModel->numsurfs);
+#ifdef __SWITCH__
+        if (switchTraceXModel)
+            g_switchDbStage = "xmodel/materials_done";
+#endif
     }
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/collSurfs";
+#endif
     if (varXModel->collSurfs)
     {
 #ifdef __SWITCH__
@@ -7190,15 +7272,35 @@ void __cdecl Load_XModel(bool atStreamStart)
 #endif
         varXModelCollSurf = varXModel->collSurfs;
         Load_XModelCollSurfArray(1, varXModel->numCollSurfs);
+#ifdef __SWITCH__
+        if (switchTraceXModel)
+            g_switchDbStage = "xmodel/collSurfs_done";
+#endif
     }
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/boneInfo";
+#endif
     if (varXModel->boneInfo)
     {
         varXModel->boneInfo = (XBoneInfo *)AllocLoad_FxElemVisStateSample();
         varXBoneInfo = varXModel->boneInfo;
         Load_XBoneInfoArray(1, varXModel->numBones);
+#ifdef __SWITCH__
+        if (switchTraceXModel)
+            g_switchDbStage = "xmodel/boneInfo_done";
+#endif
     }
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/physPreset";
+#endif
     varPhysPresetPtr = &varXModel->physPreset;
     Load_PhysPresetPtr(0);
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/physGeoms";
+#endif
     if (varXModel->physGeoms)
     {
         if (varXModel->physGeoms == (PhysGeomList *)-1)
@@ -7206,21 +7308,56 @@ void __cdecl Load_XModel(bool atStreamStart)
             varXModel->physGeoms = (PhysGeomList *)AllocLoad_FxElemVisStateSample();
             varPhysGeomList = varXModel->physGeoms;
             Load_PhysGeomList(1);
+#ifdef __SWITCH__
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/physGeoms_done";
+#endif
         }
         else
         {
             DB_ConvertOffsetToPointer((uint32_t*)&varXModel->physGeoms);
         }
     }
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/load_pop_call";
+#endif
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/load_done";
+#endif
 }
 
 void __cdecl Load_XModelPtr(bool atStreamStart)
 {
     const void **inserted; // [esp+0h] [ebp-Ch]
     uint32_t value; // [esp+4h] [ebp-8h]
+#ifdef __SWITCH__
+    const bool switchTraceXModel =
+        g_switchCurrentAssetIndex == 1520 &&
+        g_switchCurrentAssetRawType == 3u;
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/ptr_stream";
+#endif
 
     Load_Stream(atStreamStart, (uint8_t *)varXModelPtr, 4);
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+    {
+        value = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(*varXModelPtr));
+        g_switchDbStage = "xmodel/ptr_value";
+        char trace[192];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH XMODEL1520] ptr slot=%p value=%08x atStream=%u\n",
+            static_cast<void *>(varXModelPtr),
+            value,
+            static_cast<unsigned>(atStreamStart));
+        Switch_LogWrite(trace);
+    }
+#endif
     DB_PushStreamPos(0);
     if (*varXModelPtr)
     {
@@ -7228,6 +7365,8 @@ void __cdecl Load_XModelPtr(bool atStreamStart)
         if (value == -1 || value == -2)
         {
 #ifdef __SWITCH__
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/alloc";
             *varXModelPtr = reinterpret_cast<XModel *>(
                 Hunk_Alloc(
                     static_cast<uint32_t>(sizeof(XModel)),
@@ -7242,17 +7381,49 @@ void __cdecl Load_XModelPtr(bool atStreamStart)
                 inserted = DB_InsertPointer();
             else
                 inserted = 0;
+#ifdef __SWITCH__
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/load";
+#endif
             Load_XModel(1);
+#ifdef __SWITCH__
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/load_return";
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/asset";
+#endif
             Load_XModelAsset((XAssetHeader *)varXModelPtr);
+#ifdef __SWITCH__
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/asset_return";
+#endif
             if (inserted)
+            {
+#ifdef __SWITCH__
+                if (switchTraceXModel)
+                    g_switchDbStage = "xmodel/inserted";
+#endif
                 *inserted = *varXModelPtr;
+#ifdef __SWITCH__
+                if (switchTraceXModel)
+                    g_switchDbStage = "xmodel/inserted_done";
+#endif
+            }
         }
         else
         {
             DB_ConvertOffsetToAlias((uint32_t *)varXModelPtr);
         }
     }
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/pop_call";
+#endif
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/done";
+#endif
 }
 
 void __cdecl Load_XModelPtrArray(bool atStreamStart, int32_t count)
