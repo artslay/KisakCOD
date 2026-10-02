@@ -6043,13 +6043,27 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
     }
 
 #ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 5u &&
+        g_switchCurrentAssetIndex >= 1501 &&
+        g_switchCurrentAssetIndex <= 1502)
     {
-        char trace[256];
+        char trace[512];
+        const char *resolvedName = varMaterialTechniqueSet->name;
+        const uintptr_t namePtr =
+            reinterpret_cast<uintptr_t>(resolvedName);
+        const uintptr_t cursor =
+            reinterpret_cast<uintptr_t>(DB_GetStreamPos());
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH TECHSET] complete start=%p after=%p\n",
-            static_cast<const void *>(techniqueSetStart),
+            "[SWITCH DB FIND] techset complete asset=%d nameToken=%08x namePtr=%p nameText=%s nameRelToStream4=%lld after=%p\n",
+            g_switchCurrentAssetIndex,
+            serialized.name,
+            static_cast<const void *>(resolvedName),
+            resolvedName ? resolvedName : "<null>",
+            resolvedName
+                ? static_cast<long long>(namePtr - cursor)
+                : 0LL,
             static_cast<void *>(DB_GetStreamPos()));
         Switch_LogWrite(trace);
     }
