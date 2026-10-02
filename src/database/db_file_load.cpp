@@ -643,6 +643,20 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         g_switchCurrentAssetRawType = serialized.type;
         g_switchCurrentAssetHeader = serialized.header;
 
+        if (serialized.type == ASSET_TYPE_TECHNIQUE_SET &&
+            i >= 1498 && i <= 1505)
+        {
+            char trace[224];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH DB FIND] raw techset asset=%d raw=%u header=%08x\n",
+                i,
+                static_cast<unsigned>(serialized.type),
+                serialized.header);
+            Switch_LogWrite(trace);
+        }
+
         const bool traceXAnim1507 =
             i == 1507 && serialized.type == ASSET_TYPE_XANIMPARTS;
         if (traceXAnim1507)
