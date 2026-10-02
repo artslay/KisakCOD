@@ -1749,23 +1749,68 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
     asset.type = type;
     ++g_defaultAssetCount;
 #ifdef __SWITCH__
-    if (type == ASSET_TYPE_TECHNIQUE_SET)
+    const bool traceDefaultTechset =
+        type == ASSET_TYPE_TECHNIQUE_SET &&
+        name &&
+        !I_stricmp(name, "default");
+    if (traceDefaultTechset)
+    {
         g_switchDbStage = "asset/default_alloc";
+        Switch_LogWrite("[SWITCH DEFAULT TECHSET] before DB_AllocXAssetEntry\n");
+    }
 #endif
     newEntry = (XAssetEntry *)DB_AllocXAssetEntry(type, 0);
 #ifdef __SWITCH__
-    if (type == ASSET_TYPE_TECHNIQUE_SET)
+    if (traceDefaultTechset)
+    {
+        g_switchDbStage = "asset/default_alloc_done";
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH DEFAULT TECHSET] after DB_AllocXAssetEntry entry=%p data=%p\n",
+            static_cast<void *>(newEntry),
+            newEntry ? static_cast<void *>(newEntry->asset.header.data) : nullptr);
+        Switch_LogWrite(trace);
         g_switchDbStage = "asset/default_clone";
+        Switch_LogWrite("[SWITCH DEFAULT TECHSET] before DB_CloneXAssetInternal\n");
+    }
 #endif
     DB_CloneXAssetInternal(&asset, &newEntry->asset);
+#ifdef __SWITCH__
+    if (traceDefaultTechset)
+    {
+        g_switchDbStage = "asset/default_clone_done";
+        Switch_LogWrite("[SWITCH DEFAULT TECHSET] after DB_CloneXAssetInternal\n");
+    }
+#endif
     if (type == ASSET_TYPE_SOUND)
     {
         newEntry->asset.header.sound->count = 0;
         newEntry->asset.header.sound->head = NULL;
     }
+    if (traceDefaultTechset)
+    {
+        g_switchDbStage = "asset/default_hash_link";
+        Switch_LogWrite("[SWITCH DEFAULT TECHSET] before hash link\n");
+    }
     newEntry->nextHash = db_hashTable[DB_HashForName(name, type)];
     db_hashTable[DB_HashForName(name, type)] = static_cast<uint16_t>(reinterpret_cast<XAssetEntryPoolEntry *>(newEntry) - g_assetEntryPool);
+#ifdef __SWITCH__
+    if (traceDefaultTechset)
+    {
+        g_switchDbStage = "asset/default_name";
+        Switch_LogWrite("[SWITCH DEFAULT TECHSET] before DB_SetXAssetName\n");
+    }
+#endif
     DB_SetXAssetName(&newEntry->asset, SL_ConvertToString(SL_GetString(name, 4)));
+#ifdef __SWITCH__
+    if (traceDefaultTechset)
+    {
+        g_switchDbStage = "asset/default_done";
+        Switch_LogWrite("[SWITCH DEFAULT TECHSET] done\n");
+    }
+#endif
     newEntry->inuse = 1;
     return newEntry;
 }
