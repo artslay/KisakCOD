@@ -6796,7 +6796,7 @@ void __cdecl Load_PhysGeomInfo(bool atStreamStart)
         float halfLengths[3];
     };
     static_assert(sizeof(SerializedPhysGeomInfo) == 68);
-    static_assert(sizeof(PhysGeomInfo) == 80);
+    static_assert(sizeof(PhysGeomInfo) == 72);
 
     SerializedPhysGeomInfo serialized{};
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
