@@ -8304,7 +8304,7 @@ void __cdecl Load_MenuList(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH MENULIST1504] header=%p name=%08x count=%d menus=%08x afterHeader=%p\\n",
+            "[SWITCH MENULIST1504] header=%p name=%08x count=%d menus=%08x afterHeader=%p\n",
             static_cast<const void *>(serializedStart),
             serialized.name,
             serialized.menuCount,
@@ -8333,7 +8333,7 @@ void __cdecl Load_MenuList(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH MENULIST1504] nameToken=%08x namePos=%p->%p delta=%td\\n",
+            "[SWITCH MENULIST1504] nameToken=%08x namePos=%p->%p delta=%td\n",
             serialized.name,
             static_cast<const void *>(beforeName),
             static_cast<const void *>(afterName),
