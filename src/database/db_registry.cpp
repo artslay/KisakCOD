@@ -1716,7 +1716,7 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH DEFAULT TECHSET] enter type=%u requested=%s currentAsset=%d raw=%u header=%08x\\n",
+            "[SWITCH DEFAULT TECHSET] enter type=%u requested=%s currentAsset=%d raw=%u header=%08x\n",
             static_cast<unsigned>(type),
             name ? name : "<null>",
             g_switchCurrentAssetIndex,
