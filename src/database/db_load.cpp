@@ -6093,6 +6093,19 @@ void __cdecl Load_MaterialHandle(bool atStreamStart)
 
 void __cdecl Load_MaterialHandleArray(bool atStreamStart, int32_t count)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+    Material **var = varMaterialHandle;
+    for (int32_t i = 0; i < count; ++i)
+    {
+        uint32_t token = 0;
+        DB_LoadSwitchSerialized(&token, sizeof(token));
+        var[i] = reinterpret_cast<Material *>(
+            static_cast<uintptr_t>(token));
+        varMaterialHandle = &var[i];
+        Load_MaterialHandle(0);
+    }
+#else
     Material **var; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
 
@@ -6104,6 +6117,7 @@ void __cdecl Load_MaterialHandleArray(bool atStreamStart, int32_t count)
         Load_MaterialHandle(0);
         ++var;
     }
+#endif
 }
 
 void __cdecl Mark_MaterialTextureDefInfo()
@@ -6529,6 +6543,43 @@ void __cdecl Load_XModelCollTriArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_XModelCollSurf(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+
+    struct SerializedXModelCollSurf
+    {
+        uint32_t collTris;
+        int32_t numCollTris;
+        float mins[3];
+        float maxs[3];
+        int32_t boneIdx;
+        int32_t contents;
+        int32_t surfFlags;
+    };
+    static_assert(sizeof(SerializedXModelCollSurf) == 44);
+
+    SerializedXModelCollSurf serialized{};
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    std::memset(varXModelCollSurf, 0, sizeof(*varXModelCollSurf));
+    varXModelCollSurf->numCollTris = serialized.numCollTris;
+    std::memcpy(varXModelCollSurf->mins, serialized.mins,
+        sizeof(serialized.mins));
+    std::memcpy(varXModelCollSurf->maxs, serialized.maxs,
+        sizeof(serialized.maxs));
+    varXModelCollSurf->boneIdx = serialized.boneIdx;
+    varXModelCollSurf->contents = serialized.contents;
+    varXModelCollSurf->surfFlags = serialized.surfFlags;
+
+    if (serialized.collTris)
+    {
+        varXModelCollSurf->collTris =
+            reinterpret_cast<XModelCollTri_s *>(
+                AllocLoad_FxElemVisStateSample());
+        varXModelCollTri = varXModelCollSurf->collTris;
+        Load_XModelCollTriArray(1, varXModelCollSurf->numCollTris);
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varXModelCollSurf, 44);
     if (varXModelCollSurf->collTris)
     {
@@ -6536,10 +6587,20 @@ void __cdecl Load_XModelCollSurf(bool atStreamStart)
         varXModelCollTri = varXModelCollSurf->collTris;
         Load_XModelCollTriArray(1, varXModelCollSurf->numCollTris);
     }
+#endif
 }
 
 void __cdecl Load_XModelCollSurfArray(bool atStreamStart, int32_t count)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+    XModelCollSurf_s *var = varXModelCollSurf;
+    for (int32_t i = 0; i < count; ++i)
+    {
+        varXModelCollSurf = &var[i];
+        Load_XModelCollSurf(1);
+    }
+#else
     XModelCollSurf_s *var; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
 
@@ -6551,6 +6612,7 @@ void __cdecl Load_XModelCollSurfArray(bool atStreamStart, int32_t count)
         Load_XModelCollSurf(0);
         ++var;
     }
+#endif
 }
 
 void __cdecl Load_BrushWrapper(bool atStreamStart)
@@ -6821,7 +6883,23 @@ void __cdecl Load_XModel(bool atStreamStart)
     }
     if (varXModel->collSurfs)
     {
+#ifdef __SWITCH__
+        varXModel->collSurfs =
+            reinterpret_cast<XModelCollSurf_s *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(
+                        sizeof(XModelCollSurf_s) *
+                        static_cast<size_t>(varXModel->numCollSurfs)),
+                    "SwitchXModelCollSurfArray",
+                    22));
+        std::memset(
+            varXModel->collSurfs,
+            0,
+            sizeof(XModelCollSurf_s) *
+                static_cast<size_t>(varXModel->numCollSurfs));
+#else
         varXModel->collSurfs = (XModelCollSurf_s *)AllocLoad_FxElemVisStateSample();
+#endif
         varXModelCollSurf = varXModel->collSurfs;
         Load_XModelCollSurfArray(1, varXModel->numCollSurfs);
     }
