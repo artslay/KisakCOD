@@ -5042,6 +5042,7 @@ void __cdecl Load_MaterialHandle(bool atStreamStart)
         if (value == -1 || value == -2)
         {
 #ifdef __SWITCH__
+            DB_AllocStreamPos(3);
             *varMaterialHandle = reinterpret_cast<Material *>(
                 Hunk_Alloc(
                     static_cast<uint32_t>(sizeof(Material)),
@@ -8219,7 +8220,16 @@ void __cdecl Load_menuDef_ptr(bool atStreamStart)
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varmenuDef_ptr));
         if (value == -1 || value == -2)
         {
+#ifdef __SWITCH__
+            DB_AllocStreamPos(3);
+            *varmenuDef_ptr = reinterpret_cast<menuDef_t *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(menuDef_t)),
+                    "SwitchMenuDef",
+                    22));
+#else
             *varmenuDef_ptr = (menuDef_t *)AllocLoad_FxElemVisStateSample();
+#endif
             varmenuDef_t = *varmenuDef_ptr;
             if (value == -2)
                 inserted = DB_InsertPointer();
@@ -8409,7 +8419,16 @@ void __cdecl Load_MenuListPtr(bool atStreamStart)
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varMenuListPtr));
         if (value == -1 || value == -2)
         {
+#ifdef __SWITCH__
+            DB_AllocStreamPos(3);
+            *varMenuListPtr = reinterpret_cast<MenuList *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(MenuList)),
+                    "SwitchMenuList",
+                    22));
+#else
             *varMenuListPtr = (MenuList *)AllocLoad_FxElemVisStateSample();
+#endif
             varMenuList = *varMenuListPtr;
             if (value == -2)
                 inserted = DB_InsertPointer();
