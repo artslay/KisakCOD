@@ -4951,9 +4951,7 @@ void __cdecl Load_MaterialVertexShader(bool atStreamStart)
 
     iassert(atStreamStart);
 
-    // Preserve the original 4-byte serialized object alignment on Switch.
-    DB_AllocStreamPos(3);
-
+    // The upstream loader reads the 16-byte serialized record directly at the current cursor.
     SerializedMaterialVertexShader serialized{};
     const uint8_t *vertexShaderStart = DB_GetStreamPos();
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
@@ -5054,12 +5052,7 @@ void __cdecl Load_MaterialPixelShader(bool atStreamStart)
 
     iassert(atStreamStart);
 
-    // The original 32-bit loader allocates the serialized object with
-    // DB_AllocStreamPos(3), so every embedded shader starts on a 4-byte boundary.
-    // The Switch runtime object lives in Hunk memory, therefore we must preserve
-    // that stream alignment explicitly before reading its serialized 16-byte form.
-    DB_AllocStreamPos(3);
-
+    // The upstream loader reads the serialized shader directly at the current cursor.
     SerializedMaterialPixelShader serialized{};
     const uint8_t *pixelShaderStart = DB_GetStreamPos();
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
@@ -5578,10 +5571,7 @@ void __cdecl Load_MaterialTechnique(bool atStreamStart)
 
     iassert(atStreamStart);
 
-    // The runtime technique lives in Hunk memory on Switch; preserve the
-    // original 4-byte alignment of its serialized fastfile record.
-    DB_AllocStreamPos(3);
-
+    // The upstream loader reads the serialized technique header directly at the current cursor.
     SerializedMaterialTechnique serialized{};
     const uint8_t *techniqueStart = DB_GetStreamPos();
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
