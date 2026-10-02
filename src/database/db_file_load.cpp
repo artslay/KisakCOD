@@ -66,7 +66,7 @@ volatile int32_t g_totalExternalBytes;
 int32_t g_trackLoadProgress;
 
 #ifdef __SWITCH__
-const char *g_switchDbStage = "idle";
+const char * volatile g_switchDbStage = "idle";
 #endif
 
 #ifdef __SWITCH__
