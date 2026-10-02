@@ -6767,8 +6767,27 @@ static_assert(sizeof(XModel) == 280);
 void __cdecl Load_XModel(bool atStreamStart)
 {
 #ifdef __SWITCH__
+    const bool switchTraceXModel1520 =
+        g_switchCurrentAssetIndex == 1520 &&
+        g_switchCurrentAssetRawType == 3u;
+    if (switchTraceXModel1520)
+    {
+        char trace[768];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XMODEL1520] begin ptr=%p raw=%08x stream=%u pos=%p\\n",
+            static_cast<void *>(varXModelPtr),
+            static_cast<unsigned>(static_cast<uint32_t>(
+                reinterpret_cast<uintptr_t>(*varXModelPtr))),
+            g_streamPosIndex,
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
     iassert(atStreamStart);
     Switch_TranslateXModelSerialized(varXModel);
+    if (switchTraceXModel1520)
+        Switch_LogWrite("[SWITCH XMODEL1520] root translated");
 #else
     Load_Stream(atStreamStart, (uint8_t *)varXModel, 220);
 #endif
@@ -6925,8 +6944,24 @@ void __cdecl Load_XModel(bool atStreamStart)
         varXBoneInfo = varXModel->boneInfo;
         Load_XBoneInfoArray(1, varXModel->numBones);
     }
+    if (switchTraceXModel1520)
+        Switch_LogWrite("[SWITCH XMODEL1520] before PhysPreset");
     varPhysPresetPtr = &varXModel->physPreset;
     Load_PhysPresetPtr(0);
+    if (switchTraceXModel1520)
+        Switch_LogWrite("[SWITCH XMODEL1520] after PhysPreset");
+    if (switchTraceXModel1520 && varXModel->physGeoms)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XMODEL1520] physGeoms token=%08x ptr=%p\\n",
+            static_cast<unsigned>(static_cast<uint32_t>(
+                reinterpret_cast<uintptr_t>(varXModel->physGeoms))),
+            static_cast<void *>(varXModel->physGeoms));
+        Switch_LogWrite(trace);
+    }
     if (varXModel->physGeoms)
     {
         if (varXModel->physGeoms == (PhysGeomList *)-1)
@@ -6941,6 +6976,10 @@ void __cdecl Load_XModel(bool atStreamStart)
         }
     }
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (switchTraceXModel1520)
+        Switch_LogWrite("[SWITCH XMODEL1520] Load_XModel complete");
+#endif
 }
 
 void __cdecl Load_XModelPtr(bool atStreamStart)
@@ -6989,6 +7028,11 @@ void __cdecl Load_XModelPtr(bool atStreamStart)
             else
                 inserted = 0;
             Load_XModel(1);
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 1520 &&
+                g_switchCurrentAssetRawType == 3u)
+                Switch_LogWrite("[SWITCH XMODEL1520] after Load_XModel before asset");
+#endif
 #ifdef __SWITCH__
             if (switchTraceWeapon1506)
                 Switch_LogWrite("[SWITCH WEAPON1506] XModelPtr inline payload done\n");
