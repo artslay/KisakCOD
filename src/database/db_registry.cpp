@@ -1773,14 +1773,12 @@ XAssetHeader __cdecl DB_FindXAssetDefaultHeaderInternal(XAssetType type)
 #endif
 
     name = g_defaultAssetName[type];
-#ifdef __SWITCH__
     const uint32_t hash = DB_HashForName(name, type);
+#ifdef __SWITCH__
     if (type == ASSET_TYPE_TECHNIQUE_SET)
         g_switchDbStage = "asset/default_bucket";
-    uint32_t bucket = db_hashTable[hash];
-#else
-    const uint32_t hash = DB_HashForName(name, type);
 #endif
+    const uint32_t bucket = db_hashTable[hash];
     for (assetEntryIndex = bucket; ; assetEntryIndex = assetEntry->entry.nextHash)
     {
         if (!assetEntryIndex)
