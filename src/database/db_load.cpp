@@ -10558,6 +10558,10 @@ void __cdecl Load_itemDef_ptrArray(bool atStreamStart, int32_t count)
         if (count <= 0)
             return;
 
+        const bool traceMenu11 =
+            g_switchCurrentAssetIndex == 11 &&
+            g_switchCurrentAssetRawType == 20u;
+
         DB_AllocStreamPos(3);
 
         std::vector<uint32_t> serialized(
@@ -10565,6 +10569,20 @@ void __cdecl Load_itemDef_ptrArray(bool atStreamStart, int32_t count)
         DB_LoadSwitchSerialized(
             serialized.data(),
             static_cast<size_t>(count) * sizeof(uint32_t));
+
+        if (traceMenu11)
+        {
+            char trace[256];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH MENU11] item tokens count=%d stream=%u pos=%p\n",
+                count,
+                static_cast<unsigned>(g_streamPosIndex),
+                static_cast<const void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+            g_switchDbStage = "menu/items_tokens";
+        }
 
         itemDef_s **base = varitemDef_ptr;
         for (int32_t i = 0; i < count; ++i)
@@ -10574,11 +10592,28 @@ void __cdecl Load_itemDef_ptrArray(bool atStreamStart, int32_t count)
                 serialized[static_cast<size_t>(i)];
 
             *varitemDef_ptr = nullptr;
+
+            if (traceMenu11)
+            {
+                char trace[256];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH MENU11] item token i=%d token=%08x\n",
+                    i,
+                    token);
+                Switch_LogWrite(trace);
+                g_switchDbStage = "menu/item_token";
+            }
+
             if (!token)
                 continue;
 
             if (token == UINT32_MAX || token == UINT32_MAX - 1)
             {
+                if (traceMenu11)
+                    g_switchDbStage = "menu/item_inline";
+
                 DB_AllocStreamPos(3);
                 *varitemDef_ptr =
                     reinterpret_cast<itemDef_s *>(
@@ -10599,14 +10634,50 @@ void __cdecl Load_itemDef_ptrArray(bool atStreamStart, int32_t count)
                 varitemDef_t = *varitemDef_ptr;
                 Load_itemDef_t(1);
 
+                if (traceMenu11)
+                {
+                    char trace[320];
+                    std::snprintf(
+                        trace,
+                        sizeof(trace),
+                        "[SWITCH MENU11] item inline i=%d obj=%p type=%d text=%p parent=%p stream=%u pos=%p\n",
+                        i,
+                        static_cast<void *>(*varitemDef_ptr),
+                        varitemDef_t->type,
+                        static_cast<const void *>(varitemDef_t->text),
+                        static_cast<void *>(varitemDef_t->parent),
+                        static_cast<unsigned>(g_streamPosIndex),
+                        static_cast<const void *>(DB_GetStreamPos()));
+                    Switch_LogWrite(trace);
+                    g_switchDbStage = "menu/item_inline_done";
+                }
+
                 if (inserted)
                     *inserted = *varitemDef_ptr;
             }
             else
             {
-                *varitemDef_ptr =
+                if (traceMenu11)
+                    g_switchDbStage = "menu/item_alias";
+
+                itemDef_s *alias =
                     reinterpret_cast<itemDef_s *>(
                         DB_ConvertOffsetToPointerValue(token));
+                *varitemDef_ptr = alias;
+
+                if (traceMenu11)
+                {
+                    char trace[320];
+                    std::snprintf(
+                        trace,
+                        sizeof(trace),
+                        "[SWITCH MENU11] item alias i=%d token=%08x ptr=%p\n",
+                        i,
+                        token,
+                        static_cast<void *>(alias));
+                    Switch_LogWrite(trace);
+                    g_switchDbStage = "menu/item_alias_done";
+                }
             }
         }
         return;
