@@ -330,6 +330,133 @@ static void Load_multiDef_t(bool atStreamStart);
 static void Load_multiDef_ptr(bool atStreamStart);
 static void Load_windowDef_t(bool atStreamStart);
 static void Load_Window(bool atStreamStart);
+#ifdef __SWITCH__
+static void Switch_TranslateItemDefSerialized(itemDef_s *item)
+{
+    constexpr size_t SERIALIZED_SIZE = 372;
+
+    uint8_t serialized[SERIALIZED_SIZE];
+    DB_LoadSwitchSerialized(serialized, SERIALIZED_SIZE);
+    std::memset(item, 0, sizeof(*item));
+
+    // Serialized itemDef_s is the 32-bit 0x174-byte layout. Translate all
+    // pointer-bearing fields to the native ARM64 layout; nested window and
+    // statement payloads are loaded separately by their generated loaders.
+    Switch_TranslateWindowDefSerialized(
+        &item->window,
+        serialized);
+
+    std::memcpy(
+        reinterpret_cast<uint8_t *>(item) + 168,
+        serialized + 156,
+        24 + 8 * 6);
+
+    item->text = reinterpret_cast<const char *>(
+        Switch_WidenSerializedPointer(serialized, 224));
+    item->itemFlags =
+        static_cast<int>(
+            Switch_ReadSerializedU32(serialized, 228));
+    item->parent =
+        reinterpret_cast<menuDef_t *>(
+            Switch_WidenSerializedPointer(serialized, 232));
+    item->mouseEnterText =
+        reinterpret_cast<const char *>(
+            Switch_WidenSerializedPointer(serialized, 236));
+    item->mouseExitText =
+        reinterpret_cast<const char *>(
+            Switch_WidenSerializedPointer(serialized, 240));
+    item->mouseEnter =
+        reinterpret_cast<const char *>(
+            Switch_WidenSerializedPointer(serialized, 244));
+    item->mouseExit =
+        reinterpret_cast<const char *>(
+            Switch_WidenSerializedPointer(serialized, 248));
+    item->action =
+        reinterpret_cast<const char *>(
+            Switch_WidenSerializedPointer(serialized, 252));
+    item->onAccept =
+        reinterpret_cast<const char *>(
+            Switch_WidenSerializedPointer(serialized, 256));
+    item->onFocus =
+        reinterpret_cast<const char *>(
+            Switch_WidenSerializedPointer(serialized, 260));
+    item->leaveFocus =
+        reinterpret_cast<const char *>(
+            Switch_WidenSerializedPointer(serialized, 264));
+    item->dvar =
+        reinterpret_cast<const char *>(
+            Switch_WidenSerializedPointer(serialized, 268));
+    item->dvarTest =
+        reinterpret_cast<const char *>(
+            Switch_WidenSerializedPointer(serialized, 272));
+    item->onKey =
+        reinterpret_cast<ItemKeyHandler *>(
+            Switch_WidenSerializedPointer(serialized, 276));
+    item->enableDvar =
+        reinterpret_cast<const char *>(
+            Switch_WidenSerializedPointer(serialized, 280));
+    item->dvarFlags =
+        static_cast<int>(
+            Switch_ReadSerializedU32(serialized, 284));
+    item->focusSound =
+        reinterpret_cast<snd_alias_list_t *>(
+            Switch_WidenSerializedPointer(serialized, 288));
+
+    std::memcpy(
+        reinterpret_cast<uint8_t *>(item) + 376,
+        serialized + 292,
+        8);
+
+    const uintptr_t typeData =
+        Switch_WidenSerializedPointer(serialized, 300);
+    std::memcpy(
+        reinterpret_cast<uint8_t *>(item) + 384,
+        &typeData,
+        sizeof(typeData));
+
+    item->imageTrack =
+        static_cast<int>(
+            Switch_ReadSerializedU32(serialized, 304));
+
+    Switch_TranslateStatementSerialized(
+        &item->visibleExp,
+        serialized + 308);
+    Switch_TranslateStatementSerialized(
+        &item->textExp,
+        serialized + 316);
+    Switch_TranslateStatementSerialized(
+        &item->materialExp,
+        serialized + 324);
+    Switch_TranslateStatementSerialized(
+        &item->rectXExp,
+        serialized + 332);
+    Switch_TranslateStatementSerialized(
+        &item->rectYExp,
+        serialized + 340);
+    Switch_TranslateStatementSerialized(
+        &item->rectWExp,
+        serialized + 348);
+    Switch_TranslateStatementSerialized(
+        &item->rectHExp,
+        serialized + 356);
+    Switch_TranslateStatementSerialized(
+        &item->forecolorAExp,
+        serialized + 364);
+
+    static_assert(sizeof(itemDef_s) == 528, "Switch itemDef_s ABI changed");
+}
+#endif
+
+#ifdef __SWITCH__
+static void Switch_TranslateWindowDefSerialized(
+    windowDef_t *window,
+    const uint8_t *serialized);
+static void Switch_TranslateStatementSerialized(
+    statement_s *statement,
+    const uint8_t *serialized);
+static void Switch_TranslateItemDefSerialized(
+    itemDef_s *item);
+#endif
 static void Load_ItemKeyHandler(bool atStreamStart);
 static void Load_ItemKeyHandlerNext(bool atStreamStart);
 static void Load_itemDefData_t(bool atStreamStart);
@@ -8077,49 +8204,38 @@ void __cdecl Load_expressionEntry_ptrArray(bool atStreamStart, int32_t count)
 void __cdecl Load_statement(bool atStreamStart)
 {
 #ifdef __SWITCH__
-    if (atStreamStart)
+    constexpr size_t SERIALIZED_SIZE = 8;
+    uint8_t serialized[SERIALIZED_SIZE];
+
+    DB_LoadSwitchSerialized(serialized, SERIALIZED_SIZE);
+    Switch_TranslateStatementSerialized(
+        varstatement,
+        serialized);
+
+    if (varstatement->entries)
     {
-        constexpr size_t SERIALIZED_SIZE = 8;
-        uint8_t serialized[SERIALIZED_SIZE];
+        varstatement->entries =
+            reinterpret_cast<expressionEntry **>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(
+                        sizeof(expressionEntry *) *
+                        static_cast<size_t>(
+                            varstatement->numEntries)),
+                    "SwitchStatementEntries",
+                    22));
+        std::memset(
+            varstatement->entries,
+            0,
+            sizeof(expressionEntry *) *
+                static_cast<size_t>(varstatement->numEntries));
 
-        DB_LoadSwitchSerialized(serialized, SERIALIZED_SIZE);
-        std::memset(varstatement, 0, sizeof(*varstatement));
-
-        std::memcpy(
-            &varstatement->numEntries,
-            serialized,
-            sizeof(varstatement->numEntries));
-
-        const uint32_t entriesToken =
-            Switch_ReadSerializedU32(serialized, 4);
-
-        varstatement->entries = nullptr;
-
-        if (entriesToken)
-        {
-            varstatement->entries =
-                reinterpret_cast<expressionEntry **>(
-                    Hunk_Alloc(
-                        static_cast<uint32_t>(
-                            sizeof(expressionEntry *) *
-                            static_cast<size_t>(varstatement->numEntries)),
-                        "SwitchStatementEntries",
-                        22));
-            std::memset(
-                varstatement->entries,
-                0,
-                sizeof(expressionEntry *) *
-                    static_cast<size_t>(varstatement->numEntries));
-
-            varexpressionEntry_ptr = varstatement->entries;
-            Switch_LoadExpressionEntryPtrArray(
-                varstatement->entries,
-                varstatement->numEntries);
-        }
-        return;
+        varexpressionEntry_ptr = varstatement->entries;
+        Switch_LoadExpressionEntryPtrArray(
+            varstatement->entries,
+            varstatement->numEntries);
     }
-#endif
-
+    return;
+#else
     Load_Stream(atStreamStart, (uint8_t *)varstatement, 8);
     if (varstatement->entries)
     {
@@ -8128,6 +8244,7 @@ void __cdecl Load_statement(bool atStreamStart)
         varexpressionEntry_ptr = varstatement->entries;
         Load_expressionEntry_ptrArray(1, varstatement->numEntries);
     }
+#endif
 }
 
 void __cdecl Load_listBoxDef_t(bool atStreamStart)
@@ -8188,7 +8305,15 @@ void __cdecl Load_multiDef_ptr(bool atStreamStart)
 
 void __cdecl Load_windowDef_t(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    uint8_t serialized[156];
+    DB_LoadSwitchSerialized(serialized, sizeof(serialized));
+    Switch_TranslateWindowDefSerialized(
+        varwindowDef_t,
+        serialized);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varwindowDef_t, 156);
+#endif
     varXString = &varwindowDef_t->name;
     Load_XString(0);
     varXString = &varwindowDef_t->group;
@@ -8199,9 +8324,19 @@ void __cdecl Load_windowDef_t(bool atStreamStart)
 
 void __cdecl Load_Window(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    uint8_t serialized[156];
+    DB_LoadSwitchSerialized(serialized, sizeof(serialized));
+    varwindowDef_t = varWindow;
+    Switch_TranslateWindowDefSerialized(
+        varwindowDef_t,
+        serialized);
+    Load_windowDef_t(0);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varWindow, 156);
     varwindowDef_t = varWindow;
     Load_windowDef_t(0);
+#endif
 }
 
 #ifdef __SWITCH__
@@ -8323,7 +8458,12 @@ void __cdecl Load_itemDefData_t(bool atStreamStart)
 
 void __cdecl Load_itemDef_t(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+    Switch_TranslateItemDefSerialized(varitemDef_t);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varitemDef_t, 372);
+#endif
     varWindow = &varitemDef_t->window;
     Load_Window(0);
     varXString = &varitemDef_t->text;
@@ -8390,6 +8530,49 @@ void __cdecl Load_itemDef_t(bool atStreamStart)
 
 void __cdecl Load_itemDef_ptr(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        uint32_t serialized = 0;
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+        *varitemDef_ptr = nullptr;
+        if (!serialized)
+            return;
+
+        if (serialized == UINT32_MAX || serialized == UINT32_MAX - 1)
+        {
+            DB_AllocStreamPos(3);
+            *varitemDef_ptr =
+                reinterpret_cast<itemDef_s *>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(sizeof(itemDef_s)),
+                        "SwitchItemDef",
+                        22));
+
+            std::memset(
+                *varitemDef_ptr,
+                0,
+                sizeof(itemDef_s));
+
+            varitemDef_t = *varitemDef_ptr;
+            Switch_TranslateItemDefSerialized(varitemDef_t);
+
+            if (serialized == UINT32_MAX - 1)
+            {
+                const void **inserted = DB_InsertPointer();
+                (void)inserted;
+            }
+            return;
+        }
+
+        *varitemDef_ptr =
+            reinterpret_cast<itemDef_s *>(
+                DB_ConvertOffsetToPointerValue(serialized));
+        return;
+    }
+#endif
+
     Load_Stream(atStreamStart, (uint8_t *)varitemDef_ptr, 4);
     if (*varitemDef_ptr)
     {
@@ -8401,6 +8584,67 @@ void __cdecl Load_itemDef_ptr(bool atStreamStart)
 
 void __cdecl Load_itemDef_ptrArray(bool atStreamStart, int32_t count)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        if (count <= 0)
+            return;
+
+        DB_AllocStreamPos(3);
+
+        std::vector<uint32_t> serialized(
+            static_cast<size_t>(count));
+        DB_LoadSwitchSerialized(
+            serialized.data(),
+            static_cast<size_t>(count) * sizeof(uint32_t));
+
+        itemDef_s **base = varitemDef_ptr;
+        for (int32_t i = 0; i < count; ++i)
+        {
+            varitemDef_ptr = base + i;
+            const uint32_t token =
+                serialized[static_cast<size_t>(i)];
+
+            *varitemDef_ptr = nullptr;
+            if (!token)
+                continue;
+
+            if (token == UINT32_MAX || token == UINT32_MAX - 1)
+            {
+                DB_AllocStreamPos(3);
+                *varitemDef_ptr =
+                    reinterpret_cast<itemDef_s *>(
+                        Hunk_Alloc(
+                            static_cast<uint32_t>(sizeof(itemDef_s)),
+                            "SwitchItemDef",
+                            22));
+
+                std::memset(
+                    *varitemDef_ptr,
+                    0,
+                    sizeof(itemDef_s));
+
+                const void **inserted = nullptr;
+                if (token == UINT32_MAX - 1)
+                    inserted = DB_InsertPointer();
+
+                varitemDef_t = *varitemDef_ptr;
+                Load_itemDef_t(1);
+
+                if (inserted)
+                    *inserted = *varitemDef_ptr;
+            }
+            else
+            {
+                *varitemDef_ptr =
+                    reinterpret_cast<itemDef_s *>(
+                        DB_ConvertOffsetToPointerValue(token));
+            }
+        }
+        return;
+    }
+#endif
+
     itemDef_s **var; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
 
