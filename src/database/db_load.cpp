@@ -6100,17 +6100,32 @@ void __cdecl Load_MaterialHandle(bool atStreamStart)
 #endif
             Load_MaterialAsset((XAssetHeader *)varMaterialHandle);
 #ifdef __SWITCH__
+            g_switchDbStage = "material/asset_return";
             Switch_LogWrite("[SWITCH MATERIAL] asset done\n");
 #endif
             if (inserted)
+            {
+#ifdef __SWITCH__
+                g_switchDbStage = "material/inserted";
+#endif
                 *inserted = *varMaterialHandle;
+#ifdef __SWITCH__
+                g_switchDbStage = "material/inserted_done";
+#endif
+            }
         }
         else
         {
             DB_ConvertOffsetToAlias((uint32_t *)varMaterialHandle);
         }
     }
+#ifdef __SWITCH__
+    g_switchDbStage = "material/pop_call";
+#endif
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    g_switchDbStage = "material/done";
+#endif
 }
 
 void __cdecl Load_MaterialHandleArray(bool atStreamStart, int32_t count)
