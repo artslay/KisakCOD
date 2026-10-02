@@ -2,7 +2,7 @@
 #include "database.h"
 
 #ifdef __SWITCH__
-extern const char *g_switchDbStage;
+extern const char * volatile g_switchDbStage;
 extern char com_errorMessage[4096];
 #endif
 
