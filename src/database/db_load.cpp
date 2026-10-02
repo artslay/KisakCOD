@@ -3825,6 +3825,47 @@ void __cdecl Load_XSurfaceCollisionNodeArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_XSurfaceCollisionTree(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+
+    struct SerializedXSurfaceCollisionTree
+    {
+        float trans[3];
+        float scale[3];
+        uint32_t nodeCount;
+        uint32_t nodes;
+        uint32_t leafCount;
+        uint32_t leafs;
+    };
+    static_assert(sizeof(SerializedXSurfaceCollisionTree) == 40);
+
+    SerializedXSurfaceCollisionTree serialized{};
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    std::memset(varXSurfaceCollisionTree, 0, sizeof(*varXSurfaceCollisionTree));
+    std::memcpy(varXSurfaceCollisionTree->trans, serialized.trans, sizeof(serialized.trans));
+    std::memcpy(varXSurfaceCollisionTree->scale, serialized.scale, sizeof(serialized.scale));
+    varXSurfaceCollisionTree->nodeCount = serialized.nodeCount;
+    varXSurfaceCollisionTree->leafCount = serialized.leafCount;
+
+    if (serialized.nodes)
+    {
+        varXSurfaceCollisionTree->nodes =
+            reinterpret_cast<XSurfaceCollisionNode *>(
+                AllocLoad_GfxPackedVertex0());
+        varXSurfaceCollisionNode = varXSurfaceCollisionTree->nodes;
+        Load_XSurfaceCollisionNodeArray(1, varXSurfaceCollisionTree->nodeCount);
+    }
+
+    if (serialized.leafs)
+    {
+        varXSurfaceCollisionTree->leafs =
+            reinterpret_cast<XSurfaceCollisionLeaf *>(
+                AllocLoad_XBlendInfo());
+        varXSurfaceCollisionLeaf = varXSurfaceCollisionTree->leafs;
+        Load_XSurfaceCollisionLeafArray(1, varXSurfaceCollisionTree->leafCount);
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varXSurfaceCollisionTree, 40);
     if (varXSurfaceCollisionTree->nodes)
     {
@@ -3838,10 +3879,59 @@ void __cdecl Load_XSurfaceCollisionTree(bool atStreamStart)
         varXSurfaceCollisionLeaf = varXSurfaceCollisionTree->leafs;
         Load_XSurfaceCollisionLeafArray(1, varXSurfaceCollisionTree->leafCount);
     }
+#endif
 }
 
 void __cdecl Load_XRigidVertList(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+
+    struct SerializedXRigidVertList
+    {
+        uint16_t boneOffset;
+        uint16_t vertCount;
+        uint16_t triOffset;
+        uint16_t triCount;
+        uint32_t collisionTree;
+    };
+    static_assert(sizeof(SerializedXRigidVertList) == 12);
+
+    SerializedXRigidVertList serialized{};
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    std::memset(varXRigidVertList, 0, sizeof(*varXRigidVertList));
+    varXRigidVertList->boneOffset = serialized.boneOffset;
+    varXRigidVertList->vertCount = serialized.vertCount;
+    varXRigidVertList->triOffset = serialized.triOffset;
+    varXRigidVertList->triCount = serialized.triCount;
+
+    if (serialized.collisionTree)
+    {
+        if (serialized.collisionTree == UINT32_MAX)
+        {
+            varXRigidVertList->collisionTree =
+                reinterpret_cast<XSurfaceCollisionTree *>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(
+                            sizeof(XSurfaceCollisionTree)),
+                        "SwitchXSurfaceCollisionTree",
+                        22));
+            std::memset(
+                varXRigidVertList->collisionTree,
+                0,
+                sizeof(XSurfaceCollisionTree));
+            varXSurfaceCollisionTree = varXRigidVertList->collisionTree;
+            Load_XSurfaceCollisionTree(1);
+        }
+        else
+        {
+            varXRigidVertList->collisionTree =
+                reinterpret_cast<XSurfaceCollisionTree *>(
+                    DB_ConvertOffsetToPointerValue(serialized.collisionTree));
+        }
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varXRigidVertList, 12);
     if (varXRigidVertList->collisionTree)
     {
@@ -3856,6 +3946,7 @@ void __cdecl Load_XRigidVertList(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)&varXRigidVertList->collisionTree);
         }
     }
+#endif
 }
 
 void __cdecl Load_XRigidVertListArray(bool atStreamStart, int32_t count)
@@ -3885,6 +3976,47 @@ void __cdecl Load_XBlendInfoArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_XSurfaceVertexInfo(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+
+    struct SerializedXSurfaceVertexInfo
+    {
+        uint16_t vertCount[4];
+        uint32_t vertsBlend;
+    };
+    static_assert(sizeof(SerializedXSurfaceVertexInfo) == 12);
+
+    SerializedXSurfaceVertexInfo serialized{};
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    std::memset(varXSurfaceVertexInfo, 0, sizeof(*varXSurfaceVertexInfo));
+    std::memcpy(
+        varXSurfaceVertexInfo->vertCount,
+        serialized.vertCount,
+        sizeof(serialized.vertCount));
+
+    if (serialized.vertsBlend)
+    {
+        if (serialized.vertsBlend == UINT32_MAX)
+        {
+            varXSurfaceVertexInfo->vertsBlend =
+                reinterpret_cast<uint16_t *>(AllocLoad_XBlendInfo());
+            varXBlendInfo = varXSurfaceVertexInfo->vertsBlend;
+            Load_XBlendInfoArray(
+                1,
+                7 * varXSurfaceVertexInfo->vertCount[3]
+                + 5 * varXSurfaceVertexInfo->vertCount[2]
+                + 3 * varXSurfaceVertexInfo->vertCount[1]
+                + varXSurfaceVertexInfo->vertCount[0]);
+        }
+        else
+        {
+            varXSurfaceVertexInfo->vertsBlend =
+                reinterpret_cast<uint16_t *>(
+                    DB_ConvertOffsetToPointerValue(serialized.vertsBlend));
+        }
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varXSurfaceVertexInfo, 12);
     if (varXSurfaceVertexInfo->vertsBlend)
     {
@@ -3904,6 +4036,7 @@ void __cdecl Load_XSurfaceVertexInfo(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)&varXSurfaceVertexInfo->vertsBlend);
         }
     }
+#endif
 }
 
 void __cdecl Load_r_index_tArray(bool atStreamStart, int32_t count)
@@ -3926,6 +4059,168 @@ void __cdecl Load_XZoneHandle(bool atStreamStart)
 
 void __cdecl Load_XSurface(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+
+    struct SerializedXSurface
+    {
+        uint8_t tileMode;
+        uint8_t deformed;
+        uint16_t vertCount;
+        uint16_t triCount;
+        uint8_t zoneHandle;
+        uint8_t pad0;
+        uint16_t baseTriIndex;
+        uint16_t baseVertIndex;
+        uint32_t triIndices;
+        uint16_t vertCountInfo[4];
+        uint32_t vertsBlend;
+        uint32_t verts0;
+        uint32_t vertListCount;
+        uint32_t vertList;
+        int32_t partBits[4];
+    };
+    static_assert(sizeof(SerializedXSurface) == 56);
+
+    SerializedXSurface serialized{};
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    std::memset(varXSurface, 0, sizeof(*varXSurface));
+    varXSurface->tileMode = serialized.tileMode;
+    varXSurface->deformed = serialized.deformed != 0;
+    varXSurface->vertCount = serialized.vertCount;
+    varXSurface->triCount = serialized.triCount;
+    varXSurface->zoneHandle = serialized.zoneHandle;
+    varXSurface->baseTriIndex = serialized.baseTriIndex;
+    varXSurface->baseVertIndex = serialized.baseVertIndex;
+    varXSurface->vertInfo.vertCount[0] = serialized.vertCountInfo[0];
+    varXSurface->vertInfo.vertCount[1] = serialized.vertCountInfo[1];
+    varXSurface->vertInfo.vertCount[2] = serialized.vertCountInfo[2];
+    varXSurface->vertInfo.vertCount[3] = serialized.vertCountInfo[3];
+    if (serialized.vertsBlend)
+    {
+        if (serialized.vertsBlend == UINT32_MAX)
+        {
+            varXSurface->vertInfo.vertsBlend =
+                reinterpret_cast<uint16_t *>(AllocLoad_XBlendInfo());
+            varXBlendInfo = varXSurface->vertInfo.vertsBlend;
+            Load_XBlendInfoArray(
+                1,
+                7 * varXSurface->vertInfo.vertCount[3]
+                + 5 * varXSurface->vertInfo.vertCount[2]
+                + 3 * varXSurface->vertInfo.vertCount[1]
+                + varXSurface->vertInfo.vertCount[0]);
+        }
+        else
+        {
+            varXSurface->vertInfo.vertsBlend =
+                reinterpret_cast<uint16_t *>(
+                    DB_ConvertOffsetToPointerValue(serialized.vertsBlend));
+        }
+    }
+
+    if (serialized.triIndices)
+    {
+        varXSurface->triIndices =
+            reinterpret_cast<uint16_t *>(
+                serialized.triIndices == UINT32_MAX
+                    ? static_cast<uintptr_t>(UINTPTR_MAX)
+                    : static_cast<uintptr_t>(serialized.triIndices));
+    }
+
+    varXSurface->verts0 =
+        reinterpret_cast<GfxPackedVertex *>(
+            serialized.verts0 == 0
+                ? 0
+                : serialized.verts0 == UINT32_MAX
+                    ? UINTPTR_MAX
+                    : static_cast<uintptr_t>(serialized.verts0));
+
+    varXSurface->vertListCount = serialized.vertListCount;
+    if (serialized.vertList)
+    {
+        if (serialized.vertList == UINT32_MAX)
+        {
+            varXSurface->vertList =
+                reinterpret_cast<XRigidVertList *>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(
+                            sizeof(XRigidVertList) *
+                            static_cast<size_t>(varXSurface->vertListCount)),
+                        "SwitchXRigidVertListArray",
+                        22));
+            std::memset(
+                varXSurface->vertList,
+                0,
+                sizeof(XRigidVertList) *
+                    static_cast<size_t>(varXSurface->vertListCount));
+        }
+        else
+        {
+            varXSurface->vertList =
+                reinterpret_cast<XRigidVertList *>(
+                    DB_ConvertOffsetToPointerValue(serialized.vertList));
+        }
+    }
+
+    std::memcpy(
+        varXSurface->partBits,
+        serialized.partBits,
+        sizeof(varXSurface->partBits));
+
+    varXZoneHandle = &varXSurface->zoneHandle;
+    Load_XZoneHandle(0);
+    varXSurfaceVertexInfo = &varXSurface->vertInfo;
+
+    DB_PushStreamPos(7);
+    if (serialized.verts0)
+    {
+        if (serialized.verts0 == UINT32_MAX)
+        {
+            varXSurface->verts0 =
+                reinterpret_cast<GfxPackedVertex *>(
+                    AllocLoad_GfxPackedVertex0());
+            varGfxPackedVertex0 = varXSurface->verts0;
+            Load_GfxPackedVertex0Array(1, varXSurface->vertCount);
+        }
+        else
+        {
+            varXSurface->verts0 =
+                reinterpret_cast<GfxPackedVertex *>(
+                    DB_ConvertOffsetToPointerValue(serialized.verts0));
+        }
+    }
+    DB_PopStreamPos();
+
+    if (serialized.vertList)
+    {
+        if (serialized.vertList == UINT32_MAX)
+        {
+            varXRigidVertList = varXSurface->vertList;
+            Load_XRigidVertListArray(1, varXSurface->vertListCount);
+        }
+    }
+
+    DB_PushStreamPos(8);
+    if (serialized.triIndices)
+    {
+        if (serialized.triIndices == UINT32_MAX)
+        {
+            varXSurface->triIndices =
+                reinterpret_cast<uint16_t *>(
+                    AllocLoad_GfxPackedVertex0());
+            varr_index16_t = varXSurface->triIndices;
+            Load_r_index16_tArray(1, 3 * varXSurface->triCount);
+        }
+        else
+        {
+            varXSurface->triIndices =
+                reinterpret_cast<uint16_t *>(
+                    DB_ConvertOffsetToPointerValue(serialized.triIndices));
+        }
+    }
+    DB_PopStreamPos();
+#else
     Load_Stream(atStreamStart, (unsigned char*)varXSurface, 56);
     varXZoneHandle = &varXSurface->zoneHandle;
     Load_XZoneHandle(0);
@@ -3974,10 +4269,20 @@ void __cdecl Load_XSurface(bool atStreamStart)
         }
     }
     DB_PopStreamPos();
+#endif
 }
 
 void __cdecl Load_XSurfaceArray(bool atStreamStart, int32_t count)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+    XSurface *var = varXSurface;
+    for (int32_t i = 0; i < count; ++i)
+    {
+        varXSurface = &var[i];
+        Load_XSurface(1);
+    }
+#else
     XSurface *var; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
 
@@ -3989,6 +4294,7 @@ void __cdecl Load_XSurfaceArray(bool atStreamStart, int32_t count)
         Load_XSurface(0);
         ++var;
     }
+#endif
 }
 
 void __cdecl Load_GfxTextureLoad(bool atStreamStart)
@@ -6477,7 +6783,23 @@ void __cdecl Load_XModel(bool atStreamStart)
     }
     if (varXModel->surfs)
     {
+#ifdef __SWITCH__
+        varXModel->surfs =
+            reinterpret_cast<XSurface *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(
+                        sizeof(XSurface) *
+                        static_cast<size_t>(varXModel->numsurfs)),
+                    "SwitchXSurfaceArray",
+                    22));
+        std::memset(
+            varXModel->surfs,
+            0,
+            sizeof(XSurface) *
+                static_cast<size_t>(varXModel->numsurfs));
+#else
         varXModel->surfs = (XSurface *)AllocLoad_FxElemVisStateSample();
+#endif
         varXSurface = varXModel->surfs;
         Load_XSurfaceArray(1, varXModel->numsurfs);
     }
