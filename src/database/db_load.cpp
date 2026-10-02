@@ -6056,18 +6056,30 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
     {
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varMaterialTechniqueSetPtr));
 #ifdef __SWITCH__
+        const bool traceCinematic =
+            g_switchCurrentAssetRawType == ASSET_TYPE_TECHNIQUE_SET &&
+            g_switchCurrentAssetIndex >= 1498 &&
+            g_switchCurrentAssetIndex <= 1505;
+
+        if (traceCinematic)
         {
-            char trace[192];
+            char trace[256];
             std::snprintf(
-                trace, sizeof(trace),
-                "[SWITCH MATERIAL] techset ptr=%08x stream=%u\n",
-                value, g_streamPosIndex);
+                trace,
+                sizeof(trace),
+                "[SWITCH DB FIND] techset ptr asset=%d value=%08x stream=%u slot=%p\n",
+                g_switchCurrentAssetIndex,
+                value,
+                g_streamPosIndex,
+                static_cast<void *>(varMaterialTechniqueSetPtr));
             Switch_LogWrite(trace);
         }
 #endif
         if (value == -1 || value == -2)
         {
 #ifdef __SWITCH__
+            if (traceCinematic)
+                Switch_LogWrite("[SWITCH DB FIND] techset ptr -> inline\n");
             Switch_LogWrite("[SWITCH MATERIAL] techset inline begin\n");
             *varMaterialTechniqueSetPtr =
                 reinterpret_cast<MaterialTechniqueSet *>(
@@ -6097,6 +6109,8 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
         else
         {
 #ifdef __SWITCH__
+            if (traceCinematic)
+                Switch_LogWrite("[SWITCH DB FIND] techset ptr -> alias\n");
             const uintptr_t aliasSlot = DB_ConvertOffsetToPointerValue(value);
             const uint32_t *aliasWords =
                 reinterpret_cast<const uint32_t *>(aliasSlot);
