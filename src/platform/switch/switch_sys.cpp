@@ -62,9 +62,13 @@ static bool Switch_LogPrefixAllowed(const char *msg)
 
     // Crash diagnostics use the separate [KisakCOD][CRASH] path.
     // Keep normal [SWITCH ...] diagnostics suppressed, but allow the
-    // narrowly-scoped XModel 1520 trace used during DB ABI bring-up.
+    // DB asset lookup and serialized material traces needed for fastfile
+    // ABI bring-up.
     return std::strncmp(msg, "[SWITCH XMODEL1520]", 19) == 0 ||
-           std::strncmp(msg, "[SWITCH DB FIND]", 16) == 0;
+           std::strncmp(msg, "[SWITCH DB FIND]", 16) == 0 ||
+           std::strncmp(msg, "[SWITCH TECHSET", 15) == 0 ||
+           std::strncmp(msg, "[SWITCH TECHNIQUE", 18) == 0 ||
+           std::strncmp(msg, "[SWITCH PASS", 12) == 0;
 }
 
 /*
