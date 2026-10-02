@@ -2641,6 +2641,8 @@ static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
     XAssetHeader result = existingEntry->entry.asset.header;
 
 #ifdef __SWITCH__
+    g_switchDbLastAssetResult = result.data;
+    g_switchDbLastAssetType = static_cast<uint32_t>(type);
     g_switchDbStage = "asset/unlock";
 #endif
     Sys_UnlockWrite(&db_hashCritSect);
