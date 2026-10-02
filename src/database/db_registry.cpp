@@ -2891,8 +2891,14 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
 #ifdef __SWITCH__
     const bool switchTraceTechniqueFind =
         type == ASSET_TYPE_TECHNIQUE_SET &&
-        g_switchCurrentAssetIndex >= 0 &&
-        g_switchCurrentAssetIndex <= 32;
+        (
+            (g_switchCurrentAssetIndex >= 0 &&
+             g_switchCurrentAssetIndex <= 32) ||
+            (name &&
+             (!I_stricmp(name, "sm2/cinematic") ||
+              !I_stricmp(name, "cinematic") ||
+              !I_stricmp(name, "default")))
+        );
 
     if (switchTraceTechniqueFind)
     {
@@ -3280,18 +3286,46 @@ void __cdecl Mark_MaterialAsset(Material *material)
 void __cdecl Load_MaterialTechniqueSetAsset(XAssetHeader *techniqueSet)
 {
 #ifdef __SWITCH__
+    MaterialTechniqueSet *techset = techniqueSet ? techniqueSet->techniqueSet : nullptr;
+    const char *techsetName = techset ? techset->name : nullptr;
+    const bool traceTechset =
+        techsetName &&
+        (!I_stricmp(techsetName, "sm2/cinematic") ||
+         !I_stricmp(techsetName, "cinematic") ||
+         !I_stricmp(techsetName, "default"));
+
+    if (traceTechset)
     {
-        char trace[256];
+        char trace[320];
         std::snprintf(
-            trace, sizeof(trace),
-            "[SWITCH TECHSET ASSET] before add name=%p\n",
-            static_cast<void *>(techniqueSet->techniqueSet));
+            trace,
+            sizeof(trace),
+            "[SWITCH DB FIND] TECHSET ASSET begin index=%d raw=%u name=%s obj=%p\n",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            techsetName,
+            static_cast<void *>(techset));
         Switch_LogWrite(trace);
+        g_switchDbStage = "techset/asset_add";
     }
 #endif
-    techniqueSet->xmodelPieces = DB_AddXAsset(ASSET_TYPE_TECHNIQUE_SET, (XAssetHeader)techniqueSet->xmodelPieces).xmodelPieces;
+    techniqueSet->xmodelPieces =
+        DB_AddXAsset(
+            ASSET_TYPE_TECHNIQUE_SET,
+            (XAssetHeader)techniqueSet->xmodelPieces).xmodelPieces;
 #ifdef __SWITCH__
-    Switch_LogWrite("[SWITCH TECHSET ASSET] after add\n");
+    if (traceTechset)
+    {
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH DB FIND] TECHSET ASSET after add name=%s result=%p\n",
+            techsetName,
+            static_cast<void *>(techniqueSet->techniqueSet));
+        Switch_LogWrite(trace);
+        g_switchDbStage = "techset/asset_added";
+    }
 #endif
 #ifdef __SWITCH__
     g_switchDbStage = "techset/remap_call";
