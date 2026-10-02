@@ -26,6 +26,7 @@ extern void Switch_LogWrite(const char *msg);
 extern uint32_t g_switchImageAdds;
 extern int32_t g_switchCurrentAssetIndex;
 extern uint32_t g_switchCurrentAssetRawType;
+extern uint32_t g_switchCurrentAssetHeader;
 #endif
 #include <qcommon/com_bsp.h>
 #include <gfx_d3d/r_init.h>
