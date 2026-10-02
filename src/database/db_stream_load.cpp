@@ -173,10 +173,55 @@ void __cdecl DB_LoadSwitchSerialized(void *dst, uint32_t size)
     iassert(dst);
     iassert(size);
 
+    const bool traceMenu11 =
+        g_switchCurrentAssetIndex == 11 &&
+        g_switchCurrentAssetRawType == 20u;
+
     uint8_t *streamPos = DB_GetStreamPos();
+
+    if (traceMenu11)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH MENU11] serialized read pre size=%u stream=%u pos=%p\\n",
+            size,
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(streamPos));
+        Switch_LogWrite(trace);
+        g_switchDbStage = "menu/serialized_read";
+    }
+
     DB_LoadXFileData(streamPos, size);
+
+    if (traceMenu11)
+    {
+        Switch_LogWrite("[SWITCH MENU11] serialized read inflated\\n");
+        g_switchDbStage = "menu/serialized_copy";
+    }
+
     std::memcpy(dst, streamPos, size);
+
+    if (traceMenu11)
+    {
+        Switch_LogWrite("[SWITCH MENU11] serialized copy done\\n");
+        g_switchDbStage = "menu/serialized_inc";
+    }
+
     DB_IncStreamPos(static_cast<int32_t>(size));
+
+    if (traceMenu11)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH MENU11] serialized read post pos=%p\\n",
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+        g_switchDbStage = "menu/serialized_done";
+    }
 #else
     (void)dst;
     (void)size;
