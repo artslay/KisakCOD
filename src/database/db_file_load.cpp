@@ -628,7 +628,7 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         {
             ++materialRecords;
         }
-        else if (serialized.type == ASSET_TYPE_TECHNIQUE_SET)
+        else if (serialized.type == 5u)
         {
             ++techsetRecords;
         }
@@ -643,7 +643,7 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         g_switchCurrentAssetRawType = serialized.type;
         g_switchCurrentAssetHeader = serialized.header;
 
-        if (serialized.type == ASSET_TYPE_TECHNIQUE_SET &&
+        if (serialized.type == 5u &&
             i >= 1498 && i <= 1505)
         {
             char trace[224];
