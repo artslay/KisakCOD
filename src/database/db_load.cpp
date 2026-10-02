@@ -6150,7 +6150,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
                 std::snprintf(
                     trace + written,
                     sizeof(trace) - static_cast<size_t>(written),
-                    "\\n");
+                    "\n");
                 Switch_LogWrite(trace);
             }
 
@@ -6173,7 +6173,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
                 std::snprintf(
                     trace + written,
                     sizeof(trace) - static_cast<size_t>(written),
-                    "\\n");
+                    "\n");
                 Switch_LogWrite(trace);
             }
         }
