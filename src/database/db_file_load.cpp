@@ -21,6 +21,12 @@ extern const char *varConstChar;
 extern XAssetHeader *varXAssetHeader;
 extern void __cdecl Load_XAssetHeader(bool atStreamStart);
 uint32_t g_switchImageAdds = 0;
+
+// XFile is a serialized fastfile header: two 32-bit sizes followed by
+// exactly nine 32-bit block sizes. Keep this layout independent of host
+// pointer size on ARM64.
+static_assert(sizeof(XFile) == 44, "Switch XFile must remain 44-byte serialized layout");
+static_assert(offsetof(XFile, blockSize) == 8, "Switch XFile.blockSize offset must remain 8");
 #endif
 
 //uint32_t volatile g_loadingAssets      828e3f3c     db_file_load.obj
@@ -372,7 +378,8 @@ void __cdecl DB_LoadXFileInternal()
         int written = std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH XFILE RAW] size=%u external=%u",
+            "[SWITCH XFILE BLOCKS] zone=%s size=%u external=%u",
+            g_load.filename,
             file.size,
             file.externalSize);
 
