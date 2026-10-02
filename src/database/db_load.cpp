@@ -9105,6 +9105,48 @@ void __cdecl Load_WeaponDefPtr(bool atStreamStart)
     if (*varWeaponDefPtr)
     {
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varWeaponDefPtr));
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 1506 &&
+            g_switchCurrentAssetRawType == 23u)
+        {
+            const uintptr_t block0Base =
+                g_streamBlocks && g_streamBlocks[0].data
+                    ? reinterpret_cast<uintptr_t>(g_streamBlocks[0].data)
+                    : 0;
+            const uintptr_t current =
+                reinterpret_cast<uintptr_t>(DB_GetStreamPos());
+            const uintptr_t array0 =
+                reinterpret_cast<uintptr_t>(g_streamPosArray[0]);
+
+            char trace[384];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH WEAPON1506] after PushStreamPos0 value=%08x"
+                " current=%p off=%08x array0=%p array0off=%08x"
+                " stream=%u\n",
+                value,
+                static_cast<const void *>(current),
+                block0Base && current >= block0Base
+                    ? static_cast<unsigned>(current - block0Base)
+                    : UINT32_MAX,
+                static_cast<const void *>(array0),
+                block0Base && array0 >= block0Base
+                    ? static_cast<unsigned>(array0 - block0Base)
+                    : UINT32_MAX,
+                static_cast<unsigned>(g_streamPosIndex));
+            Switch_LogWrite(trace);
+
+            if (current && current >= block0Base &&
+                current + 64 <= block0Base + g_streamBlocks[0].size)
+            {
+                Switch_LogRawDwords(
+                    "[SWITCH WEAPON1506] stream0 bytes before WeaponDef",
+                    reinterpret_cast<const uint8_t *>(current),
+                    64);
+            }
+        }
+#endif
         if (value == -1 || value == -2)
         {
 #ifdef __SWITCH__
