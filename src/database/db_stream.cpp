@@ -278,45 +278,51 @@ void __cdecl DB_IncStreamPos(int32_t size)
 
 const void **__cdecl DB_InsertPointer()
 {
-    const void **pData; // [esp+0h] [ebp-4h]
-
 #ifdef __SWITCH__
-    const uint32_t traceIndex = g_switchCurrentAssetIndex < 0
-        ? UINT32_MAX
-        : static_cast<uint32_t>(g_switchCurrentAssetIndex);
-    const uint32_t beforeCount = g_switchPointerInsertCount;
+    // The fastfile/DB stream layout remains serialized 32-bit. Preserve the
+    // original four-byte stream reservation, but keep the actual pointer slot
+    // native 64-bit so callers may store a Switch pointer without truncation.
     const uintptr_t beforePos =
         reinterpret_cast<uintptr_t>(g_streamPos);
-#endif
 
     DB_PushStreamPos(4);
-#ifdef __SWITCH__
-    pData = reinterpret_cast<const void **>(DB_AllocStreamPos(7));
-    DB_IncStreamPos(static_cast<int32_t>(sizeof(void *)));
-    ++g_switchPointerInsertCount;
-    g_switchPointerInsertExtraBytes +=
-        static_cast<uint32_t>(sizeof(void *) - 4);
+    DB_AllocStreamPos(3);
+    DB_IncStreamPos(4);
 
-    if (traceIndex >= 1190u && traceIndex <= 1210u)
+    const void **pData =
+        reinterpret_cast<const void **>(
+            Hunk_Alloc(
+                static_cast<uint32_t>(sizeof(void *)),
+                "SwitchDBInsertPointer",
+                22));
+    *pData = nullptr;
+
+    ++g_switchPointerInsertCount;
+
+    if (g_switchCurrentAssetIndex >= 1190 &&
+        g_switchCurrentAssetIndex <= 1210)
     {
         char trace[256];
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH PTR INSERT] asset=%u #%u extra=%u before=%p after=%p slot=%p\n",
-            traceIndex,
-            beforeCount,
-            g_switchPointerInsertExtraBytes,
-            reinterpret_cast<void *>(beforePos),
-            reinterpret_cast<void *>(g_streamPos),
-            static_cast<void *>(pData));
+            "[SWITCH PTR INSERT] asset=%d before=%p after=%p slot=%p\n",
+            g_switchCurrentAssetIndex,
+            reinterpret_cast<const void *>(beforePos),
+            static_cast<const void *>(g_streamPos),
+            static_cast<const void *>(pData));
         Switch_LogWrite(trace);
     }
-#else
-    pData = (const void **)DB_AllocStreamPos(3);
-    DB_IncStreamPos(4);
-#endif
+
     DB_PopStreamPos();
     return pData;
+#else
+    const void **pData;
+    DB_PushStreamPos(4);
+    pData = (const void **)DB_AllocStreamPos(3);
+    DB_IncStreamPos(4);
+    DB_PopStreamPos();
+    return pData;
+#endif
 }
 
