@@ -66,9 +66,7 @@ static bool Switch_LogPrefixAllowed(const char *msg)
     // ABI bring-up.
     return std::strncmp(msg, "[SWITCH XMODEL1520]", 19) == 0 ||
            std::strncmp(msg, "[SWITCH DB FIND]", 16) == 0 ||
-           std::strncmp(msg, "[SWITCH TECHSET", 15) == 0 ||
-           std::strncmp(msg, "[SWITCH TECHNIQUE", 18) == 0 ||
-           std::strncmp(msg, "[SWITCH PASS", 12) == 0;
+           std::strncmp(msg, "[SWITCH TECHSET 1502]", 21) == 0;
 }
 
 /*
