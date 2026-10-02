@@ -8295,21 +8295,41 @@ void __cdecl Load_MenuList(bool atStreamStart)
 
     SerializedMenuList serialized{};
     const uint8_t *serializedStart = DB_GetStreamPos();
+
+    if (g_switchCurrentAssetIndex == 1504 &&
+        g_switchCurrentAssetRawType == 20u)
+    {
+        char trace[384];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XASSET STREAM] MenuList1504 pre stream=%u s0=%p s4=%p\\n",
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<const void *>(g_streamPosArray[0]),
+            static_cast<const void *>(g_streamPosArray[4]));
+        Switch_LogWrite(trace);
+        Switch_LogRawDwords(
+            "[SWITCH MENULIST1504 S0]",
+            g_streamPosIndex == 0 ? serializedStart : g_streamPosArray[0],
+            32);
+    }
+
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
     if (g_switchCurrentAssetIndex == 1504 &&
         g_switchCurrentAssetRawType == 20u)
     {
-        char trace[320];
+        char trace[384];
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH MENULIST1504] header=%p name=%08x count=%d menus=%08x afterHeader=%p\n",
+            "[SWITCH XASSET STREAM] MenuList1504 header=%p name=%08x count=%d menus=%08x after=%p stream=%u\\n",
             static_cast<const void *>(serializedStart),
             serialized.name,
             serialized.menuCount,
             serialized.menus,
-            static_cast<const void *>(DB_GetStreamPos()));
+            static_cast<const void *>(DB_GetStreamPos()),
+            static_cast<unsigned>(g_streamPosIndex));
         Switch_LogWrite(trace);
     }
 
