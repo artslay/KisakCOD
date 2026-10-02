@@ -7,6 +7,9 @@ extern void Switch_LogWrite(const char *msg);
 extern int32_t g_switchCurrentAssetIndex;
 extern uint32_t g_switchCurrentAssetRawType;
 extern uint32_t g_switchCurrentAssetHeader;
+extern const char *g_switchDbStage;
+
+const char *g_switchDbStage = "db_stream_load";
 #endif
 
 
@@ -185,7 +188,7 @@ void __cdecl DB_LoadSwitchSerialized(void *dst, uint32_t size)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH MENU11] serialized read pre size=%u stream=%u pos=%p\\n",
+            "[SWITCH MENU11] serialized read pre size=%u stream=%u pos=%p\n",
             size,
             static_cast<unsigned>(g_streamPosIndex),
             static_cast<void *>(streamPos));
@@ -197,7 +200,7 @@ void __cdecl DB_LoadSwitchSerialized(void *dst, uint32_t size)
 
     if (traceMenu11)
     {
-        Switch_LogWrite("[SWITCH MENU11] serialized read inflated\\n");
+        Switch_LogWrite("[SWITCH MENU11] serialized read inflated\n");
         g_switchDbStage = "menu/serialized_copy";
     }
 
@@ -205,7 +208,7 @@ void __cdecl DB_LoadSwitchSerialized(void *dst, uint32_t size)
 
     if (traceMenu11)
     {
-        Switch_LogWrite("[SWITCH MENU11] serialized copy done\\n");
+        Switch_LogWrite("[SWITCH MENU11] serialized copy done\n");
         g_switchDbStage = "menu/serialized_inc";
     }
 
@@ -217,7 +220,7 @@ void __cdecl DB_LoadSwitchSerialized(void *dst, uint32_t size)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH MENU11] serialized read post pos=%p\\n",
+            "[SWITCH MENU11] serialized read post pos=%p\n",
             static_cast<void *>(DB_GetStreamPos()));
         Switch_LogWrite(trace);
         g_switchDbStage = "menu/serialized_done";
