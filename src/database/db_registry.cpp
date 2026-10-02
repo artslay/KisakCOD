@@ -1623,20 +1623,28 @@ XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *na
 
 uint32_t __cdecl DB_HashForName(const char *name, XAssetType type)
 {
-    int32_t c; // [esp+8h] [ebp-4h]
-    int32_t out_val = (int)type;
+    int32_t out_val = static_cast<int32_t>(type);
 
-    while (1)
+    while (*name)
     {
-        c = tolower(*name);
+        // Keep the original asset-name hash semantics without calling the
+        // libc tolower() import. The Switch runtime should not depend on a
+        // possibly unresolved PLT entry for this hot registry path.
+        const unsigned char ch =
+            static_cast<unsigned char>(*name);
+        int32_t c = static_cast<int32_t>(ch);
+
+        if (c >= 'A' && c <= 'Z')
+            c += 'a' - 'A';
+
         if (c == '\\')
             c = '/';
-        if (!c)
-            break;
+
         out_val = c + 31 * out_val;
         ++name;
     }
-    return out_val % 0x8000u;
+
+    return static_cast<uint32_t>(out_val) % 0x8000u;
 }
 
 
