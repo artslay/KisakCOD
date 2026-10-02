@@ -11131,6 +11131,14 @@ void __cdecl Load_MenuList(bool atStreamStart)
     };
 
     static_assert(sizeof(SerializedMenuList) == 12);
+    const bool traceMenuList11 =
+        g_switchCurrentAssetIndex == 11 &&
+        g_switchCurrentAssetRawType == 20u;
+    if (traceMenuList11)
+    {
+        g_switchDbStage = "menulist/header_pre";
+        Switch_LogWrite("[SWITCH MENULIST11] before serialized header load\\n");
+    }
     iassert(atStreamStart);
 
     SerializedMenuList serialized{};
@@ -11151,6 +11159,22 @@ void __cdecl Load_MenuList(bool atStreamStart)
     }
 
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    if (traceMenuList11)
+    {
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH MENULIST11] header name=%08x count=%d menus=%08x after=%p stream=%u\\n",
+            serialized.name,
+            serialized.menuCount,
+            serialized.menus,
+            static_cast<const void *>(DB_GetStreamPos()),
+            static_cast<unsigned>(g_streamPosIndex));
+        Switch_LogWrite(trace);
+        g_switchDbStage = "menulist/header_post";
+    }
 
     if (g_switchCurrentAssetIndex == 1504 &&
         g_switchCurrentAssetRawType == 20u)
@@ -11187,6 +11211,10 @@ void __cdecl Load_MenuList(bool atStreamStart)
             64);
     }
 
+#ifdef __SWITCH__
+    if (traceMenuList11)
+        g_switchDbStage = "menulist/name";
+#endif
     varXString = &varMenuList->name;
     Load_XString(0);
 
@@ -11228,10 +11256,29 @@ void __cdecl Load_MenuList(bool atStreamStart)
             sizeof(menuDef_t *) * count);
 
         varmenuDef_ptr = varMenuList->menus;
+#ifdef __SWITCH__
+        if (traceMenuList11)
+            g_switchDbStage = "menulist/menus";
+#endif
         Load_menuDef_ptrArray(1, varMenuList->menuCount);
+#ifdef __SWITCH__
+        if (traceMenuList11)
+            g_switchDbStage = "menulist/menus_done";
+#endif
     }
 
+#ifdef __SWITCH__
+    if (traceMenuList11)
+        g_switchDbStage = "menulist/pop";
+#endif
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (traceMenuList11)
+    {
+        g_switchDbStage = "menulist/done";
+        Switch_LogWrite("[SWITCH MENULIST11] done\\n");
+    }
+#endif
 #else
     Load_Stream(atStreamStart, (uint8_t *)varMenuList, 12);
     DB_PushStreamPos(4);
@@ -11252,12 +11299,47 @@ void __cdecl Load_MenuListPtr(bool atStreamStart)
 {
     const void **inserted; // [esp+0h] [ebp-Ch]
     uint32_t value; // [esp+4h] [ebp-8h]
+#ifdef __SWITCH__
+    const bool traceMenuList11 =
+        g_switchCurrentAssetIndex == 11 &&
+        g_switchCurrentAssetRawType == 20u;
+    if (traceMenuList11)
+    {
+        g_switchDbStage = "menulist/ptr_pre";
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH MENULIST11] ptr pre atStream=%u slot=%p stream=%u pos=%p\\n",
+            static_cast<unsigned>(atStreamStart),
+            static_cast<void *>(varMenuListPtr),
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<const void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+#endif
 
     Load_Stream(atStreamStart, (uint8_t *)varMenuListPtr, 4);
     DB_PushStreamPos(0);
     if (*varMenuListPtr)
     {
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varMenuListPtr));
+#ifdef __SWITCH__
+        if (traceMenuList11)
+        {
+            g_switchDbStage = "menulist/ptr_loaded";
+            char trace[256];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH MENULIST11] ptr token=%08x ptr=%p stream=%u pos=%p\\n",
+                value,
+                static_cast<void *>(*varMenuListPtr),
+                static_cast<unsigned>(g_streamPosIndex),
+                static_cast<const void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
+#endif
         if (value == -1 || value == -2)
         {
 #ifdef __SWITCH__
@@ -11275,8 +11357,20 @@ void __cdecl Load_MenuListPtr(bool atStreamStart)
                 inserted = DB_InsertPointer();
             else
                 inserted = 0;
+#ifdef __SWITCH__
+            if (traceMenuList11)
+                g_switchDbStage = "menulist/load";
+#endif
             Load_MenuList(1);
+#ifdef __SWITCH__
+            if (traceMenuList11)
+                g_switchDbStage = "menulist/asset_register";
+#endif
             Load_MenuListAsset((XAssetHeader *)varMenuListPtr);
+#ifdef __SWITCH__
+            if (traceMenuList11)
+                g_switchDbStage = "menulist/asset_registered";
+#endif
             if (inserted)
                 *inserted = *varMenuListPtr;
         }
@@ -11285,7 +11379,15 @@ void __cdecl Load_MenuListPtr(bool atStreamStart)
             DB_ConvertOffsetToAlias((uint32_t *)varMenuListPtr);
         }
     }
+#ifdef __SWITCH__
+    if (traceMenuList11)
+        g_switchDbStage = "menulist/ptr_pop";
+#endif
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (traceMenuList11)
+        Switch_LogWrite("[SWITCH MENULIST11] ptr done\\n");
+#endif
 }
 
 void __cdecl Mark_listBoxDef_t()
