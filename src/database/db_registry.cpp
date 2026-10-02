@@ -2634,6 +2634,13 @@ static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
 #endif
 
 #ifdef __SWITCH__
+    // Copy the native 64-bit header while the registry lock is still held.
+    // Do not dereference the pool entry after releasing the writer lock.
+    g_switchDbStage = "asset/header";
+#endif
+    XAssetHeader result = existingEntry->entry.asset.header;
+
+#ifdef __SWITCH__
     g_switchDbStage = "asset/unlock";
 #endif
     Sys_UnlockWrite(&db_hashCritSect);
@@ -2646,11 +2653,14 @@ static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
 #endif
 
 #ifdef __SWITCH__
-    g_switchDbStage = "asset/return";
+    g_switchDbStage = "asset/sync";
 #endif
     DB_SyncLostDevice();
 
-    return existingEntry->entry.asset.header;
+#ifdef __SWITCH__
+    g_switchDbStage = "asset/return";
+#endif
+    return result;
 }
 
 XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
