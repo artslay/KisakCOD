@@ -48,6 +48,40 @@ extern uint32_t g_switchCurrentAssetRawType;
 
 #include <algorithm>
 #ifdef __SWITCH__
+static int Switch_IstricmpAssetName(const char *lhs, const char *rhs)
+{
+    if (!lhs || !rhs)
+    {
+        if (lhs == rhs)
+            return 0;
+        return lhs ? 1 : -1;
+    }
+
+    while (*lhs && *rhs)
+    {
+        unsigned char a = static_cast<unsigned char>(*lhs);
+        unsigned char b = static_cast<unsigned char>(*rhs);
+
+        if (a >= 'A' && a <= 'Z')
+            a = static_cast<unsigned char>(a + ('a' - 'A'));
+        if (b >= 'A' && b <= 'Z')
+            b = static_cast<unsigned char>(b + ('a' - 'A'));
+
+        if (a != b)
+            return static_cast<int>(a) - static_cast<int>(b);
+
+        ++lhs;
+        ++rhs;
+    }
+
+    return static_cast<int>(
+        static_cast<unsigned char>(*lhs)) -
+        static_cast<int>(
+            static_cast<unsigned char>(*rhs));
+}
+#endif
+
+#ifdef __SWITCH__
 #include <thread>
 #include <gfx/opengl/gl_backend.h>
 #endif
@@ -1612,7 +1646,7 @@ XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *na
         if (assetEntry->entry.asset.type == type)
         {
             XAssetName = DB_GetXAssetName(&assetEntry->entry.asset);
-            if (!I_stricmp(XAssetName, name))
+            if (Switch_IstricmpAssetName(XAssetName, name) == 0)
                 return &g_assetEntryPool[assetEntryIndex];
         }
     }
