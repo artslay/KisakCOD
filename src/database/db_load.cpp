@@ -6166,7 +6166,12 @@ static void Switch_TranslateXModelSerialized(XModel *model)
 
         uint32_t token = 0;
         std::memcpy(&token, serialized + pointerOffset, sizeof(token));
-        const uintptr_t widenedToken = static_cast<uintptr_t>(token);
+        const uintptr_t widenedToken =
+            token == UINT32_MAX
+                ? UINTPTR_MAX
+                : (token == UINT32_MAX - 1u
+                    ? UINTPTR_MAX - 1u
+                    : static_cast<uintptr_t>(token));
         std::memcpy(nativeBase + dst, &widenedToken, sizeof(widenedToken));
 
         src = static_cast<size_t>(pointerOffset) + sizeof(uint32_t);
