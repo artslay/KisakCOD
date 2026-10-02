@@ -3951,6 +3951,15 @@ void __cdecl Load_XRigidVertList(bool atStreamStart)
 
 void __cdecl Load_XRigidVertListArray(bool atStreamStart, int32_t count)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+    XRigidVertList *var = varXRigidVertList;
+    for (int32_t i = 0; i < count; ++i)
+    {
+        varXRigidVertList = &var[i];
+        Load_XRigidVertList(1);
+    }
+#else
     XRigidVertList *var; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
 
@@ -3962,6 +3971,7 @@ void __cdecl Load_XRigidVertListArray(bool atStreamStart, int32_t count)
         Load_XRigidVertList(0);
         ++var;
     }
+#endif
 }
 
 void __cdecl Load_GfxVertexBuffer(bool atStreamStart)
