@@ -14043,6 +14043,22 @@ void __cdecl Mark_FontHandle()
 void __cdecl Load_XAssetHeader(bool atStreamStart)
 {
 #ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex == 11 &&
+        g_switchCurrentAssetRawType == 20u)
+    {
+        g_switchDbStage = "xasset_header/11";
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XHEADER11] enter raw=%u runtime=%u atStream=%u headerPtr=%p data=%p\\n",
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            varXAsset ? static_cast<unsigned>(varXAsset->type) : ASSET_TYPE_COUNT,
+            static_cast<unsigned>(atStreamStart),
+            static_cast<void *>(varXAssetHeader),
+            varXAssetHeader ? varXAssetHeader->data : nullptr);
+        Switch_LogWrite(trace);
+    }
     if (g_switchCurrentAssetRawType == 31u &&
         g_switchCurrentAssetIndex >= 1190 &&
         g_switchCurrentAssetIndex <= 1210)
@@ -14077,6 +14093,10 @@ void __cdecl Load_XAssetHeader(bool atStreamStart)
     if (varXAsset->type == ASSET_TYPE_MATERIAL)
         g_switchDbStage = "material/header";
 #endif
+    if (g_switchCurrentAssetIndex == 11 &&
+        g_switchCurrentAssetRawType == 20u)
+        g_switchDbStage = "xasset_header/switch";
+
     switch (varXAsset->type)
     {
 #ifdef KISAK_SP
