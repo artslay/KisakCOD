@@ -8,8 +8,6 @@ extern int32_t g_switchCurrentAssetIndex;
 extern uint32_t g_switchCurrentAssetRawType;
 extern uint32_t g_switchCurrentAssetHeader;
 extern const char *g_switchDbStage;
-
-const char *g_switchDbStage = "db_stream_load";
 #endif
 
 
