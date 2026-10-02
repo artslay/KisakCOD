@@ -642,8 +642,28 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         g_switchCurrentAssetIndex = i;
         g_switchCurrentAssetRawType = serialized.type;
         g_switchCurrentAssetHeader = serialized.header;
+
+        const bool traceXAnim1507 =
+            i == 1507 && serialized.type == ASSET_TYPE_XANIMPARTS;
+        if (traceXAnim1507)
+        {
+            char trace[320];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XANIM1507] array pre-clear var=%p base=%p rawType=%u rawHeader=%08x\n",
+                static_cast<void *>(varXAsset),
+                static_cast<void *>(varXAssetList->assets),
+                serialized.type,
+                serialized.header);
+            Switch_LogWrite(trace);
+        }
 #endif
         memset(varXAsset, 0, sizeof(*varXAsset));
+#ifdef __SWITCH__
+        if (traceXAnim1507)
+            Switch_LogWrite("[SWITCH XANIM1507] array after-clear\n");
+#endif
 
         uint32_t runtimeType = serialized.type;
 #ifdef KISAK_SP
@@ -655,6 +675,23 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         memcpy(&varXAsset->header, &serialized.header,
             sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
+#ifdef __SWITCH__
+        if (i == 1507 && serialized.type == ASSET_TYPE_XANIMPARTS)
+        {
+            char trace[320];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XANIM1507] prepared runtimeType=%u actualType=%u header=%08x headerPtr=%p data=%p\n",
+                runtimeType,
+                static_cast<unsigned>(varXAsset->type),
+                serialized.header,
+                static_cast<void *>(varXAssetHeader),
+                varXAssetHeader ? varXAssetHeader->data : nullptr);
+            Switch_LogWrite(trace);
+            Switch_LogWrite("[SWITCH XANIM1507] before Load_XAssetHeader\n");
+        }
+#endif
 
         const bool traceStreamWindow =
             i >= 1490 && i <= 1506;
@@ -708,6 +745,8 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         Load_XAssetHeader(0);
 
 #ifdef __SWITCH__
+        if (i == 1507 && serialized.type == ASSET_TYPE_XANIMPARTS)
+            Switch_LogWrite("[SWITCH XANIM1507] after Load_XAssetHeader\n");
         if (traceStreamWindow)
         {
             const uint32_t postStreamIndex = g_streamPosIndex;
