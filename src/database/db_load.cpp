@@ -1155,11 +1155,48 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
         return;
     }
 
-    // A normal serialized XStringPtr value is already the DB offset
-    // of the native char* slot. Do not dereference it as a second token.
-    *varXStringPtr =
-        reinterpret_cast<const char **>(
-            DB_ConvertOffsetToPointerValue(serialized));
+    const uintptr_t slotAddress =
+        DB_ConvertOffsetToPointerValue(serialized);
+
+    uint32_t stringToken = 0;
+    std::memcpy(
+        &stringToken,
+        reinterpret_cast<const void *>(slotAddress),
+        sizeof(stringToken));
+
+    if (g_switchCurrentAssetIndex == 1506 &&
+        g_switchCurrentAssetRawType == 23u)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON1506] XStringPtr serialized=%08x "
+            "slot=%p stringToken=%08x\n",
+            serialized,
+            reinterpret_cast<const void *>(slotAddress),
+            stringToken);
+        Switch_LogWrite(trace);
+
+        Switch_LogRawDwords(
+            "[SWITCH WEAPON1506] XStringPtr slot data",
+            reinterpret_cast<const uint8_t *>(slotAddress),
+            16);
+    }
+
+    if (stringToken == UINT32_MAX)
+    {
+        *nativeStringSlot =
+            reinterpret_cast<const char *>(AllocLoad_raw_byte());
+        varXString = nativeStringSlot;
+        Load_XString(1);
+    }
+    else if (stringToken)
+    {
+        *nativeStringSlot =
+            reinterpret_cast<const char *>(
+                DB_ConvertOffsetToPointerValue(stringToken));
+    }
 #else
     Load_Stream(atStreamStart, (uint8_t *)varXStringPtr, 4);
     if (*varXStringPtr)
