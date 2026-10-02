@@ -1769,13 +1769,8 @@ XAssetHeader __cdecl DB_FindXAssetDefaultHeaderInternal(XAssetType type)
                 Switch_LogWrite(trace);
             }
 #endif
-#ifdef __SWITCH__
-            if (!Switch_IstricmpAssetName(XAssetName, name))
-                break;
-#else
             if (!I_stricmp(XAssetName, name))
                 break;
-#endif
         }
     }
     while (assetEntry->entry.nextOverride)
@@ -2755,8 +2750,13 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
             }
 #endif
 
+#ifdef __SWITCH__
+            if (!Switch_IstricmpAssetName(XAssetName, name))
+                break;
+#else
             if (!I_stricmp(XAssetName, name))
                 break;
+#endif
         }
     }
 
