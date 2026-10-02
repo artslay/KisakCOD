@@ -2825,60 +2825,140 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
 #endif
     existingEntry = NULL;
 
-    for (existingEntryIndex = db_hashTable[hash]; existingEntryIndex; existingEntryIndex = existingEntry->entry.nextHash)
+#ifdef __SWITCH__
+    const bool switchTraceTechniqueFind =
+        type == ASSET_TYPE_TECHNIQUE_SET &&
+        g_switchCurrentAssetIndex >= 0 &&
+        g_switchCurrentAssetIndex <= 32;
+
+    if (switchTraceTechniqueFind)
     {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH DB FIND] begin asset=%d raw=%u type=%u hash=%u bucket=%u name=%p\n",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            static_cast<unsigned>(type),
+            hash,
+            static_cast<unsigned>(db_hashTable[hash]),
+            static_cast<const void *>(name));
+        Switch_LogWrite(trace);
+    }
+#endif
+
+    uint32_t switchFindGuard = 0;
+    for (existingEntryIndex = db_hashTable[hash];
+         existingEntryIndex;
+         existingEntryIndex = existingEntry->entry.nextHash)
+    {
+#ifdef __SWITCH__
+        if (++switchFindGuard > 0x8000u)
+        {
+            g_switchDbStage = "asset/find_cycle";
+            if (switchTraceTechniqueFind)
+            {
+                char trace[224];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH DB FIND] cycle asset=%d raw=%u type=%u hash=%u index=%u\n",
+                    g_switchCurrentAssetIndex,
+                    static_cast<unsigned>(g_switchCurrentAssetRawType),
+                    static_cast<unsigned>(type),
+                    hash,
+                    static_cast<unsigned>(existingEntryIndex));
+                Switch_LogWrite(trace);
+            }
+            Com_Error(
+                ERR_DROP,
+                "Switch DB hash chain cycle: type=%u hash=%u",
+                static_cast<unsigned>(type),
+                hash);
+            return NULL;
+        }
+
+        if (existingEntryIndex >= 0x8000u)
+        {
+            g_switchDbStage = "asset/find_oob";
+            if (switchTraceTechniqueFind)
+            {
+                char trace[224];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH DB FIND] OOB asset=%d raw=%u type=%u hash=%u index=%u\n",
+                    g_switchCurrentAssetIndex,
+                    static_cast<unsigned>(g_switchCurrentAssetRawType),
+                    static_cast<unsigned>(type),
+                    hash,
+                    static_cast<unsigned>(existingEntryIndex));
+                Switch_LogWrite(trace);
+            }
+            Com_Error(
+                ERR_DROP,
+                "Switch DB hash chain OOB: type=%u hash=%u index=%u",
+                static_cast<unsigned>(type),
+                hash,
+                static_cast<unsigned>(existingEntryIndex));
+            return NULL;
+        }
+#endif
+
         existingEntry = &g_assetEntryPool[existingEntryIndex];
 
 #ifdef __SWITCH__
-        if (type == ASSET_TYPE_LOADED_SOUND)
+        if (switchTraceTechniqueFind)
         {
-            char trace[192];
+            char trace[320];
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH LOADEDSOUND HASH] existing index=%u entry=%p assetType=%u\n",
-                existingEntryIndex,
+                "[SWITCH DB FIND] entry idx=%u ptr=%p type=%u next=%u header=%p\n",
+                static_cast<unsigned>(existingEntryIndex),
                 static_cast<void *>(existingEntry),
-                static_cast<unsigned>(existingEntry->entry.asset.type));
+                static_cast<unsigned>(existingEntry->entry.asset.type),
+                static_cast<unsigned>(existingEntry->entry.nextHash),
+                static_cast<void *>(existingEntry->entry.asset.header.data));
             Switch_LogWrite(trace);
         }
+
+        g_switchDbStage = "asset/find_type";
 #endif
 
         if (existingEntry->entry.asset.type == type)
         {
 #ifdef __SWITCH__
-            if (switchTraceWeapon1506)
+            g_switchDbStage = "asset/find_existing_name";
+            if (switchTraceTechniqueFind)
             {
-                char trace[192];
-                std::snprintf(trace, sizeof(trace),
-                    "[SWITCH WEAPON1506] existing idx=%u entry=%p header=%p\n",
-                    existingEntryIndex,
-                    static_cast<void *>(existingEntry),
+                char trace[256];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH DB FIND] matching type idx=%u header=%p\n",
+                    static_cast<unsigned>(existingEntryIndex),
                     static_cast<void *>(existingEntry->entry.asset.header.data));
                 Switch_LogWrite(trace);
             }
 #endif
+
             if (type == ASSET_TYPE_IMAGE)
                 XAssetName = existingEntry->entry.asset.header.image->name;
             else
                 XAssetName = DB_GetXAssetName(&existingEntry->entry.asset);
 
 #ifdef __SWITCH__
-            if (switchTraceWeapon1506)
+            g_switchDbStage = "asset/find_compare";
+            if (switchTraceTechniqueFind)
             {
-                char trace[192];
-                std::snprintf(trace, sizeof(trace),
-                    "[SWITCH WEAPON1506] existing name=%p\n",
-                    static_cast<const void *>(XAssetName));
-                Switch_LogWrite(trace);
-            }
-            if (type == ASSET_TYPE_LOADED_SOUND)
-            {
-                char trace[192];
+                char trace[256];
                 std::snprintf(
                     trace,
                     sizeof(trace),
-                    "[SWITCH LOADEDSOUND HASH] existing name=%p new name=%p\n",
+                    "[SWITCH DB FIND] compare idx=%u existingName=%p newName=%p\n",
+                    static_cast<unsigned>(existingEntryIndex),
                     static_cast<const void *>(XAssetName),
                     static_cast<const void *>(name));
                 Switch_LogWrite(trace);
