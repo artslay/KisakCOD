@@ -1415,6 +1415,7 @@ void __cdecl  DB_Thread(uint32_t threadContext)
     if (setjmp(*Value))
     {
         Profile_Recover(1);
+        Com_ErrorAbort();
 #ifdef __llvm__ 
         __builtin_debugtrap();
 #else
@@ -1424,7 +1425,6 @@ void __cdecl  DB_Thread(uint32_t threadContext)
         __debugbreak();
 #endif
 #endif
-        Com_ErrorAbort();
     }
     Profile_Guard(1);
     while (1)
