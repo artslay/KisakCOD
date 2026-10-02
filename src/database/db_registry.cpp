@@ -2138,7 +2138,7 @@ static XAssetHeader __cdecl DB_AllocXAssetHeader(XAssetType type)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH WEAPON ALLOC] type=%u handler=%p pool=%p\\n",
+            "[SWITCH WEAPON ALLOC] type=%u handler=%p pool=%p\n",
             static_cast<unsigned>(type),
             reinterpret_cast<void *>(DB_AllocXAssetHeaderHandler[type]),
             DB_XAssetPool[type]);
@@ -2184,7 +2184,7 @@ static XAssetEntryPoolEntry *__cdecl DB_AllocXAssetEntry(XAssetType type, uint8_
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH WEAPON ALLOC] entryHead=%p next=%p\\n",
+            "[SWITCH WEAPON ALLOC] entryHead=%p next=%p\n",
             static_cast<void *>(freeHead),
             freeHead ? static_cast<void *>(freeHead->next) : nullptr);
         Switch_LogWrite(trace);
