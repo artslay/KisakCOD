@@ -62,8 +62,27 @@ static void Switch_CheckStreamCursor(const char *where)
     if (owner == static_cast<int32_t>(g_streamPosIndex))
         return;
 
-    if (g_switchStreamMismatchCount >= 32)
+    if (g_switchStreamMismatchCount >= 8)
         return;
+
+    if (g_switchStreamMismatchCount == 0)
+    {
+        char trace[512];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH STREAM MISMATCH] range zone=%p blocks=%p b0=%p+%u b4=%p+%u pos=%p idx=%u stack=%u\n",
+            static_cast<void *>(g_streamZoneMem),
+            static_cast<void *>(g_streamBlocks),
+            g_streamBlocks ? static_cast<void *>(g_streamBlocks[0].data) : nullptr,
+            g_streamBlocks ? g_streamBlocks[0].size : 0u,
+            g_streamBlocks ? static_cast<void *>(g_streamBlocks[4].data) : nullptr,
+            g_streamBlocks ? g_streamBlocks[4].size : 0u,
+            static_cast<void *>(g_streamPos),
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<unsigned>(g_streamPosStackIndex));
+        Switch_LogWrite(trace);
+    }
 
     char trace[320];
     std::snprintf(
@@ -95,7 +114,7 @@ static void Switch_CheckStreamArrayEntry(
     if (owner == static_cast<int32_t>(index))
         return;
 
-    if (g_switchStreamMismatchCount >= 32)
+    if (g_switchStreamMismatchCount >= 8)
         return;
 
     char trace[320];
