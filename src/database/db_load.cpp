@@ -8303,7 +8303,7 @@ void __cdecl Load_MenuList(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH XASSET STREAM] MenuList1504 pre stream=%u s0=%p s4=%p\\n",
+            "[SWITCH XASSET STREAM] MenuList1504 pre stream=%u s0=%p s4=%p\n",
             static_cast<unsigned>(g_streamPosIndex),
             static_cast<const void *>(g_streamPosArray[0]),
             static_cast<const void *>(g_streamPosArray[4]));
@@ -8323,7 +8323,7 @@ void __cdecl Load_MenuList(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH XASSET STREAM] MenuList1504 header=%p name=%08x count=%d menus=%08x after=%p stream=%u\\n",
+            "[SWITCH XASSET STREAM] MenuList1504 header=%p name=%08x count=%d menus=%08x after=%p stream=%u\n",
             static_cast<const void *>(serializedStart),
             serialized.name,
             serialized.menuCount,
