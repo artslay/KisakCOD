@@ -44,7 +44,8 @@ static bool Switch_LogPrefixAllowed(const char *msg)
            std::strncmp(msg, "[SWITCH OFFSET INVALID]", sizeof("[SWITCH OFFSET INVALID]") - 1) == 0 ||
            std::strncmp(msg, "[SWITCH XHEADER]", sizeof("[SWITCH XHEADER]") - 1) == 0 ||
            std::strncmp(msg, "[SWITCH LIGHTDEF]", sizeof("[SWITCH LIGHTDEF]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH WEAPON1506]", sizeof("[SWITCH WEAPON1506]") - 1) == 0;
+           std::strncmp(msg, "[SWITCH WEAPON1506]", sizeof("[SWITCH WEAPON1506]") - 1) == 0 ||
+           std::strncmp(msg, "[SWITCH XANIM1507]", sizeof("[SWITCH XANIM1507]") - 1) == 0;
 }
 
 /*
