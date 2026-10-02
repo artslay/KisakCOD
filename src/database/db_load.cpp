@@ -8648,7 +8648,42 @@ static void Switch_TranslateWeaponDefSerialized(WeaponDef *weaponDef)
     uint8_t serialized[SERIALIZED_SIZE];
 
     iassert(weaponDef);
+
+#ifdef __SWITCH__
+    const uint8_t *serializedStreamPos = DB_GetStreamPos();
+    const uint32_t serializedStreamIndex = g_streamPosIndex;
+#endif
+
     DB_LoadSwitchSerialized(serialized, SERIALIZED_SIZE);
+
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex == 1506 &&
+        g_switchCurrentAssetRawType == 23u)
+    {
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON1506] serialized stream=%p index=%u size=%u"
+            " pickupRaw@340=%08x\n",
+            static_cast<const void *>(serializedStreamPos),
+            serializedStreamIndex,
+            static_cast<unsigned>(SERIALIZED_SIZE),
+            *reinterpret_cast<const uint32_t *>(serialized + 340));
+        Switch_LogWrite(trace);
+
+        Switch_LogRawDwords(
+            "[SWITCH WEAPON1506] serialized head",
+            serialized,
+            64);
+
+        Switch_LogRawDwords(
+            "[SWITCH WEAPON1506] serialized sound region",
+            serialized + 328,
+            32);
+    }
+#endif
+
     std::memset(weaponDef, 0, sizeof(*weaponDef));
 
     uint8_t *nativeBase = reinterpret_cast<uint8_t *>(weaponDef);
