@@ -3729,21 +3729,10 @@ void __cdecl Load_MenuAsset(XAssetHeader *menu)
 #ifdef __SWITCH__
         if (traceMenu11)
         {
-            char trace[384];
-            const itemDef_s *item =
-                header.menu->items ? header.menu->items[i] : nullptr;
-            std::snprintf(
-                trace,
-                sizeof(trace),
-                "[SWITCH MENU11] parent i=%d item=%p items=%p count=%d\n",
-                i,
-                static_cast<const void *>(item),
-                header.menu ? static_cast<void *>(header.menu->items) : nullptr,
-                header.menu ? header.menu->itemCount : -1);
-            Switch_LogWrite(trace);
-            g_switchDbStage = (item && menu->menu)
-                ? "menu/parent_assign"
-                : "menu/parent_bad";
+            g_switchDbStage =
+                (header.menu->items && header.menu->items[i] && menu->menu)
+                    ? "menu/parent_assign"
+                    : "menu/parent_bad";
         }
 #endif
         header.menu->items[i]->parent = menu->menu;
