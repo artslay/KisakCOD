@@ -2862,6 +2862,23 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
 #endif
     hash = DB_HashForName(name, type);
 #ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET &&
+        name &&
+        !I_stricmp(name, "default"))
+    {
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH DB FIND] default techset post-strip originalFirst=%02x stub=%d name=%p text=%s hash=%u bucket=%u\n",
+            static_cast<unsigned>(static_cast<uint8_t>(v2)),
+            isStubAsset,
+            static_cast<const void *>(name),
+            name,
+            hash,
+            static_cast<unsigned>(db_hashTable[hash]));
+        Switch_LogWrite(trace);
+    }
     if (switchTraceWeapon1506)
     {
         char trace[256];
