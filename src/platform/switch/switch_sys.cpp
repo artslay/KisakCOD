@@ -77,6 +77,7 @@ extern "C" {
 extern int32_t g_switchCurrentAssetIndex;
 extern uint32_t g_switchCurrentAssetRawType;
 extern uint32_t g_switchCurrentAssetHeader;
+extern volatile int32_t g_switchCurrentMenuItemIndex;
 extern const char * volatile g_switchDbStage;
 extern void * volatile g_switchDbLastAssetResult;
 extern uint32_t volatile g_switchDbLastAssetType;
@@ -125,12 +126,13 @@ extern "C" void __libnx_exception_handler(ThreadExceptionDump *ctx)
     std::snprintf(
         line,
         sizeof(line),
-        "[KisakCOD][CRASH] db_stage=%s asset_index=%d raw_type=%u raw_header=0x%08x\n"
+        "[KisakCOD][CRASH] db_stage=%s asset_index=%d raw_type=%u raw_header=0x%08x menu_item=%d\n"
         "[KisakCOD][CRASH] asset_result=%p asset_type=%u preloadDvar=%p\n",
         g_switchDbStage ? g_switchDbStage : "(null)",
         g_switchCurrentAssetIndex,
         g_switchCurrentAssetRawType,
         g_switchCurrentAssetHeader,
+        g_switchCurrentMenuItemIndex,
         g_switchDbLastAssetResult,
         g_switchDbLastAssetType,
         g_switchDbLastPreloadShaders);
