@@ -1726,7 +1726,7 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
         newEntry->asset.header.sound->head = NULL;
     }
     newEntry->nextHash = db_hashTable[DB_HashForName(name, type)];
-    db_hashTable[DB_HashForName(name, type)] = static_cast<uint16_t>(newEntry - g_assetEntryPool);
+    db_hashTable[DB_HashForName(name, type)] = static_cast<uint16_t>(reinterpret_cast<XAssetEntryPoolEntry *>(newEntry) - g_assetEntryPool);
     DB_SetXAssetName(&newEntry->asset, SL_ConvertToString(SL_GetString(name, 4)));
     newEntry->inuse = 1;
     return newEntry;
