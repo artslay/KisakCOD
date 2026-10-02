@@ -1762,6 +1762,40 @@ void __cdecl Load_XAnimParts(bool atStreamStart)
         Switch_LogWrite(trace);
     }
 
+    if (switchXAnimTrace)
+    {
+        const uint8_t *serializedStart =
+            DB_GetStreamPos() - sizeof(SerializedXAnimParts);
+        char trace[768];
+        int written = std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XANIM1507] root offsets start=%p end=%p scalarShort=%u scalarInt=%u framerate=%g frequency=%g\\n",
+            static_cast<const void *>(serializedStart),
+            static_cast<const void *>(DB_GetStreamPos()),
+            static_cast<unsigned>(serialized.randomDataShortCount),
+            static_cast<unsigned>(serialized.indexCount),
+            static_cast<double>(serialized.framerate),
+            static_cast<double>(serialized.frequency));
+        Switch_LogWrite(trace);
+        for (unsigned i = 0; i < sizeof(SerializedXAnimParts) / 16; ++i)
+        {
+            const uint32_t *d =
+                reinterpret_cast<const uint32_t *>(serializedStart + i * 16);
+            written = std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XANIM1507] root +%02x: %08x %08x %08x %08x\\n",
+                i * 16,
+                d[0], d[1], d[2], d[3]);
+            Switch_LogWrite(trace);
+        }
+        Switch_LogRawDwords(
+            "[SWITCH XANIM1507] root tail",
+            serializedStart + sizeof(SerializedXAnimParts) - 16,
+            16);
+    }
+
     std::memset(varXAnimParts, 0, sizeof(*varXAnimParts));
 
     varXAnimParts->name =
