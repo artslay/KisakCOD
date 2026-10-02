@@ -1420,7 +1420,7 @@ void __cdecl  DB_Thread(uint32_t threadContext)
         std::snprintf(
             errorTrace,
             sizeof(errorTrace),
-            "[KisakCOD][DB FATAL] %s\\n",
+            "[KisakCOD][DB FATAL] %s\n",
             com_errorMessage);
         Switch_LogWrite(errorTrace);
 #endif
