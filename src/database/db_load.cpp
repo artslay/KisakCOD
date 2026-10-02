@@ -3888,6 +3888,10 @@ void __cdecl Load_XRigidVertList(bool atStreamStart)
 #ifdef __SWITCH__
     iassert(atStreamStart);
 
+    const bool switchTraceXModel =
+        g_switchCurrentAssetIndex == 1520 &&
+        g_switchCurrentAssetRawType == 3u;
+
     struct SerializedXRigidVertList
     {
         uint16_t boneOffset;
@@ -3898,8 +3902,30 @@ void __cdecl Load_XRigidVertList(bool atStreamStart)
     };
     static_assert(sizeof(SerializedXRigidVertList) == 12);
 
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/vertlist_raw";
+
     SerializedXRigidVertList serialized{};
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    if (switchTraceXModel)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XMODEL1520] XRigidVertList raw bone=%u vert=%u triOff=%u tri=%u tree=%08x pos=%p sizeofRigid=%u sizeofTree=%u\n",
+            static_cast<unsigned>(serialized.boneOffset),
+            static_cast<unsigned>(serialized.vertCount),
+            static_cast<unsigned>(serialized.triOffset),
+            static_cast<unsigned>(serialized.triCount),
+            serialized.collisionTree,
+            static_cast<void *>(DB_GetStreamPos()),
+            static_cast<unsigned>(sizeof(XRigidVertList)),
+            static_cast<unsigned>(sizeof(XSurfaceCollisionTree)));
+        Switch_LogWrite(trace);
+        g_switchDbStage = "xmodel/surf/vertlist_raw_done";
+    }
 
     std::memset(varXRigidVertList, 0, sizeof(*varXRigidVertList));
     varXRigidVertList->boneOffset = serialized.boneOffset;
@@ -3911,6 +3937,8 @@ void __cdecl Load_XRigidVertList(bool atStreamStart)
     {
         if (serialized.collisionTree == UINT32_MAX)
         {
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/surf/vertlist/colltree_alloc";
             varXRigidVertList->collisionTree =
                 reinterpret_cast<XSurfaceCollisionTree *>(
                     Hunk_Alloc(
@@ -3923,15 +3951,27 @@ void __cdecl Load_XRigidVertList(bool atStreamStart)
                 0,
                 sizeof(XSurfaceCollisionTree));
             varXSurfaceCollisionTree = varXRigidVertList->collisionTree;
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/surf/vertlist/colltree_load";
             Load_XSurfaceCollisionTree(1);
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/surf/vertlist/colltree_load_done";
         }
         else
         {
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/surf/vertlist/colltree_offset";
             varXRigidVertList->collisionTree =
                 reinterpret_cast<XSurfaceCollisionTree *>(
                     DB_ConvertOffsetToPointerValue(serialized.collisionTree));
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/surf/vertlist/colltree_offset_done";
         }
     }
+
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/vertlist_done";
+}
 #else
     Load_Stream(atStreamStart, (uint8_t *)varXRigidVertList, 12);
     if (varXRigidVertList->collisionTree)
