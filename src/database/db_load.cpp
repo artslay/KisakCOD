@@ -4006,8 +4006,6 @@ void __cdecl Load_XSurfaceVertexInfo(bool atStreamStart)
         serialized.vertCount,
         sizeof(serialized.vertCount));
 
-    if (switchTraceXModel)
-        g_switchDbStage = "xmodel/surf/blend";
     if (serialized.vertsBlend)
     {
         if (serialized.vertsBlend == UINT32_MAX)
