@@ -680,15 +680,12 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 #ifdef __SWITCH__
         uint32_t preStreamIndex = 0;
         const uint8_t *preStreamPos = nullptr;
-#ifdef __SWITCH__
-        uint64_t preDecompOut = 0;
-#endif
         if (traceStreamWindow)
         {
             preStreamIndex = g_streamPosIndex;
             preStreamPos = DB_GetStreamPos();
-            preDecompOut = static_cast<uint64_t>(g_load.stream.total_out);
-            g_switchTraceDecompOut = preDecompOut;
+            g_switchTraceDecompOut =
+                static_cast<uint64_t>(g_load.stream.total_out);
 
             char trace[320];
             std::snprintf(
