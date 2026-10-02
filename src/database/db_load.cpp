@@ -5859,8 +5859,6 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
     // CoD4 PC fastfiles serialize the PC MaterialTechniqueSet layout:
     // name + worldVertFormat/meta + remappedTechniqueSet + 34 technique pointers.
     // The Switch runtime is 64-bit, so expand the serialized 32-bit pointers.
-    DB_AllocStreamPos(3);
-
     SerializedMaterialTechniqueSet serialized{};
     const uint8_t *techniqueSetStart = DB_GetStreamPos();
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
