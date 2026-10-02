@@ -53,6 +53,7 @@ extern uint32_t g_switchCurrentAssetHeader;
 extern const char * volatile g_switchDbStage;
 extern void * volatile g_switchDbLastAssetResult;
 extern uint32_t volatile g_switchDbLastAssetType;
+extern void * volatile g_switchDbLastPreloadShaders;
 }
 
 static void Switch_LogCrashLine(const char *line)
@@ -94,13 +95,14 @@ extern "C" void __libnx_exception_handler(ThreadExceptionDump *ctx)
         line,
         sizeof(line),
         "[KisakCOD][CRASH] db_stage=%s asset_index=%d raw_type=%u raw_header=0x%08x\n"
-        "[KisakCOD][CRASH] asset_result=%p asset_type=%u\n",
+        "[KisakCOD][CRASH] asset_result=%p asset_type=%u preloadDvar=%p\n",
         g_switchDbStage ? g_switchDbStage : "(null)",
         g_switchCurrentAssetIndex,
         g_switchCurrentAssetRawType,
         g_switchCurrentAssetHeader,
         g_switchDbLastAssetResult,
-        g_switchDbLastAssetType);
+        g_switchDbLastAssetType,
+        g_switchDbLastPreloadShaders);
     Switch_LogCrashLine(line);
 
     for (int i = 0; i < 29; i += 2)
