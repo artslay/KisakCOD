@@ -8294,7 +8294,24 @@ void __cdecl Load_MenuList(bool atStreamStart)
     iassert(atStreamStart);
 
     SerializedMenuList serialized{};
+    const uint8_t *serializedStart = DB_GetStreamPos();
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    if (g_switchCurrentAssetIndex == 1504 &&
+        g_switchCurrentAssetRawType == 20u)
+    {
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH MENULIST1504] header=%p name=%08x count=%d menus=%08x afterHeader=%p\\n",
+            static_cast<const void *>(serializedStart),
+            serialized.name,
+            serialized.menuCount,
+            serialized.menus,
+            static_cast<const void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
 
     std::memset(varMenuList, 0, sizeof(*varMenuList));
 
@@ -8304,8 +8321,25 @@ void __cdecl Load_MenuList(bool atStreamStart)
 
     DB_PushStreamPos(4);
 
+    const uint8_t *beforeName = DB_GetStreamPos();
     varXString = &varMenuList->name;
     Load_XString(0);
+
+    if (g_switchCurrentAssetIndex == 1504 &&
+        g_switchCurrentAssetRawType == 20u)
+    {
+        char trace[320];
+        const uint8_t *afterName = DB_GetStreamPos();
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH MENULIST1504] nameToken=%08x namePos=%p->%p delta=%td\\n",
+            serialized.name,
+            static_cast<const void *>(beforeName),
+            static_cast<const void *>(afterName),
+            afterName - beforeName);
+        Switch_LogWrite(trace);
+    }
 
     if (serialized.menus && varMenuList->menuCount > 0)
     {
