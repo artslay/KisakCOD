@@ -6036,7 +6036,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
             Load_MaterialTechnique(1);
 
 #ifdef __SWITCH__
-            if (g_switchCurrentAssetRawType == 5u &&
+            if (traceRawType == 5u &&
                 traceAssetIndex == 1502 &&
                 i < 4)
             {
@@ -6121,7 +6121,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH DB FIND] techset complete asset=%d nameToken=%08x namePtr=%p nameText=%s nameRelToStart=%lld nameRelToCursor=%lld after=%p\\n",
+            "[SWITCH DB FIND] techset complete asset=%d nameToken=%08x namePtr=%p nameText=%s nameRelToStart=%lld nameRelToCursor=%lld after=%p\n",
             traceAssetIndex,
             serialized.name,
             static_cast<const void *>(resolvedName),
