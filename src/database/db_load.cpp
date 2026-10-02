@@ -1851,7 +1851,7 @@ static XAnimDeltaPartQuat *Switch_LoadXAnimDeltaPartQuat()
     {
         const uint32_t frameCount = static_cast<uint32_t>(size) + 1u;
         uint8_t *frames = DB_AllocStreamPos(3);
-        native->u.frames.u.frames =
+        native->u.frames.frames =
             reinterpret_cast<__int16 (*)[2]>(frames);
         const uint32_t frameBytes =
             frameCount * sizeof(__int16) * 2u;
