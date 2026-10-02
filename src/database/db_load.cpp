@@ -1743,15 +1743,8 @@ static XAnimPartTrans *Switch_LoadXAnimPartTrans()
     const uint32_t indexBytes = indexCount * (wideIndices ? 2u : 1u);
 
     // The runtime object has 64-bit pointers, but the serialized index array
-    // begins immediately at the native indices member. Allocate enough tail
-    // storage so code using indices._1/_2[i] sees the complete array.
-    const size_t indexOffset =
-        reinterpret_cast<size_t>(
-            reinterpret_cast<uint8_t *>(
-                &reinterpret_cast<XAnimPartTrans *>(0)->u.frames.indices))
-        ;
-    (void)indexOffset;
-
+    // begins immediately at the native indices member. Keep tail storage for
+    // the complete dynamic index array.
     const size_t nativeSize =
         sizeof(XAnimPartTrans) +
         (indexBytes ? static_cast<size_t>(indexBytes) : 0u);
@@ -1872,6 +1865,7 @@ static XAnimDeltaPartQuat *Switch_LoadXAnimDeltaPartQuat()
 
     if (framesToken)
     {
+        const uint32_t frameCount = indexCount;
         uint8_t *frames = DB_AllocStreamPos(3);
         native->u.frames.frames =
             reinterpret_cast<__int16 (*)[2]>(frames);
