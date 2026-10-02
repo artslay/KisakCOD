@@ -3840,8 +3840,34 @@ void __cdecl Load_XSurfaceCollisionTree(bool atStreamStart)
     };
     static_assert(sizeof(SerializedXSurfaceCollisionTree) == 40);
 
+    const bool switchTraceXModel =
+        g_switchCurrentAssetIndex == 1520 &&
+        g_switchCurrentAssetRawType == 3u;
+
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/colltree/raw";
+
     SerializedXSurfaceCollisionTree serialized{};
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    if (switchTraceXModel)
+    {
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XMODEL1520] CollisionTree raw trans=%g,%g,%g scale=%g,%g,%g nodes=%u nodePtr=%08x leafs=%u leafPtr=%08x stream=%u pos=%p\n",
+            serialized.trans[0], serialized.trans[1], serialized.trans[2],
+            serialized.scale[0], serialized.scale[1], serialized.scale[2],
+            static_cast<unsigned>(serialized.nodeCount),
+            serialized.nodes,
+            static_cast<unsigned>(serialized.leafCount),
+            serialized.leafs,
+            g_streamPosIndex,
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+        g_switchDbStage = "xmodel/surf/colltree/raw_done";
+    }
 
     std::memset(varXSurfaceCollisionTree, 0, sizeof(*varXSurfaceCollisionTree));
     std::memcpy(varXSurfaceCollisionTree->trans, serialized.trans, sizeof(serialized.trans));
@@ -3851,20 +3877,32 @@ void __cdecl Load_XSurfaceCollisionTree(bool atStreamStart)
 
     if (serialized.nodes)
     {
+        if (switchTraceXModel)
+            g_switchDbStage = "xmodel/surf/colltree/nodes_alloc";
         varXSurfaceCollisionTree->nodes =
             reinterpret_cast<XSurfaceCollisionNode *>(
                 AllocLoad_GfxPackedVertex0());
         varXSurfaceCollisionNode = varXSurfaceCollisionTree->nodes;
+        if (switchTraceXModel)
+            g_switchDbStage = "xmodel/surf/colltree/nodes_load";
         Load_XSurfaceCollisionNodeArray(1, varXSurfaceCollisionTree->nodeCount);
+        if (switchTraceXModel)
+            g_switchDbStage = "xmodel/surf/colltree/nodes_done";
     }
 
     if (serialized.leafs)
     {
+        if (switchTraceXModel)
+            g_switchDbStage = "xmodel/surf/colltree/leafs_alloc";
         varXSurfaceCollisionTree->leafs =
             reinterpret_cast<XSurfaceCollisionLeaf *>(
                 AllocLoad_XBlendInfo());
         varXSurfaceCollisionLeaf = varXSurfaceCollisionTree->leafs;
+        if (switchTraceXModel)
+            g_switchDbStage = "xmodel/surf/colltree/leafs_load";
         Load_XSurfaceCollisionLeafArray(1, varXSurfaceCollisionTree->leafCount);
+        if (switchTraceXModel)
+            g_switchDbStage = "xmodel/surf/colltree/leafs_done";
     }
 #else
     Load_Stream(atStreamStart, (uint8_t *)varXSurfaceCollisionTree, 40);
