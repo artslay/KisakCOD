@@ -3884,7 +3884,33 @@ void __cdecl Load_XSurfaceCollisionTree(bool atStreamStart)
                 AllocLoad_GfxPackedVertex0());
         varXSurfaceCollisionNode = varXSurfaceCollisionTree->nodes;
         if (switchTraceXModel)
+        {
+            const uint64_t nodeBytes =
+                static_cast<uint64_t>(varXSurfaceCollisionTree->nodeCount) * 16ull;
+            const uint8_t *streamPos = DB_GetStreamPos();
+            const uint8_t *blockEnd =
+                g_streamBlocks[g_streamPosIndex].data +
+                g_streamBlocks[g_streamPosIndex].size;
+            const uint64_t remaining =
+                streamPos && streamPos <= blockEnd
+                    ? static_cast<uint64_t>(blockEnd - streamPos)
+                    : 0ull;
+            char trace[320];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XMODEL1520] nodes load count=%u bytes=%llu stream=%u pos=%p blockData=%p blockSize=%u remaining=%llu dst=%p\n",
+                static_cast<unsigned>(varXSurfaceCollisionTree->nodeCount),
+                static_cast<unsigned long long>(nodeBytes),
+                g_streamPosIndex,
+                static_cast<const void *>(streamPos),
+                static_cast<const void *>(g_streamBlocks[g_streamPosIndex].data),
+                static_cast<unsigned>(g_streamBlocks[g_streamPosIndex].size),
+                static_cast<unsigned long long>(remaining),
+                static_cast<void *>(varXSurfaceCollisionNode));
+            Switch_LogWrite(trace);
             g_switchDbStage = "xmodel/surf/colltree/nodes_load";
+        }
         Load_XSurfaceCollisionNodeArray(1, varXSurfaceCollisionTree->nodeCount);
         if (switchTraceXModel)
             g_switchDbStage = "xmodel/surf/colltree/nodes_done";
