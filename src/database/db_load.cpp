@@ -6877,7 +6877,23 @@ void __cdecl Load_XModel(bool atStreamStart)
     }
     if (varXModel->materialHandles)
     {
+#ifdef __SWITCH__
+        varXModel->materialHandles =
+            reinterpret_cast<Material **>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(
+                        sizeof(Material *) *
+                        static_cast<size_t>(varXModel->numsurfs)),
+                    "SwitchMaterialHandleArray",
+                    22));
+        std::memset(
+            varXModel->materialHandles,
+            0,
+            sizeof(Material *) *
+                static_cast<size_t>(varXModel->numsurfs));
+#else
         varXModel->materialHandles = (Material **)AllocLoad_FxElemVisStateSample();
+#endif
         varMaterialHandle = varXModel->materialHandles;
         Load_MaterialHandleArray(1, varXModel->numsurfs);
     }
