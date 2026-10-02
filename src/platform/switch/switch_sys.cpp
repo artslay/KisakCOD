@@ -31,21 +31,9 @@ static bool Switch_LogPrefixAllowed(const char *msg)
     if (!msg)
         return false;
 
-    // Keep only diagnostics that are still useful for Switch bring-up.
-    return std::strncmp(msg, "[SWITCH CRASH]", sizeof("[SWITCH CRASH]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH IWD]", sizeof("[SWITCH IWD]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH GLCTX]", sizeof("[SWITCH GLCTX]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH XASSET TRACE]", sizeof("[SWITCH XASSET TRACE]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH XASSET STREAM]", sizeof("[SWITCH XASSET STREAM]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH STREAM REGRESS]", sizeof("[SWITCH STREAM REGRESS]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH STREAM MISMATCH]", sizeof("[SWITCH STREAM MISMATCH]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH STREAM ARRAY MISMATCH]", sizeof("[SWITCH STREAM ARRAY MISMATCH]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH XFILE BLOCKS]", sizeof("[SWITCH XFILE BLOCKS]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH OFFSET INVALID]", sizeof("[SWITCH OFFSET INVALID]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH XHEADER]", sizeof("[SWITCH XHEADER]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH LIGHTDEF]", sizeof("[SWITCH LIGHTDEF]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH WEAPON1506]", sizeof("[SWITCH WEAPON1506]") - 1) == 0 ||
-           std::strncmp(msg, "[SWITCH XANIM1507]", sizeof("[SWITCH XANIM1507]") - 1) == 0;
+    // Keep only low-volume filesystem/graphics diagnostics.
+    return std::strncmp(msg, "[SWITCH IWD]", sizeof("[SWITCH IWD]") - 1) == 0 ||
+           std::strncmp(msg, "[SWITCH GLCTX]", sizeof("[SWITCH GLCTX]") - 1) == 0;
 }
 
 /*
