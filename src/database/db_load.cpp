@@ -4006,6 +4006,8 @@ void __cdecl Load_XSurfaceVertexInfo(bool atStreamStart)
         serialized.vertCount,
         sizeof(serialized.vertCount));
 
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/blend";
     if (serialized.vertsBlend)
     {
         if (serialized.vertsBlend == UINT32_MAX)
@@ -4094,7 +4096,47 @@ void __cdecl Load_XSurface(bool atStreamStart)
     static_assert(sizeof(SerializedXSurface) == 56);
 
     SerializedXSurface serialized{};
+
+    const bool switchTraceXModel =
+        g_switchCurrentAssetIndex == 1520 &&
+        g_switchCurrentAssetRawType == 3u;
+
+    if (switchTraceXModel)
+    {
+        g_switchDbStage = "xmodel/surf/raw";
+    }
+
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    if (switchTraceXModel)
+    {
+        char trace[512];
+        std::snprintf(
+            trace, sizeof(trace),
+            "[SWITCH XMODEL1520] XSurface raw tile=%u deform=%u verts=%u tris=%u"
+            " zone=%u baseTri=%u baseVert=%u triIdx=%08x"
+            " vc=%u,%u,%u,%u blend=%08x verts0=%08x listCount=%u list=%08x"
+            " pos=%p\n",
+            static_cast<unsigned>(serialized.tileMode),
+            static_cast<unsigned>(serialized.deformed),
+            static_cast<unsigned>(serialized.vertCount),
+            static_cast<unsigned>(serialized.triCount),
+            static_cast<unsigned>(serialized.zoneHandle),
+            static_cast<unsigned>(serialized.baseTriIndex),
+            static_cast<unsigned>(serialized.baseVertIndex),
+            serialized.triIndices,
+            static_cast<unsigned>(serialized.vertCountInfo[0]),
+            static_cast<unsigned>(serialized.vertCountInfo[1]),
+            static_cast<unsigned>(serialized.vertCountInfo[2]),
+            static_cast<unsigned>(serialized.vertCountInfo[3]),
+            serialized.vertsBlend,
+            serialized.verts0,
+            serialized.vertListCount,
+            serialized.vertList,
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+        g_switchDbStage = "xmodel/surf/raw_done";
+    }
 
     std::memset(varXSurface, 0, sizeof(*varXSurface));
     varXSurface->tileMode = serialized.tileMode;
@@ -4115,12 +4157,28 @@ void __cdecl Load_XSurface(bool atStreamStart)
             varXSurface->vertInfo.vertsBlend =
                 reinterpret_cast<uint16_t *>(AllocLoad_XBlendInfo());
             varXBlendInfo = varXSurface->vertInfo.vertsBlend;
-            Load_XBlendInfoArray(
-                1,
+            const int32_t blendCount =
                 7 * varXSurface->vertInfo.vertCount[3]
                 + 5 * varXSurface->vertInfo.vertCount[2]
                 + 3 * varXSurface->vertInfo.vertCount[1]
-                + varXSurface->vertInfo.vertCount[0]);
+                + varXSurface->vertInfo.vertCount[0];
+
+            if (switchTraceXModel)
+            {
+                char trace[256];
+                std::snprintf(
+                    trace, sizeof(trace),
+                    "[SWITCH XMODEL1520] vertsBlend inline count=%d\n",
+                    blendCount);
+                Switch_LogWrite(trace);
+            }
+
+            Load_XBlendInfoArray(1, blendCount);
+
+#ifdef __SWITCH__
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/surf/blend_done";
+#endif
         }
         else
         {
@@ -4148,6 +4206,8 @@ void __cdecl Load_XSurface(bool atStreamStart)
                     : static_cast<uintptr_t>(serialized.verts0));
 
     varXSurface->vertListCount = serialized.vertListCount;
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/vertlist";
     if (serialized.vertList)
     {
         if (serialized.vertList == UINT32_MAX)
@@ -4179,11 +4239,23 @@ void __cdecl Load_XSurface(bool atStreamStart)
         serialized.partBits,
         sizeof(varXSurface->partBits));
 
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/zone";
     varXZoneHandle = &varXSurface->zoneHandle;
     Load_XZoneHandle(0);
+
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/zone_done";
+
     varXSurfaceVertexInfo = &varXSurface->vertInfo;
 
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/stream7_push";
     DB_PushStreamPos(7);
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/stream7_pushed";
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/verts0";
     if (serialized.verts0)
     {
         if (serialized.verts0 == UINT32_MAX)
@@ -4192,7 +4264,11 @@ void __cdecl Load_XSurface(bool atStreamStart)
                 reinterpret_cast<GfxPackedVertex *>(
                     AllocLoad_GfxPackedVertex0());
             varGfxPackedVertex0 = varXSurface->verts0;
+            if (switchTraceXModel)
+            g_switchDbStage = "xmodel/surf/verts0_load";
             Load_GfxPackedVertex0Array(1, varXSurface->vertCount);
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/surf/verts0_load_done";
         }
         else
         {
@@ -4201,18 +4277,41 @@ void __cdecl Load_XSurface(bool atStreamStart)
                     DB_ConvertOffsetToPointerValue(serialized.verts0));
         }
     }
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/stream7_pop";
     DB_PopStreamPos();
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/stream7_popped";
 
     if (serialized.vertList)
     {
         if (serialized.vertList == UINT32_MAX)
         {
             varXRigidVertList = varXSurface->vertList;
+            if (switchTraceXModel)
+            {
+                char trace[192];
+                std::snprintf(
+                    trace, sizeof(trace),
+                    "[SWITCH XMODEL1520] vertList inline count=%u ptr=%p\n",
+                    static_cast<unsigned>(varXSurface->vertListCount),
+                    static_cast<void *>(varXSurface->vertList));
+                Switch_LogWrite(trace);
+                g_switchDbStage = "xmodel/surf/vertlist_load";
+            }
             Load_XRigidVertListArray(1, varXSurface->vertListCount);
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/surf/vertlist_done";
         }
     }
 
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/stream8_push";
     DB_PushStreamPos(8);
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/stream8_pushed";
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/triIndices";
     if (serialized.triIndices)
     {
         if (serialized.triIndices == UINT32_MAX)
@@ -4221,7 +4320,11 @@ void __cdecl Load_XSurface(bool atStreamStart)
                 reinterpret_cast<uint16_t *>(
                     AllocLoad_GfxPackedVertex0());
             varr_index16_t = varXSurface->triIndices;
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/surf/tri_load";
             Load_r_index16_tArray(1, 3 * varXSurface->triCount);
+            if (switchTraceXModel)
+                g_switchDbStage = "xmodel/surf/tri_load_done";
         }
         else
         {
@@ -4230,7 +4333,11 @@ void __cdecl Load_XSurface(bool atStreamStart)
                     DB_ConvertOffsetToPointerValue(serialized.triIndices));
         }
     }
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/stream8_pop";
     DB_PopStreamPos();
+    if (switchTraceXModel)
+        g_switchDbStage = "xmodel/surf/stream8_popped";
 #else
     Load_Stream(atStreamStart, (unsigned char*)varXSurface, 56);
     varXZoneHandle = &varXSurface->zoneHandle;
@@ -4291,7 +4398,49 @@ void __cdecl Load_XSurfaceArray(bool atStreamStart, int32_t count)
     for (int32_t i = 0; i < count; ++i)
     {
         varXSurface = &var[i];
+
+        const bool switchTraceXModel =
+            g_switchCurrentAssetIndex == 1520 &&
+            g_switchCurrentAssetRawType == 3u;
+
+        if (switchTraceXModel)
+        {
+            if (i == 0)
+                g_switchDbStage = "xmodel/surf0/call";
+            else
+                g_switchDbStage = "xmodel/surf/call";
+
+            char trace[256];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH XMODEL1520] surface[%d/%d] call dst=%p stream=%u pos=%p sizeofXSurface=%u\n",
+                i,
+                count,
+                static_cast<void *>(varXSurface),
+                g_streamPosIndex,
+                static_cast<void *>(DB_GetStreamPos()),
+                static_cast<unsigned>(sizeof(XSurface)));
+            Switch_LogWrite(trace);
+        }
+
         Load_XSurface(1);
+
+        if (switchTraceXModel)
+        {
+            if (i == 0)
+                g_switchDbStage = "xmodel/surf0/done";
+            else
+                g_switchDbStage = "xmodel/surf/done";
+
+            char trace[256];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH XMODEL1520] surface[%d/%d] done pos=%p\n",
+                i,
+                count,
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
     }
 #else
     XSurface *var; // [esp+0h] [ebp-8h]
