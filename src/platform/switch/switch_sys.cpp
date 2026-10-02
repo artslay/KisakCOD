@@ -32,8 +32,9 @@ static bool Switch_LogPrefixAllowed(const char *msg)
         return false;
 
     // Crash diagnostics use the separate [KisakCOD][CRASH] path.
-    // Suppress all regular [SWITCH ...] diagnostic spam.
-    return false;
+    // Keep normal [SWITCH ...] diagnostics suppressed, but allow the
+    // narrowly-scoped XModel 1520 trace used during DB ABI bring-up.
+    return std::strncmp(msg, "[SWITCH XMODEL1520]", 19) == 0;
 }
 
 /*
