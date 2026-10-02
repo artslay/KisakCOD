@@ -8457,10 +8457,6 @@ void __cdecl Load_MenuList(bool atStreamStart)
             static_cast<const void *>(g_streamPosArray[0]),
             static_cast<const void *>(g_streamPosArray[4]));
         Switch_LogWrite(trace);
-        Switch_LogRawDwords(
-            "[SWITCH MENULIST1504 S0]",
-            g_streamPosIndex == 0 ? serializedStart : g_streamPosArray[0],
-            32);
     }
 
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
