@@ -1770,7 +1770,7 @@ void __cdecl Load_XAnimParts(bool atStreamStart)
         int written = std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH XANIM1507] root offsets start=%p end=%p scalarShort=%u scalarInt=%u framerate=%g frequency=%g\\n",
+            "[SWITCH XANIM1507] root offsets start=%p end=%p scalarShort=%u scalarInt=%u framerate=%g frequency=%g\n",
             static_cast<const void *>(serializedStart),
             static_cast<const void *>(DB_GetStreamPos()),
             static_cast<unsigned>(serialized.randomDataShortCount),
@@ -1785,7 +1785,7 @@ void __cdecl Load_XAnimParts(bool atStreamStart)
             written = std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH XANIM1507] root +%02x: %08x %08x %08x %08x\\n",
+                "[SWITCH XANIM1507] root +%02x: %08x %08x %08x %08x\n",
                 i * 16,
                 d[0], d[1], d[2], d[3]);
             Switch_LogWrite(trace);
