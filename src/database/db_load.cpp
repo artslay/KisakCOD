@@ -1681,8 +1681,187 @@ void __cdecl Load_XAnimNotifyInfoArray(bool atStreamStart, int32_t count)
     }
 }
 
+#ifdef __SWITCH__
+struct SerializedXAnimParts
+{
+    uint32_t name;
+    uint16_t dataByteCount;
+    uint16_t dataShortCount;
+    uint16_t dataIntCount;
+    uint16_t randomDataByteCount;
+    uint16_t randomDataIntCount;
+    uint16_t numframes;
+    uint8_t bLoop;
+    uint8_t bDelta;
+    uint8_t boneCount[10];
+    uint8_t notifyCount;
+    uint8_t assetType;
+    uint8_t isDefault;
+    uint8_t pad;
+    uint32_t randomDataShortCount;
+    uint32_t indexCount;
+    float framerate;
+    float frequency;
+    uint32_t names;
+    uint32_t dataByte;
+    uint32_t dataShort;
+    uint32_t dataInt;
+    uint32_t randomDataShort;
+    uint32_t randomDataByte;
+    uint32_t randomDataInt;
+    uint32_t indices;
+    uint32_t notify;
+    uint32_t deltaPart;
+};
+static_assert(sizeof(SerializedXAnimParts) == 88,
+    "Serialized XAnimParts must remain 88 bytes");
+static_assert(sizeof(XAnimParts) == 128,
+    "Switch XAnimParts native ABI must remain 128 bytes");
+#endif
+
 void __cdecl Load_XAnimParts(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+
+    SerializedXAnimParts serialized{};
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    std::memset(varXAnimParts, 0, sizeof(*varXAnimParts));
+
+    varXAnimParts->name =
+        reinterpret_cast<const char *>(static_cast<uintptr_t>(serialized.name));
+    varXAnimParts->dataByteCount = serialized.dataByteCount;
+    varXAnimParts->dataShortCount = serialized.dataShortCount;
+    varXAnimParts->dataIntCount = serialized.dataIntCount;
+    varXAnimParts->randomDataByteCount = serialized.randomDataByteCount;
+    varXAnimParts->randomDataIntCount = serialized.randomDataIntCount;
+    varXAnimParts->numframes = serialized.numframes;
+    varXAnimParts->bLoop = serialized.bLoop != 0;
+    varXAnimParts->bDelta = serialized.bDelta != 0;
+    std::memcpy(
+        varXAnimParts->boneCount,
+        serialized.boneCount,
+        sizeof(varXAnimParts->boneCount));
+    varXAnimParts->notifyCount = serialized.notifyCount;
+    varXAnimParts->assetType = serialized.assetType;
+    varXAnimParts->isDefault = serialized.isDefault != 0;
+    varXAnimParts->randomDataShortCount = serialized.randomDataShortCount;
+    varXAnimParts->indexCount = serialized.indexCount;
+    varXAnimParts->framerate = serialized.framerate;
+    varXAnimParts->frequency = serialized.frequency;
+
+    varXAnimParts->names =
+        reinterpret_cast<uint16_t *>(
+            static_cast<uintptr_t>(serialized.names));
+    varXAnimParts->dataByte =
+        reinterpret_cast<uint8_t *>(
+            static_cast<uintptr_t>(serialized.dataByte));
+    varXAnimParts->dataShort =
+        reinterpret_cast<int16_t *>(
+            static_cast<uintptr_t>(serialized.dataShort));
+    varXAnimParts->dataInt =
+        reinterpret_cast<int *>(
+            static_cast<uintptr_t>(serialized.dataInt));
+    varXAnimParts->randomDataShort =
+        reinterpret_cast<int16_t *>(
+            static_cast<uintptr_t>(serialized.randomDataShort));
+    varXAnimParts->randomDataByte =
+        reinterpret_cast<uint8_t *>(
+            static_cast<uintptr_t>(serialized.randomDataByte));
+    varXAnimParts->randomDataInt =
+        reinterpret_cast<int *>(
+            static_cast<uintptr_t>(serialized.randomDataInt));
+    varXAnimParts->indices.data =
+        reinterpret_cast<void *>(
+            static_cast<uintptr_t>(serialized.indices));
+    varXAnimParts->notify =
+        reinterpret_cast<XAnimNotifyInfo *>(
+            static_cast<uintptr_t>(serialized.notify));
+    varXAnimParts->deltaPart =
+        reinterpret_cast<XAnimDeltaPart *>(
+            static_cast<uintptr_t>(serialized.deltaPart));
+
+    DB_PushStreamPos(4);
+
+    varXString = &varXAnimParts->name;
+    Load_XString(0);
+
+    if (varXAnimParts->names)
+    {
+        varXAnimParts->names =
+            reinterpret_cast<uint16_t *>(AllocLoad_XBlendInfo());
+        varScriptString = varXAnimParts->names;
+        Load_ScriptStringArray(1, varXAnimParts->boneCount[9]);
+    }
+
+    if (varXAnimParts->notify)
+    {
+        varXAnimParts->notify =
+            reinterpret_cast<XAnimNotifyInfo *>(AllocLoad_FxElemVisStateSample());
+        varXAnimNotifyInfo = varXAnimParts->notify;
+        Load_XAnimNotifyInfoArray(1, varXAnimParts->notifyCount);
+    }
+
+    if (varXAnimParts->deltaPart)
+    {
+        varXAnimParts->deltaPart =
+            reinterpret_cast<XAnimDeltaPart *>(AllocLoad_FxElemVisStateSample());
+        varXAnimDeltaPart = varXAnimParts->deltaPart;
+        Load_XAnimDeltaPart(1);
+    }
+
+    if (varXAnimParts->dataByte)
+    {
+        varXAnimParts->dataByte = AllocLoad_raw_byte();
+        varbyte = varXAnimParts->dataByte;
+        Load_byteArray(1, varXAnimParts->dataByteCount);
+    }
+
+    if (varXAnimParts->dataShort)
+    {
+        varXAnimParts->dataShort =
+            reinterpret_cast<int16_t *>(AllocLoad_XBlendInfo());
+        varshort = varXAnimParts->dataShort;
+        Load_shortArray(1, varXAnimParts->dataShortCount);
+    }
+
+    if (varXAnimParts->dataInt)
+    {
+        varXAnimParts->dataInt =
+            reinterpret_cast<int *>(AllocLoad_FxElemVisStateSample());
+        varint = varXAnimParts->dataInt;
+        Load_intArray(1, varXAnimParts->dataIntCount);
+    }
+
+    if (varXAnimParts->randomDataShort)
+    {
+        varXAnimParts->randomDataShort =
+            reinterpret_cast<int16_t *>(AllocLoad_XBlendInfo());
+        varshort = varXAnimParts->randomDataShort;
+        Load_shortArray(1, varXAnimParts->randomDataShortCount);
+    }
+
+    if (varXAnimParts->randomDataByte)
+    {
+        varXAnimParts->randomDataByte = AllocLoad_raw_byte();
+        varbyte = varXAnimParts->randomDataByte;
+        Load_byteArray(1, varXAnimParts->randomDataByteCount);
+    }
+
+    if (varXAnimParts->randomDataInt)
+    {
+        varXAnimParts->randomDataInt =
+            reinterpret_cast<int *>(AllocLoad_FxElemVisStateSample());
+        varint = varXAnimParts->randomDataInt;
+        Load_intArray(1, varXAnimParts->randomDataIntCount);
+    }
+
+    varXAnimIndices = &varXAnimParts->indices;
+    Load_XAnimIndices();
+
+    DB_PopStreamPos();
+#else
     Load_Stream(atStreamStart, (uint8_t *)varXAnimParts, 88);
     DB_PushStreamPos(4);
     varXString = &varXAnimParts->name;
@@ -1744,6 +1923,7 @@ void __cdecl Load_XAnimParts(bool atStreamStart)
     varXAnimIndices = &varXAnimParts->indices;
     Load_XAnimIndices();
     DB_PopStreamPos();
+#endif
 }
 
 void __cdecl Load_XAnimPartsPtr(bool atStreamStart)
@@ -1758,7 +1938,19 @@ void __cdecl Load_XAnimPartsPtr(bool atStreamStart)
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varXAnimPartsPtr));
         if (value == -1 || value == -2)
         {
+#ifdef __SWITCH__
+            *varXAnimPartsPtr = reinterpret_cast<XAnimParts *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(XAnimParts)),
+                    "SwitchXAnimParts",
+                    22));
+            std::memset(
+                *varXAnimPartsPtr,
+                0,
+                sizeof(XAnimParts));
+#else
             *varXAnimPartsPtr = (XAnimParts *)AllocLoad_FxElemVisStateSample();
+#endif
             varXAnimParts = *varXAnimPartsPtr;
             if (value == -2)
                 inserted = DB_InsertPointer();
