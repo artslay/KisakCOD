@@ -21,6 +21,7 @@ extern const char *varConstChar;
 extern XAssetHeader *varXAssetHeader;
 extern void __cdecl Load_XAssetHeader(bool atStreamStart);
 uint32_t g_switchImageAdds = 0;
+uint64_t g_switchTraceDecompOut = 0;
 
 // XFile is a serialized fastfile header: two 32-bit sizes followed by
 // exactly nine 32-bit block sizes. Keep this layout independent of host
@@ -679,24 +680,30 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 #ifdef __SWITCH__
         uint32_t preStreamIndex = 0;
         const uint8_t *preStreamPos = nullptr;
+#ifdef __SWITCH__
+        uint64_t preDecompOut = 0;
+#endif
         if (traceStreamWindow)
         {
             preStreamIndex = g_streamPosIndex;
             preStreamPos = DB_GetStreamPos();
+            preDecompOut = static_cast<uint64_t>(g_load.stream.total_out);
+            g_switchTraceDecompOut = preDecompOut;
 
             char trace[320];
             std::snprintf(
                 trace,
                 sizeof(trace),
                 "[SWITCH XASSET STREAM] begin i=%d rawType=%u rawHeader=%08x"
-                " stream=%u pos=%p b0=%08x b4=%08x\n",
+                " stream=%u pos=%p b0=%08x b4=%08x decompOut=%llu\n",
                 i,
                 serialized.type,
                 serialized.header,
                 preStreamIndex,
                 static_cast<const void *>(preStreamPos),
                 switchBlockOffset(0, g_streamPosArray[0]),
-                switchBlockOffset(4, g_streamPosArray[4]));
+                switchBlockOffset(4, g_streamPosArray[4]),
+                static_cast<unsigned long long>(g_load.stream.total_out));
             Switch_LogWrite(trace);
         }
 #endif
@@ -714,7 +721,8 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
                 trace,
                 sizeof(trace),
                 "[SWITCH XASSET STREAM] end   i=%d rawType=%u rawHeader=%08x"
-                " stream=%u pos=%p b0=%08x b4=%08x delta=%ld\n",
+                " stream=%u pos=%p b0=%08x b4=%08x delta=%ld decompOut=%llu"
+                " decompDelta=%llu\n",
                 i,
                 serialized.type,
                 serialized.header,
@@ -726,7 +734,14 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
                 preStreamPos &&
                 postStreamIndex == preStreamIndex
                     ? static_cast<long>(postStreamPos - preStreamPos)
-                    : 0L);
+                    : 0L,
+                static_cast<unsigned long long>(g_load.stream.total_out),
+                g_load.stream.total_out >=
+                        static_cast<decltype(g_load.stream.total_out)>(
+                            g_switchTraceDecompOut)
+                    ? static_cast<unsigned long long>(
+                        g_load.stream.total_out - g_switchTraceDecompOut)
+                    : 0ULL);
             Switch_LogWrite(trace);
         }
 #endif
