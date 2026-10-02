@@ -3083,7 +3083,20 @@ void __cdecl Mark_XModelAsset(XModel *model)
 
 void __cdecl Load_MaterialAsset(XAssetHeader *material)
 {
-    material->xmodelPieces = DB_AddXAsset(ASSET_TYPE_MATERIAL, (XAssetHeader)material->xmodelPieces).xmodelPieces;
+#ifdef __SWITCH__
+    XAssetHeader added =
+        DB_AddXAsset(
+            ASSET_TYPE_MATERIAL,
+            (XAssetHeader)material->xmodelPieces);
+    g_switchDbStage = "material/asset_store";
+    material->xmodelPieces = added.xmodelPieces;
+    g_switchDbStage = "material/asset_done";
+#else
+    material->xmodelPieces =
+        DB_AddXAsset(
+            ASSET_TYPE_MATERIAL,
+            (XAssetHeader)material->xmodelPieces).xmodelPieces;
+#endif
 }
 
 void __cdecl Mark_MaterialAsset(Material *material)
