@@ -10427,56 +10427,85 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
     Load_XString(0);
     if (varWeaponDef->accuracyGraphKnots[0])
     {
-        if (varWeaponDef->accuracyGraphKnots[0] == (float (*)[2]) - 1)
+        const bool inlineGraph0 =
+            static_cast<uint32_t>(
+                reinterpret_cast<uintptr_t>(
+                    varWeaponDef->accuracyGraphKnots[0])) == UINT32_MAX;
+        if (inlineGraph0)
         {
-            varWeaponDef->accuracyGraphKnots[0] = (float (*)[2])AllocLoad_FxElemVisStateSample();
+            DB_PushStreamPos(0);
+            varWeaponDef->accuracyGraphKnots[0] =
+                (float (*)[2])AllocLoad_FxElemVisStateSample();
             varvec2_t = varWeaponDef->accuracyGraphKnots[0];
             Load_vec2_tArray(1, varWeaponDef->accuracyGraphKnotCount[0]);
+            DB_PopStreamPos();
         }
         else
         {
-            DB_ConvertOffsetToPointer((uint32_t*)varWeaponDef->accuracyGraphKnots);
+            DB_ConvertOffsetToPointer(
+                (uint32_t*)varWeaponDef->accuracyGraphKnots);
         }
     }
     if (varWeaponDef->originalAccuracyGraphKnots[0])
     {
-        if (varWeaponDef->originalAccuracyGraphKnots[0] == (float (*)[2]) - 1)
+        const bool inlineOriginalGraph0 =
+            static_cast<uint32_t>(
+                reinterpret_cast<uintptr_t>(
+                    varWeaponDef->originalAccuracyGraphKnots[0])) == UINT32_MAX;
+        if (inlineOriginalGraph0)
         {
-            varWeaponDef->originalAccuracyGraphKnots[0] = (float (*)[2])AllocLoad_FxElemVisStateSample();
+            varWeaponDef->originalAccuracyGraphKnots[0] =
+                (float (*)[2])AllocLoad_FxElemVisStateSample();
+            varvec2_t = varWeaponDef->originalAccuracyGraphKnots[0];
             varvec2_t = varWeaponDef->originalAccuracyGraphKnots[0];
             Load_vec2_tArray(1, varWeaponDef->accuracyGraphKnotCount[0]);
         }
         else
         {
-            DB_ConvertOffsetToPointer((uint32_t*)varWeaponDef->originalAccuracyGraphKnots);
+            DB_ConvertOffsetToPointer(
+                (uint32_t*)varWeaponDef->originalAccuracyGraphKnots);
         }
     }
     varXString = &varWeaponDef->accuracyGraphName[1];
     Load_XString(0);
     if (varWeaponDef->accuracyGraphKnots[1])
     {
-        if (varWeaponDef->accuracyGraphKnots[1] == (float (*)[2]) - 1)
+        const bool inlineGraph1 =
+            static_cast<uint32_t>(
+                reinterpret_cast<uintptr_t>(
+                    varWeaponDef->accuracyGraphKnots[1])) == UINT32_MAX;
+        if (inlineGraph1)
         {
-            varWeaponDef->accuracyGraphKnots[1] = (float (*)[2])AllocLoad_FxElemVisStateSample();
+            DB_PushStreamPos(0);
+            varWeaponDef->accuracyGraphKnots[1] =
+                (float (*)[2])AllocLoad_FxElemVisStateSample();
             varvec2_t = varWeaponDef->accuracyGraphKnots[1];
             Load_vec2_tArray(1, varWeaponDef->accuracyGraphKnotCount[1]);
+            DB_PopStreamPos();
         }
         else
         {
-            DB_ConvertOffsetToPointer((uint32_t*)&varWeaponDef->accuracyGraphKnots[1]);
+            DB_ConvertOffsetToPointer(
+                (uint32_t*)&varWeaponDef->accuracyGraphKnots[1]);
         }
     }
     if (varWeaponDef->originalAccuracyGraphKnots[1])
     {
-        if (varWeaponDef->originalAccuracyGraphKnots[1] == (float (*)[2]) - 1)
+        const bool inlineOriginalGraph1 =
+            static_cast<uint32_t>(
+                reinterpret_cast<uintptr_t>(
+                    varWeaponDef->originalAccuracyGraphKnots[1])) == UINT32_MAX;
+        if (inlineOriginalGraph1)
         {
-            varWeaponDef->originalAccuracyGraphKnots[1] = (float (*)[2])AllocLoad_FxElemVisStateSample();
+            varWeaponDef->originalAccuracyGraphKnots[1] =
+                (float (*)[2])AllocLoad_FxElemVisStateSample();
             varvec2_t = varWeaponDef->originalAccuracyGraphKnots[1];
             Load_vec2_tArray(1, varWeaponDef->accuracyGraphKnotCount[1]);
         }
         else
         {
-            DB_ConvertOffsetToPointer((uint32_t*)&varWeaponDef->originalAccuracyGraphKnots[1]);
+            DB_ConvertOffsetToPointer(
+                (uint32_t*)&varWeaponDef->originalAccuracyGraphKnots[1]);
         }
     }
     varXString = &varWeaponDef->szUseHintString;
