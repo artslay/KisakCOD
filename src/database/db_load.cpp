@@ -1140,9 +1140,40 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
     if (!serialized)
         return;
 
+    const bool switchTraceWeapon1506 =
+        g_switchCurrentAssetIndex == 1506 &&
+        g_switchCurrentAssetRawType == 23u;
+
+    if (switchTraceWeapon1506)
+    {
+        char trace[192];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON1506] XStringPtr enter serialized=%08x var=%p\n",
+            serialized,
+            static_cast<void *>(varXStringPtr));
+        Switch_LogWrite(trace);
+    }
+
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] XStringPtr before Hunk_Alloc\n");
+
     const char **nativeStringSlot =
         reinterpret_cast<const char **>(
             Hunk_Alloc(sizeof(const char *), "SwitchXStringPtr", 22));
+
+    if (switchTraceWeapon1506)
+    {
+        char trace[192];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON1506] XStringPtr after Hunk_Alloc slot=%p\n",
+            static_cast<void *>(nativeStringSlot));
+        Switch_LogWrite(trace);
+    }
+
     *nativeStringSlot = nullptr;
     *varXStringPtr = nativeStringSlot;
 
@@ -1155,8 +1186,22 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
         return;
     }
 
+    if (switchTraceWeapon1506)
+        Switch_LogWrite("[SWITCH WEAPON1506] XStringPtr before offset convert\n");
+
     const uintptr_t slotAddress =
         DB_ConvertOffsetToPointerValue(serialized);
+
+    if (switchTraceWeapon1506)
+    {
+        char trace[224];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON1506] XStringPtr after offset convert slot=%p\n",
+            reinterpret_cast<const void *>(slotAddress));
+        Switch_LogWrite(trace);
+    }
 
     uint32_t stringToken = 0;
     std::memcpy(
@@ -1164,18 +1209,15 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
         reinterpret_cast<const void *>(slotAddress),
         sizeof(stringToken));
 
-    if (g_switchCurrentAssetIndex == 1506 &&
-        g_switchCurrentAssetRawType == 23u)
+    if (switchTraceWeapon1506)
     {
         char trace[256];
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH WEAPON1506] XStringPtr serialized=%08x "
-            "slot=%p stringToken=%08x\n",
-            serialized,
-            reinterpret_cast<const void *>(slotAddress),
-            stringToken);
+            "[SWITCH WEAPON1506] XStringPtr stringToken=%08x slot=%p\n",
+            stringToken,
+            reinterpret_cast<const void *>(slotAddress));
         Switch_LogWrite(trace);
 
         Switch_LogRawDwords(
