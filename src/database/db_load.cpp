@@ -6490,6 +6490,46 @@ void __cdecl Load_cplane_tArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_cbrushside_t(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+
+    struct SerializedCBrushSide
+    {
+        uint32_t plane;
+        uint32_t materialNum;
+        int16_t firstAdjacentSideOffset;
+        uint8_t edgeCount;
+        uint8_t pad;
+    };
+    static_assert(sizeof(SerializedCBrushSide) == 12);
+    static_assert(sizeof(cbrushside_t) == 16);
+
+    SerializedCBrushSide serialized{};
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    std::memset(varcbrushside_t, 0, sizeof(*varcbrushside_t));
+    varcbrushside_t->materialNum = serialized.materialNum;
+    varcbrushside_t->firstAdjacentSideOffset =
+        serialized.firstAdjacentSideOffset;
+    varcbrushside_t->edgeCount = serialized.edgeCount;
+
+    if (serialized.plane)
+    {
+        if (serialized.plane == UINT32_MAX)
+        {
+            varcbrushside_t->plane =
+                (cplane_s *)AllocLoad_FxElemVisStateSample();
+            varcplane_t = varcbrushside_t->plane;
+            Load_cplane_t(1);
+        }
+        else
+        {
+            varcbrushside_t->plane =
+                reinterpret_cast<cplane_s *>(
+                    DB_ConvertOffsetToPointerValue(serialized.plane));
+        }
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varcbrushside_t, 12);
     if (varcbrushside_t->plane)
     {
@@ -6504,6 +6544,7 @@ void __cdecl Load_cbrushside_t(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)(uint32_t*)varcbrushside_t);
         }
     }
+#endif
 }
 
 XAsset *__cdecl AllocLoad_FxElemVisStateSample()
@@ -6513,6 +6554,16 @@ XAsset *__cdecl AllocLoad_FxElemVisStateSample()
 
 void __cdecl Load_cbrushside_tArray(bool atStreamStart, int32_t count)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+
+    cbrushside_t *var = varcbrushside_t;
+    for (int32_t i = 0; i < count; ++i)
+    {
+        varcbrushside_t = &var[i];
+        Load_cbrushside_t(1);
+    }
+#else
     cbrushside_t *var; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
 
@@ -6524,6 +6575,7 @@ void __cdecl Load_cbrushside_tArray(bool atStreamStart, int32_t count)
         Load_cbrushside_t(0);
         ++var;
     }
+#endif
 }
 
 void __cdecl Load_cbrushedge_t(bool atStreamStart)
@@ -6617,6 +6669,90 @@ void __cdecl Load_XModelCollSurfArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_BrushWrapper(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+
+    struct SerializedBrushWrapper
+    {
+        float mins[3];
+        int contents;
+        float maxs[3];
+        uint32_t numsides;
+        uint32_t sides;
+        int16_t axialMaterialNum[2][3];
+        uint32_t baseAdjacentSide;
+        int16_t firstAdjacentSideOffsets[2][3];
+        uint8_t edgeCount[2][3];
+        int totalEdgeCount;
+        uint32_t planes;
+    };
+    static_assert(sizeof(SerializedBrushWrapper) == 80);
+    static_assert(sizeof(BrushWrapper) == 96);
+
+    SerializedBrushWrapper serialized{};
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    std::memset(varBrushWrapper, 0, sizeof(*varBrushWrapper));
+    std::memcpy(varBrushWrapper->mins, serialized.mins,
+        sizeof(serialized.mins));
+    varBrushWrapper->contents = serialized.contents;
+    std::memcpy(varBrushWrapper->maxs, serialized.maxs,
+        sizeof(serialized.maxs));
+    varBrushWrapper->numsides = serialized.numsides;
+    std::memcpy(varBrushWrapper->axialMaterialNum,
+        serialized.axialMaterialNum,
+        sizeof(serialized.axialMaterialNum));
+    std::memcpy(varBrushWrapper->firstAdjacentSideOffsets,
+        serialized.firstAdjacentSideOffsets,
+        sizeof(serialized.firstAdjacentSideOffsets));
+    std::memcpy(varBrushWrapper->edgeCount,
+        serialized.edgeCount,
+        sizeof(serialized.edgeCount));
+    varBrushWrapper->totalEdgeCount = serialized.totalEdgeCount;
+
+    if (serialized.sides)
+    {
+        varBrushWrapper->sides =
+            reinterpret_cast<cbrushside_t *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(
+                        sizeof(cbrushside_t) *
+                        static_cast<size_t>(serialized.numsides)),
+                    "SwitchCBrushSideArray",
+                    22));
+        std::memset(
+            varBrushWrapper->sides,
+            0,
+            sizeof(cbrushside_t) *
+                static_cast<size_t>(serialized.numsides));
+        varcbrushside_t = varBrushWrapper->sides;
+        Load_cbrushside_tArray(1, serialized.numsides);
+    }
+
+    if (serialized.baseAdjacentSide)
+    {
+        varBrushWrapper->baseAdjacentSide = AllocLoad_raw_byte();
+        varcbrushedge_t = varBrushWrapper->baseAdjacentSide;
+        Load_cbrushedge_tArray(1, serialized.totalEdgeCount);
+    }
+
+    if (serialized.planes)
+    {
+        if (serialized.planes == UINT32_MAX)
+        {
+            varBrushWrapper->planes =
+                (cplane_s *)AllocLoad_FxElemVisStateSample();
+            varcplane_t = varBrushWrapper->planes;
+            Load_cplane_tArray(1, serialized.numsides);
+        }
+        else
+        {
+            varBrushWrapper->planes =
+                reinterpret_cast<cplane_s *>(
+                    DB_ConvertOffsetToPointerValue(serialized.planes));
+        }
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varBrushWrapper, 80);
     if (varBrushWrapper->sides)
     {
@@ -6643,10 +6779,58 @@ void __cdecl Load_BrushWrapper(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)&varBrushWrapper->planes);
         }
     }
+#endif
 }
 
 void __cdecl Load_PhysGeomInfo(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+
+    struct SerializedPhysGeomInfo
+    {
+        uint32_t brush;
+        int32_t type;
+        float orientation[3][3];
+        float offset[3];
+        float halfLengths[3];
+    };
+    static_assert(sizeof(SerializedPhysGeomInfo) == 68);
+    static_assert(sizeof(PhysGeomInfo) == 80);
+
+    SerializedPhysGeomInfo serialized{};
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    std::memset(varPhysGeomInfo, 0, sizeof(*varPhysGeomInfo));
+    varPhysGeomInfo->type = serialized.type;
+    std::memcpy(varPhysGeomInfo->orientation, serialized.orientation,
+        sizeof(serialized.orientation));
+    std::memcpy(varPhysGeomInfo->offset, serialized.offset,
+        sizeof(serialized.offset));
+    std::memcpy(varPhysGeomInfo->halfLengths, serialized.halfLengths,
+        sizeof(serialized.halfLengths));
+
+    if (serialized.brush)
+    {
+        if (serialized.brush == UINT32_MAX)
+        {
+            varPhysGeomInfo->brush =
+                (BrushWrapper *)Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(BrushWrapper)),
+                    "SwitchBrushWrapper",
+                    22);
+            std::memset(varPhysGeomInfo->brush, 0, sizeof(BrushWrapper));
+            varBrushWrapper = varPhysGeomInfo->brush;
+            Load_BrushWrapper(1);
+        }
+        else
+        {
+            varPhysGeomInfo->brush =
+                reinterpret_cast<BrushWrapper *>(
+                    DB_ConvertOffsetToPointerValue(serialized.brush));
+        }
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varPhysGeomInfo, 68);
     if (varPhysGeomInfo->brush)
     {
@@ -6661,10 +6845,21 @@ void __cdecl Load_PhysGeomInfo(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)varPhysGeomInfo);
         }
     }
+#endif
 }
 
 void __cdecl Load_PhysGeomInfoArray(bool atStreamStart, int32_t count)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+
+    PhysGeomInfo *var = varPhysGeomInfo;
+    for (int32_t i = 0; i < count; ++i)
+    {
+        varPhysGeomInfo = &var[i];
+        Load_PhysGeomInfo(1);
+    }
+#else
     PhysGeomInfo *var; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
 
@@ -6676,10 +6871,49 @@ void __cdecl Load_PhysGeomInfoArray(bool atStreamStart, int32_t count)
         Load_PhysGeomInfo(0);
         ++var;
     }
+#endif
 }
 
 void __cdecl Load_PhysGeomList(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+
+    struct SerializedPhysGeomList
+    {
+        uint32_t count;
+        uint32_t geoms;
+        PhysMass mass;
+    };
+    static_assert(sizeof(SerializedPhysGeomList) == 44);
+    static_assert(sizeof(PhysGeomList) == 56);
+
+    SerializedPhysGeomList serialized{};
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    std::memset(varPhysGeomList, 0, sizeof(*varPhysGeomList));
+    varPhysGeomList->count = serialized.count;
+    varPhysGeomList->mass = serialized.mass;
+
+    if (serialized.geoms)
+    {
+        varPhysGeomList->geoms =
+            reinterpret_cast<PhysGeomInfo *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(
+                        sizeof(PhysGeomInfo) *
+                        static_cast<size_t>(serialized.count)),
+                    "SwitchPhysGeomInfoArray",
+                    22));
+        std::memset(
+            varPhysGeomList->geoms,
+            0,
+            sizeof(PhysGeomInfo) *
+                static_cast<size_t>(serialized.count));
+        varPhysGeomInfo = varPhysGeomList->geoms;
+        Load_PhysGeomInfoArray(1, static_cast<int32_t>(serialized.count));
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varPhysGeomList, 44);
     if (varPhysGeomList->geoms)
     {
@@ -6687,6 +6921,7 @@ void __cdecl Load_PhysGeomList(bool atStreamStart)
         varPhysGeomInfo = varPhysGeomList->geoms;
         Load_PhysGeomInfoArray(1, varPhysGeomList->count);
     }
+#endif
 }
 
 #ifdef __SWITCH__
