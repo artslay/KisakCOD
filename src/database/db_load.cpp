@@ -7183,24 +7183,6 @@ void __cdecl Load_XModelPtr(bool atStreamStart)
     const void **inserted; // [esp+0h] [ebp-Ch]
     uint32_t value; // [esp+4h] [ebp-8h]
 
-#ifdef __SWITCH__
-    const bool switchTraceWeapon1506 =
-        g_switchCurrentAssetIndex == 1506 &&
-        g_switchCurrentAssetRawType == 23u;
-    if (switchTraceWeapon1506)
-    {
-        char trace[224];
-        std::snprintf(
-            trace,
-            sizeof(trace),
-            "[SWITCH WEAPON1506] XModelPtr slot=%p raw=%08x\n",
-            static_cast<void *>(varXModelPtr),
-            static_cast<unsigned>(
-                *reinterpret_cast<const uint32_t *>(varXModelPtr)));
-        Switch_LogWrite(trace);
-    }
-#endif
-
     Load_Stream(atStreamStart, (uint8_t *)varXModelPtr, 4);
     DB_PushStreamPos(0);
     if (*varXModelPtr)
@@ -7224,10 +7206,6 @@ void __cdecl Load_XModelPtr(bool atStreamStart)
             else
                 inserted = 0;
             Load_XModel(1);
-#ifdef __SWITCH__
-            if (switchTraceWeapon1506)
-                Switch_LogWrite("[SWITCH WEAPON1506] XModelPtr inline payload done\n");
-#endif
             Load_XModelAsset((XAssetHeader *)varXModelPtr);
             if (inserted)
                 *inserted = *varXModelPtr;
