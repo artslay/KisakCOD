@@ -1724,8 +1724,43 @@ void __cdecl Load_XAnimParts(bool atStreamStart)
 #ifdef __SWITCH__
     iassert(atStreamStart);
 
+    const bool switchXAnimTrace =
+        g_switchCurrentAssetIndex == 1507 &&
+        g_switchCurrentAssetRawType == 2u;
+
     SerializedXAnimParts serialized{};
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    if (switchXAnimTrace)
+    {
+        char trace[512];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XANIM1507] raw name=%08x counts=%u/%u/%u/%u/%u frames=%u flags=%u/%u notify=%u ptrs=%08x/%08x/%08x/%08x/%08x/%08x/%08x idx=%08x notify=%08x delta=%08x pos=%p\\n",
+            serialized.name,
+            static_cast<unsigned>(serialized.dataByteCount),
+            static_cast<unsigned>(serialized.dataShortCount),
+            static_cast<unsigned>(serialized.dataIntCount),
+            static_cast<unsigned>(serialized.randomDataByteCount),
+            static_cast<unsigned>(serialized.randomDataIntCount),
+            static_cast<unsigned>(serialized.numframes),
+            static_cast<unsigned>(serialized.bLoop),
+            static_cast<unsigned>(serialized.bDelta),
+            static_cast<unsigned>(serialized.notifyCount),
+            serialized.names,
+            serialized.dataByte,
+            serialized.dataShort,
+            serialized.dataInt,
+            serialized.randomDataShort,
+            serialized.randomDataByte,
+            serialized.randomDataInt,
+            serialized.indices,
+            serialized.notify,
+            serialized.deltaPart,
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
 
     std::memset(varXAnimParts, 0, sizeof(*varXAnimParts));
 
@@ -1783,9 +1818,26 @@ void __cdecl Load_XAnimParts(bool atStreamStart)
             static_cast<uintptr_t>(serialized.deltaPart));
 
     DB_PushStreamPos(4);
+#ifdef __SWITCH__
+    if (switchXAnimTrace)
+        Switch_LogWrite("[SWITCH XANIM1507] after PushStreamPos4\\n");
+#endif
 
     varXString = &varXAnimParts->name;
     Load_XString(0);
+#ifdef __SWITCH__
+    if (switchXAnimTrace)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XANIM1507] after name=%p pos=%p\\n",
+            static_cast<const void *>(varXAnimParts->name),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+#endif
 
     if (varXAnimParts->names)
     {
@@ -1858,9 +1910,21 @@ void __cdecl Load_XAnimParts(bool atStreamStart)
     }
 
     varXAnimIndices = &varXAnimParts->indices;
+#ifdef __SWITCH__
+    if (switchXAnimTrace)
+        Switch_LogWrite("[SWITCH XANIM1507] before Load_XAnimIndices\\n");
+#endif
     Load_XAnimIndices();
+#ifdef __SWITCH__
+    if (switchXAnimTrace)
+        Switch_LogWrite("[SWITCH XANIM1507] after Load_XAnimIndices\\n");
+#endif
 
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (switchXAnimTrace)
+        Switch_LogWrite("[SWITCH XANIM1507] after PopStreamPos4\\n");
+#endif
 #else
     Load_Stream(atStreamStart, (uint8_t *)varXAnimParts, 88);
     DB_PushStreamPos(4);
@@ -1930,9 +1994,47 @@ void __cdecl Load_XAnimPartsPtr(bool atStreamStart)
 {
     const void **inserted; // [esp+0h] [ebp-Ch]
     uint32_t value; // [esp+4h] [ebp-8h]
+#ifdef __SWITCH__
+    const bool switchXAnimTrace =
+        g_switchCurrentAssetIndex == 1507 &&
+        g_switchCurrentAssetRawType == 2u;
+    if (switchXAnimTrace)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XANIM1507] ptr enter atStream=%u slot=%p slotValue=%p stream=%u pos=%p\\n",
+            static_cast<unsigned>(atStreamStart),
+            static_cast<void *>(varXAnimPartsPtr),
+            varXAnimPartsPtr ? static_cast<void *>(*varXAnimPartsPtr) : nullptr,
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+#endif
 
     Load_Stream(atStreamStart, (uint8_t *)varXAnimPartsPtr, 4);
+#ifdef __SWITCH__
+    if (switchXAnimTrace)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XANIM1507] after Load_Stream slot=%p value=%p stream=%u pos=%p\\n",
+            static_cast<void *>(varXAnimPartsPtr),
+            varXAnimPartsPtr ? static_cast<void *>(*varXAnimPartsPtr) : nullptr,
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+#endif
     DB_PushStreamPos(0);
+#ifdef __SWITCH__
+    if (switchXAnimTrace)
+        Switch_LogWrite("[SWITCH XANIM1507] after PushStreamPos0\\n");
+#endif
     if (*varXAnimPartsPtr)
     {
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varXAnimPartsPtr));
@@ -1956,8 +2058,30 @@ void __cdecl Load_XAnimPartsPtr(bool atStreamStart)
                 inserted = DB_InsertPointer();
             else
                 inserted = 0;
+#ifdef __SWITCH__
+            if (switchXAnimTrace)
+            {
+                char trace[256];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH XANIM1507] before Load_XAnimParts value=%08x obj=%p pos=%p\\n",
+                    value,
+                    static_cast<void *>(*varXAnimPartsPtr),
+                    static_cast<void *>(DB_GetStreamPos()));
+                Switch_LogWrite(trace);
+            }
+#endif
             Load_XAnimParts(1);
+#ifdef __SWITCH__
+            if (switchXAnimTrace)
+                Switch_LogWrite("[SWITCH XANIM1507] after Load_XAnimParts\\n");
+#endif
             Load_XAnimPartsAsset((XAssetHeader *)varXAnimPartsPtr);
+#ifdef __SWITCH__
+            if (switchXAnimTrace)
+                Switch_LogWrite("[SWITCH XANIM1507] after Load_XAnimPartsAsset\\n");
+#endif
             if (inserted)
                 *inserted = *varXAnimPartsPtr;
         }
