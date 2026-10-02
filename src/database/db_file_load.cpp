@@ -659,6 +659,24 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             i >= 1490 && i <= 1506;
 
 #ifdef __SWITCH__
+        auto switchBlockOffset = [](uint32_t block, const uint8_t *ptr) -> uint32_t
+        {
+            if (!g_streamBlocks || block >= 9 || !g_streamBlocks[block].data || !ptr)
+                return UINT32_MAX;
+
+            const uintptr_t base =
+                reinterpret_cast<uintptr_t>(g_streamBlocks[block].data);
+            const uintptr_t address =
+                reinterpret_cast<uintptr_t>(ptr);
+            if (address < base ||
+                address > base + g_streamBlocks[block].size)
+                return UINT32_MAX;
+
+            return static_cast<uint32_t>(address - base);
+        };
+#endif
+
+#ifdef __SWITCH__
         uint32_t preStreamIndex = 0;
         const uint8_t *preStreamPos = nullptr;
         if (traceStreamWindow)
@@ -671,12 +689,14 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
                 trace,
                 sizeof(trace),
                 "[SWITCH XASSET STREAM] begin i=%d rawType=%u rawHeader=%08x"
-                " stream=%u pos=%p\n",
+                " stream=%u pos=%p b0=%08x b4=%08x\n",
                 i,
                 serialized.type,
                 serialized.header,
                 preStreamIndex,
-                static_cast<const void *>(preStreamPos));
+                static_cast<const void *>(preStreamPos),
+                switchBlockOffset(0, g_streamPosArray[0]),
+                switchBlockOffset(4, g_streamPosArray[4]));
             Switch_LogWrite(trace);
         }
 #endif
@@ -694,12 +714,14 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
                 trace,
                 sizeof(trace),
                 "[SWITCH XASSET STREAM] end   i=%d rawType=%u rawHeader=%08x"
-                " stream=%u pos=%p delta=%ld\n",
+                " stream=%u pos=%p b0=%08x b4=%08x delta=%ld\n",
                 i,
                 serialized.type,
                 serialized.header,
                 postStreamIndex,
                 static_cast<const void *>(postStreamPos),
+                switchBlockOffset(0, g_streamPosArray[0]),
+                switchBlockOffset(4, g_streamPosArray[4]),
                 postStreamPos &&
                 preStreamPos &&
                 postStreamIndex == preStreamIndex
