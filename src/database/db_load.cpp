@@ -1189,6 +1189,24 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
     if (switchTraceWeapon1506)
         Switch_LogWrite("[SWITCH WEAPON1506] XStringPtr before offset convert\n");
 
+    if (switchTraceWeapon1506)
+    {
+        const uint32_t debugBlock = (serialized - 1u) >> 28;
+        const uint32_t debugOffset = (serialized - 1u) & 0x0FFFFFFFu;
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON1506] XStringPtr block=%u offset=%08x "
+            "blocks=%p data=%p size=%u\n",
+            debugBlock,
+            debugOffset,
+            static_cast<void *>(g_streamBlocks),
+            debugBlock < 9 ? static_cast<void *>(g_streamBlocks[debugBlock].data) : nullptr,
+            debugBlock < 9 ? g_streamBlocks[debugBlock].size : 0u);
+        Switch_LogWrite(trace);
+    }
+
     const uintptr_t slotAddress =
         DB_ConvertOffsetToPointerValue(serialized);
 
