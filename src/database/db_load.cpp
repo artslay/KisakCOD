@@ -662,6 +662,7 @@ XAssetList g_varXAssetList{};
 int32_t g_switchCurrentAssetIndex = -1;
 uint32_t g_switchCurrentAssetRawType = UINT32_MAX;
 uint32_t g_switchCurrentAssetHeader = 0;
+volatile int32_t g_switchCurrentMenuItemIndex = -1;
 static int32_t g_switchCurrentSoundAliasIndex = -1;
 #endif
 
@@ -10428,34 +10429,50 @@ void __cdecl Load_itemDef_t(bool atStreamStart)
 {
 #ifdef __SWITCH__
     iassert(atStreamStart);
+    if (g_switchCurrentAssetIndex == 11 &&
+        g_switchCurrentAssetRawType == 20u)
+        g_switchDbStage = "menu/item/header";
     Switch_TranslateItemDefSerialized(varitemDef_t);
 #else
     Load_Stream(atStreamStart, (uint8_t *)varitemDef_t, 372);
 #endif
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/window";
     varWindow = &varitemDef_t->window;
     Load_Window(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/text";
     varXString = &varitemDef_t->text;
     Load_XString(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/mouseEnterText";
     varXString = &varitemDef_t->mouseEnterText;
     Load_XString(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/mouseExitText";
     varXString = &varitemDef_t->mouseExitText;
     Load_XString(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/mouseEnter";
     varXString = &varitemDef_t->mouseEnter;
     Load_XString(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/mouseExit";
     varXString = &varitemDef_t->mouseExit;
     Load_XString(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/action";
     varXString = &varitemDef_t->action;
     Load_XString(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/onAccept";
     varXString = &varitemDef_t->onAccept;
     Load_XString(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/onFocus";
     varXString = &varitemDef_t->onFocus;
     Load_XString(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/leaveFocus";
     varXString = &varitemDef_t->leaveFocus;
     Load_XString(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/dvar";
     varXString = &varitemDef_t->dvar;
     Load_XString(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/dvarTest";
     varXString = &varitemDef_t->dvarTest;
     Load_XString(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/onKey";
     if (varitemDef_t->onKey)
     {
 #ifdef __SWITCH__
@@ -10472,26 +10489,37 @@ void __cdecl Load_itemDef_t(bool atStreamStart)
         varItemKeyHandler = varitemDef_t->onKey;
         Load_ItemKeyHandler(1);
     }
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/enableDvar";
     varXString = &varitemDef_t->enableDvar;
     Load_XString(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/focusSound";
     varsnd_alias_list_ptr = &varitemDef_t->focusSound;
     Load_snd_alias_list_ptr(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/typeData";
     varitemDefData_t = &varitemDef_t->typeData;
     Load_itemDefData_t(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/visibleExp";
     varstatement = &varitemDef_t->visibleExp;
     Load_statement(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/textExp";
     varstatement = &varitemDef_t->textExp;
     Load_statement(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/materialExp";
     varstatement = &varitemDef_t->materialExp;
     Load_statement(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/rectXExp";
     varstatement = &varitemDef_t->rectXExp;
     Load_statement(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/rectYExp";
     varstatement = &varitemDef_t->rectYExp;
     Load_statement(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/rectWExp";
     varstatement = &varitemDef_t->rectWExp;
     Load_statement(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/rectHExp";
     varstatement = &varitemDef_t->rectHExp;
     Load_statement(0);
+    if (g_switchCurrentAssetIndex == 11 && g_switchCurrentAssetRawType == 20u) g_switchDbStage = "menu/item/forecolorAExp";
     varstatement = &varitemDef_t->forecolorAExp;
     Load_statement(0);
 }
@@ -10595,14 +10623,18 @@ void __cdecl Load_itemDef_ptrArray(bool atStreamStart, int32_t count)
 
             if (traceMenu11)
             {
-                char trace[256];
-                std::snprintf(
-                    trace,
-                    sizeof(trace),
-                    "[SWITCH MENU11] item token i=%d token=%08x\n",
-                    i,
-                    token);
-                Switch_LogWrite(trace);
+                g_switchCurrentMenuItemIndex = i;
+                if (i >= 19 && i <= 21)
+                {
+                    char trace[192];
+                    std::snprintf(
+                        trace,
+                        sizeof(trace),
+                        "[SWITCH MENU11] item i=%d token=%08x\n",
+                        i,
+                        token);
+                    Switch_LogWrite(trace);
+                }
                 g_switchDbStage = "menu/item_token";
             }
 
@@ -10632,24 +10664,28 @@ void __cdecl Load_itemDef_ptrArray(bool atStreamStart, int32_t count)
                     inserted = DB_InsertPointer();
 
                 varitemDef_t = *varitemDef_ptr;
+                if (traceMenu11)
+                    g_switchDbStage = "menu/item_load";
                 Load_itemDef_t(1);
 
                 if (traceMenu11)
                 {
-                    char trace[320];
-                    std::snprintf(
-                        trace,
-                        sizeof(trace),
-                        "[SWITCH MENU11] item inline i=%d obj=%p type=%d text=%p parent=%p stream=%u pos=%p\n",
-                        i,
-                        static_cast<void *>(*varitemDef_ptr),
-                        varitemDef_t->type,
-                        static_cast<const void *>(varitemDef_t->text),
-                        static_cast<void *>(varitemDef_t->parent),
-                        static_cast<unsigned>(g_streamPosIndex),
-                        static_cast<const void *>(DB_GetStreamPos()));
-                    Switch_LogWrite(trace);
                     g_switchDbStage = "menu/item_inline_done";
+                    if (i >= 19 && i <= 21)
+                    {
+                        char trace[224];
+                        std::snprintf(
+                            trace,
+                            sizeof(trace),
+                            "[SWITCH MENU11] item inline done i=%d obj=%p type=%d text=%p parent=%p pos=%p\n",
+                            i,
+                            static_cast<void *>(*varitemDef_ptr),
+                            varitemDef_t->type,
+                            static_cast<const void *>(varitemDef_t->text),
+                            static_cast<void *>(varitemDef_t->parent),
+                            static_cast<const void *>(DB_GetStreamPos()));
+                        Switch_LogWrite(trace);
+                    }
                 }
 
                 if (inserted)
@@ -10667,19 +10703,23 @@ void __cdecl Load_itemDef_ptrArray(bool atStreamStart, int32_t count)
 
                 if (traceMenu11)
                 {
-                    char trace[320];
-                    std::snprintf(
-                        trace,
-                        sizeof(trace),
-                        "[SWITCH MENU11] item alias i=%d token=%08x ptr=%p\n",
-                        i,
-                        token,
-                        static_cast<void *>(alias));
-                    Switch_LogWrite(trace);
                     g_switchDbStage = "menu/item_alias_done";
+                    if (i >= 19 && i <= 21)
+                    {
+                        char trace[224];
+                        std::snprintf(
+                            trace,
+                            sizeof(trace),
+                            "[SWITCH MENU11] item alias i=%d token=%08x ptr=%p\n",
+                            i,
+                            token,
+                            static_cast<void *>(alias));
+                        Switch_LogWrite(trace);
+                    }
                 }
             }
         }
+        g_switchCurrentMenuItemIndex = -1;
         return;
     }
 #endif
