@@ -1164,8 +1164,7 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH WEAPON1506] XStringPtr direct token=%08x resolved=%p
-",
+                "[SWITCH WEAPON1506] XStringPtr direct token=%08x resolved=%p\n",
                 serialized,
                 reinterpret_cast<const void *>(resolved));
             Switch_LogWrite(trace);
@@ -1194,8 +1193,7 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH WEAPON1506] XStringPtr inline nested=%08x slot=%p
-",
+            "[SWITCH WEAPON1506] XStringPtr inline nested=%08x slot=%p\n",
             nested,
             static_cast<void *>(nativeStringSlot));
         Switch_LogWrite(trace);
