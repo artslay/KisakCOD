@@ -1699,7 +1699,15 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
     XAsset asset; // [esp+Ch] [ebp-Ch] BYREF
     XAssetEntry *newEntry; // [esp+14h] [ebp-4h]
 
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+        g_switchDbStage = "asset/default_header";
+#endif
     asset.header = DB_FindXAssetDefaultHeaderInternal(type);
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+        g_switchDbStage = "asset/default_header_done";
+#endif
     if (!asset.header.data)
     {
         Sys_UnlockWrite(&db_hashCritSect);
@@ -1718,7 +1726,15 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
     }
     asset.type = type;
     ++g_defaultAssetCount;
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+        g_switchDbStage = "asset/default_alloc";
+#endif
     newEntry = (XAssetEntry *)DB_AllocXAssetEntry(type, 0);
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+        g_switchDbStage = "asset/default_clone";
+#endif
     DB_CloneXAssetInternal(&asset, &newEntry->asset);
     if (type == ASSET_TYPE_SOUND)
     {
@@ -1752,12 +1768,48 @@ XAssetHeader __cdecl DB_FindXAssetDefaultHeaderInternal(XAssetType type)
     uint32_t assetEntryIndex; // [esp+8h] [ebp-Ch]
     const char *name; // [esp+Ch] [ebp-8h]
     XAssetEntryPoolEntry *assetEntry; // [esp+10h] [ebp-4h]
+#ifdef __SWITCH__
+    uint32_t guard = 0;
+#endif
 
     name = g_defaultAssetName[type];
-    for (assetEntryIndex = db_hashTable[DB_HashForName(name, type)]; ; assetEntryIndex = assetEntry->entry.nextHash)
+#ifdef __SWITCH__
+    const uint32_t hash = DB_HashForName(name, type);
+    if (type == ASSET_TYPE_TECHNIQUE_SET)
+        g_switchDbStage = "asset/default_bucket";
+    uint32_t bucket = db_hashTable[hash];
+#else
+    const uint32_t hash = DB_HashForName(name, type);
+#endif
+    for (assetEntryIndex = bucket; ; assetEntryIndex = assetEntry->entry.nextHash)
     {
         if (!assetEntryIndex)
             return 0;
+#ifdef __SWITCH__
+        if (++guard > 0x8000u)
+        {
+            g_switchDbStage = "asset/default_cycle";
+            Com_Error(
+                ERR_DROP,
+                "Switch default asset hash chain cycle: type=%u hash=%u",
+                static_cast<unsigned>(type),
+                hash);
+            return 0;
+        }
+        if (assetEntryIndex >= 0x8000u)
+        {
+            g_switchDbStage = "asset/default_oob";
+            Com_Error(
+                ERR_DROP,
+                "Switch default asset hash chain OOB: type=%u hash=%u index=%u",
+                static_cast<unsigned>(type),
+                hash,
+                static_cast<unsigned>(assetEntryIndex));
+            return 0;
+        }
+        if (type == ASSET_TYPE_TECHNIQUE_SET)
+            g_switchDbStage = "asset/default_entry";
+#endif
         assetEntry = &g_assetEntryPool[assetEntryIndex];
         if (assetEntry->entry.asset.type == type)
         {
@@ -2975,6 +3027,27 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         }
     }
 
+#ifdef __SWITCH__
+    g_switchDbStage = "asset/find_done";
+    if (switchTraceTechniqueFind)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH DB FIND] done asset=%d raw=%u type=%u bucket=%u found=%u stub=%d allow=%d first=%d\n",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            static_cast<unsigned>(type),
+            static_cast<unsigned>(db_hashTable[hash]),
+            static_cast<unsigned>(existingEntryIndex),
+            isStubAsset,
+            allowOverride,
+            static_cast<int>(static_cast<unsigned char>(v2)));
+        Switch_LogWrite(trace);
+    }
+    g_switchDbStage = "asset/override";
+#endif
     if (allowOverride)
     {
         iassert(!isStubAsset);
@@ -2990,6 +3063,9 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
             if (!existingEntryIndex)
             {
 #ifdef __SWITCH__
+                if (switchTraceTechniqueFind)
+                    Switch_LogWrite("[SWITCH DB FIND] calling DB_CreateDefaultEntry\n");
+                g_switchDbStage = "asset/default_entry_call";
                 if (type == ASSET_TYPE_LOADED_SOUND)
                     Switch_LogWrite("[SWITCH LOADEDSOUND PATH] before DB_CreateDefaultEntry\n");
 #endif
