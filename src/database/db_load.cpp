@@ -349,20 +349,22 @@ static void Switch_TranslateItemDefSerialized(itemDef_s *item)
     DB_LoadSwitchSerialized(serialized, SERIALIZED_SIZE);
     std::memset(item, 0, sizeof(*item));
 
-    // Serialized itemDef_s is the 32-bit 0x174-byte layout. Translate all
-    // pointer-bearing fields to the native ARM64 layout; nested window and
-    // statement payloads are loaded separately by their generated loaders.
+    // Serialized itemDef_s is the original 32-bit 0x174-byte layout.
+    // Translate pointer-bearing members individually into the native
+    // ARM64 layout instead of memcpy'ing across changed pointer alignment.
     Switch_TranslateWindowDefSerialized(
         &item->window,
         serialized);
 
+    // textRect[1] + scalar fields type..gameMsgWindowMode
     std::memcpy(
         reinterpret_cast<uint8_t *>(item) + 168,
         serialized + 156,
-        24 + 8 * 6);
+        68);
 
-    item->text = reinterpret_cast<const char *>(
-        Switch_WidenSerializedPointer(serialized, 224));
+    item->text =
+        reinterpret_cast<const char *>(
+            Switch_WidenSerializedPointer(serialized, 224));
     item->itemFlags =
         static_cast<int>(
             Switch_ReadSerializedU32(serialized, 228));
@@ -415,7 +417,12 @@ static void Switch_TranslateItemDefSerialized(itemDef_s *item)
     std::memcpy(
         reinterpret_cast<uint8_t *>(item) + 376,
         serialized + 292,
-        8);
+        4);
+
+    std::memcpy(
+        reinterpret_cast<uint8_t *>(item) + 380,
+        serialized + 296,
+        4);
 
     const uintptr_t typeData =
         Switch_WidenSerializedPointer(serialized, 300);
@@ -454,8 +461,15 @@ static void Switch_TranslateItemDefSerialized(itemDef_s *item)
         serialized + 364);
 
     static_assert(sizeof(itemDef_s) == 528, "Switch itemDef_s ABI changed");
+    static_assert(offsetof(itemDef_s, window) == 0);
+    static_assert(offsetof(itemDef_s, text) == 240);
+    static_assert(offsetof(itemDef_s, parent) == 256);
+    static_assert(offsetof(itemDef_s, onKey) == 344);
+    static_assert(offsetof(itemDef_s, typeData) == 384);
+    static_assert(offsetof(itemDef_s, visibleExp) == 400);
 }
 #endif
+
 
 #ifdef __SWITCH__
 static void Switch_TranslateWindowDefSerialized(
@@ -8214,13 +8228,14 @@ void __cdecl Load_expressionEntry_ptrArray(bool atStreamStart, int32_t count)
 void __cdecl Load_statement(bool atStreamStart)
 {
 #ifdef __SWITCH__
-    constexpr size_t SERIALIZED_SIZE = 8;
-    uint8_t serialized[SERIALIZED_SIZE];
-
-    DB_LoadSwitchSerialized(serialized, SERIALIZED_SIZE);
-    Switch_TranslateStatementSerialized(
-        varstatement,
-        serialized);
+    if (atStreamStart)
+    {
+        uint8_t serialized[8];
+        DB_LoadSwitchSerialized(serialized, sizeof(serialized));
+        Switch_TranslateStatementSerialized(
+            varstatement,
+            serialized);
+    }
 
     if (varstatement->entries)
     {
@@ -8316,11 +8331,14 @@ void __cdecl Load_multiDef_ptr(bool atStreamStart)
 void __cdecl Load_windowDef_t(bool atStreamStart)
 {
 #ifdef __SWITCH__
-    uint8_t serialized[156];
-    DB_LoadSwitchSerialized(serialized, sizeof(serialized));
-    Switch_TranslateWindowDefSerialized(
-        varwindowDef_t,
-        serialized);
+    if (atStreamStart)
+    {
+        uint8_t serialized[156];
+        DB_LoadSwitchSerialized(serialized, sizeof(serialized));
+        Switch_TranslateWindowDefSerialized(
+            varwindowDef_t,
+            serialized);
+    }
 #else
     Load_Stream(atStreamStart, (uint8_t *)varwindowDef_t, 156);
 #endif
@@ -8335,12 +8353,15 @@ void __cdecl Load_windowDef_t(bool atStreamStart)
 void __cdecl Load_Window(bool atStreamStart)
 {
 #ifdef __SWITCH__
-    uint8_t serialized[156];
-    DB_LoadSwitchSerialized(serialized, sizeof(serialized));
+    if (atStreamStart)
+    {
+        uint8_t serialized[156];
+        DB_LoadSwitchSerialized(serialized, sizeof(serialized));
+        Switch_TranslateWindowDefSerialized(
+            varWindow,
+            serialized);
+    }
     varwindowDef_t = varWindow;
-    Switch_TranslateWindowDefSerialized(
-        varwindowDef_t,
-        serialized);
     Load_windowDef_t(0);
 #else
     Load_Stream(atStreamStart, (uint8_t *)varWindow, 156);
