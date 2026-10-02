@@ -102,6 +102,10 @@ extern "C" void __libnx_exception_handler(ThreadExceptionDump *ctx)
 
     char line[1024];
 
+    // Flush deferred DB diagnostics before writing the crash report so the
+    // fastfile trace remains in chronological order in the log.
+    Switch_LogFlushDeferred();
+
     std::snprintf(
         line,
         sizeof(line),
