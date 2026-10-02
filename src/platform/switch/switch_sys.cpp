@@ -57,16 +57,10 @@ void Switch_LogWrite(const char *msg);
 
 static bool Switch_LogPrefixAllowed(const char *msg)
 {
-    if (!msg)
-        return false;
-
-    // Crash diagnostics use the separate [KisakCOD][CRASH] path.
-    // Keep normal [SWITCH ...] diagnostics suppressed, but allow the
-    // DB asset lookup and serialized material traces needed for fastfile
-    // ABI bring-up.
-    return std::strncmp(msg, "[SWITCH XMODEL1520]", 19) == 0 ||
-           std::strncmp(msg, "[SWITCH DB FIND]", 16) == 0 ||
-           std::strncmp(msg, "[SWITCH TECHSET 1502]", 21) == 0;
+    // Do not filter Switch diagnostics. During fastfile/ABI bring-up we need
+    // every [SWITCH ...] trace, including asset-specific stages that are not
+    // known to this function ahead of time.
+    return msg != nullptr;
 }
 
 /*
