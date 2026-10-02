@@ -419,6 +419,8 @@ static void __cdecl DB_RemoveGfxWorld(XAssetHeader ass);
 static void __cdecl DB_DynamicCloneMenu(XAssetHeader from, XAssetHeader to, int32_t swag = 0);
 static void __cdecl DB_RemoveWindowFocus(windowDef_t *window);
 static XAssetHeader __cdecl DB_AllocMaterial(void *arg);
+static XAssetHeader __cdecl DB_AllocWeaponDef(void *arg);
+static void __cdecl DB_FreeWeaponDef(void *arg, XAssetHeader header);
 #ifdef KISAK_SP
 static XAssetHeader __cdecl DB_AllocPixelShader(void *arg);
 static void __cdecl DB_FreePixelShader(void *arg, XAssetHeader header);
@@ -2012,6 +2014,34 @@ static void __cdecl DB_FreeLoadedSound(void *arg, XAssetHeader header)
     pool->freeHead = entry;
 }
 
+static XAssetHeader __cdecl DB_AllocWeaponDef(void *arg)
+{
+    auto *pool =
+        static_cast<XAssetPool<WeaponDef, POOLSIZE_WEAPON> *>(arg);
+    XAssetHeader header{};
+
+    if (!pool->freeHead)
+        return header;
+
+    auto *entry = pool->freeHead;
+    pool->freeHead = entry->next;
+    header.data = &entry->entry;
+    return header;
+}
+
+static void __cdecl DB_FreeWeaponDef(void *arg, XAssetHeader header)
+{
+    auto *pool =
+        static_cast<XAssetPool<WeaponDef, POOLSIZE_WEAPON> *>(arg);
+    if (!header.data)
+        return;
+
+    auto *entry =
+        reinterpret_cast<XAssetPoolEntry<WeaponDef> *>(header.data);
+    entry->next = pool->freeHead;
+    pool->freeHead = entry;
+}
+
 static XAssetHeader __cdecl DB_AllocMaterial(void *arg)
 {
     XAssetHeader *pool = (XAssetHeader*)arg;
@@ -2147,9 +2177,13 @@ static XAssetHeader __cdecl DB_AllocXAssetHeader(XAssetType type)
 #endif
 
 #ifdef __SWITCH__
-    // LightDef uses an ARM64-native 32-byte object and must not depend on the
-    // generic function-pointer table for allocation.
-    if (type == ASSET_TYPE_LIGHT_DEF)
+    // WeaponDef and LightDef use typed ARM64-native pools and must not depend
+    // on the generic indirect allocator table for their critical allocation path.
+    if (type == ASSET_TYPE_WEAPON)
+    {
+        header = DB_AllocWeaponDef(DB_XAssetPool[type]);
+    }
+    else if (type == ASSET_TYPE_LIGHT_DEF)
     {
         header = DB_AllocGfxLightDef(DB_XAssetPool[type]);
     }
