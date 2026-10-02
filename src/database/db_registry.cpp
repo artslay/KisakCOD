@@ -2591,6 +2591,7 @@ __attribute__((visibility("hidden")))
 XAssetHeader (*g_switchDBAddXAsset)(XAssetType type, XAssetHeader header) = nullptr;
 void * volatile g_switchDbLastAssetResult = nullptr;
 uint32_t volatile g_switchDbLastAssetType = 0;
+void * volatile g_switchDbLastPreloadShaders = nullptr;
 #endif
 
 static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
