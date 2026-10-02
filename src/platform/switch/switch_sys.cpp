@@ -57,10 +57,28 @@ void Switch_LogWrite(const char *msg);
 
 static bool Switch_LogPrefixAllowed(const char *msg)
 {
-    // Do not filter Switch diagnostics. During fastfile/ABI bring-up we need
-    // every [SWITCH ...] trace, including asset-specific stages that are not
-    // known to this function ahead of time.
-    return msg != nullptr;
+    if (!msg)
+        return false;
+
+    // Keep only compact diagnostics needed to locate the current stream failure.
+    static constexpr const char *const kPrefixes[] =
+    {
+        "[SWITCH STREAM MISMATCH]",
+        "[SWITCH STREAM ARRAY MISMATCH]",
+        "[SWITCH STREAM REGRESS]",
+        "[SWITCH OFFSET INVALID]",
+        "[SWITCH MENU11 ITEM87]",
+        "[SWITCH XHEADER11]"
+    };
+
+    for (const char *prefix : kPrefixes)
+    {
+        const size_t len = std::strlen(prefix);
+        if (std::strncmp(msg, prefix, len) == 0)
+            return true;
+    }
+
+    return false;
 }
 
 /*
