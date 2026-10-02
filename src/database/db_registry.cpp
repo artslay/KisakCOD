@@ -2823,6 +2823,18 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
             (const void *)name,
             name ? static_cast<unsigned>(static_cast<uint8_t>(*name)) : 0u);
         Switch_LogWrite(trace);
+
+        if (name && !I_stricmp(name, "default"))
+        {
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH DB FIND] default techset registration entry=%p header=%p zone=%u\n",
+                static_cast<void *>(newEntry),
+                static_cast<void *>(newEntry->entry.asset.header.data),
+                static_cast<unsigned>(newEntry->entry.zoneIndex));
+            Switch_LogWrite(trace);
+        }
     }
     if (newEntry->entry.asset.type == ASSET_TYPE_IMAGE)
     {
