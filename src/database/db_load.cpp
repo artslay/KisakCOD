@@ -9968,11 +9968,11 @@ static void Switch_TranslateWeaponDefSerialized(WeaponDef *weaponDef)
             sizeof(trace),
             "[SWITCH WEAPON1506] after serialized root idx=%u pos=%p posOff=%08x array0=%p array0Off=%08x\n",
             static_cast<unsigned>(g_streamPosIndex),
-            static_cast<const void *>(cursor),
+            reinterpret_cast<const void *>(cursor),
             block0Base && cursor >= block0Base
                 ? static_cast<unsigned>(cursor - block0Base)
                 : UINT32_MAX,
-            static_cast<const void *>(array0),
+            reinterpret_cast<const void *>(array0),
             block0Base && array0 >= block0Base
                 ? static_cast<unsigned>(array0 - block0Base)
                 : UINT32_MAX);
@@ -10110,7 +10110,7 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
             "[SWITCH WEAPON1506] after PushStreamPos4 idx=%u pos=%p array0=%p array0Off=%08x\n",
             static_cast<unsigned>(g_streamPosIndex),
             static_cast<const void *>(DB_GetStreamPos()),
-            static_cast<const void *>(array0),
+            reinterpret_cast<const void *>(array0),
             block0Base && array0 >= block0Base
                 ? static_cast<unsigned>(array0 - block0Base)
                 : UINT32_MAX);
@@ -10447,7 +10447,7 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
             sizeof(trace),
             "[SWITCH WEAPON1506] before PopStreamPos idx=%u pos=%p posOff=%08x array0Off=%08x\n",
             static_cast<unsigned>(g_streamPosIndex),
-            static_cast<const void *>(cursor),
+            reinterpret_cast<const void *>(cursor),
             block0Base && cursor >= block0Base
                 ? static_cast<unsigned>(cursor - block0Base)
                 : UINT32_MAX,
@@ -10476,7 +10476,7 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
             sizeof(trace),
             "[SWITCH WEAPON1506] after PopStreamPos idx=%u pos=%p posOff=%08x array0Off=%08x\n",
             static_cast<unsigned>(g_streamPosIndex),
-            static_cast<const void *>(cursor),
+            reinterpret_cast<const void *>(cursor),
             block0Base && cursor >= block0Base
                 ? static_cast<unsigned>(cursor - block0Base)
                 : UINT32_MAX,
