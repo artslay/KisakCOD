@@ -7982,7 +7982,17 @@ void __cdecl Load_ItemKeyHandler(bool atStreamStart)
     Load_XString(0);
     if (varItemKeyHandler->next)
     {
+#ifdef __SWITCH__
+        DB_AllocStreamPos(3);
+        varItemKeyHandler->next =
+            reinterpret_cast<ItemKeyHandler *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(ItemKeyHandler)),
+                    "SwitchItemKeyHandlerNext",
+                    22));
+#else
         varItemKeyHandler->next = (ItemKeyHandler *)AllocLoad_FxElemVisStateSample();
+#endif
         varItemKeyHandlerNext = varItemKeyHandler->next;
         Load_ItemKeyHandlerNext(1);
     }
@@ -7990,7 +8000,12 @@ void __cdecl Load_ItemKeyHandler(bool atStreamStart)
 
 void __cdecl Load_ItemKeyHandlerNext(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    iassert(atStreamStart);
+    Switch_TranslateItemKeyHandlerSerialized(varItemKeyHandlerNext);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varItemKeyHandlerNext, 12);
+#endif
     varItemKeyHandler = varItemKeyHandlerNext;
     Load_ItemKeyHandler(0);
 }
@@ -8055,7 +8070,17 @@ void __cdecl Load_itemDef_t(bool atStreamStart)
     Load_XString(0);
     if (varitemDef_t->onKey)
     {
+#ifdef __SWITCH__
+        DB_AllocStreamPos(3);
+        varitemDef_t->onKey =
+            reinterpret_cast<ItemKeyHandler *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(ItemKeyHandler)),
+                    "SwitchItemKeyHandler",
+                    22));
+#else
         varitemDef_t->onKey = (ItemKeyHandler *)AllocLoad_FxElemVisStateSample();
+#endif
         varItemKeyHandler = varitemDef_t->onKey;
         Load_ItemKeyHandler(1);
     }
@@ -8185,7 +8210,17 @@ void __cdecl Load_menuDef_t(bool atStreamStart)
     Load_XString(0);
     if (varmenuDef_t->onKey)
     {
+#ifdef __SWITCH__
+        DB_AllocStreamPos(3);
+        varmenuDef_t->onKey =
+            reinterpret_cast<ItemKeyHandler *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(ItemKeyHandler)),
+                    "SwitchItemKeyHandler",
+                    22));
+#else
         varmenuDef_t->onKey = (ItemKeyHandler *)AllocLoad_FxElemVisStateSample();
+#endif
         varItemKeyHandler = varmenuDef_t->onKey;
         Load_ItemKeyHandler(1);
     }
