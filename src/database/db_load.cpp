@@ -11030,8 +11030,22 @@ void Load_XAssetListCustom()
     DB_PushStreamPos(4);
     if (serialized.stringList.strings)
     {
+        // The serialized string table contains 32-bit offsets packed at 4-byte
+        // intervals. The Switch runtime stores const char* as 64-bit pointers,
+        // so the native pointer array must not live in stream 4 itself.
         varXAssetList->stringList.strings =
-            reinterpret_cast<const char **>(DB_AllocStreamPos(3));
+            reinterpret_cast<const char **>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(
+                        sizeof(const char *) *
+                        static_cast<size_t>(serialized.stringList.count)),
+                    "SwitchXAssetStringList",
+                    22));
+        std::memset(
+            const_cast<char **>(varXAssetList->stringList.strings),
+            0,
+            sizeof(const char *) *
+                static_cast<size_t>(serialized.stringList.count));
 
         for (uint32_t i = 0; i < serialized.stringList.count; ++i)
         {
