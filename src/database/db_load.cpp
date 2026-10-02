@@ -7806,15 +7806,178 @@ void __cdecl Load_entryInternalData(bool atStreamStart)
     }
 }
 
+#ifdef __SWITCH__
+static void Switch_TranslateExpressionEntrySerialized(
+    expressionEntry *entry)
+{
+    constexpr size_t SERIALIZED_SIZE = 12;
+
+    uint8_t serialized[SERIALIZED_SIZE];
+    DB_LoadSwitchSerialized(serialized, SERIALIZED_SIZE);
+    std::memset(entry, 0, sizeof(*entry));
+
+    std::memcpy(
+        &entry->type,
+        serialized,
+        sizeof(entry->type));
+
+    const uint32_t type = Switch_ReadSerializedU32(serialized, 0);
+    if (type == 0)
+    {
+        // operationEnum occupies the first four bytes of entryInternalData.
+        std::memcpy(
+            &entry->data.op,
+            serialized + 4,
+            sizeof(uint32_t));
+    }
+    else
+    {
+        const uint32_t dataType =
+            Switch_ReadSerializedU32(serialized, 4);
+        std::memcpy(
+            &entry->data.operand.dataType,
+            &dataType,
+            sizeof(dataType));
+
+        if (dataType == VAL_STRING)
+        {
+            const uintptr_t stringToken =
+                Switch_WidenSerializedPointer(serialized, 8);
+            std::memcpy(
+                reinterpret_cast<uint8_t *>(&entry->data.operand.internals),
+                &stringToken,
+                sizeof(stringToken));
+        }
+        else
+        {
+            std::memcpy(
+                reinterpret_cast<uint8_t *>(&entry->data.operand.internals),
+                serialized + 8,
+                sizeof(uint32_t));
+        }
+    }
+
+    static_assert(sizeof(expressionEntry) == 16);
+}
+
+static void Switch_LoadExpressionEntryPtrArray(
+    expressionEntry **base,
+    int32_t count)
+{
+    if (count <= 0)
+        return;
+
+    std::vector<uint32_t> serialized(
+        static_cast<size_t>(count));
+
+    DB_LoadSwitchSerialized(
+        serialized.data(),
+        static_cast<uint32_t>(
+            sizeof(uint32_t) * static_cast<size_t>(count)));
+
+    for (int32_t i = 0; i < count; ++i)
+    {
+        expressionEntry **slot = base + i;
+        const uint32_t token = serialized[static_cast<size_t>(i)];
+
+        *slot = nullptr;
+        if (!token)
+            continue;
+
+        if (token == UINT32_MAX || token == UINT32_MAX - 1)
+        {
+            DB_AllocStreamPos(3);
+
+            *slot = reinterpret_cast<expressionEntry *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(expressionEntry)),
+                    "SwitchExpressionEntry",
+                    22));
+            std::memset(*slot, 0, sizeof(expressionEntry));
+
+            varexpressionEntry_ptr = slot;
+            varexpressionEntry = *slot;
+
+            const void **inserted = nullptr;
+            if (token == UINT32_MAX - 1)
+                inserted = DB_InsertPointer();
+
+            Switch_TranslateExpressionEntrySerialized(*slot);
+
+            if (inserted)
+                *inserted = *slot;
+        }
+        else
+        {
+            *slot = reinterpret_cast<expressionEntry *>(
+                DB_ConvertOffsetToPointerValue(token));
+        }
+    }
+}
+#endif
+
 void __cdecl Load_expressionEntry(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        Switch_TranslateExpressionEntrySerialized(
+            varexpressionEntry);
+        return;
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varexpressionEntry, 12);
+#endif
     varentryInternalData = &varexpressionEntry->data;
     Load_entryInternalData(0);
 }
 
 void __cdecl Load_expressionEntry_ptr(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        uint32_t serialized = 0;
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+        *varexpressionEntry_ptr = nullptr;
+        if (!serialized)
+            return;
+
+        if (serialized == UINT32_MAX || serialized == UINT32_MAX - 1)
+        {
+            DB_AllocStreamPos(3);
+            *varexpressionEntry_ptr =
+                reinterpret_cast<expressionEntry *>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(sizeof(expressionEntry)),
+                        "SwitchExpressionEntry",
+                        22));
+            std::memset(
+                *varexpressionEntry_ptr,
+                0,
+                sizeof(expressionEntry));
+            varexpressionEntry = *varexpressionEntry_ptr;
+
+            const void **inserted = nullptr;
+            if (serialized == UINT32_MAX - 1)
+                inserted = DB_InsertPointer();
+
+            Switch_TranslateExpressionEntrySerialized(varexpressionEntry);
+
+            if (inserted)
+                *inserted = *varexpressionEntry_ptr;
+        }
+        else
+        {
+            *varexpressionEntry_ptr =
+                reinterpret_cast<expressionEntry *>(
+                    DB_ConvertOffsetToPointerValue(serialized));
+        }
+        return;
+    }
+#endif
+
     Load_Stream(atStreamStart, (uint8_t *)varexpressionEntry_ptr, 4);
     if (*varexpressionEntry_ptr)
     {
@@ -7826,12 +7989,21 @@ void __cdecl Load_expressionEntry_ptr(bool atStreamStart)
 
 void __cdecl Load_expressionEntry_ptrArray(bool atStreamStart, int32_t count)
 {
-    expressionEntry **var; // [esp+0h] [ebp-8h]
-    int32_t i; // [esp+4h] [ebp-4h]
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        Switch_LoadExpressionEntryPtrArray(
+            varexpressionEntry_ptr,
+            count);
+        return;
+    }
+#endif
+
+    expressionEntry **var; // [esp+0h] [ebp-4h]
 
     Load_Stream(atStreamStart, (uint8_t *)varexpressionEntry_ptr, 4 * count);
     var = varexpressionEntry_ptr;
-    for (i = 0; i < count; ++i)
+    for (int32_t i = 0; i < count; ++i)
     {
         varexpressionEntry_ptr = var;
         Load_expressionEntry_ptr(0);
@@ -7841,10 +8013,55 @@ void __cdecl Load_expressionEntry_ptrArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_statement(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        constexpr size_t SERIALIZED_SIZE = 8;
+        uint8_t serialized[SERIALIZED_SIZE];
+
+        DB_LoadSwitchSerialized(serialized, SERIALIZED_SIZE);
+        std::memset(varstatement, 0, sizeof(*varstatement));
+
+        std::memcpy(
+            &varstatement->numEntries,
+            serialized,
+            sizeof(varstatement->numEntries));
+
+        const uint32_t entriesToken =
+            Switch_ReadSerializedU32(serialized, 4);
+
+        varstatement->entries = nullptr;
+
+        if (entriesToken)
+        {
+            varstatement->entries =
+                reinterpret_cast<expressionEntry **>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(
+                            sizeof(expressionEntry *) *
+                            static_cast<size_t>(varstatement->numEntries)),
+                        "SwitchStatementEntries",
+                        22));
+            std::memset(
+                varstatement->entries,
+                0,
+                sizeof(expressionEntry *) *
+                    static_cast<size_t>(varstatement->numEntries));
+
+            varexpressionEntry_ptr = varstatement->entries;
+            Switch_LoadExpressionEntryPtrArray(
+                varstatement->entries,
+                varstatement->numEntries);
+        }
+        return;
+    }
+#endif
+
     Load_Stream(atStreamStart, (uint8_t *)varstatement, 8);
     if (varstatement->entries)
     {
-        varstatement->entries = (expressionEntry **)AllocLoad_FxElemVisStateSample();
+        varstatement->entries =
+            (expressionEntry **)AllocLoad_FxElemVisStateSample();
         varexpressionEntry_ptr = varstatement->entries;
         Load_expressionEntry_ptrArray(1, varstatement->numEntries);
     }
