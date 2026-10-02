@@ -424,9 +424,45 @@ void __cdecl DB_LoadXFileInternal()
     DB_AllocXZoneMemory(file.blockSize, g_load.filename, g_load.zoneMem, g_load.allocType);
     DB_InitStreams(g_load.zoneMem);
 #ifdef __SWITCH__
+    if (g_load.filename && I_stricmp(g_load.filename, "ui") == 0)
+    {
+        char trace[512];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH DB FIND] stream ui-init zoneMem=%p blocks=%p b4=%p size4=%u pos=%p idx=%u arr4=%p\n",
+            static_cast<void *>(g_load.zoneMem),
+            static_cast<void *>(g_streamBlocks),
+            static_cast<void *>(g_streamBlocks ? g_streamBlocks[4].data : nullptr),
+            g_streamBlocks ? g_streamBlocks[4].size : 0u,
+            static_cast<void *>(g_streamPos),
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(g_streamPosArray[4]));
+        Switch_LogWrite(trace);
+    }
+#endif
+#ifdef __SWITCH__
     g_switchDbStage = "asset_list";
 #endif
     Load_XAssetListCustom();
+#ifdef __SWITCH__
+    if (g_load.filename && I_stricmp(g_load.filename, "ui") == 0)
+    {
+        char trace[512];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH DB FIND] stream ui-assetlist zoneMem=%p blocks=%p b4=%p size4=%u pos=%p idx=%u arr4=%p\n",
+            static_cast<void *>(g_load.zoneMem),
+            static_cast<void *>(g_streamBlocks),
+            static_cast<void *>(g_streamBlocks ? g_streamBlocks[4].data : nullptr),
+            g_streamBlocks ? g_streamBlocks[4].size : 0u,
+            static_cast<void *>(g_streamPos),
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(g_streamPosArray[4]));
+        Switch_LogWrite(trace);
+    }
+#endif
     DB_PushStreamPos(4);
     if (varXAssetList->assets)
     {
