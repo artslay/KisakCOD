@@ -1719,6 +1719,172 @@ static_assert(sizeof(XAnimParts) == 136,
     "Switch XAnimParts native ABI must remain 136 bytes");
 #endif
 
+#ifdef __SWITCH__
+struct SerializedXAnimDeltaPart
+{
+    uint32_t trans;
+    uint32_t quat;
+};
+static_assert(sizeof(SerializedXAnimDeltaPart) == 8,
+    "Serialized XAnimDeltaPart must remain 8 bytes");
+
+static XAnimPartTrans *Switch_LoadXAnimPartTrans()
+{
+    uint8_t base[4];
+    DB_LoadSwitchSerialized(base, sizeof(base));
+
+    uint16_t size = 0;
+    uint8_t smallTrans = 0;
+    std::memcpy(&size, base + 0, sizeof(size));
+    std::memcpy(&smallTrans, base + 2, sizeof(smallTrans));
+
+    const size_t extraIndices =
+        size ? static_cast<size_t>(size) * sizeof(uint16_t) : 0u;
+    const size_t nativeSize = sizeof(XAnimPartTrans) + extraIndices;
+
+    XAnimPartTrans *native =
+        reinterpret_cast<XAnimPartTrans *>(
+            Hunk_Alloc(
+                static_cast<uint32_t>(nativeSize),
+                "SwitchXAnimPartTrans",
+                22));
+    std::memset(native, 0, nativeSize);
+
+    native->size = size;
+    native->smallTrans = smallTrans != 0;
+
+    if (!size)
+    {
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(native->u.frame0),
+            sizeof(native->u.frame0));
+        DB_IncStreamPos(static_cast<int32_t>(sizeof(native->u.frame0)));
+        return native;
+    }
+
+    uint8_t frameHeader[28];
+    DB_LoadSwitchSerialized(frameHeader, sizeof(frameHeader));
+    std::memcpy(native->u.frames.mins, frameHeader + 0, 12);
+    std::memcpy(native->u.frames.size, frameHeader + 12, 12);
+
+    uint32_t framesToken = 0;
+    std::memcpy(&framesToken, frameHeader + 24, sizeof(framesToken));
+
+    uint8_t *indicesDst =
+        reinterpret_cast<uint8_t *>(&native->u.frames.indices);
+    const uint32_t indexBytes =
+        (static_cast<uint32_t>(size) + 1u) * sizeof(uint16_t);
+    DB_LoadXFileData(indicesDst, indexBytes);
+    DB_IncStreamPos(static_cast<int32_t>(indexBytes));
+
+    if (framesToken)
+    {
+        const uint32_t frameCount = static_cast<uint32_t>(size) + 1u;
+        if (native->smallTrans)
+        {
+            uint8_t *frames = DB_AllocStreamPos(0);
+            native->u.frames.frames._1 =
+                reinterpret_cast<uint8_t (*)[3]>(frames);
+            const uint32_t frameBytes = frameCount * 3u;
+            DB_LoadXFileData(frames, frameBytes);
+            DB_IncStreamPos(static_cast<int32_t>(frameBytes));
+        }
+        else
+        {
+            uint8_t *frames = DB_AllocStreamPos(3);
+            native->u.frames.frames._2 =
+                reinterpret_cast<uint16_t (*)[3]>(frames);
+            const uint32_t frameBytes = frameCount * 6u;
+            DB_LoadXFileData(frames, frameBytes);
+            DB_IncStreamPos(static_cast<int32_t>(frameBytes));
+        }
+    }
+
+    return native;
+}
+
+static XAnimDeltaPartQuat *Switch_LoadXAnimDeltaPartQuat()
+{
+    uint8_t base[4];
+    DB_LoadSwitchSerialized(base, sizeof(base));
+
+    uint16_t size = 0;
+    std::memcpy(&size, base + 0, sizeof(size));
+
+    const size_t extraIndices =
+        size ? static_cast<size_t>(size) * sizeof(uint16_t) : 0u;
+    const size_t nativeSize =
+        sizeof(XAnimDeltaPartQuat) + extraIndices;
+
+    XAnimDeltaPartQuat *native =
+        reinterpret_cast<XAnimDeltaPartQuat *>(
+            Hunk_Alloc(
+                static_cast<uint32_t>(nativeSize),
+                "SwitchXAnimDeltaPartQuat",
+                22));
+    std::memset(native, 0, nativeSize);
+
+    native->size = size;
+
+    if (!size)
+    {
+        DB_LoadXFileData(
+            reinterpret_cast<uint8_t *>(native->u.frame0),
+            sizeof(native->u.frame0));
+        DB_IncStreamPos(static_cast<int32_t>(sizeof(native->u.frame0)));
+        return native;
+    }
+
+    uint8_t frameHeader[4];
+    DB_LoadSwitchSerialized(frameHeader, sizeof(frameHeader));
+    uint32_t framesToken = 0;
+    std::memcpy(&framesToken, frameHeader, sizeof(framesToken));
+
+    uint8_t *indicesDst =
+        reinterpret_cast<uint8_t *>(&native->u.frames.indices);
+    const uint32_t indexBytes =
+        (static_cast<uint32_t>(size) + 1u) * sizeof(uint16_t);
+    DB_LoadXFileData(indicesDst, indexBytes);
+    DB_IncStreamPos(static_cast<int32_t>(indexBytes));
+
+    if (framesToken)
+    {
+        const uint32_t frameCount = static_cast<uint32_t>(size) + 1u;
+        uint8_t *frames = DB_AllocStreamPos(3);
+        native->u.frames.u.frames =
+            reinterpret_cast<__int16 (*)[2]>(frames);
+        const uint32_t frameBytes =
+            frameCount * sizeof(__int16) * 2u;
+        DB_LoadXFileData(frames, frameBytes);
+        DB_IncStreamPos(static_cast<int32_t>(frameBytes));
+    }
+
+    return native;
+}
+
+static XAnimDeltaPart *Switch_LoadXAnimDeltaPart()
+{
+    SerializedXAnimDeltaPart serialized{};
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    XAnimDeltaPart *native =
+        reinterpret_cast<XAnimDeltaPart *>(
+            Hunk_Alloc(
+                static_cast<uint32_t>(sizeof(XAnimDeltaPart)),
+                "SwitchXAnimDeltaPart",
+                22));
+    std::memset(native, 0, sizeof(*native));
+
+    if (serialized.trans)
+        native->trans = Switch_LoadXAnimPartTrans();
+
+    if (serialized.quat)
+        native->quat = Switch_LoadXAnimDeltaPartQuat();
+
+    return native;
+}
+#endif
+
 void __cdecl Load_XAnimParts(bool atStreamStart)
 {
 #ifdef __SWITCH__
@@ -1891,10 +2057,10 @@ void __cdecl Load_XAnimParts(bool atStreamStart)
 
     if (varXAnimParts->deltaPart)
     {
-        varXAnimParts->deltaPart =
-            reinterpret_cast<XAnimDeltaPart *>(AllocLoad_FxElemVisStateSample());
+        varXAnimParts->deltaPart = Switch_LoadXAnimDeltaPart();
         varXAnimDeltaPart = varXAnimParts->deltaPart;
-        Load_XAnimDeltaPart(1);
+        if (switchXAnimTrace)
+            Switch_LogWrite("[SWITCH XANIM1507] deltaPart translated\n");
     }
 
     if (varXAnimParts->dataByte)
