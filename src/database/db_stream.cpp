@@ -248,7 +248,15 @@ void __cdecl DB_PopStreamPos()
 
     --g_streamPosStackIndex;
 
-#ifndef __SWITCH__
+#ifdef __SWITCH__
+    if (!g_streamPosIndex)
+    {
+        uintptr_t offset = 0;
+        const int32_t owner = Switch_StreamOwner(g_streamPos, &offset);
+        if (owner != 0)
+            g_streamPos = g_streamPosStack[g_streamPosStackIndex].pos;
+    }
+#else
     if (!g_streamPosIndex)
         g_streamPos = g_streamPosStack[g_streamPosStackIndex].pos;
 #endif
