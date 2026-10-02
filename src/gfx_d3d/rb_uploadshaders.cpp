@@ -13,7 +13,16 @@ $C28D828B354D71D7584331F40DBDE744 mtlUploadGlob;
 
 void __cdecl Material_UploadShaders(MaterialTechniqueSet *techSet)
 {
+#ifdef __SWITCH__
+    extern const char * volatile g_switchDbStage;
+    extern void * volatile g_switchDbLastPreloadShaders;
+    g_switchDbStage = "techset/upload_thread";
+#endif
     iassert( Sys_IsDatabaseThread() );
+#ifdef __SWITCH__
+    g_switchDbStage = "techset/upload_dvar";
+    g_switchDbLastPreloadShaders = const_cast<dvar_t *>(r_preloadShaders);
+#endif
     if (mtlUploadGlob.put - mtlUploadGlob.get >= 0x400)
         MyAssertHandler(
             ".\\rb_uploadshaders.cpp",
