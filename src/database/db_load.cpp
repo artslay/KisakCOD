@@ -5861,6 +5861,11 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
 
     iassert(atStreamStart);
 
+#ifdef __SWITCH__
+    const int32_t traceAssetIndex = g_switchCurrentAssetIndex;
+    const uint32_t traceRawType = g_switchCurrentAssetRawType;
+#endif
+
     // CoD4 PC fastfiles serialize the PC MaterialTechniqueSet layout:
     // name + worldVertFormat/meta + remappedTechniqueSet + 34 technique pointers.
     // The Switch runtime is 64-bit, so expand the serialized 32-bit pointers.
@@ -5976,9 +5981,9 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
 #endif
 
 #ifdef __SWITCH__
-    if (g_switchCurrentAssetRawType == 5u &&
-        g_switchCurrentAssetIndex >= 1501 &&
-        g_switchCurrentAssetIndex <= 1502)
+    if (traceRawType == 5u &&
+        traceAssetIndex >= 1501 &&
+        traceAssetIndex <= 1502)
     {
         char trace[384];
         const char *resolvedName = varMaterialTechniqueSet->name;
@@ -5986,7 +5991,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
             trace,
             sizeof(trace),
             "[SWITCH DB FIND] techset after header asset=%d nameToken=%08x namePtr=%p nameText=%s remap=%08x stream=%u pos=%p\n",
-            g_switchCurrentAssetIndex,
+            traceAssetIndex,
             serialized.name,
             static_cast<const void *>(resolvedName),
             resolvedName ? resolvedName : "<null>",
@@ -6032,7 +6037,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
 
 #ifdef __SWITCH__
             if (g_switchCurrentAssetRawType == 5u &&
-                g_switchCurrentAssetIndex == 1502 &&
+                traceAssetIndex == 1502 &&
                 i < 4)
             {
                 const uintptr_t techStart =
@@ -6099,9 +6104,9 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
     }
 
 #ifdef __SWITCH__
-    if (g_switchCurrentAssetRawType == 5u &&
-        g_switchCurrentAssetIndex >= 1501 &&
-        g_switchCurrentAssetIndex <= 1502)
+    if (traceRawType == 5u &&
+        traceAssetIndex >= 1501 &&
+        traceAssetIndex <= 1502)
     {
         char trace[512];
         const char *resolvedName = varMaterialTechniqueSet->name;
@@ -6117,7 +6122,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
             trace,
             sizeof(trace),
             "[SWITCH DB FIND] techset complete asset=%d nameToken=%08x namePtr=%p nameText=%s nameRelToStart=%lld nameRelToCursor=%lld after=%p\\n",
-            g_switchCurrentAssetIndex,
+            traceAssetIndex,
             serialized.name,
             static_cast<const void *>(resolvedName),
             resolvedName ? resolvedName : "<null>",
@@ -6130,7 +6135,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
             static_cast<void *>(DB_GetStreamPos()));
         Switch_LogWrite(trace);
 
-        if (g_switchCurrentAssetIndex == 1502)
+        if (traceAssetIndex == 1502)
         {
             for (int base = 0; base < 34; base += 6)
             {
