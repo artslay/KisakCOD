@@ -95,8 +95,43 @@ uintptr_t __cdecl DB_ConvertOffsetToPointerValue(uint32_t offset)
     }
 #endif
 
-    return reinterpret_cast<uintptr_t>(
-        &g_streamBlocks[block].data[blockOffset]);
+    const uintptr_t resolved =
+        reinterpret_cast<uintptr_t>(
+            &g_streamBlocks[block].data[blockOffset]);
+
+    if (g_switchCurrentAssetRawType == 5u &&
+        g_switchCurrentAssetIndex == 1502 &&
+        offset == 0x4004dddd)
+    {
+        const uint8_t *bytes =
+            reinterpret_cast<const uint8_t *>(resolved);
+        char trace[384];
+        int written = std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH DB FIND] token target asset=1502 token=%08x block=%u offset=%08x ptr=%p stream=%u cursor=%p bytes:",
+            offset,
+            block,
+            blockOffset,
+            reinterpret_cast<const void *>(resolved),
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(DB_GetStreamPos()));
+        for (size_t i = 0; i < 24; ++i)
+        {
+            written += std::snprintf(
+                trace + written,
+                sizeof(trace) - static_cast<size_t>(written),
+                " %02x",
+                static_cast<unsigned>(bytes[i]));
+        }
+        std::snprintf(
+            trace + written,
+            sizeof(trace) - static_cast<size_t>(written),
+            "\n");
+        Switch_LogWrite(trace);
+    }
+
+    return resolved;
 }
 
 void __cdecl DB_ConvertOffsetToAlias(void *data)
