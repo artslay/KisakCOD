@@ -10848,11 +10848,15 @@ void __cdecl Load_menuDef_t(bool atStreamStart)
 
     iassert(atStreamStart);
     if (traceMenu11)
-        g_switchDbStage = "menu/load_header";
+    {
+        g_switchDbStage = "menu/header_pre";
+        Switch_LogWrite("[SWITCH MENU11] before serialized header load\\n");
+    }
     Switch_TranslateMenuDefSerialized(varmenuDef_t);
 
     if (traceMenu11)
     {
+        g_switchDbStage = "menu/header_post";
         char trace[384];
         std::snprintf(
             trace,
@@ -11025,6 +11029,24 @@ void __cdecl Load_menuDef_ptr(bool atStreamStart)
     if (*varmenuDef_ptr)
     {
         value = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(*varmenuDef_ptr));
+
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetIndex == 11 &&
+            g_switchCurrentAssetRawType == 20u)
+        {
+            char trace[320];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH MENU11] ptr token=%08x stream=%u pos=%p\\n",
+                value,
+                static_cast<unsigned>(g_streamPosIndex),
+                static_cast<const void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+            g_switchDbStage = "menu/header_ptr";
+        }
+#endif
+
         if (value == -1 || value == -2)
         {
 #ifdef __SWITCH__
