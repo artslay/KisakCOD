@@ -3,6 +3,7 @@
 
 #ifdef __SWITCH__
 extern const char *g_switchDbStage;
+extern char com_errorMessage[4096];
 #endif
 
 #include <qcommon/files.h>
