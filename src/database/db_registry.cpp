@@ -2131,6 +2131,20 @@ static void __cdecl DB_InitSingleton(void *pool, int32_t size)
 static XAssetHeader __cdecl DB_AllocXAssetHeader(XAssetType type)
 {
     XAssetHeader header{};
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_WEAPON)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON ALLOC] type=%u handler=%p pool=%p\\n",
+            static_cast<unsigned>(type),
+            reinterpret_cast<void *>(DB_AllocXAssetHeaderHandler[type]),
+            DB_XAssetPool[type]);
+        Switch_LogWrite(trace);
+    }
+#endif
 
 #ifdef __SWITCH__
     // LightDef uses an ARM64-native 32-byte object and must not depend on the
@@ -2163,6 +2177,19 @@ static void __cdecl DB_FreeXAssetHeader(XAssetType type, XAssetHeader header)
 static XAssetEntryPoolEntry *__cdecl DB_AllocXAssetEntry(XAssetType type, uint8_t zoneIndex)
 {
     XAssetEntryPoolEntry *freeHead = g_freeAssetEntryHead;
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_WEAPON)
+    {
+        char trace[192];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON ALLOC] entryHead=%p next=%p\\n",
+            static_cast<void *>(freeHead),
+            freeHead ? static_cast<void *>(freeHead->next) : nullptr);
+        Switch_LogWrite(trace);
+    }
+#endif
 
 #ifdef __SWITCH__
     if (type == ASSET_TYPE_LOADED_SOUND)
