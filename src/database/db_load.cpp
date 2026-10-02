@@ -10771,22 +10771,68 @@ static void Switch_TranslateMenuDefSerialized(menuDef_t *menu)
 void __cdecl Load_menuDef_t(bool atStreamStart)
 {
 #ifdef __SWITCH__
+    const bool traceMenu11 =
+        g_switchCurrentAssetIndex == 11 &&
+        g_switchCurrentAssetRawType == 20u;
+
     iassert(atStreamStart);
+    if (traceMenu11)
+        g_switchDbStage = "menu/load_header";
     Switch_TranslateMenuDefSerialized(varmenuDef_t);
+
+    if (traceMenu11)
+    {
+        char trace[384];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH MENU11] header menu=%p window=%p itemCount=%d itemsToken=%p font=%p onOpen=%p onClose=%p onESC=%p onKey=%p\n",
+            static_cast<void *>(varmenuDef_t),
+            static_cast<void *>(&varmenuDef_t->window),
+            varmenuDef_t->itemCount,
+            static_cast<void *>(varmenuDef_t->items),
+            static_cast<const void *>(varmenuDef_t->font),
+            static_cast<const void *>(varmenuDef_t->onOpen),
+            static_cast<const void *>(varmenuDef_t->onClose),
+            static_cast<const void *>(varmenuDef_t->onESC),
+            static_cast<void *>(varmenuDef_t->onKey));
+        Switch_LogWrite(trace);
+        g_switchDbStage = "menu/load_stream";
+    }
 #else
     Load_Stream(atStreamStart, (uint8_t *)varmenuDef_t, 284);
 #endif
     DB_PushStreamPos(4);
+
+#ifdef __SWITCH__
+    if (traceMenu11)
+        g_switchDbStage = "menu/window";
+#endif
     varWindow = &varmenuDef_t->window;
     Load_Window(0);
+
+#ifdef __SWITCH__
+    if (traceMenu11)
+        g_switchDbStage = "menu/font";
+#endif
     varXString = &varmenuDef_t->font;
     Load_XString(0);
+
+#ifdef __SWITCH__
+    if (traceMenu11)
+        g_switchDbStage = "menu/openclose";
+#endif
     varXString = &varmenuDef_t->onOpen;
     Load_XString(0);
     varXString = &varmenuDef_t->onClose;
     Load_XString(0);
     varXString = &varmenuDef_t->onESC;
     Load_XString(0);
+
+#ifdef __SWITCH__
+    if (traceMenu11)
+        g_switchDbStage = "menu/onkey";
+#endif
     if (varmenuDef_t->onKey)
     {
 #ifdef __SWITCH__
@@ -10803,16 +10849,53 @@ void __cdecl Load_menuDef_t(bool atStreamStart)
         varItemKeyHandler = varmenuDef_t->onKey;
         Load_ItemKeyHandler(1);
     }
+
+#ifdef __SWITCH__
+    if (traceMenu11)
+        g_switchDbStage = "menu/visible";
+#endif
     varstatement = &varmenuDef_t->visibleExp;
     Load_statement(0);
+
+#ifdef __SWITCH__
+    if (traceMenu11)
+        g_switchDbStage = "menu/allowed";
+#endif
     varXString = &varmenuDef_t->allowedBinding;
     Load_XString(0);
+
+#ifdef __SWITCH__
+    if (traceMenu11)
+        g_switchDbStage = "menu/sound";
+#endif
     varXString = &varmenuDef_t->soundName;
     Load_XString(0);
+
+#ifdef __SWITCH__
+    if (traceMenu11)
+        g_switchDbStage = "menu/rect";
+#endif
     varstatement = &varmenuDef_t->rectXExp;
     Load_statement(0);
     varstatement = &varmenuDef_t->rectYExp;
     Load_statement(0);
+
+#ifdef __SWITCH__
+    if (traceMenu11)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH MENU11] pre-items itemCount=%d items=%p stream=%u pos=%p\n",
+            varmenuDef_t->itemCount,
+            static_cast<void *>(varmenuDef_t->items),
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<const void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+        g_switchDbStage = "menu/items";
+    }
+#endif
     if (varmenuDef_t->items)
     {
 #ifdef __SWITCH__
@@ -10837,7 +10920,28 @@ void __cdecl Load_menuDef_t(bool atStreamStart)
         varitemDef_ptr = varmenuDef_t->items;
         Load_itemDef_ptrArray(1, varmenuDef_t->itemCount);
     }
+
+#ifdef __SWITCH__
+    if (traceMenu11)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH MENU11] post-items itemCount=%d items=%p stream=%u pos=%p\n",
+            varmenuDef_t->itemCount,
+            static_cast<void *>(varmenuDef_t->items),
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<const void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+        g_switchDbStage = "menu/pop";
+    }
+#endif
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (traceMenu11)
+        g_switchDbStage = "menu/load_done";
+#endif
 }
 
 void __cdecl Load_menuDef_ptr(bool atStreamStart)
