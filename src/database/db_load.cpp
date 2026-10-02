@@ -5863,6 +5863,49 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
     const uint8_t *techniqueSetStart = DB_GetStreamPos();
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 5u && g_switchCurrentAssetIndex == 1502)
+    {
+        const uint8_t *block4 =
+            g_streamBlocks && g_streamBlocks[4].data
+                ? g_streamBlocks[4].data
+                : nullptr;
+        const uint32_t block4Size =
+            g_streamBlocks ? g_streamBlocks[4].size : 0u;
+        uint32_t defaultOffset = UINT32_MAX;
+        uint32_t cinematicOffset = UINT32_MAX;
+
+        if (block4 && block4Size >= 10)
+        {
+            for (uint32_t off = 0; off + 10 <= block4Size; ++off)
+            {
+                if (defaultOffset == UINT32_MAX &&
+                    !std::memcmp(block4 + off, "default\\0", 8))
+                    defaultOffset = off;
+                if (cinematicOffset == UINT32_MAX &&
+                    !std::memcmp(block4 + off, "cinematic\\0", 10))
+                    cinematicOffset = off;
+                if (defaultOffset != UINT32_MAX &&
+                    cinematicOffset != UINT32_MAX)
+                    break;
+            }
+        }
+
+        char trace[768];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH DB FIND] techset1502 raw-name=%08x remap=%08x block4=%p size=%u defaultOff=%08x cinematicOff=%08x\\n",
+            serialized.name,
+            serialized.remappedTechniqueSet,
+            static_cast<const void *>(block4),
+            block4Size,
+            defaultOffset,
+            cinematicOffset);
+        Switch_LogWrite(trace);
+    }
+#endif
+
     Switch_LogRawDwords(
         "[SWITCH TECHSET WORDS]",
         reinterpret_cast<const uint8_t *>(&serialized),
