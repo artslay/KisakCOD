@@ -37,6 +37,9 @@ static bool Switch_LogPrefixAllowed(const char *msg)
            std::strncmp(msg, "[SWITCH GLCTX]", sizeof("[SWITCH GLCTX]") - 1) == 0 ||
            std::strncmp(msg, "[SWITCH XASSET TRACE]", sizeof("[SWITCH XASSET TRACE]") - 1) == 0 ||
            std::strncmp(msg, "[SWITCH XASSET STREAM]", sizeof("[SWITCH XASSET STREAM]") - 1) == 0 ||
+           std::strncmp(msg, "[SWITCH STREAM REGRESS]", sizeof("[SWITCH STREAM REGRESS]") - 1) == 0 ||
+           std::strncmp(msg, "[SWITCH STREAM MISMATCH]", sizeof("[SWITCH STREAM MISMATCH]") - 1) == 0 ||
+           std::strncmp(msg, "[SWITCH STREAM ARRAY MISMATCH]", sizeof("[SWITCH STREAM ARRAY MISMATCH]") - 1) == 0 ||
            std::strncmp(msg, "[SWITCH XFILE BLOCKS]", sizeof("[SWITCH XFILE BLOCKS]") - 1) == 0 ||
            std::strncmp(msg, "[SWITCH OFFSET INVALID]", sizeof("[SWITCH OFFSET INVALID]") - 1) == 0 ||
            std::strncmp(msg, "[SWITCH XHEADER]", sizeof("[SWITCH XHEADER]") - 1) == 0 ||
