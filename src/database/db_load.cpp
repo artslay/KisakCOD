@@ -1715,8 +1715,8 @@ struct SerializedXAnimParts
 };
 static_assert(sizeof(SerializedXAnimParts) == 88,
     "Serialized XAnimParts must remain 88 bytes");
-static_assert(sizeof(XAnimParts) == 128,
-    "Switch XAnimParts native ABI must remain 128 bytes");
+static_assert(sizeof(XAnimParts) == 136,
+    "Switch XAnimParts native ABI must remain 136 bytes");
 #endif
 
 void __cdecl Load_XAnimParts(bool atStreamStart)
