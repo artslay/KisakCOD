@@ -331,6 +331,16 @@ static void Load_multiDef_ptr(bool atStreamStart);
 static void Load_windowDef_t(bool atStreamStart);
 static void Load_Window(bool atStreamStart);
 #ifdef __SWITCH__
+static void Switch_TranslateWindowDefSerialized(
+    windowDef_t *window,
+    const uint8_t *serialized);
+static void Switch_TranslateStatementSerialized(
+    statement_s *statement,
+    const uint8_t *serialized);
+static void Switch_TranslateItemDefSerialized(
+    itemDef_s *item);
+#endif
+#ifdef __SWITCH__
 static void Switch_TranslateItemDefSerialized(itemDef_s *item)
 {
     constexpr size_t SERIALIZED_SIZE = 372;
