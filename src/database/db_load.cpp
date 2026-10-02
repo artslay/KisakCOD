@@ -1144,15 +1144,10 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
         g_switchCurrentAssetIndex == 1506 &&
         g_switchCurrentAssetRawType == 23u;
 
-    // Match the original loader's two distinct cases:
+    // Match the original loader:
     //   normal token -> direct DB offset to the final XString pointer
-    //   -1            -> inline pointer slot, followed by another serialized
-    //                    32-bit XString token and possibly inline string data.
-    //
-    // The previous Switch implementation incorrectly treated every normal
-    // token as a pointer to a second serialized token. That is not how
-    // Load_XStringPtr is serialized and caused tokens such as 0x203b2022 to be
-    // interpreted as a second-stage block-2 reference.
+    //   -1            -> allocate a 32-bit nested token slot in the current
+    //                    DB stream, then resolve that nested token.
     if (serialized != UINT32_MAX)
     {
         const uintptr_t resolved =
@@ -1175,6 +1170,14 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
         return;
     }
 
+    // The serialized pointer-to-string slot is still 4 bytes on Switch. Keep
+    // that 4-byte stream allocation exactly like the original loader; the
+    // native pointer-to-pointer lives separately in Hunk memory.
+    const uint8_t *nestedStreamPos = DB_GetStreamPos();
+    DB_AllocStreamPos(3);
+    uint32_t nested = 0;
+    DB_LoadSwitchSerialized(&nested, sizeof(nested));
+
     const char **nativeStringSlot =
         reinterpret_cast<const char **>(
             Hunk_Alloc(
@@ -1184,16 +1187,14 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
     *nativeStringSlot = nullptr;
     *varXStringPtr = nativeStringSlot;
 
-    uint32_t nested = 0;
-    DB_LoadSwitchSerialized(&nested, sizeof(nested));
-
     if (switchTraceWeapon1506)
     {
         char trace[256];
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH WEAPON1506] XStringPtr inline nested=%08x slot=%p\n",
+            "[SWITCH WEAPON1506] XStringPtr inline stream=%p nested=%08x slot=%p\n",
+            static_cast<const void *>(nestedStreamPos),
             nested,
             static_cast<void *>(nativeStringSlot));
         Switch_LogWrite(trace);
