@@ -4559,18 +4559,17 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
     {
         varMaterialTechniqueSet->name = nullptr;
     }
-    else if (serialized.name == UINT32_MAX)
+    else if (serialized.name != UINT32_MAX)
     {
-        char *nameBuffer =
-            reinterpret_cast<char *>(AllocLoad_raw_byte());
-        Load_XStringCustom(&nameBuffer);
-        varMaterialTechniqueSet->name = nameBuffer;
+        varMaterialTechniqueSet->name =
+            reinterpret_cast<const char *>(
+                DB_ConvertOffsetToPointerValue(serialized.name));
     }
     else
     {
         varMaterialTechniqueSet->name =
             reinterpret_cast<const char *>(
-                DB_ConvertOffsetToPointerValue(serialized.name));
+                static_cast<uintptr_t>(UINT32_MAX));
     }
 
     // The serialized TechniqueSet header is read from the current inline
@@ -4681,6 +4680,16 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
                 reinterpret_cast<MaterialTechnique *>(
                     DB_ConvertOffsetToPointerValue(value));
         }
+    }
+
+    // The original 32-bit loader consumes the inline TechniqueSet name only
+    // after all 34 technique entries (including their nested payloads).
+    if (serialized.name == UINT32_MAX)
+    {
+        char *nameBuffer =
+            reinterpret_cast<char *>(AllocLoad_raw_byte());
+        Load_XStringCustom(&nameBuffer);
+        varMaterialTechniqueSet->name = nameBuffer;
     }
 
 #ifdef __SWITCH__
