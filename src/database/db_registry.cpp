@@ -2,6 +2,7 @@
 #include "database.h"
 
 #ifdef __SWITCH__
+extern const char *g_switchDbStage;
 #endif
 
 #include <qcommon/files.h>
@@ -1001,6 +1002,9 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
 #ifdef __SWITCH__
     if (traceDefaultMaterial)
         Switch_LogWrite("[SWITCH DBLOOKUP] before write lock\n");
+#endif
+#ifdef __SWITCH__
+    g_switchDbStage = "asset/lock";
 #endif
     Sys_LockWrite(&db_hashCritSect);
 #ifdef __SWITCH__
@@ -2597,6 +2601,9 @@ static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
     newEntry.entry.asset.type = type;
     newEntry.entry.asset.header = header;
 
+#ifdef __SWITCH__
+    g_switchDbStage = "asset/add";
+#endif
 
 #ifdef __SWITCH__
     if (type == ASSET_TYPE_TECHNIQUE_SET)
@@ -2615,8 +2622,10 @@ static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
         Switch_LogWrite("[SWITCH IMAGE] DB_AddXAsset after write lock\n");
 #endif
 
+#ifdef __SWITCH__
+    g_switchDbStage = "asset/link";
+#endif
     existingEntry = DB_LinkXAssetEntry(&newEntry, 0);
-
 #ifdef __SWITCH__
     if (type == ASSET_TYPE_TECHNIQUE_SET)
         Switch_LogWrite("[SWITCH TECHSET ADD] after link\n");
@@ -2624,6 +2633,9 @@ static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
         Switch_LogWrite("[SWITCH IMAGE] DB_AddXAsset after DB_LinkXAssetEntry\n");
 #endif
 
+#ifdef __SWITCH__
+    g_switchDbStage = "asset/unlock";
+#endif
     Sys_UnlockWrite(&db_hashCritSect);
 
 #ifdef __SWITCH__
@@ -2633,8 +2645,10 @@ static __attribute__((noinline)) XAssetHeader __cdecl DB_AddXAsset_SwitchLocal(
         Switch_LogWrite("[SWITCH IMAGE] DB_AddXAsset after unlock\n");
 #endif
 
+#ifdef __SWITCH__
+    g_switchDbStage = "asset/return";
+#endif
     DB_SyncLostDevice();
-
 
     return existingEntry->entry.asset.header;
 }
@@ -2663,6 +2677,9 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     type = newEntry->entry.asset.type;
 
 #ifdef __SWITCH__
+    g_switchDbStage = "asset/type";
+#endif
+#ifdef __SWITCH__
     const bool switchTraceWeapon1506 =
         g_switchCurrentAssetIndex == 1506 &&
         g_switchCurrentAssetRawType == 23u &&
@@ -2677,6 +2694,9 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
 #ifdef __SWITCH__
     if (newEntry->entry.asset.type == ASSET_TYPE_LOADED_SOUND)
         Switch_LogWrite("[SWITCH LOADEDSOUND LINK] before DB_GetXAssetName\n");
+#endif
+#ifdef __SWITCH__
+    g_switchDbStage = "asset/name";
 #endif
     if (newEntry->entry.asset.type == ASSET_TYPE_IMAGE)
         name = newEntry->entry.asset.header.image->name;
@@ -2731,10 +2751,16 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     if (type == ASSET_TYPE_LOADED_SOUND)
         Switch_LogWrite("[SWITCH LOADEDSOUND LINK] before name dereference\n");
 #endif
+#ifdef __SWITCH__
+    g_switchDbStage = "asset/name_deref";
+#endif
     v2 = *name;
     isStubAsset = v2 == ',';
     if (v2 == ',')
         ++name;
+#ifdef __SWITCH__
+    g_switchDbStage = "asset/hash";
+#endif
     hash = DB_HashForName(name, type);
 #ifdef __SWITCH__
     if (switchTraceWeapon1506)
@@ -2779,6 +2805,9 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     }
 #endif
 
+#ifdef __SWITCH__
+    g_switchDbStage = "asset/find";
+#endif
     existingEntry = NULL;
 
     for (existingEntryIndex = db_hashTable[hash]; existingEntryIndex; existingEntryIndex = existingEntry->entry.nextHash)
@@ -2889,6 +2918,9 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
             Switch_LogWrite(trace);
         }
 #endif
+#ifdef __SWITCH__
+        g_switchDbStage = "asset/alloc";
+#endif
         newEntry = DB_AllocXAssetEntry(asset.type, g_zoneIndex);
 #ifdef __SWITCH__
         if (type == ASSET_TYPE_LOADED_SOUND)
@@ -2902,6 +2934,9 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
                 static_cast<void *>(newEntry));
             Switch_LogWrite(trace);
         }
+#endif
+#ifdef __SWITCH__
+        g_switchDbStage = "asset/clone";
 #endif
         DB_CloneXAssetInternal(&asset, &newEntry->entry.asset);
     }
