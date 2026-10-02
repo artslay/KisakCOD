@@ -248,8 +248,10 @@ void __cdecl DB_PopStreamPos()
 
     --g_streamPosStackIndex;
 
+#ifndef __SWITCH__
     if (!g_streamPosIndex)
         g_streamPos = g_streamPosStack[g_streamPosStackIndex].pos;
+#endif
     DB_SetStreamIndex(g_streamPosStack[g_streamPosStackIndex].index);
 }
 
