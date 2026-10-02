@@ -9954,6 +9954,34 @@ static void Switch_TranslateWeaponDefSerialized(WeaponDef *weaponDef)
     if (g_switchCurrentAssetIndex == 1506 &&
         g_switchCurrentAssetRawType == 23u)
     {
+        const uintptr_t block0Base =
+            g_streamBlocks && g_streamBlocks[0].data
+                ? reinterpret_cast<uintptr_t>(g_streamBlocks[0].data)
+                : 0;
+        const uintptr_t cursor =
+            reinterpret_cast<uintptr_t>(DB_GetStreamPos());
+        const uintptr_t array0 =
+            reinterpret_cast<uintptr_t>(g_streamPosArray[0]);
+        char trace[384];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON1506] after serialized root idx=%u pos=%p posOff=%08x array0=%p array0Off=%08x\n",
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<const void *>(cursor),
+            block0Base && cursor >= block0Base
+                ? static_cast<unsigned>(cursor - block0Base)
+                : UINT32_MAX,
+            static_cast<const void *>(array0),
+            block0Base && array0 >= block0Base
+                ? static_cast<unsigned>(array0 - block0Base)
+                : UINT32_MAX);
+        Switch_LogWrite(trace);
+    }
+
+    if (g_switchCurrentAssetIndex == 1506 &&
+        g_switchCurrentAssetRawType == 23u)
+    {
         char trace[320];
         std::snprintf(
             trace,
@@ -10068,7 +10096,27 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
     }
     DB_PushStreamPos(4);
     if (switchTraceWeapon1506)
+    {
+        const uintptr_t block0Base =
+            g_streamBlocks && g_streamBlocks[0].data
+                ? reinterpret_cast<uintptr_t>(g_streamBlocks[0].data)
+                : 0;
+        const uintptr_t array0 =
+            reinterpret_cast<uintptr_t>(g_streamPosArray[0]);
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON1506] after PushStreamPos4 idx=%u pos=%p array0=%p array0Off=%08x\n",
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<const void *>(DB_GetStreamPos()),
+            static_cast<const void *>(array0),
+            block0Base && array0 >= block0Base
+                ? static_cast<unsigned>(array0 - block0Base)
+                : UINT32_MAX);
+        Switch_LogWrite(trace);
         Switch_LogWrite("[SWITCH WEAPON1506] begin nested fields\n");
+    }
 #else
     Load_Stream(atStreamStart, (uint8_t *)varWeaponDef, 2168);
     DB_PushStreamPos(4);
@@ -10384,9 +10432,60 @@ void __cdecl Load_WeaponDef(bool atStreamStart)
     Load_XString(0);
 #ifdef __SWITCH__
     if (switchTraceWeapon1506)
+    {
+        const uintptr_t block0Base =
+            g_streamBlocks && g_streamBlocks[0].data
+                ? reinterpret_cast<uintptr_t>(g_streamBlocks[0].data)
+                : 0;
+        const uintptr_t array0 =
+            reinterpret_cast<uintptr_t>(g_streamPosArray[0]);
+        const uintptr_t cursor =
+            reinterpret_cast<uintptr_t>(DB_GetStreamPos());
+        char trace[384];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON1506] before PopStreamPos idx=%u pos=%p posOff=%08x array0Off=%08x\n",
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<const void *>(cursor),
+            block0Base && cursor >= block0Base
+                ? static_cast<unsigned>(cursor - block0Base)
+                : UINT32_MAX,
+            block0Base && array0 >= block0Base
+                ? static_cast<unsigned>(array0 - block0Base)
+                : UINT32_MAX);
+        Switch_LogWrite(trace);
         Switch_LogWrite("[SWITCH WEAPON1506] all fields done\n");
+    }
 #endif
     DB_PopStreamPos();
+#ifdef __SWITCH__
+    if (switchTraceWeapon1506)
+    {
+        const uintptr_t block0Base =
+            g_streamBlocks && g_streamBlocks[0].data
+                ? reinterpret_cast<uintptr_t>(g_streamBlocks[0].data)
+                : 0;
+        const uintptr_t array0 =
+            reinterpret_cast<uintptr_t>(g_streamPosArray[0]);
+        const uintptr_t cursor =
+            reinterpret_cast<uintptr_t>(DB_GetStreamPos());
+        char trace[384];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH WEAPON1506] after PopStreamPos idx=%u pos=%p posOff=%08x array0Off=%08x\n",
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<const void *>(cursor),
+            block0Base && cursor >= block0Base
+                ? static_cast<unsigned>(cursor - block0Base)
+                : UINT32_MAX,
+            block0Base && array0 >= block0Base
+                ? static_cast<unsigned>(array0 - block0Base)
+                : UINT32_MAX);
+        Switch_LogWrite(trace);
+    }
+#endif
 }
 
 void __cdecl Load_WeaponDefPtr(bool atStreamStart)
