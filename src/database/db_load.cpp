@@ -8847,7 +8847,25 @@ void __cdecl Load_menuDef_t(bool atStreamStart)
     Load_statement(0);
     if (varmenuDef_t->items)
     {
-        varmenuDef_t->items = (itemDef_s **)AllocLoad_FxElemVisStateSample();
+#ifdef __SWITCH__
+        DB_AllocStreamPos(3);
+        varmenuDef_t->items =
+            reinterpret_cast<itemDef_s **>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(
+                        sizeof(itemDef_s *) *
+                        static_cast<size_t>(varmenuDef_t->itemCount)),
+                    "SwitchMenuItemDefArray",
+                    22));
+        std::memset(
+            varmenuDef_t->items,
+            0,
+            sizeof(itemDef_s *) *
+                static_cast<size_t>(varmenuDef_t->itemCount));
+#else
+        varmenuDef_t->items =
+            (itemDef_s **)AllocLoad_FxElemVisStateSample();
+#endif
         varitemDef_ptr = varmenuDef_t->items;
         Load_itemDef_ptrArray(1, varmenuDef_t->itemCount);
     }
