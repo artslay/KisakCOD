@@ -655,7 +655,57 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             sizeof(serialized.header));
         varXAssetHeader = &varXAsset->header;
 
+        const bool traceStreamWindow =
+            i >= 1490 && i <= 1506;
+
+#ifdef __SWITCH__
+        uint32_t preStreamIndex = 0;
+        const uint8_t *preStreamPos = nullptr;
+        if (traceStreamWindow)
+        {
+            preStreamIndex = g_streamPosIndex;
+            preStreamPos = DB_GetStreamPos();
+
+            char trace[320];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XASSET STREAM] begin i=%d rawType=%u rawHeader=%08x"
+                " stream=%u pos=%p\n",
+                i,
+                serialized.type,
+                serialized.header,
+                preStreamIndex,
+                static_cast<const void *>(preStreamPos));
+            Switch_LogWrite(trace);
+        }
+#endif
+
         Load_XAssetHeader(0);
+
+#ifdef __SWITCH__
+        if (traceStreamWindow)
+        {
+            const uint32_t postStreamIndex = g_streamPosIndex;
+            const uint8_t *postStreamPos = DB_GetStreamPos();
+
+            char trace[320];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XASSET STREAM] end   i=%d rawType=%u rawHeader=%08x"
+                " stream=%u pos=%p delta=%ld\n",
+                i,
+                serialized.type,
+                serialized.header,
+                postStreamIndex,
+                static_cast<const void *>(postStreamPos),
+                postStreamPos && preStreamPos
+                    ? static_cast<long>(postStreamPos - preStreamPos)
+                    : 0L);
+            Switch_LogWrite(trace);
+        }
+#endif
 
         ++var;
     }
