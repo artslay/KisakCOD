@@ -6109,19 +6109,74 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
             reinterpret_cast<uintptr_t>(resolvedName);
         const uintptr_t cursor =
             reinterpret_cast<uintptr_t>(DB_GetStreamPos());
+        const uintptr_t stream4Base =
+            g_streamBlocks[4].data
+                ? reinterpret_cast<uintptr_t>(g_streamBlocks[4].data)
+                : 0;
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH DB FIND] techset complete asset=%d nameToken=%08x namePtr=%p nameText=%s nameRelToStream4=%lld after=%p\n",
+            "[SWITCH DB FIND] techset complete asset=%d nameToken=%08x namePtr=%p nameText=%s nameRelToStart=%lld nameRelToCursor=%lld after=%p\\n",
             g_switchCurrentAssetIndex,
             serialized.name,
             static_cast<const void *>(resolvedName),
             resolvedName ? resolvedName : "<null>",
+            resolvedName && stream4Base
+                ? static_cast<long long>(namePtr - stream4Base)
+                : 0LL,
             resolvedName
                 ? static_cast<long long>(namePtr - cursor)
                 : 0LL,
             static_cast<void *>(DB_GetStreamPos()));
         Switch_LogWrite(trace);
+
+        if (g_switchCurrentAssetIndex == 1502)
+        {
+            for (int base = 0; base < 34; base += 6)
+            {
+                int written = std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH TECHSET 1502 TOKENS] %d:",
+                    base);
+                for (int i = base; i < base + 6 && i < 34; ++i)
+                {
+                    written += std::snprintf(
+                        trace + written,
+                        sizeof(trace) - static_cast<size_t>(written),
+                        " %08x",
+                        serialized.techniques[i]);
+                }
+                std::snprintf(
+                    trace + written,
+                    sizeof(trace) - static_cast<size_t>(written),
+                    "\\n");
+                Switch_LogWrite(trace);
+            }
+
+            if (resolvedName)
+            {
+                const uint8_t *nameBytes =
+                    reinterpret_cast<const uint8_t *>(resolvedName);
+                int written = std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH TECHSET 1502 NAMEBYTES]");
+                for (size_t i = 0; i < 32; ++i)
+                {
+                    written += std::snprintf(
+                        trace + written,
+                        sizeof(trace) - static_cast<size_t>(written),
+                        " %02x",
+                        static_cast<unsigned>(nameBytes[i]));
+                }
+                std::snprintf(
+                    trace + written,
+                    sizeof(trace) - static_cast<size_t>(written),
+                    "\\n");
+                Switch_LogWrite(trace);
+            }
+        }
     }
 #endif
 
