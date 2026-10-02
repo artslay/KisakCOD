@@ -5875,16 +5875,21 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
         uint32_t defaultOffset = UINT32_MAX;
         uint32_t cinematicOffset = UINT32_MAX;
 
-        if (block4 && block4Size >= 10)
+        if (block4)
         {
-            for (uint32_t off = 0; off + 10 <= block4Size; ++off)
+            for (uint32_t off = 0; off + 8 <= block4Size; ++off)
             {
                 if (defaultOffset == UINT32_MAX &&
-                    !std::memcmp(block4 + off, "default\\0", 8))
+                    !std::memcmp(block4 + off, "default", 7) &&
+                    block4[off + 7] == 0)
                     defaultOffset = off;
+
                 if (cinematicOffset == UINT32_MAX &&
-                    !std::memcmp(block4 + off, "cinematic\\0", 10))
+                    off + 10 <= block4Size &&
+                    !std::memcmp(block4 + off, "cinematic", 9) &&
+                    block4[off + 9] == 0)
                     cinematicOffset = off;
+
                 if (defaultOffset != UINT32_MAX &&
                     cinematicOffset != UINT32_MAX)
                     break;
