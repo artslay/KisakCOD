@@ -3124,12 +3124,18 @@ void __cdecl Load_MaterialTechniqueSetAsset(XAssetHeader *techniqueSet)
 #ifdef __SWITCH__
     Switch_LogWrite("[SWITCH TECHSET ASSET] after add\n");
 #endif
+#ifdef __SWITCH__
+    g_switchDbStage = "techset/remap_call";
+#endif
     Material_OriginalRemapTechniqueSet(techniqueSet->techniqueSet);
 #ifdef __SWITCH__
+    g_switchDbStage = "techset/remap_done";
     Switch_LogWrite("[SWITCH TECHSET ASSET] after remap\n");
+    g_switchDbStage = "techset/upload_call";
 #endif
     Material_UploadShaders(techniqueSet->techniqueSet);
 #ifdef __SWITCH__
+    g_switchDbStage = "techset/upload_done";
     Switch_LogWrite("[SWITCH TECHSET ASSET] after upload\n");
 #endif
 }
