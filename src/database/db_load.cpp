@@ -7841,12 +7841,28 @@ static void Switch_TranslateExpressionEntrySerialized(
 
         if (dataType == VAL_STRING)
         {
-            const uintptr_t stringToken =
-                Switch_WidenSerializedPointer(serialized, 8);
+            const uint32_t stringToken =
+                Switch_ReadSerializedU32(serialized, 8);
+
+            const char *stringValue = nullptr;
+            if (stringToken == UINT32_MAX)
+            {
+                char *stringBuffer =
+                    reinterpret_cast<char *>(AllocLoad_raw_byte());
+                varConstChar = stringBuffer;
+                Load_XStringCustom(&stringBuffer);
+                stringValue = stringBuffer;
+            }
+            else if (stringToken)
+            {
+                stringValue = reinterpret_cast<const char *>(
+                    DB_ConvertOffsetToPointerValue(stringToken));
+            }
+
             std::memcpy(
                 reinterpret_cast<uint8_t *>(&entry->data.operand.internals),
-                &stringToken,
-                sizeof(stringToken));
+                &stringValue,
+                sizeof(stringValue));
         }
         else
         {
@@ -7870,6 +7886,7 @@ static void Switch_LoadExpressionEntryPtrArray(
     std::vector<uint32_t> serialized(
         static_cast<size_t>(count));
 
+    DB_AllocStreamPos(3);
     DB_LoadSwitchSerialized(
         serialized.data(),
         static_cast<uint32_t>(
@@ -8614,6 +8631,7 @@ void __cdecl Load_menuDef_ptrArray(bool atStreamStart, int32_t count)
 
         if (count > 0)
         {
+            DB_AllocStreamPos(3);
             DB_LoadSwitchSerialized(
                 serialized.data(),
                 static_cast<uint32_t>(
