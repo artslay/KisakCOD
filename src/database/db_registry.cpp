@@ -3482,7 +3482,49 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
 
 void __cdecl Load_PhysPresetAsset(XAssetHeader *physPreset)
 {
-    physPreset->xmodelPieces = DB_AddXAsset(ASSET_TYPE_PHYSPRESET, (XAssetHeader)physPreset->xmodelPieces).xmodelPieces;
+#ifdef __SWITCH__
+    PhysPreset *source =
+        physPreset ? physPreset->xmodelPieces->physPreset : nullptr;
+    if (source)
+    {
+        char trace[384];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH PHYSPRESET] register asset=%d raw=%u source=%p name=%p text=%s hash=%u\n",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            static_cast<void *>(source),
+            static_cast<const void *>(source->name),
+            source->name ? source->name : "<null>",
+            source->name ? DB_HashForName(source->name, ASSET_TYPE_PHYSPRESET) : 0u);
+        Switch_LogRaw(trace);
+    }
+#endif
+
+    physPreset->xmodelPieces =
+        DB_AddXAsset(
+            ASSET_TYPE_PHYSPRESET,
+            (XAssetHeader)physPreset->xmodelPieces).xmodelPieces;
+
+#ifdef __SWITCH__
+    if (physPreset && physPreset->xmodelPieces)
+    {
+        PhysPreset *result =
+            physPreset->xmodelPieces->physPreset;
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH PHYSPRESET] register result asset=%d raw=%u result=%p name=%p text=%s\n",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            static_cast<void *>(result),
+            result ? static_cast<const void *>(result->name) : nullptr,
+            result && result->name ? result->name : "<null>");
+        Switch_LogRaw(trace);
+    }
+#endif
 }
 
 void __cdecl Mark_PhysPresetAsset(PhysPreset *physPreset)
