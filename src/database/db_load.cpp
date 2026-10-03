@@ -6470,6 +6470,27 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
     const uint8_t *techniqueSetStart = DB_GetStreamPos();
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
+    if (g_switchCurrentAssetIndex == 4728)
+    {
+        char trace[512];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[KisakCOD][TECHSET4728] start=%p after=%p stream=%u name=%08x remap=%08x t0=%08x t1=%08x t2=%08x t3=%08x t4=%08x b4=%08x\n",
+            static_cast<const void *>(techniqueSetStart),
+            static_cast<const void *>(DB_GetStreamPos()),
+            static_cast<unsigned>(g_streamPosIndex),
+            serialized.name,
+            serialized.remappedTechniqueSet,
+            serialized.techniques[0],
+            serialized.techniques[1],
+            serialized.techniques[2],
+            serialized.techniques[3],
+            serialized.techniques[4],
+            Switch_GetStreamCursorOffset(4));
+        Sys_Print(trace);
+    }
+
 #ifdef __SWITCH__
     if (g_switchCurrentAssetRawType == 5u && g_switchCurrentAssetIndex == 1502)
     {
@@ -6893,6 +6914,23 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
     uint32_t value; // [esp+4h] [ebp-8h]
 
     Load_Stream(atStreamStart, (uint8_t *)varMaterialTechniqueSetPtr, 4);
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex == 4728)
+    {
+        const uint32_t traceValue = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(*varMaterialTechniqueSetPtr));
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[KisakCOD][TECHSETPTR4728] token=%08x stream=%u b4=%08x pos=%p\n",
+            traceValue,
+            static_cast<unsigned>(g_streamPosIndex),
+            Switch_GetStreamCursorOffset(4),
+            static_cast<void *>(DB_GetStreamPos()));
+        Sys_Print(trace);
+    }
+#endif
     DB_PushStreamPos(0);
     if (*varMaterialTechniqueSetPtr)
     {
@@ -7014,6 +7052,26 @@ void __cdecl Load_Material(bool atStreamStart)
     SerializedMaterial serialized{};
     uint8_t *materialStreamPos = DB_GetStreamPos();
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    if (g_switchCurrentAssetIndex == 4728)
+    {
+        char trace[384];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[KisakCOD][MATERIAL4728] start=%p after=%p stream=%u name=%08x techset=%08x textures=%08x counts=%u/%u/%u b4=%08x\n",
+            static_cast<void *>(materialStreamPos),
+            static_cast<void *>(DB_GetStreamPos()),
+            static_cast<unsigned>(g_streamPosIndex),
+            serialized.name,
+            serialized.techniqueSet,
+            serialized.textureTable,
+            static_cast<unsigned>(serialized.textureCount),
+            static_cast<unsigned>(serialized.constantCount),
+            static_cast<unsigned>(serialized.stateBitsCount),
+            Switch_GetStreamCursorOffset(4));
+        Sys_Print(trace);
+    }
 
     const bool traceUiMaterial =
         g_switchCurrentAssetRawType == 4u &&
@@ -11627,6 +11685,23 @@ void __cdecl Load_windowDef_t(bool atStreamStart)
     varXString = &varwindowDef_t->group;
     Load_XString(0);
     varMaterialHandle = &varwindowDef_t->background;
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex == 4728)
+    {
+        const uint32_t backgroundToken = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(varwindowDef_t->background));
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[KisakCOD][WINDOW4728] background=%08x stream=%u b4=%08x pos=%p\n",
+            backgroundToken,
+            static_cast<unsigned>(g_streamPosIndex),
+            Switch_GetStreamCursorOffset(4),
+            static_cast<void *>(DB_GetStreamPos()));
+        Sys_Print(trace);
+    }
+#endif
     Load_MaterialHandle(0);
 }
 
