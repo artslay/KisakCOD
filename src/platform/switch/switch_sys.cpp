@@ -70,7 +70,8 @@ static bool Switch_LogPrefixAllowed(const char *msg)
         "[SWITCH XASSET STREAM]",
         "[SWITCH FX TRACE]",
         "[SWITCH MENU11 ITEM87]",
-        "[SWITCH XHEADER11]"
+        "[SWITCH XHEADER11]",
+        "[SWITCH PHYSPRESET"
     };
 
     for (const char *prefix : kPrefixes)
