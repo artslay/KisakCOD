@@ -7744,6 +7744,22 @@ void __cdecl Load_PhysPreset(bool atStreamStart)
     DB_PushStreamPos(4);
     varXString = &varPhysPreset->name;
     Load_XString(0);
+#ifdef __SWITCH__
+    {
+        char trace[384];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH PHYSPRESET] resolved asset=%d raw=%u name=%p text=%s hash=%u default=%d\n",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            static_cast<const void *>(varPhysPreset->name),
+            varPhysPreset->name ? varPhysPreset->name : "<null>",
+            varPhysPreset->name ? DB_HashForName(varPhysPreset->name, ASSET_TYPE_PHYSPRESET) : 0u,
+            varPhysPreset->name && !I_stricmp(varPhysPreset->name, "default"));
+        Switch_LogRaw(trace);
+    }
+#endif
     varXString = &varPhysPreset->sndAliasPrefix;
     Load_XString(0);
     DB_PopStreamPos();
