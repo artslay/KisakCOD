@@ -3484,7 +3484,7 @@ void __cdecl Load_PhysPresetAsset(XAssetHeader *physPreset)
 {
 #ifdef __SWITCH__
     PhysPreset *source =
-        physPreset ? physPreset->xmodelPieces->physPreset : nullptr;
+        physPreset ? reinterpret_cast<PhysPreset *>(physPreset->xmodelPieces) : nullptr;
     if (source)
     {
         char trace[384];
@@ -3511,7 +3511,7 @@ void __cdecl Load_PhysPresetAsset(XAssetHeader *physPreset)
     if (physPreset && physPreset->xmodelPieces)
     {
         PhysPreset *result =
-            physPreset->xmodelPieces->physPreset;
+            reinterpret_cast<PhysPreset *>(physPreset->xmodelPieces);
         char trace[320];
         std::snprintf(
             trace,
