@@ -5218,6 +5218,9 @@ void __cdecl Load_DWORDArray(bool atStreamStart, int32_t count)
 void __cdecl Load_GfxVertexShaderLoadDef(bool atStreamStart)
 {
 #ifdef __SWITCH__
+    // MaterialVertexShaderProgram consumed the complete serialized 12-byte
+    // record and populated the widened native loadDef. Only the program
+    // payload remains in stream 4; do not consume the native 8-byte prefix.
     iassert(!atStreamStart);
 #else
     Load_Stream(atStreamStart, (uint8_t *)varGfxVertexShaderLoadDef, 8);
@@ -5225,47 +5228,74 @@ void __cdecl Load_GfxVertexShaderLoadDef(bool atStreamStart)
     if (varGfxVertexShaderLoadDef->program)
     {
 #ifdef __SWITCH__
-        const uint32_t programToken = static_cast<uint32_t>(
-            reinterpret_cast<uintptr_t>(varGfxVertexShaderLoadDef->program));
+        g_switchDbStage = "material/technique/pass/vertex_program";
+        if (g_switchCurrentAssetIndex == 4728)
+        {
+            const uint32_t programSize =
+                static_cast<uint32_t>(varGfxVertexShaderLoadDef->programSize);
+            const uint32_t requestedBytes =
+                programSize * static_cast<uint32_t>(sizeof(uint32_t));
+            const uint32_t stream4Offset = Switch_GetStreamCursorOffset(4);
+            const uint32_t stream4Size =
+                g_streamBlocks && g_streamBlocks[4].data
+                    ? g_streamBlocks[4].size
+                    : 0u;
+            const uint32_t stream4Remaining =
+                stream4Offset <= stream4Size
+                    ? stream4Size - stream4Offset
+                    : 0u;
 
-        // A 32-bit fastfile pointer is either an inline/following sentinel
-        // (-1), an inserted/following pointer (-2), or a normal zone offset.
-        // Only the following forms have program bytes immediately in the
-        // current stream. A normal offset must be converted to a native
-        // ARM64 pointer and must not consume programSize DWORDs here.
-        if (programToken == UINT32_MAX)
-        {
-            varGfxVertexShaderLoadDef->program =
-                (uint32_t *)AllocLoad_FxElemVisStateSample();
-            varDWORD = varGfxVertexShaderLoadDef->program;
-            Load_DWORDArray(1, varGfxVertexShaderLoadDef->programSize);
+            char trace[384];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH SHADER TRACE] vertex asset=%d programToken=%08x programSize=%u bytes=%u stream=%u b4=%08x remaining=%u pos=%p\n",
+                g_switchCurrentAssetIndex,
+                static_cast<unsigned>(
+                    reinterpret_cast<uintptr_t>(
+                        varGfxVertexShaderLoadDef->program)),
+                programSize,
+                requestedBytes,
+                static_cast<unsigned>(g_streamPosIndex),
+                stream4Offset,
+                stream4Remaining,
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogRaw(trace);
+
+            if (g_streamPosIndex == 4 &&
+                requestedBytes > stream4Remaining)
+            {
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH SHADER OOB] vertex asset=%d token=%08x programSize=%u bytes=%u cursor=%08x remaining=%u blockSize=%u pos=%p\n",
+                    g_switchCurrentAssetIndex,
+                    static_cast<unsigned>(
+                        reinterpret_cast<uintptr_t>(
+                            varGfxVertexShaderLoadDef->program)),
+                    programSize,
+                    requestedBytes,
+                    stream4Offset,
+                    stream4Remaining,
+                    stream4Size,
+                    static_cast<void *>(DB_GetStreamPos()));
+                Sys_Error("%s", trace);
+                return;
+            }
         }
-        else if (programToken == UINT32_MAX - 1u)
-        {
-            const void **inserted = DB_InsertPointer();
-            varGfxVertexShaderLoadDef->program =
-                (uint32_t *)AllocLoad_FxElemVisStateSample();
-            varDWORD = varGfxVertexShaderLoadDef->program;
-            Load_DWORDArray(1, varGfxVertexShaderLoadDef->programSize);
-            *inserted = varGfxVertexShaderLoadDef->program;
-        }
-        else
-        {
-            varGfxVertexShaderLoadDef->program =
-                reinterpret_cast<uint32_t *>(
-                    DB_ConvertOffsetToPointerValue(programToken));
-        }
-#else
+#endif
         varGfxVertexShaderLoadDef->program = (uint32_t *)AllocLoad_FxElemVisStateSample();
         varDWORD = varGfxVertexShaderLoadDef->program;
         Load_DWORDArray(1, varGfxVertexShaderLoadDef->programSize);
-#endif
     }
 }
 
 void __cdecl Load_GfxPixelShaderLoadDef(bool atStreamStart)
 {
 #ifdef __SWITCH__
+    // MaterialPixelShaderProgram consumed the complete serialized 12-byte
+    // record and populated the widened native loadDef. Only the program
+    // payload remains in stream 4; do not consume the native 8-byte prefix.
     iassert(!atStreamStart);
 #else
     Load_Stream(atStreamStart, (uint8_t *)varGfxPixelShaderLoadDef, 8);
@@ -5273,36 +5303,31 @@ void __cdecl Load_GfxPixelShaderLoadDef(bool atStreamStart)
     if (varGfxPixelShaderLoadDef->program)
     {
 #ifdef __SWITCH__
-        const uint32_t programToken = static_cast<uint32_t>(
-            reinterpret_cast<uintptr_t>(varGfxPixelShaderLoadDef->program));
-
-        if (programToken == UINT32_MAX)
+        g_switchDbStage = "material/technique/pass/pixel_program";
+        if (g_switchCurrentAssetIndex == 4728)
         {
-            varGfxPixelShaderLoadDef->program =
-                (uint32_t *)AllocLoad_FxElemVisStateSample();
-            varDWORD = varGfxPixelShaderLoadDef->program;
-            Load_DWORDArray(1, varGfxPixelShaderLoadDef->programSize);
+            const uint32_t programSize =
+                static_cast<uint32_t>(varGfxPixelShaderLoadDef->programSize);
+            char trace[320];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH SHADER TRACE] pixel asset=%d programToken=%08x programSize=%u bytes=%u stream=%u b4=%08x pos=%p\n",
+                g_switchCurrentAssetIndex,
+                static_cast<unsigned>(
+                    reinterpret_cast<uintptr_t>(
+                        varGfxPixelShaderLoadDef->program)),
+                programSize,
+                programSize * static_cast<uint32_t>(sizeof(uint32_t)),
+                static_cast<unsigned>(g_streamPosIndex),
+                Switch_GetStreamCursorOffset(4),
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
         }
-        else if (programToken == UINT32_MAX - 1u)
-        {
-            const void **inserted = DB_InsertPointer();
-            varGfxPixelShaderLoadDef->program =
-                (uint32_t *)AllocLoad_FxElemVisStateSample();
-            varDWORD = varGfxPixelShaderLoadDef->program;
-            Load_DWORDArray(1, varGfxPixelShaderLoadDef->programSize);
-            *inserted = varGfxPixelShaderLoadDef->program;
-        }
-        else
-        {
-            varGfxPixelShaderLoadDef->program =
-                reinterpret_cast<uint32_t *>(
-                    DB_ConvertOffsetToPointerValue(programToken));
-        }
-#else
+#endif
         varGfxPixelShaderLoadDef->program = (uint32_t *)AllocLoad_FxElemVisStateSample();
         varDWORD = varGfxPixelShaderLoadDef->program;
         Load_DWORDArray(1, varGfxPixelShaderLoadDef->programSize);
-#endif
     }
 }
 
@@ -5927,67 +5952,46 @@ static void Switch_LoadMaterialPassSerialized(
     varMaterialPixelShaderPtr = &varMaterialPass->pixelShader;
     Load_MaterialPixelShaderPtr(0);
 
-    const uint32_t argsToken = serialized.args;
     varMaterialPass->args =
         reinterpret_cast<MaterialShaderArgument *>(
-            static_cast<uintptr_t>(argsToken));
-
-    if (argsToken)
+            static_cast<uintptr_t>(serialized.args));
+    if (serialized.args)
     {
         const uint32_t count =
             static_cast<uint32_t>(
                 varMaterialPass->stableArgCount +
                 varMaterialPass->perObjArgCount +
                 varMaterialPass->perPrimArgCount);
-
         if (count)
         {
-            // args follows the same serialized 32-bit pointer convention as
-            // vertexShader/pixelShader: only FOLLOWING/INSERT pointers have
-            // an inline array after the pass headers. A normal zone offset
-            // already points at serialized data elsewhere and must be
-            // converted without consuming the current stream.
-            if (argsToken == UINT32_MAX)
+#ifdef __SWITCH__
+            g_switchDbStage = "material/technique/pass/args";
+            if (g_switchCurrentAssetIndex == 4728)
             {
-                varMaterialPass->args =
-                    reinterpret_cast<MaterialShaderArgument *>(
-                        Hunk_Alloc(
-                            static_cast<uint32_t>(
-                                sizeof(MaterialShaderArgument) * count),
-                            "SwitchMaterialShaderArguments", 22));
-                varMaterialShaderArgument = varMaterialPass->args;
-                Load_MaterialShaderArgumentArray(
-                    1,
-                    static_cast<int32_t>(count));
+                char trace[256];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH MATERIAL TRACE] shaderArgs asset=%d count=%u pos=%p stream=%u b4=%08x\n",
+                    g_switchCurrentAssetIndex,
+                    count,
+                    static_cast<void *>(DB_GetStreamPos()),
+                    static_cast<unsigned>(g_streamPosIndex),
+                    Switch_GetStreamCursorOffset(4));
+                Switch_LogWrite(trace);
             }
-            else if (argsToken == UINT32_MAX - 1u)
-            {
-                const void **inserted = DB_InsertPointer();
-                varMaterialPass->args =
-                    reinterpret_cast<MaterialShaderArgument *>(
-                        Hunk_Alloc(
-                            static_cast<uint32_t>(
-                                sizeof(MaterialShaderArgument) * count),
-                            "SwitchMaterialShaderArguments", 22));
-                varMaterialShaderArgument = varMaterialPass->args;
-                Load_MaterialShaderArgumentArray(
-                    1,
-                    static_cast<int32_t>(count));
-                *inserted = varMaterialPass->args;
-            }
-            else
-            {
-                varMaterialPass->args =
-                    reinterpret_cast<MaterialShaderArgument *>(
-                        DB_ConvertOffsetToPointerValue(argsToken));
-            }
+#endif
+            varMaterialPass->args =
+                reinterpret_cast<MaterialShaderArgument *>(Hunk_Alloc(
+                    static_cast<uint32_t>(
+                        sizeof(MaterialShaderArgument) * count),
+                    "SwitchMaterialShaderArguments", 22));
+            varMaterialShaderArgument = varMaterialPass->args;
+            Load_MaterialShaderArgumentArray(1, static_cast<int32_t>(count));
         }
         else
-        {
             varMaterialPass->args = nullptr;
-        }
     }
-
 }
 #endif
 
