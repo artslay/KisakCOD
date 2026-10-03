@@ -864,7 +864,7 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH ASSET TAIL] i=%d count=%d rawType=%u runtimeType=%u header=%08x stream=%u b4=%08x pos=%p\\n",
+                "[SWITCH ASSET TAIL] i=%d count=%d rawType=%u runtimeType=%u header=%08x stream=%u b4=%08x pos=%p\n",
                 i,
                 count,
                 static_cast<unsigned>(serialized.type),
@@ -881,7 +881,7 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH STRINGTABLE ASSET] i=%d header=%08x stream=%u b4=%08x\\n",
+                "[SWITCH STRINGTABLE ASSET] i=%d header=%08x stream=%u b4=%08x\n",
                 i,
                 serialized.header,
                 static_cast<unsigned>(g_streamPosIndex),
