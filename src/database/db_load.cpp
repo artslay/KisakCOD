@@ -5219,6 +5219,29 @@ void __cdecl Load_GfxVertexShaderLoadDef(bool atStreamStart)
     Load_Stream(atStreamStart, (uint8_t *)varGfxVertexShaderLoadDef, 8);
     if (varGfxVertexShaderLoadDef->program)
     {
+#ifdef __SWITCH__
+        g_switchDbStage = "material/technique/pass/vertex_program";
+        if (g_switchCurrentAssetIndex == 4728)
+        {
+            const uint32_t programSize =
+                static_cast<uint32_t>(varGfxVertexShaderLoadDef->programSize);
+            char trace[320];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH SHADER TRACE] vertex asset=%d programToken=%08x programSize=%u bytes=%u stream=%u b4=%08x pos=%p\\n",
+                g_switchCurrentAssetIndex,
+                static_cast<unsigned>(
+                    reinterpret_cast<uintptr_t>(
+                        varGfxVertexShaderLoadDef->program)),
+                programSize,
+                programSize * static_cast<uint32_t>(sizeof(uint32_t)),
+                static_cast<unsigned>(g_streamPosIndex),
+                Switch_GetStreamCursorOffset(4),
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
+#endif
         varGfxVertexShaderLoadDef->program = (uint32_t *)AllocLoad_FxElemVisStateSample();
         varDWORD = varGfxVertexShaderLoadDef->program;
         Load_DWORDArray(1, varGfxVertexShaderLoadDef->programSize);
@@ -5230,6 +5253,29 @@ void __cdecl Load_GfxPixelShaderLoadDef(bool atStreamStart)
     Load_Stream(atStreamStart, (uint8_t *)varGfxPixelShaderLoadDef, 8);
     if (varGfxPixelShaderLoadDef->program)
     {
+#ifdef __SWITCH__
+        g_switchDbStage = "material/technique/pass/pixel_program";
+        if (g_switchCurrentAssetIndex == 4728)
+        {
+            const uint32_t programSize =
+                static_cast<uint32_t>(varGfxPixelShaderLoadDef->programSize);
+            char trace[320];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH SHADER TRACE] pixel asset=%d programToken=%08x programSize=%u bytes=%u stream=%u b4=%08x pos=%p\\n",
+                g_switchCurrentAssetIndex,
+                static_cast<unsigned>(
+                    reinterpret_cast<uintptr_t>(
+                        varGfxPixelShaderLoadDef->program)),
+                programSize,
+                programSize * static_cast<uint32_t>(sizeof(uint32_t)),
+                static_cast<unsigned>(g_streamPosIndex),
+                Switch_GetStreamCursorOffset(4),
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
+#endif
         varGfxPixelShaderLoadDef->program = (uint32_t *)AllocLoad_FxElemVisStateSample();
         varDWORD = varGfxPixelShaderLoadDef->program;
         Load_DWORDArray(1, varGfxPixelShaderLoadDef->programSize);
