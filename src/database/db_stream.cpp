@@ -471,14 +471,14 @@ const void **__cdecl DB_InsertPointer()
 #ifdef __SWITCH__
     // ARM64 zone loading reserves a native pointer-sized slot in the
     // virtual/insert block for every -2 pointer. The serialized asset data
-    // remains 32-bit, but the insertion cursor must advance by 8 bytes on
-    // Switch just like the ARM64 reference loader.
+    // remains 32-bit, so the serialized stream cursor advances by 4 bytes;
+    // the widened native pointer lives in the separate Hunk allocation below.
     const uintptr_t beforePos =
         reinterpret_cast<uintptr_t>(g_streamPos);
 
     DB_PushStreamPos(4);
     uint8_t *serializedSlot = DB_AllocStreamPos(3);
-    DB_IncStreamPos(sizeof(void *));
+    DB_IncStreamPos(4);
 
     const void **pData =
         reinterpret_cast<const void **>(
