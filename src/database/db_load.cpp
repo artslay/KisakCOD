@@ -4884,6 +4884,26 @@ void __cdecl Load_GfxImageLoadDef(bool atStreamStart)
             0,
             "%s",
             "DB_GetStreamPos() == reinterpret_cast< byte * >( varGfxImageLoadDef->data )");
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 4u &&
+        g_switchCurrentAssetIndex >= 20)
+    {
+        char trace[384];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH UI IMAGE DATA] asset=%d name=%p resourceSize=%u stream=%u b0=%08x b4=%08x data=%p\n",
+            g_switchCurrentAssetIndex,
+            static_cast<const void *>(varGfxImage ? varGfxImage->name : nullptr),
+            varGfxImageLoadDef ? static_cast<unsigned>(varGfxImageLoadDef->resourceSize) : 0u,
+            static_cast<unsigned>(g_streamPosIndex),
+            Switch_GetStreamCursorOffset(0),
+            Switch_GetStreamCursorOffset(4),
+            static_cast<void *>(varGfxImageLoadDef ? varGfxImageLoadDef->data : nullptr));
+        Switch_LogWrite(trace);
+        g_switchDbStage = "image/pixels";
+    }
+#endif
     varbyte = &varGfxImageLoadDef->data[0];
     Load_byteArray(1, varGfxImageLoadDef->resourceSize);
 }
@@ -4976,6 +4996,24 @@ void __cdecl Load_GfxImage(bool atStreamStart)
         
 
         varGfxTextureLoad = &varGfxImage->texture;
+#ifdef __SWITCH__
+        if (g_switchCurrentAssetRawType == 4u &&
+            g_switchCurrentAssetIndex >= 20)
+        {
+            char trace[384];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH UI IMAGE PAYLOAD] asset=%d textureToken=%08x resourcePtr=%p stream=%u b0=%08x b4=%08x\n",
+                g_switchCurrentAssetIndex,
+                serialized.texture,
+                static_cast<void *>(varGfxImage->texture.loadDef),
+                static_cast<unsigned>(g_streamPosIndex),
+                Switch_GetStreamCursorOffset(0),
+                Switch_GetStreamCursorOffset(4));
+            Switch_LogWrite(trace);
+        }
+#endif
         Load_GfxTextureLoad(0);
 
         if (traceUiImage)
