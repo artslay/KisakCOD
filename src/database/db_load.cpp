@@ -5438,15 +5438,16 @@ void __cdecl Load_MaterialVertexShader(bool atStreamStart)
         char trace[320];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH VERTEXSHADER RAW] pos=%p name=%08x shader=%08x program=%08x size=%u renderer=%u after=%p\n",
+            "[SWITCH VERTEXSHADER RAW] pos=%p name=%08x shader=%08x program=%08x size=%u renderer=%u after=%p b4=%08x\n",
             static_cast<const void *>(vertexShaderStart),
             serialized.name,
             serialized.shader,
             serialized.program,
             static_cast<unsigned>(serialized.programSize),
             static_cast<unsigned>(serialized.loadForRenderer),
-            static_cast<void *>(DB_GetStreamPos()));
-        Switch_LogWrite(trace);
+            static_cast<void *>(DB_GetStreamPos()),
+            Switch_GetStreamCursorOffset(4));
+        Switch_LogRaw(trace);
     }
 #endif
 
@@ -5894,7 +5895,7 @@ static void Switch_LoadMaterialPassSerialized(
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH PASS RAW] pos=%p decl=%08x vs=%08x ps=%08x args=%08x counts=%u/%u/%u flags=%u\n",
+            "[SWITCH PASS RAW] pos=%p decl=%08x vs=%08x ps=%08x args=%08x counts=%u/%u/%u flags=%u b4=%08x\n",
             static_cast<const void *>(passStart),
             serialized.vertexDecl,
             serialized.vertexShader,
@@ -5903,8 +5904,9 @@ static void Switch_LoadMaterialPassSerialized(
             static_cast<unsigned>(serialized.perPrimArgCount),
             static_cast<unsigned>(serialized.perObjArgCount),
             static_cast<unsigned>(serialized.stableArgCount),
-            static_cast<unsigned>(serialized.customSamplerFlags));
-        Switch_LogWrite(trace);
+            static_cast<unsigned>(serialized.customSamplerFlags),
+            Switch_GetStreamCursorOffset(4));
+        Switch_LogRaw(trace);
     }
 
     if (serialized.vertexDecl == UINT32_MAX)
