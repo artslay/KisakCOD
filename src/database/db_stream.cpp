@@ -1,10 +1,16 @@
 #include <cstdio>
+#include <climits>
+#include <vector>
 #include <universal/q_shared.h>
 #include "database.h"
 
 #ifdef __SWITCH__
 extern void Switch_LogWrite(const char *msg);
+extern void __cdecl Sys_Error(const char *error, ...);
 extern int32_t g_switchCurrentAssetIndex;
+extern uint32_t g_switchCurrentAssetRawType;
+extern uint32_t g_switchCurrentAssetHeader;
+extern const char * volatile g_switchDbStage;
 #endif
 
 uint32_t g_streamDelayIndex;
@@ -24,6 +30,22 @@ static uint32_t g_switchStreamRegressionCount = 0;
 static uint32_t g_switchStreamMismatchCount = 0;
 uint32_t g_switchPointerInsertCount = 0;
 uint32_t g_switchPointerInsertExtraBytes = 0;
+
+struct SwitchPointerAliasEntry
+{
+    uintptr_t serializedSlot;
+    const void **nativeSlot;
+    uintptr_t nativePointer;
+};
+
+struct SwitchPointerAliasFixup
+{
+    uintptr_t serializedSlot;
+    uintptr_t *destination;
+};
+
+static std::vector<SwitchPointerAliasEntry> g_switchPointerAliasEntries;
+static std::vector<SwitchPointerAliasFixup> g_switchPointerAliasFixups;
 
 static int32_t Switch_StreamOwner(
     const uint8_t *pos,
@@ -88,14 +110,18 @@ static void Switch_CheckStreamCursor(const char *where)
     std::snprintf(
         trace,
         sizeof(trace),
-        "[SWITCH STREAM MISMATCH] #%u where=%s current=%u owner=%d offset=%08x pos=%p stack=%u\n",
+        "[SWITCH STREAM MISMATCH] #%u where=%s current=%u owner=%d offset=%08x pos=%p stack=%u asset=%d rawType=%u rawHeader=%08x stage=%s\n",
         g_switchStreamMismatchCount,
         where,
         static_cast<unsigned>(g_streamPosIndex),
         owner,
         static_cast<unsigned>(offset),
         static_cast<void *>(g_streamPos),
-        static_cast<unsigned>(g_streamPosStackIndex));
+        static_cast<unsigned>(g_streamPosStackIndex),
+        g_switchCurrentAssetIndex,
+        static_cast<unsigned>(g_switchCurrentAssetRawType),
+        static_cast<unsigned>(g_switchCurrentAssetHeader),
+        g_switchDbStage ? g_switchDbStage : "");
     Switch_LogWrite(trace);
     ++g_switchStreamMismatchCount;
 }
@@ -121,7 +147,7 @@ static void Switch_CheckStreamArrayEntry(
     std::snprintf(
         trace,
         sizeof(trace),
-        "[SWITCH STREAM ARRAY MISMATCH] #%u where=%s index=%u owner=%d offset=%08x pos=%p stack=%u current=%u\n",
+        "[SWITCH STREAM ARRAY MISMATCH] #%u where=%s index=%u owner=%d offset=%08x pos=%p stack=%u current=%u asset=%d rawType=%u rawHeader=%08x stage=%s\n",
         g_switchStreamMismatchCount,
         where,
         static_cast<unsigned>(index),
@@ -129,7 +155,11 @@ static void Switch_CheckStreamArrayEntry(
         static_cast<unsigned>(offset),
         static_cast<void *>(g_streamPosArray[index]),
         static_cast<unsigned>(g_streamPosStackIndex),
-        static_cast<unsigned>(g_streamPosIndex));
+        static_cast<unsigned>(g_streamPosIndex),
+        g_switchCurrentAssetIndex,
+        static_cast<unsigned>(g_switchCurrentAssetRawType),
+        static_cast<unsigned>(g_switchCurrentAssetHeader),
+        g_switchDbStage ? g_switchDbStage : "");
     Switch_LogWrite(trace);
     ++g_switchStreamMismatchCount;
 }
@@ -193,8 +223,11 @@ void __cdecl DB_InitStreams(XZoneMemory *zoneMem)
 #ifdef __SWITCH__
     std::memset(g_switchStreamHighWater, 0, sizeof(g_switchStreamHighWater));
     g_switchStreamRegressionCount = 0;
+    g_switchStreamMismatchCount = 0;
     g_switchPointerInsertCount = 0;
     g_switchPointerInsertExtraBytes = 0;
+    g_switchPointerAliasEntries.clear();
+    g_switchPointerAliasFixups.clear();
 #endif
     for (i = 0; i < 9; ++i)
         g_streamPosArray[i] = zoneMem->blocks[i].data;
@@ -268,12 +301,59 @@ void __cdecl DB_PopStreamPos()
     --g_streamPosStackIndex;
 
 #ifdef __SWITCH__
-    if (!g_streamPosIndex)
+    const uint32_t currentIndex = g_streamPosIndex;
+    const uint32_t previousIndex =
+        g_streamPosStack[g_streamPosStackIndex].index;
+    uintptr_t currentOffset = 0;
+    const int32_t owner = Switch_StreamOwner(g_streamPos, &currentOffset);
+    if (owner != static_cast<int32_t>(currentIndex))
     {
-        uintptr_t offset = 0;
-        const int32_t owner = Switch_StreamOwner(g_streamPos, &offset);
-        if (owner != 0)
-            g_streamPos = g_streamPosStack[g_streamPosStackIndex].pos;
+        // The active cursor no longer belongs to the selected stream. Do not
+        // pass it through DB_SetStreamIndex(), which would save the foreign
+        // pointer into that stream's cursor array. Restore the parent cursor
+        // directly and preserve the last valid cursor for the active stream.
+        uint8_t *previousPos = g_streamPosArray[previousIndex];
+        uintptr_t previousOffset = 0;
+        if (Switch_StreamOwner(previousPos, &previousOffset) !=
+            static_cast<int32_t>(previousIndex))
+        {
+            previousPos = g_streamBlocks[previousIndex].data;
+            g_streamPosArray[previousIndex] = previousPos;
+        }
+
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH STREAM RECOVER] pop current=%u owner=%d offset=%08x parent=%u pos=%p\n",
+            currentIndex,
+            owner,
+            static_cast<unsigned>(currentOffset),
+            previousIndex,
+            static_cast<void *>(g_streamPos));
+        Switch_LogWrite(trace);
+
+        g_streamPosIndex = previousIndex;
+        g_streamPos = previousPos;
+        Switch_CheckStreamCursor("DB_PopStreamPos:recover");
+        return;
+    }
+
+    // Stream 0 is the legacy temporary load buffer. The desktop loader rewinds
+    // it to the position captured by DB_PushStreamPos() whenever a nested
+    // stream-0 load returns, because Switch keeps the native asset object in
+    // Hunk memory instead of retaining the serialized bytes in this buffer.
+    // Preserve that reuse behavior here; advancing stream 0 across every
+    // top-level asset makes valid fastfiles exhaust their small temp block.
+    if (currentIndex == 0)
+    {
+        uint8_t *savedPos = g_streamPosStack[g_streamPosStackIndex].pos;
+        uintptr_t savedOffset = 0;
+        if (Switch_StreamOwner(savedPos, &savedOffset) == 0)
+        {
+            g_streamPos = savedPos;
+            g_switchStreamHighWater[0] = static_cast<uint32_t>(savedOffset);
+        }
     }
 #else
     if (!g_streamPosIndex)
@@ -299,8 +379,89 @@ void __cdecl DB_IncStreamPos(int32_t size)
     iassert(g_streamPos);
     iassert(g_streamPos + size <= g_streamZoneMem->blocks[g_streamPosIndex].data + g_streamZoneMem->blocks[g_streamPosIndex].size);
 
+#ifdef __SWITCH__
+    uintptr_t beforeOffset = 0;
+    const int32_t beforeOwner = Switch_StreamOwner(g_streamPos, &beforeOffset);
+    const bool streamIndexValid =
+        g_streamBlocks &&
+        g_streamPosIndex < ARRAY_COUNT(g_streamPosArray) &&
+        g_streamBlocks[g_streamPosIndex].data;
+    const uint32_t blockSize =
+        streamIndexValid ? g_streamBlocks[g_streamPosIndex].size : 0u;
+
+    const bool advanceOutOfBounds =
+        !streamIndexValid ||
+        size < 0 ||
+        beforeOwner != static_cast<int32_t>(g_streamPosIndex) ||
+        beforeOffset > blockSize ||
+        static_cast<uint32_t>(size) >
+            blockSize - beforeOffset;
+    if (advanceOutOfBounds)
+    {
+        const uintptr_t streamBase =
+            streamIndexValid
+                ? reinterpret_cast<uintptr_t>(
+                      g_streamBlocks[g_streamPosIndex].data)
+                : 0;
+        const uintptr_t streamAddress =
+            reinterpret_cast<uintptr_t>(g_streamPos);
+        const long long signedOffset =
+            !streamIndexValid
+                ? LLONG_MIN
+                : streamAddress >= streamBase
+                      ? static_cast<long long>(streamAddress - streamBase)
+                      : -static_cast<long long>(streamBase - streamAddress);
+        const long long requestedEnd =
+            signedOffset == LLONG_MIN
+                ? LLONG_MIN
+                : signedOffset + static_cast<long long>(size);
+        char trace[512];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH STREAM OOB] stream=%u owner=%d offset=%lld requestedEnd=%lld size=%d blockSize=%u pos=%p stack=%u caller=%p asset=%d rawType=%u rawHeader=%08x stage=%s\n",
+            static_cast<unsigned>(g_streamPosIndex),
+            beforeOwner,
+            signedOffset,
+            requestedEnd,
+            size,
+            blockSize,
+            static_cast<void *>(g_streamPos),
+            static_cast<unsigned>(g_streamPosStackIndex),
+            __builtin_return_address(0),
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            static_cast<unsigned>(g_switchCurrentAssetHeader),
+            g_switchDbStage ? g_switchDbStage : "");
+        Sys_Error("%s", trace);
+        return;
+    }
+#endif
     g_streamPos += size;
 #ifdef __SWITCH__
+    uintptr_t afterOffset = 0;
+    const int32_t afterOwner = Switch_StreamOwner(g_streamPos, &afterOffset);
+    if (beforeOwner != static_cast<int32_t>(g_streamPosIndex) ||
+        afterOwner != static_cast<int32_t>(g_streamPosIndex))
+    {
+        char trace[448];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH STREAM ADVANCE] stream=%u beforeOwner=%d before=%08x size=%d afterOwner=%d after=%08x caller=%p asset=%d rawType=%u rawHeader=%08x stage=%s\n",
+            static_cast<unsigned>(g_streamPosIndex),
+            beforeOwner,
+            static_cast<unsigned>(beforeOffset),
+            size,
+            afterOwner,
+            static_cast<unsigned>(afterOffset),
+            __builtin_return_address(0),
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            static_cast<unsigned>(g_switchCurrentAssetHeader),
+            g_switchDbStage ? g_switchDbStage : "");
+        Switch_LogWrite(trace);
+    }
     Switch_CheckStreamCursor("DB_IncStreamPos:after");
 #endif
 }
@@ -315,7 +476,7 @@ const void **__cdecl DB_InsertPointer()
         reinterpret_cast<uintptr_t>(g_streamPos);
 
     DB_PushStreamPos(4);
-    DB_AllocStreamPos(3);
+    uint8_t *serializedSlot = DB_AllocStreamPos(3);
     DB_IncStreamPos(4);
 
     const void **pData =
@@ -325,6 +486,9 @@ const void **__cdecl DB_InsertPointer()
                 "SwitchDBInsertPointer",
                 22));
     *pData = nullptr;
+
+    g_switchPointerAliasEntries.push_back(
+        {reinterpret_cast<uintptr_t>(serializedSlot), pData, 0});
 
     ++g_switchPointerInsertCount;
 
@@ -355,3 +519,86 @@ const void **__cdecl DB_InsertPointer()
 #endif
 }
 
+#ifdef __SWITCH__
+bool __cdecl DB_ResolveSwitchPointerAlias(
+    uintptr_t serializedSlot,
+    uintptr_t *resolvedPointer)
+{
+    for (auto entry = g_switchPointerAliasEntries.rbegin();
+         entry != g_switchPointerAliasEntries.rend();
+         ++entry)
+    {
+        if (entry->serializedSlot != serializedSlot)
+            continue;
+
+        if (resolvedPointer)
+        {
+            *resolvedPointer = entry->nativeSlot
+                ? reinterpret_cast<uintptr_t>(*entry->nativeSlot)
+                : entry->nativePointer;
+        }
+        return true;
+    }
+
+    return false;
+}
+
+void __cdecl DB_RegisterSwitchPointerAlias(
+    uintptr_t serializedSlot,
+    uintptr_t nativePointer)
+{
+    if (!serializedSlot || !nativePointer)
+        return;
+
+    for (SwitchPointerAliasEntry &entry : g_switchPointerAliasEntries)
+    {
+        if (entry.serializedSlot == serializedSlot)
+        {
+            entry.nativeSlot = nullptr;
+            entry.nativePointer = nativePointer;
+            return;
+        }
+    }
+
+    g_switchPointerAliasEntries.push_back(
+        {serializedSlot, nullptr, nativePointer});
+}
+
+void __cdecl DB_AddSwitchPointerAliasFixup(
+    uintptr_t serializedSlot,
+    uintptr_t *destination)
+{
+    if (!serializedSlot || !destination)
+        return;
+
+    for (const SwitchPointerAliasFixup &fixup : g_switchPointerAliasFixups)
+    {
+        if (fixup.serializedSlot == serializedSlot &&
+            fixup.destination == destination)
+            return;
+    }
+
+    g_switchPointerAliasFixups.push_back({serializedSlot, destination});
+}
+
+void __cdecl DB_FixupSwitchPointerAliases()
+{
+    auto fixup = g_switchPointerAliasFixups.begin();
+    while (fixup != g_switchPointerAliasFixups.end())
+    {
+        uintptr_t resolvedPointer = 0;
+        if (DB_ResolveSwitchPointerAlias(
+                fixup->serializedSlot,
+                &resolvedPointer) &&
+            resolvedPointer)
+        {
+            *fixup->destination = resolvedPointer;
+            fixup = g_switchPointerAliasFixups.erase(fixup);
+        }
+        else
+        {
+            ++fixup;
+        }
+    }
+}
+#endif

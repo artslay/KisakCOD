@@ -1,9 +1,11 @@
 #include <cstring>
+#include <climits>
 #include <universal/q_shared.h>
 #include "database.h"
 
 #ifdef __SWITCH__
 extern void Switch_LogWrite(const char *msg);
+extern void __cdecl Sys_Error(const char *error, ...);
 extern int32_t g_switchCurrentAssetIndex;
 extern uint32_t g_switchCurrentAssetRawType;
 extern uint32_t g_switchCurrentAssetHeader;
@@ -16,6 +18,61 @@ extern const char * volatile g_switchDbStage;
 void __cdecl Load_Stream(bool atStreamStart, uint8_t *ptr, int32_t size)
 {
     iassert(atStreamStart == (ptr == DB_GetStreamPos()));
+#ifdef __SWITCH__
+    if (atStreamStart && size != 0)
+    {
+        const uint32_t streamIndex = g_streamPosIndex;
+        const bool streamIndexValid =
+            g_streamBlocks && streamIndex < ARRAY_COUNT(g_streamPosArray) &&
+            g_streamBlocks[streamIndex].data;
+        const uintptr_t streamBase =
+            streamIndexValid
+                ? reinterpret_cast<uintptr_t>(
+                      g_streamBlocks[streamIndex].data)
+                : 0;
+        const uintptr_t streamAddress =
+            reinterpret_cast<uintptr_t>(DB_GetStreamPos());
+        const bool cursorInBlock =
+            streamIndexValid && streamAddress >= streamBase &&
+            streamAddress - streamBase <= g_streamBlocks[streamIndex].size;
+        const uint32_t streamOffset =
+            cursorInBlock
+                ? static_cast<uint32_t>(streamAddress - streamBase)
+                : 0;
+        const uint32_t bytesRemaining =
+            cursorInBlock
+                ? g_streamBlocks[streamIndex].size - streamOffset
+                : 0;
+
+        if (size < 0 || !cursorInBlock ||
+            static_cast<uint32_t>(size) > bytesRemaining)
+        {
+            const long long signedOffset =
+                !streamIndexValid
+                    ? LLONG_MIN
+                    : streamAddress >= streamBase
+                          ? static_cast<long long>(streamAddress - streamBase)
+                          : -static_cast<long long>(streamBase - streamAddress);
+            char trace[512];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH STREAM READ OOB] stream=%u offset=%lld size=%d blockSize=%u pos=%p caller=%p asset=%d rawType=%u rawHeader=%08x stage=%s\n",
+                static_cast<unsigned>(streamIndex),
+                signedOffset,
+                size,
+                streamIndexValid ? g_streamBlocks[streamIndex].size : 0u,
+                static_cast<void *>(DB_GetStreamPos()),
+                __builtin_return_address(0),
+                g_switchCurrentAssetIndex,
+                static_cast<unsigned>(g_switchCurrentAssetRawType),
+                static_cast<unsigned>(g_switchCurrentAssetHeader),
+                g_switchDbStage ? g_switchDbStage : "");
+            Sys_Error("%s", trace);
+            return;
+        }
+    }
+#endif
     if (atStreamStart && size)
     {
         if (g_streamPosIndex - 1 < 3)
@@ -142,12 +199,39 @@ void __cdecl DB_ConvertOffsetToAlias(void *data)
 
     const uintptr_t aliasSlot = DB_ConvertOffsetToPointerValue(offset);
     if (!aliasSlot)
-        return;
+    {
 #ifdef __SWITCH__
-    const uint32_t serializedAliasValue =
-        *reinterpret_cast<const uint32_t *>(aliasSlot);
-    *reinterpret_cast<uintptr_t *>(data) =
-        static_cast<uintptr_t>(serializedAliasValue);
+        *reinterpret_cast<uintptr_t *>(data) = 0;
+#endif
+        return;
+    }
+#ifdef __SWITCH__
+    uintptr_t resolvedPointer = 0;
+    if (DB_ResolveSwitchPointerAlias(aliasSlot, &resolvedPointer))
+    {
+        if (resolvedPointer)
+        {
+            *reinterpret_cast<uintptr_t *>(data) = resolvedPointer;
+        }
+        else
+        {
+            *reinterpret_cast<uintptr_t *>(data) = 0;
+            DB_AddSwitchPointerAliasFixup(
+                aliasSlot,
+                reinterpret_cast<uintptr_t *>(data));
+        }
+    }
+    else
+    {
+        // Alias tokens refer to the 4-byte insertion slot reserved by
+        // DB_InsertPointer. That stream slot cannot hold a native ARM64
+        // pointer, so retain a fixup against its address instead of treating
+        // the stream address itself as the asset pointer.
+        *reinterpret_cast<uintptr_t *>(data) = 0;
+        DB_AddSwitchPointerAliasFixup(
+            aliasSlot,
+            reinterpret_cast<uintptr_t *>(data));
+    }
 #else
     const uint32_t aliasValue =
         *reinterpret_cast<const uint32_t *>(aliasSlot);
@@ -173,6 +257,67 @@ void __cdecl DB_LoadSwitchSerialized(void *dst, uint32_t size)
 #ifdef __SWITCH__
     iassert(dst);
     iassert(size);
+
+    // Check the active stream before touching its memory. DB_IncStreamPos()
+    // also checks bounds, but it runs after DB_LoadXFileData() and memcpy();
+    // an invalid cursor could fault before that diagnostic is reached.
+    const uint32_t streamIndex = g_streamPosIndex;
+    const bool streamIndexValid =
+        g_streamBlocks && streamIndex < ARRAY_COUNT(g_streamPosArray);
+    const XBlock *streamBlock =
+        streamIndexValid ? &g_streamBlocks[streamIndex] : nullptr;
+    const uintptr_t streamBase = streamBlock
+        ? reinterpret_cast<uintptr_t>(streamBlock->data)
+        : 0;
+    const uintptr_t streamAddress =
+        reinterpret_cast<uintptr_t>(DB_GetStreamPos());
+    const bool cursorInBlock =
+        streamBlock && streamBlock->data &&
+        streamAddress >= streamBase &&
+        streamAddress - streamBase <= streamBlock->size;
+    const uint32_t streamOffset = cursorInBlock
+        ? static_cast<uint32_t>(streamAddress - streamBase)
+        : 0;
+    const uint32_t bytesRemaining = cursorInBlock
+        ? streamBlock->size - streamOffset
+        : 0;
+
+    if (!cursorInBlock || size > bytesRemaining)
+    {
+        const long long signedOffset =
+            !streamBlock || !streamBlock->data
+                ? LLONG_MIN
+                : streamAddress >= streamBase
+                      ? static_cast<long long>(streamAddress - streamBase)
+                      : -static_cast<long long>(streamBase - streamAddress);
+        const long long requestedEnd =
+            signedOffset == LLONG_MIN
+                ? LLONG_MIN
+                : signedOffset + static_cast<long long>(size);
+        char trace[512];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH SERIALIZED OOB] stream=%u offset=%lld requestedEnd=%lld size=%u blockSize=%u base=%p pos=%p caller=%p asset=%d rawType=%u rawHeader=%08x stage=%s\n",
+            static_cast<unsigned>(streamIndex),
+            signedOffset,
+            requestedEnd,
+            static_cast<unsigned>(size),
+            streamBlock ? streamBlock->size : 0u,
+            streamBlock ? static_cast<void *>(streamBlock->data) : nullptr,
+            static_cast<void *>(DB_GetStreamPos()),
+            __builtin_return_address(0),
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            static_cast<unsigned>(g_switchCurrentAssetHeader),
+            g_switchDbStage ? g_switchDbStage : "");
+        // Switch_LogWrite defers [SWITCH ...] diagnostics in memory while the
+        // database loads. Sys_Error aborts without entering the libnx
+        // exception handler that normally flushes them, so include the
+        // details in the fatal line, which is written directly to the log.
+        Sys_Error("%s", trace);
+        return;
+    }
 
     const char *switchDbStage = g_switchDbStage;
     const bool traceMenu11Header =
@@ -261,4 +406,3 @@ void __cdecl Load_TempStringCustom(char **str)
         string= 0;
     *str = (char *)string;
 }
-

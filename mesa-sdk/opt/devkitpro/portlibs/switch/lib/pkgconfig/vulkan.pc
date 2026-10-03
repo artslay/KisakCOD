@@ -1,0 +1,11 @@
+prefix=/opt/devkitpro/portlibs/switch
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+Name: vulkan
+Description: Mesa Vulkan static archive for Horizon
+Version: 26.2.1
+Requires.private: libelf, expat, zlib, libzstd
+Libs: -lvulkan
+Libs.private: -lnx -lm -lstdc++
+Cflags: -I${includedir}

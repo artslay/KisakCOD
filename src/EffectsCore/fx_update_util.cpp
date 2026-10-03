@@ -1,6 +1,13 @@
 #include <universal/q_shared.h>
 #include "fx_system.h"
 
+#ifdef __SWITCH__
+#include <cstdio>
+extern void Switch_LogWrite(const char *msg);
+
+static volatile uint32_t g_switchFxSphereFrustumWarningCount;
+#endif
+
 int32_t warnCount_1;
 
 void __cdecl FX_OffsetSpawnOrigin(
@@ -446,6 +453,38 @@ char __cdecl FX_CullSphere(const FxCamera *camera, uint32_t frustumPlaneCount, c
     double v7; // [esp+18h] [ebp-18h]
     float pointToPlaneDist; // [esp+28h] [ebp-8h]
     uint32_t planeIndex; // [esp+2Ch] [ebp-4h]
+
+    if (!camera)
+    {
+        MyAssertHandler(".\\EffectsCore\\fx_update_util.cpp", 439, 0, "%s", "camera");
+        return 0;
+    }
+
+#ifdef __SWITCH__
+    if (frustumPlaneCount < 5 ||
+        frustumPlaneCount > ARRAY_COUNT(camera->frustum) ||
+        camera->frustumPlaneCount < 5 ||
+        camera->frustumPlaneCount > ARRAY_COUNT(camera->frustum))
+    {
+        const uint32_t warningIndex =
+            __sync_fetch_and_add(&g_switchFxSphereFrustumWarningCount, 1u);
+        if (warningIndex < 8u)
+        {
+            char trace[256];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[KisakCOD][FX FRUSTUM] sphere camera=%p valid=%d requested=%u cameraCount=%u max=%u\n",
+                static_cast<const void *>(camera),
+                camera->isValid,
+                static_cast<unsigned>(frustumPlaneCount),
+                static_cast<unsigned>(camera->frustumPlaneCount),
+                static_cast<unsigned>(ARRAY_COUNT(camera->frustum)));
+            Switch_LogWrite(trace);
+        }
+        return 0;
+    }
+#endif
 
     if (!camera->isValid)
         MyAssertHandler(".\\EffectsCore\\fx_update_util.cpp", 439, 0, "%s", "camera->isValid");

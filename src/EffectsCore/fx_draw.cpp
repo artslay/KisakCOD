@@ -12,6 +12,37 @@
 #include <win32/win_local.h>
 #include <universal/profile.h>
 
+#ifdef __SWITCH__
+#include <cstdio>
+extern void Switch_LogWrite(const char *msg);
+
+static volatile uint32_t g_switchFxFrustumWarningCount;
+
+static void FX_LogInvalidSwitchFrustum(
+    const char *where,
+    const FxCamera *camera,
+    uint32_t requestedPlaneCount)
+{
+    const uint32_t warningIndex =
+        __sync_fetch_and_add(&g_switchFxFrustumWarningCount, 1u);
+    if (warningIndex >= 8u)
+        return;
+
+    char trace[256];
+    std::snprintf(
+        trace,
+        sizeof(trace),
+        "[KisakCOD][FX FRUSTUM] %s camera=%p valid=%d requested=%u cameraCount=%u max=%u\n",
+        where,
+        static_cast<const void *>(camera),
+        camera ? camera->isValid : 0,
+        static_cast<unsigned>(requestedPlaneCount),
+        camera ? static_cast<unsigned>(camera->frustumPlaneCount) : 0u,
+        camera ? static_cast<unsigned>(ARRAY_COUNT(camera->frustum)) : 0u);
+    Switch_LogWrite(trace);
+}
+#endif
+
 #ifdef KISAK_MP
 #include <cgame_mp/cg_local_mp.h>
 #elif KISAK_SP
@@ -574,17 +605,41 @@ bool __cdecl FX_CullElementForDraw_Sprite(const FxDrawState *draw)
 
 uint32_t __cdecl FX_CullElementForDraw_FrustumPlaneCount(const FxDrawState *draw)
 {
-    if (!draw || !draw->camera || draw->camera->frustumPlaneCount < 5)
+    if (!draw || !draw->camera)
         MyAssertHandler(
             ".\\EffectsCore\\fx_draw.cpp",
             537,
             0,
             "%s",
             "draw && draw->camera && draw->camera->frustumPlaneCount >= 5");
+
+    const uint32_t cameraPlaneCount = draw->camera->frustumPlaneCount;
+#ifdef __SWITCH__
+    if (cameraPlaneCount < 5 ||
+        cameraPlaneCount > ARRAY_COUNT(draw->camera->frustum))
+    {
+        // A valid FX camera has five side planes and optionally the far plane.
+        // Do not let a corrupted count walk beyond FxCamera::frustum.
+        FX_LogInvalidSwitchFrustum(
+            "draw count",
+            draw->camera,
+            cameraPlaneCount);
+        return 5;
+    }
+#else
+    if (cameraPlaneCount < 5)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_draw.cpp",
+            537,
+            0,
+            "%s",
+            "draw && draw->camera && draw->camera->frustumPlaneCount >= 5");
+#endif
+
     if ((draw->elemDef->flags & 0x400) != 0)
         return 5;
     else
-        return draw->camera->frustumPlaneCount;
+        return cameraPlaneCount;
 }
 
 void __cdecl FX_DrawElem_OrientedSprite(FxDrawState *draw)
@@ -653,6 +708,26 @@ char __cdecl FX_CullCylinder(
     float pointToPlaneDist; // [esp+28h] [ebp-8h]
     float pointToPlaneDista; // [esp+28h] [ebp-8h]
     uint32_t planeIndex; // [esp+2Ch] [ebp-4h]
+
+    if (!camera)
+    {
+        MyAssertHandler(".\\EffectsCore\\fx_draw.cpp", 620, 0, "%s", "camera");
+        return 0;
+    }
+
+#ifdef __SWITCH__
+    if (frustumPlaneCount < 5 ||
+        frustumPlaneCount > ARRAY_COUNT(camera->frustum) ||
+        camera->frustumPlaneCount < 5 ||
+        camera->frustumPlaneCount > ARRAY_COUNT(camera->frustum))
+    {
+        FX_LogInvalidSwitchFrustum(
+            "cylinder count",
+            camera,
+            frustumPlaneCount);
+        return 0;
+    }
+#endif
 
     if (!camera->isValid)
         MyAssertHandler(".\\EffectsCore\\fx_draw.cpp", 620, 0, "%s", "camera->isValid");
@@ -1687,4 +1762,3 @@ double __cdecl FX_ClampRangeLerp(float dist, const FxFloatRange *range)
     }
     return value;
 }
-

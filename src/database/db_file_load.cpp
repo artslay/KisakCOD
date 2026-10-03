@@ -530,6 +530,22 @@ void Load_XAssetListCustom()
     SerializedXAssetList serialized{};
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
+    if (g_load.filename && I_stricmp(g_load.filename, "ui") == 0)
+    {
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[KisakCOD][UI XASSET LIST] strings=%08x stringCount=%u assetCount=%u assets=%08x stream=%u pos=%p\n",
+            serialized.stringList.strings,
+            serialized.stringList.count,
+            serialized.assetCount,
+            serialized.assets,
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+
     varXAssetList = &g_varXAssetList;
     memset(varXAssetList, 0, sizeof(*varXAssetList));
     varXAssetList->stringList.count =
@@ -547,6 +563,13 @@ void Load_XAssetListCustom()
 
         if (count)
         {
+            // All serialized string tokens precede the inline string bytes.
+            // Preserve that layout before resolving the individual entries.
+            // The serialized XAsset string-pointer array is aligned to a
+            // DWORD in the fastfile. The desktop loader gets this alignment
+            // from AllocLoad_*; the Switch path expands the array into Hunk
+            // memory, so align the serialized stream cursor explicitly.
+            DB_AllocStreamPos(3);
             const uint32_t serializedSize =
                 static_cast<uint32_t>(
                     sizeof(uint32_t) * static_cast<size_t>(count));
@@ -630,6 +653,24 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 
     if (count > 0)
     {
+        // Load_XAssetArray normally obtains its stream alignment through
+        // AllocLoad_XAsset. This Switch loader copies records to a vector, so
+        // preserve the same serialized-stream alignment before reading them.
+        DB_AllocStreamPos(3);
+        if (g_load.filename && I_stricmp(g_load.filename, "ui") == 0)
+        {
+            char trace[256];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[KisakCOD][UI XASSET ARRAY] count=%d token=%08x stream=%u start=%p\n",
+                count,
+                static_cast<uint32_t>(
+                    reinterpret_cast<uintptr_t>(varXAssetList->assets)),
+                static_cast<unsigned>(g_streamPosIndex),
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
         // Keep the original serialized XAsset records in block 4. Other
         // serialized pointers/offsets may legally refer back into this array.
         uint8_t *serializedStreamPos = DB_GetStreamPos();
@@ -744,7 +785,8 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 #endif
 
         const bool traceStreamWindow =
-            i >= 1490 && i <= 1506;
+            (i >= 1490 && i <= 1506) ||
+            (i >= 4505 && i <= 4510);
 
 #ifdef __SWITCH__
         auto switchBlockOffset = [](uint32_t block, const uint8_t *ptr) -> uint32_t
@@ -762,6 +804,10 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
 
             return static_cast<uint32_t>(address - base);
         };
+        const bool traceUiAsset =
+            g_load.filename &&
+            I_stricmp(g_load.filename, "ui") == 0 &&
+            i <= 3;
 #endif
 
 #ifdef __SWITCH__
@@ -792,9 +838,51 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
         }
 #endif
 
+#ifdef __SWITCH__
+        if (traceUiAsset)
+        {
+            const uint8_t *stream0Pos = g_streamPosIndex == 0
+                ? DB_GetStreamPos()
+                : g_streamPosArray[0];
+            char trace[224];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[KisakCOD][UI ASSET] begin i=%d rawType=%u rawHeader=%08x stream0=%08x active=%u\n",
+                i,
+                serialized.type,
+                serialized.header,
+                switchBlockOffset(0, stream0Pos),
+                static_cast<unsigned>(g_streamPosIndex));
+            Switch_LogWrite(trace);
+        }
+#endif
         Load_XAssetHeader(0);
 
 #ifdef __SWITCH__
+        if (traceUiAsset)
+        {
+            const uint8_t *stream0Pos = g_streamPosIndex == 0
+                ? DB_GetStreamPos()
+                : g_streamPosArray[0];
+            char trace[224];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[KisakCOD][UI ASSET] end   i=%d rawType=%u rawHeader=%08x stream0=%08x active=%u\n",
+                i,
+                serialized.type,
+                serialized.header,
+                switchBlockOffset(0, stream0Pos),
+                static_cast<unsigned>(g_streamPosIndex));
+            Switch_LogWrite(trace);
+        }
+
+        // Resolve aliases that appeared before their inline asset. The native
+        // slot is filled when that asset finishes loading, so retry pending
+        // references after each top-level record.
+        DB_FixupSwitchPointerAliases();
+
         if (i == 1507 && serialized.type == ASSET_TYPE_XANIMPARTS)
             Switch_LogWrite("[SWITCH XANIM1507] after Load_XAssetHeader\n");
         if (traceStreamWindow)
@@ -899,4 +987,3 @@ void __cdecl DB_LoadXFile(
     g_load.stream.next_in = buf;
     g_load.stream.avail_in = 0;
 }
-

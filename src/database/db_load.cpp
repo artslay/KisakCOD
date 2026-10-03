@@ -1,6 +1,7 @@
 #include <universal/q_shared.h>
 #include "database.h"
 
+#include <cstring>
 #include <xanim/xanim.h>
 #include <xanim/xmodel.h>
 
@@ -82,6 +83,25 @@ static uintptr_t Switch_WidenSerializedPointer(
 {
     return static_cast<uintptr_t>(
         Switch_ReadSerializedU32(serialized, offset));
+}
+
+static uint32_t Switch_GetStreamCursorOffset(uint32_t streamIndex)
+{
+    if (!g_streamBlocks || streamIndex >= ARRAY_COUNT(g_streamPosArray) ||
+        !g_streamBlocks[streamIndex].data ||
+        !g_streamPosArray[streamIndex])
+        return UINT32_MAX;
+
+    const uintptr_t base = reinterpret_cast<uintptr_t>(
+        g_streamBlocks[streamIndex].data);
+    const uint8_t *cursorPointer = g_streamPosIndex == streamIndex
+        ? DB_GetStreamPos()
+        : g_streamPosArray[streamIndex];
+    const uintptr_t cursor = reinterpret_cast<uintptr_t>(cursorPointer);
+    if (cursor < base || cursor - base > g_streamBlocks[streamIndex].size)
+        return UINT32_MAX;
+
+    return static_cast<uint32_t>(cursor - base);
 }
 #endif
 
@@ -1317,13 +1337,126 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
         g_switchCurrentAssetRawType == 23u;
 
     // Match the original loader:
-    //   normal token -> direct DB offset to the final XString pointer
+    //   normal token -> DB offset to a serialized XString pointer slot
     //   -1            -> allocate a 32-bit nested token slot in the current
     //                    DB stream, then resolve that nested token.
     if (serialized != UINT32_MAX)
     {
-        const uintptr_t resolved =
-            DB_ConvertOffsetToPointerValue(serialized);
+        // XStringPtr has two pointer levels in the fastfile: the field points
+        // at a 32-bit serialized string token. Keeping the stream address as a
+        // native const char** works on the original 32-bit target, but on
+        // Switch it makes the raw token look like a host pointer (for example,
+        // 0x00646574 becomes address 0x646574).
+        if (serialized == UINT32_MAX - 1)
+        {
+            Switch_LogWrite(
+                "[SWITCH XSTRINGPTR] unsupported outer alias token\n");
+            return;
+        }
+
+        const uint32_t outerOffset = serialized - 1;
+        const uint32_t outerBlock = outerOffset >> 28;
+        const uint32_t outerBlockOffset = outerOffset & 0x0FFFFFFFu;
+        if (!g_streamBlocks ||
+            outerBlock >= ARRAY_COUNT(g_streamPosArray) ||
+            !g_streamBlocks[outerBlock].data ||
+            outerBlockOffset > g_streamBlocks[outerBlock].size ||
+            g_streamBlocks[outerBlock].size - outerBlockOffset <
+                sizeof(uint32_t))
+        {
+            char trace[192];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XSTRINGPTR] invalid outer token=%08x asset=%d rawType=%u\n",
+                serialized,
+                g_switchCurrentAssetIndex,
+                static_cast<unsigned>(g_switchCurrentAssetRawType));
+            Switch_LogWrite(trace);
+            return;
+        }
+
+        const uint32_t *outerSlot = reinterpret_cast<const uint32_t *>(
+            g_streamBlocks[outerBlock].data + outerBlockOffset);
+        uint32_t nested = 0;
+        std::memcpy(&nested, outerSlot, sizeof(nested));
+
+        const char **nativeStringSlot = reinterpret_cast<const char **>(
+            Hunk_Alloc(
+                static_cast<uint32_t>(sizeof(const char *)),
+                "SwitchXStringPtr",
+                22));
+        if (!nativeStringSlot)
+            return;
+        *nativeStringSlot = nullptr;
+        *varXStringPtr = nativeStringSlot;
+
+        if (nested == UINT32_MAX)
+        {
+            const uint32_t inlineOffset =
+                outerBlockOffset + static_cast<uint32_t>(sizeof(nested));
+            const uint32_t remaining =
+                g_streamBlocks[outerBlock].size - inlineOffset;
+            const char *inlineString = reinterpret_cast<const char *>(
+                g_streamBlocks[outerBlock].data + inlineOffset);
+            if (remaining && std::memchr(inlineString, '\0', remaining))
+                *nativeStringSlot = inlineString;
+            else
+                Switch_LogWrite(
+                    "[SWITCH XSTRINGPTR] unterminated inline string\n");
+            return;
+        }
+
+        if (!nested)
+            return;
+
+        if (nested == UINT32_MAX - 1)
+        {
+            Switch_LogWrite(
+                "[SWITCH XSTRINGPTR] unsupported nested alias token\n");
+            return;
+        }
+
+        const uint32_t stringOffset = nested - 1;
+        const uint32_t stringBlock = stringOffset >> 28;
+        const uint32_t stringBlockOffset = stringOffset & 0x0FFFFFFFu;
+        if (stringBlock >= ARRAY_COUNT(g_streamPosArray) ||
+            !g_streamBlocks[stringBlock].data ||
+            stringBlockOffset >= g_streamBlocks[stringBlock].size)
+        {
+            char trace[192];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XSTRINGPTR] invalid nested token=%08x outer=%08x asset=%d rawType=%u\n",
+                nested,
+                serialized,
+                g_switchCurrentAssetIndex,
+                static_cast<unsigned>(g_switchCurrentAssetRawType));
+            Switch_LogWrite(trace);
+            return;
+        }
+
+        const char *string = reinterpret_cast<const char *>(
+            g_streamBlocks[stringBlock].data + stringBlockOffset);
+        const uint32_t stringRemaining =
+            g_streamBlocks[stringBlock].size - stringBlockOffset;
+        if (!std::memchr(string, '\0', stringRemaining))
+        {
+            char trace[192];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH XSTRINGPTR] unterminated string token=%08x outer=%08x asset=%d rawType=%u\n",
+                nested,
+                serialized,
+                g_switchCurrentAssetIndex,
+                static_cast<unsigned>(g_switchCurrentAssetRawType));
+            Switch_LogWrite(trace);
+            return;
+        }
+
+        *nativeStringSlot = string;
 
         if (switchTraceWeapon1506)
         {
@@ -1331,14 +1464,12 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH WEAPON1506] XStringPtr direct token=%08x resolved=%p\n",
+                "[SWITCH WEAPON1506] XStringPtr direct token=%08x nested=%08x string=%p\n",
                 serialized,
-                reinterpret_cast<const void *>(resolved));
+                nested,
+                static_cast<const void *>(string));
             Switch_LogWrite(trace);
         }
-
-        *varXStringPtr =
-            reinterpret_cast<const char **>(resolved);
         return;
     }
 
@@ -3626,11 +3757,27 @@ void __cdecl Load_SndAliasCustom(snd_alias_list_t **var)
 {
     if (*var)
     {
+#ifdef __SWITCH__
+        g_switchDbStage = "sound/xstring";
+#endif
         varXStringPtr = (const char ***)var;
         Load_XStringPtr(0);
+#ifdef __SWITCH__
+        if (!*varXStringPtr || !**varXStringPtr)
+        {
+            *var = nullptr;
+            g_switchDbStage = "sound/name_null";
+            return;
+        }
+        g_switchDbStage = "sound/lookup";
+#else
         if (!*varXStringPtr)
             MyAssertHandler(".\\universal\\com_sndalias.cpp", 696, 0, "%s", "*varXStringPtr");
+#endif
         *(XAssetHeader *)var = DB_FindXAssetHeader(ASSET_TYPE_SOUND, **varXStringPtr);
+#ifdef __SWITCH__
+        g_switchDbStage = "sound/lookup_done";
+#endif
     }
 }
 
@@ -4228,89 +4375,121 @@ void __cdecl Load_XZoneHandle(bool atStreamStart)
     Load_GetCurrentZoneHandle(varXZoneHandle);
 }
 
+#ifdef __SWITCH__
+struct SerializedXSurface_Switch
+{
+    uint8_t tileMode;
+    uint8_t deformed;
+    uint16_t vertCount;
+    uint16_t triCount;
+    uint8_t zoneHandle;
+    uint8_t pad0;
+    uint16_t baseTriIndex;
+    uint16_t baseVertIndex;
+    uint32_t triIndices;
+    uint16_t vertCountInfo[4];
+    uint32_t vertsBlend;
+    uint32_t verts0;
+    uint32_t vertListCount;
+    uint32_t vertList;
+    int32_t partBits[4];
+};
+static_assert(sizeof(SerializedXSurface_Switch) == 56);
+
+static uintptr_t Switch_WidenSerializedXSurfacePointer(uint32_t token)
+{
+    return token == UINT32_MAX
+        ? UINTPTR_MAX
+        : static_cast<uintptr_t>(token);
+}
+
+static void Switch_TranslateXSurfaceSerialized(
+    XSurface *surface,
+    const SerializedXSurface_Switch &serialized)
+{
+    std::memset(surface, 0, sizeof(*surface));
+    surface->tileMode = serialized.tileMode;
+    surface->deformed = serialized.deformed != 0;
+    surface->vertCount = serialized.vertCount;
+    surface->triCount = serialized.triCount;
+    surface->zoneHandle = serialized.zoneHandle;
+    surface->baseTriIndex = serialized.baseTriIndex;
+    surface->baseVertIndex = serialized.baseVertIndex;
+    surface->triIndices = reinterpret_cast<uint16_t *>(
+        Switch_WidenSerializedXSurfacePointer(serialized.triIndices));
+    std::memcpy(
+        surface->vertInfo.vertCount,
+        serialized.vertCountInfo,
+        sizeof(serialized.vertCountInfo));
+    surface->vertInfo.vertsBlend = reinterpret_cast<uint16_t *>(
+        Switch_WidenSerializedXSurfacePointer(serialized.vertsBlend));
+    surface->verts0 = reinterpret_cast<GfxPackedVertex *>(
+        Switch_WidenSerializedXSurfacePointer(serialized.verts0));
+    surface->vertListCount = serialized.vertListCount;
+    surface->vertList = reinterpret_cast<XRigidVertList *>(
+        Switch_WidenSerializedXSurfacePointer(serialized.vertList));
+    std::memcpy(
+        surface->partBits,
+        serialized.partBits,
+        sizeof(serialized.partBits));
+}
+#endif
+
 void __cdecl Load_XSurface(bool atStreamStart)
 {
 #ifdef __SWITCH__
-    iassert(atStreamStart);
-
-    struct SerializedXSurface
-    {
-        uint8_t tileMode;
-        uint8_t deformed;
-        uint16_t vertCount;
-        uint16_t triCount;
-        uint8_t zoneHandle;
-        uint8_t pad0;
-        uint16_t baseTriIndex;
-        uint16_t baseVertIndex;
-        uint32_t triIndices;
-        uint16_t vertCountInfo[4];
-        uint32_t vertsBlend;
-        uint32_t verts0;
-        uint32_t vertListCount;
-        uint32_t vertList;
-        int32_t partBits[4];
-    };
-    static_assert(sizeof(SerializedXSurface) == 56);
-
-    SerializedXSurface serialized{};
-
     const bool switchTraceXModel =
         g_switchCurrentAssetIndex == 1520 &&
         g_switchCurrentAssetRawType == 3u;
 
-    if (switchTraceXModel)
+    if (atStreamStart)
     {
-        g_switchDbStage = "xmodel/surf/raw";
+        SerializedXSurface_Switch serialized{};
+        if (switchTraceXModel)
+            g_switchDbStage = "xmodel/surf/raw";
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+        Switch_TranslateXSurfaceSerialized(varXSurface, serialized);
+
+        if (switchTraceXModel)
+        {
+            char trace[512];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH XMODEL1520] XSurface raw tile=%u deform=%u verts=%u tris=%u"
+                " zone=%u baseTri=%u baseVert=%u triIdx=%08x"
+                " vc=%u,%u,%u,%u blend=%08x verts0=%08x listCount=%u list=%08x"
+                " pos=%p\n",
+                static_cast<unsigned>(serialized.tileMode),
+                static_cast<unsigned>(serialized.deformed),
+                static_cast<unsigned>(serialized.vertCount),
+                static_cast<unsigned>(serialized.triCount),
+                static_cast<unsigned>(serialized.zoneHandle),
+                static_cast<unsigned>(serialized.baseTriIndex),
+                static_cast<unsigned>(serialized.baseVertIndex),
+                serialized.triIndices,
+                static_cast<unsigned>(serialized.vertCountInfo[0]),
+                static_cast<unsigned>(serialized.vertCountInfo[1]),
+                static_cast<unsigned>(serialized.vertCountInfo[2]),
+                static_cast<unsigned>(serialized.vertCountInfo[3]),
+                serialized.vertsBlend,
+                serialized.verts0,
+                serialized.vertListCount,
+                serialized.vertList,
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+            g_switchDbStage = "xmodel/surf/raw_done";
+        }
+    }
+    else
+    {
+        iassert(!atStreamStart);
     }
 
-    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
-
-    if (switchTraceXModel)
+    const uint32_t vertsBlendToken = static_cast<uint32_t>(
+        reinterpret_cast<uintptr_t>(varXSurface->vertInfo.vertsBlend));
+    if (vertsBlendToken)
     {
-        char trace[512];
-        std::snprintf(
-            trace, sizeof(trace),
-            "[SWITCH XMODEL1520] XSurface raw tile=%u deform=%u verts=%u tris=%u"
-            " zone=%u baseTri=%u baseVert=%u triIdx=%08x"
-            " vc=%u,%u,%u,%u blend=%08x verts0=%08x listCount=%u list=%08x"
-            " pos=%p\n",
-            static_cast<unsigned>(serialized.tileMode),
-            static_cast<unsigned>(serialized.deformed),
-            static_cast<unsigned>(serialized.vertCount),
-            static_cast<unsigned>(serialized.triCount),
-            static_cast<unsigned>(serialized.zoneHandle),
-            static_cast<unsigned>(serialized.baseTriIndex),
-            static_cast<unsigned>(serialized.baseVertIndex),
-            serialized.triIndices,
-            static_cast<unsigned>(serialized.vertCountInfo[0]),
-            static_cast<unsigned>(serialized.vertCountInfo[1]),
-            static_cast<unsigned>(serialized.vertCountInfo[2]),
-            static_cast<unsigned>(serialized.vertCountInfo[3]),
-            serialized.vertsBlend,
-            serialized.verts0,
-            serialized.vertListCount,
-            serialized.vertList,
-            static_cast<void *>(DB_GetStreamPos()));
-        Switch_LogWrite(trace);
-        g_switchDbStage = "xmodel/surf/raw_done";
-    }
-
-    std::memset(varXSurface, 0, sizeof(*varXSurface));
-    varXSurface->tileMode = serialized.tileMode;
-    varXSurface->deformed = serialized.deformed != 0;
-    varXSurface->vertCount = serialized.vertCount;
-    varXSurface->triCount = serialized.triCount;
-    varXSurface->zoneHandle = serialized.zoneHandle;
-    varXSurface->baseTriIndex = serialized.baseTriIndex;
-    varXSurface->baseVertIndex = serialized.baseVertIndex;
-    varXSurface->vertInfo.vertCount[0] = serialized.vertCountInfo[0];
-    varXSurface->vertInfo.vertCount[1] = serialized.vertCountInfo[1];
-    varXSurface->vertInfo.vertCount[2] = serialized.vertCountInfo[2];
-    varXSurface->vertInfo.vertCount[3] = serialized.vertCountInfo[3];
-    if (serialized.vertsBlend)
-    {
-        if (serialized.vertsBlend == UINT32_MAX)
+        if (vertsBlendToken == UINT32_MAX)
         {
             varXSurface->vertInfo.vertsBlend =
                 reinterpret_cast<uint16_t *>(AllocLoad_XBlendInfo());
@@ -4333,69 +4512,26 @@ void __cdecl Load_XSurface(bool atStreamStart)
 
             Load_XBlendInfoArray(1, blendCount);
 
-#ifdef __SWITCH__
             if (switchTraceXModel)
                 g_switchDbStage = "xmodel/surf/blend_done";
-#endif
         }
         else
         {
             varXSurface->vertInfo.vertsBlend =
                 reinterpret_cast<uint16_t *>(
-                    DB_ConvertOffsetToPointerValue(serialized.vertsBlend));
+                    DB_ConvertOffsetToPointerValue(vertsBlendToken));
         }
     }
 
-    if (serialized.triIndices)
-    {
-        varXSurface->triIndices =
-            reinterpret_cast<uint16_t *>(
-                serialized.triIndices == UINT32_MAX
-                    ? static_cast<uintptr_t>(UINTPTR_MAX)
-                    : static_cast<uintptr_t>(serialized.triIndices));
-    }
+    const uint32_t verts0Token = static_cast<uint32_t>(
+        reinterpret_cast<uintptr_t>(varXSurface->verts0));
+    const uint32_t vertListToken = static_cast<uint32_t>(
+        reinterpret_cast<uintptr_t>(varXSurface->vertList));
+    const uint32_t triIndicesToken = static_cast<uint32_t>(
+        reinterpret_cast<uintptr_t>(varXSurface->triIndices));
 
-    varXSurface->verts0 =
-        reinterpret_cast<GfxPackedVertex *>(
-            serialized.verts0 == 0
-                ? 0
-                : serialized.verts0 == UINT32_MAX
-                    ? UINTPTR_MAX
-                    : static_cast<uintptr_t>(serialized.verts0));
-
-    varXSurface->vertListCount = serialized.vertListCount;
     if (switchTraceXModel)
         g_switchDbStage = "xmodel/surf/vertlist";
-    if (serialized.vertList)
-    {
-        if (serialized.vertList == UINT32_MAX)
-        {
-            varXSurface->vertList =
-                reinterpret_cast<XRigidVertList *>(
-                    Hunk_Alloc(
-                        static_cast<uint32_t>(
-                            sizeof(XRigidVertList) *
-                            static_cast<size_t>(varXSurface->vertListCount)),
-                        "SwitchXRigidVertListArray",
-                        22));
-            std::memset(
-                varXSurface->vertList,
-                0,
-                sizeof(XRigidVertList) *
-                    static_cast<size_t>(varXSurface->vertListCount));
-        }
-        else
-        {
-            varXSurface->vertList =
-                reinterpret_cast<XRigidVertList *>(
-                    DB_ConvertOffsetToPointerValue(serialized.vertList));
-        }
-    }
-
-    std::memcpy(
-        varXSurface->partBits,
-        serialized.partBits,
-        sizeof(varXSurface->partBits));
 
     if (switchTraceXModel)
         g_switchDbStage = "xmodel/surf/zone";
@@ -4414,9 +4550,9 @@ void __cdecl Load_XSurface(bool atStreamStart)
         g_switchDbStage = "xmodel/surf/stream7_pushed";
     if (switchTraceXModel)
         g_switchDbStage = "xmodel/surf/verts0";
-    if (serialized.verts0)
+    if (verts0Token)
     {
-        if (serialized.verts0 == UINT32_MAX)
+        if (verts0Token == UINT32_MAX)
         {
             varXSurface->verts0 =
                 reinterpret_cast<GfxPackedVertex *>(
@@ -4432,7 +4568,7 @@ void __cdecl Load_XSurface(bool atStreamStart)
         {
             varXSurface->verts0 =
                 reinterpret_cast<GfxPackedVertex *>(
-                    DB_ConvertOffsetToPointerValue(serialized.verts0));
+                    DB_ConvertOffsetToPointerValue(verts0Token));
         }
     }
     if (switchTraceXModel)
@@ -4441,10 +4577,23 @@ void __cdecl Load_XSurface(bool atStreamStart)
     if (switchTraceXModel)
         g_switchDbStage = "xmodel/surf/stream7_popped";
 
-    if (serialized.vertList)
+    if (vertListToken)
     {
-        if (serialized.vertList == UINT32_MAX)
+        if (vertListToken == UINT32_MAX)
         {
+            varXSurface->vertList =
+                reinterpret_cast<XRigidVertList *>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(
+                            sizeof(XRigidVertList) *
+                            static_cast<size_t>(varXSurface->vertListCount)),
+                        "SwitchXRigidVertListArray",
+                        22));
+            std::memset(
+                varXSurface->vertList,
+                0,
+                sizeof(XRigidVertList) *
+                    static_cast<size_t>(varXSurface->vertListCount));
             varXRigidVertList = varXSurface->vertList;
             if (switchTraceXModel)
             {
@@ -4461,6 +4610,11 @@ void __cdecl Load_XSurface(bool atStreamStart)
             if (switchTraceXModel)
                 g_switchDbStage = "xmodel/surf/vertlist_done";
         }
+        else
+        {
+            varXSurface->vertList = reinterpret_cast<XRigidVertList *>(
+                DB_ConvertOffsetToPointerValue(vertListToken));
+        }
     }
 
     if (switchTraceXModel)
@@ -4470,9 +4624,9 @@ void __cdecl Load_XSurface(bool atStreamStart)
         g_switchDbStage = "xmodel/surf/stream8_pushed";
     if (switchTraceXModel)
         g_switchDbStage = "xmodel/surf/triIndices";
-    if (serialized.triIndices)
+    if (triIndicesToken)
     {
-        if (serialized.triIndices == UINT32_MAX)
+        if (triIndicesToken == UINT32_MAX)
         {
             varXSurface->triIndices =
                 reinterpret_cast<uint16_t *>(
@@ -4488,7 +4642,7 @@ void __cdecl Load_XSurface(bool atStreamStart)
         {
             varXSurface->triIndices =
                 reinterpret_cast<uint16_t *>(
-                    DB_ConvertOffsetToPointerValue(serialized.triIndices));
+                    DB_ConvertOffsetToPointerValue(triIndicesToken));
         }
     }
     if (switchTraceXModel)
@@ -4552,11 +4706,34 @@ void __cdecl Load_XSurfaceArray(bool atStreamStart, int32_t count)
 {
 #ifdef __SWITCH__
     iassert(atStreamStart);
+    iassert(count >= 0);
+
     XSurface *var = varXSurface;
+    if (count == 0)
+        return;
+
+    std::vector<SerializedXSurface_Switch> serialized(
+        static_cast<size_t>(count));
+    DB_LoadSwitchSerialized(
+        serialized.data(),
+        static_cast<uint32_t>(
+            sizeof(SerializedXSurface_Switch) *
+            static_cast<size_t>(count)));
+
+    // All serialized XSurface headers are contiguous in the fastfile. Expand
+    // the complete header array before any per-surface loader consumes inline
+    // vertex, rigid-list, or triangle payloads from the streams.
     for (int32_t i = 0; i < count; ++i)
     {
         varXSurface = &var[i];
+        Switch_TranslateXSurfaceSerialized(varXSurface, serialized[i]);
+    }
 
+    // Resolve each translated header only after the full serialized array has
+    // been consumed, matching the original 32-bit DB_LoadXSurfaceArray order.
+    for (int32_t i = 0; i < count; ++i)
+    {
+        varXSurface = &var[i];
         const bool switchTraceXModel =
             g_switchCurrentAssetIndex == 1520 &&
             g_switchCurrentAssetRawType == 3u;
@@ -4581,7 +4758,7 @@ void __cdecl Load_XSurfaceArray(bool atStreamStart, int32_t count)
             Switch_LogWrite(trace);
         }
 
-        Load_XSurface(1);
+        Load_XSurface(0);
 
         if (switchTraceXModel)
         {
@@ -4663,7 +4840,43 @@ void __cdecl Load_GfxImageLoadDef(bool atStreamStart)
     if (!atStreamStart)
         MyAssertHandler("c:\\trees\\cod3\\src\\database\\../gfx_d3d/r_image_load_db.h", 2614, 0, "%s", "atStreamStart");
     iassert(OFFSET_TO_GfxImageLoadDef_DATA == 16);
+#ifdef __SWITCH__
+    const bool traceUiImagePayload =
+        g_switchCurrentAssetRawType == 4u &&
+        g_switchCurrentAssetIndex >= 0 &&
+        g_switchCurrentAssetIndex <= 3;
+    if (traceUiImagePayload)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[KisakCOD][UI IMAGE] loaddef begin asset=%d stream=%u b0=%08x b4=%08x pos=%p\n",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_streamPosIndex),
+            Switch_GetStreamCursorOffset(0),
+            Switch_GetStreamCursorOffset(4),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+#endif
     Load_Stream(1, (unsigned char*)varGfxImageLoadDef, 16);
+#ifdef __SWITCH__
+    if (traceUiImagePayload)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[KisakCOD][UI IMAGE] loaddef header asset=%d resourceSize=%u stream=%u b0=%08x b4=%08x\n",
+            g_switchCurrentAssetIndex,
+            varGfxImageLoadDef->resourceSize,
+            static_cast<unsigned>(g_streamPosIndex),
+            Switch_GetStreamCursorOffset(0),
+            Switch_GetStreamCursorOffset(4));
+        Switch_LogWrite(trace);
+    }
+#endif
     if (DB_GetStreamPos() != varGfxImageLoadDef->data)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\database\\../gfx_d3d/r_image_load_db.h",
@@ -4702,6 +4915,26 @@ void __cdecl Load_GfxImage(bool atStreamStart)
 
         SerializedGfxImage serialized{};
         DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+        const bool traceUiImage =
+            g_switchCurrentAssetRawType == 4u &&
+            g_switchCurrentAssetIndex >= 0 &&
+            g_switchCurrentAssetIndex <= 3;
+        if (traceUiImage)
+        {
+            char trace[320];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[KisakCOD][UI IMAGE] header asset=%d texture=%08x name=%08x stream=%u b0=%08x b4=%08x\n",
+                g_switchCurrentAssetIndex,
+                serialized.texture,
+                serialized.name,
+                static_cast<unsigned>(g_streamPosIndex),
+                Switch_GetStreamCursorOffset(0),
+                Switch_GetStreamCursorOffset(4));
+            Switch_LogWrite(trace);
+        }
 
         varGfxImage->mapType = static_cast<MapType>(serialized.mapType);
         varGfxImage->texture.basemap =
@@ -4745,6 +4978,20 @@ void __cdecl Load_GfxImage(bool atStreamStart)
         varGfxTextureLoad = &varGfxImage->texture;
         Load_GfxTextureLoad(0);
 
+        if (traceUiImage)
+        {
+            char trace[256];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[KisakCOD][UI IMAGE] nested done asset=%d stream=%u b0=%08x b4=%08x\n",
+                g_switchCurrentAssetIndex,
+                static_cast<unsigned>(g_streamPosIndex),
+                Switch_GetStreamCursorOffset(0),
+                Switch_GetStreamCursorOffset(4));
+            Switch_LogWrite(trace);
+        }
+
         
 
         DB_PopStreamPos();
@@ -4775,6 +5022,25 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
         reinterpret_cast<const uint8_t *>(varGfxImagePtr),
         sizeof(value));
 
+    const bool traceUiImagePointer =
+        g_switchCurrentAssetRawType == 4u &&
+        g_switchCurrentAssetIndex >= 0 &&
+        g_switchCurrentAssetIndex <= 3;
+    if (traceUiImagePointer)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[KisakCOD][UI IMAGE] pointer asset=%d token=%08x stream=%u b0=%08x b4=%08x\n",
+            g_switchCurrentAssetIndex,
+            value,
+            static_cast<unsigned>(g_streamPosIndex),
+            Switch_GetStreamCursorOffset(0),
+            Switch_GetStreamCursorOffset(4));
+        Switch_LogWrite(trace);
+    }
+
     DB_PushStreamPos(0);
 
 
@@ -4782,6 +5048,10 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
     {
         if (value == UINT32_MAX || value == UINT32_MAX - 1)
         {
+            // The 32-bit loader's AllocLoad_FxElemVisStateSample aligns the
+            // inline image header in stream 0. Hunk_Alloc below only reserves
+            // the widened native destination, so preserve stream alignment.
+            DB_AllocStreamPos(3);
             GfxImage *nativeImage =
                 reinterpret_cast<GfxImage *>(Hunk_Alloc(
                     static_cast<uint32_t>(sizeof(GfxImage)),
@@ -4805,6 +5075,20 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
 
             Load_GfxImageAsset(&imageHeader);
 
+            if (traceUiImagePointer)
+            {
+                char trace[256];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[KisakCOD][UI IMAGE] inline done asset=%d b0=%08x b4=%08x image=%p\n",
+                    g_switchCurrentAssetIndex,
+                    Switch_GetStreamCursorOffset(0),
+                    Switch_GetStreamCursorOffset(4),
+                    static_cast<void *>(nativeImage));
+                Switch_LogWrite(trace);
+            }
+
 
             // Store the fully widened native pointer back into the runtime
             // XAsset header slot only after all serialized image reads are done.
@@ -4820,17 +5104,10 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
         }
         else
         {
-            // Existing native alias slots already contain widened pointers.
-            // Resolve their serialized 32-bit token explicitly.
-            const uintptr_t aliasValue =
-                DB_ConvertOffsetToPointerValue(value);
-            if (aliasValue)
-            {
-                std::memcpy(
-                    reinterpret_cast<uint8_t *>(varGfxImagePtr),
-                    &aliasValue,
-                    sizeof(aliasValue));
-            }
+            // The token points to a serialized 32-bit insertion slot. Resolve
+            // it through the native pointer-slot table; the stream address is
+            // not a GfxImage object on ARM64.
+            DB_ConvertOffsetToAlias(varGfxImagePtr);
         }
     }
 
@@ -5577,6 +5854,20 @@ void __cdecl Load_MaterialTechnique(bool atStreamStart)
     const uint8_t *techniqueStart = DB_GetStreamPos();
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
+    // MaterialTechnique has one trailing pass in its C++ type. Reserve only
+    // the actual pass count from the serialized header instead of a worst-case
+    // 64-pass buffer for every inline technique.
+    const size_t passStorageCount =
+        serialized.passCount ? serialized.passCount : 1u;
+    const uint32_t allocationSize = static_cast<uint32_t>(
+        sizeof(MaterialTechnique) +
+        sizeof(MaterialPass) * (passStorageCount - 1u));
+    varMaterialTechnique = reinterpret_cast<MaterialTechnique *>(
+        Hunk_Alloc(allocationSize, "SwitchMaterialTechnique", 22));
+    std::memset(varMaterialTechnique, 0, allocationSize);
+    iassert(varMaterialTechniquePtr);
+    *varMaterialTechniquePtr = varMaterialTechnique;
+
 #ifdef __SWITCH__
     {
         char trace[256];
@@ -5689,6 +5980,7 @@ void __cdecl Load_MaterialTextureDef(bool atStreamStart)
         varMaterialTextureDef->u.image =
             reinterpret_cast<GfxImage *>(
                 static_cast<uintptr_t>(serialized.info));
+
     }
     else
     {
@@ -5746,6 +6038,25 @@ void __cdecl Load_MaterialTextureDefArray(bool atStreamStart, int32_t count)
         varMaterialTextureDef->u.image =
             reinterpret_cast<GfxImage *>(
                 static_cast<uintptr_t>(serialized.info));
+
+        if (g_switchCurrentAssetRawType == 4u &&
+            g_switchCurrentAssetIndex >= 0 &&
+            g_switchCurrentAssetIndex <= 3)
+        {
+            char trace[256];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[KisakCOD][UI MATERIAL] texture asset=%d item=%d semantic=%u info=%08x stream=%u b0=%08x b4=%08x\n",
+                g_switchCurrentAssetIndex,
+                i,
+                static_cast<unsigned>(serialized.semantic),
+                serialized.info,
+                static_cast<unsigned>(g_streamPosIndex),
+                Switch_GetStreamCursorOffset(0),
+                Switch_GetStreamCursorOffset(4));
+            Switch_LogWrite(trace);
+        }
     }
 
     // Phase 2: resolve nested image/water pointers. Inline payloads are located
@@ -5777,6 +6088,9 @@ void __cdecl Load_MaterialConstantDefArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_MaterialTechniquePtr(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    const void **inserted = nullptr;
+#endif
     Load_Stream(atStreamStart, (uint8_t *)varMaterialTechniquePtr, 4);
     if (*varMaterialTechniquePtr)
     {
@@ -5784,20 +6098,17 @@ void __cdecl Load_MaterialTechniquePtr(bool atStreamStart)
         const uint32_t value =
             static_cast<uint32_t>(
                 reinterpret_cast<uintptr_t>(*varMaterialTechniquePtr));
-        if (value == UINT32_MAX)
+        if (value == UINT32_MAX || value == UINT32_MAX - 1u)
         {
-            constexpr uint32_t MAX_SWITCH_TECHNIQUE_PASSES = 64;
-            const uint32_t bytes =
-                static_cast<uint32_t>(
-                    sizeof(MaterialTechnique) +
-                    sizeof(MaterialPass) *
-                        (MAX_SWITCH_TECHNIQUE_PASSES - 1));
-            *varMaterialTechniquePtr =
-                reinterpret_cast<MaterialTechnique *>(
-                    Hunk_Alloc(bytes, "SwitchMaterialTechnique", 22));
-            varMaterialTechnique = *varMaterialTechniquePtr;
-            memset(varMaterialTechnique, 0, bytes);
+            // Mirror the serialized-header alignment previously supplied by
+            // AllocLoad_FxElemVisStateSample() before the ARM64 object is made.
+            DB_AllocStreamPos(3);
+            if (value == UINT32_MAX - 1u)
+                inserted = DB_InsertPointer();
             Load_MaterialTechnique(1);
+            if (inserted)
+                *inserted = *reinterpret_cast<void **>(
+                    varMaterialTechniquePtr);
         }
         else
         {
@@ -6001,6 +6312,23 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
         varMaterialTechniqueSet->name = nameBuffer;
     }
 
+#ifdef __SWITCH__
+    if (traceRawType == 25u && traceAssetIndex == 4510)
+    {
+        char trace[224];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH FX TRACE] techset header asset=%d token=%08x name=%p stream=%u pos=%p\n",
+            traceAssetIndex,
+            serialized.name,
+            static_cast<const void *>(varMaterialTechniqueSet->name),
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+#endif
+
     varMaterialTechniqueSet->remappedTechniqueSet = nullptr;
     if (serialized.remappedTechniqueSet)
     {
@@ -6093,22 +6421,8 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
         }
         else if (value == UINT32_MAX || value == UINT32_MAX - 1)
         {
-            constexpr uint32_t MAX_SWITCH_TECHNIQUE_PASSES = 64;
-            const uint32_t bytes =
-                static_cast<uint32_t>(
-                    sizeof(MaterialTechnique) +
-                    sizeof(MaterialPass) *
-                        (MAX_SWITCH_TECHNIQUE_PASSES - 1));
-
-            varMaterialTechniqueSet->techniques[i] =
-                reinterpret_cast<MaterialTechnique *>(
-                    Hunk_Alloc(
-                        bytes,
-                        "SwitchMaterialTechnique",
-                        22));
-            varMaterialTechnique =
-                varMaterialTechniqueSet->techniques[i];
-            memset(varMaterialTechnique, 0, bytes);
+            varMaterialTechniquePtr =
+                &varMaterialTechniqueSet->techniques[i];
 
             const void **inserted = nullptr;
             if (value == UINT32_MAX - 1)
@@ -6311,6 +6625,9 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
         if (value == -1 || value == -2)
         {
 #ifdef __SWITCH__
+            // The desktop inline allocation aligns stream 0; the Hunk-backed
+            // native object does not move or align the serialized cursor.
+            DB_AllocStreamPos(3);
             if (traceCinematic)
                 Switch_LogWrite("[SWITCH DB FIND] techset ptr -> inline\n");
             Switch_LogWrite("[SWITCH MATERIAL] techset inline begin\n");
@@ -6403,6 +6720,33 @@ void __cdecl Load_Material(bool atStreamStart)
     uint8_t *materialStreamPos = DB_GetStreamPos();
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
+    const bool traceUiMaterial =
+        g_switchCurrentAssetRawType == 4u &&
+        g_switchCurrentAssetIndex >= 0 &&
+        g_switchCurrentAssetIndex <= 3;
+    if (traceUiMaterial)
+    {
+        char trace[384];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[KisakCOD][UI MATERIAL] header asset=%d start=%p stream=%u b0=%08x b4=%08x name=%08x techset=%08x textures=%08x count=%u constants=%08x/%u statebits=%08x/%u\n",
+            g_switchCurrentAssetIndex,
+            static_cast<void *>(materialStreamPos),
+            static_cast<unsigned>(g_streamPosIndex),
+            Switch_GetStreamCursorOffset(0),
+            Switch_GetStreamCursorOffset(4),
+            serialized.name,
+            serialized.techniqueSet,
+            serialized.textureTable,
+            static_cast<unsigned>(serialized.textureCount),
+            serialized.constantTable,
+            static_cast<unsigned>(serialized.constantCount),
+            serialized.stateBitsTable,
+            static_cast<unsigned>(serialized.stateBitsCount));
+        Switch_LogWrite(trace);
+    }
+
 #ifdef __SWITCH__
     Switch_LogRawDwords(
         "[SWITCH MATERIAL WORDS]",
@@ -6485,6 +6829,9 @@ void __cdecl Load_Material(bool atStreamStart)
         if (textureTableValue == UINT32_MAX)
         {
 #ifdef __SWITCH__
+            // Match the DWORD alignment of the original inline table
+            // allocation; Hunk_Alloc only creates the native ARM64 array.
+            DB_AllocStreamPos(3);
             varMaterial->textureTable =
                 reinterpret_cast<MaterialTextureDef *>(
                     Hunk_Alloc(
@@ -6685,13 +7032,30 @@ void __cdecl Load_MaterialHandleArray(bool atStreamStart, int32_t count)
 {
 #ifdef __SWITCH__
     iassert(atStreamStart);
+    iassert(count >= 0);
+
     Material **var = varMaterialHandle;
+
+    if (count == 0)
+        return;
+
+    std::vector<uint32_t> serializedTokens(static_cast<size_t>(count));
+    DB_LoadSwitchSerialized(
+        serializedTokens.data(),
+        static_cast<uint32_t>(sizeof(uint32_t) *
+                              static_cast<size_t>(count)));
+
+    // The fastfile stores the complete pointer array before any inline
+    // Material records. Expand every 32-bit token first, then load nested
+    // materials so their payloads cannot be mistaken for remaining tokens.
     for (int32_t i = 0; i < count; ++i)
     {
-        uint32_t token = 0;
-        DB_LoadSwitchSerialized(&token, sizeof(token));
         var[i] = reinterpret_cast<Material *>(
-            static_cast<uintptr_t>(token));
+            static_cast<uintptr_t>(serializedTokens[static_cast<size_t>(i)]));
+    }
+
+    for (int32_t i = 0; i < count; ++i)
+    {
         varMaterialHandle = &var[i];
         Load_MaterialHandle(0);
     }
@@ -7019,6 +7383,53 @@ void __cdecl Mark_GfxLightmapArrayArray(int32_t count)
 
 void __cdecl Load_PhysPreset(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedPhysPreset
+    {
+        uint32_t name;
+        int32_t type;
+        float mass;
+        float bounce;
+        float friction;
+        float bulletForceScale;
+        float explosiveForceScale;
+        uint32_t sndAliasPrefix;
+        float piecesSpreadFraction;
+        float piecesUpwardVelocity;
+        uint8_t tempDefaultToCylinder;
+        uint8_t unused[3];
+    };
+    static_assert(sizeof(SerializedPhysPreset) == 44);
+    static_assert(sizeof(PhysPreset) == 56);
+
+    iassert(atStreamStart);
+
+    SerializedPhysPreset serialized{};
+    DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+    std::memset(varPhysPreset, 0, sizeof(*varPhysPreset));
+    varPhysPreset->name = reinterpret_cast<const char *>(
+        static_cast<uintptr_t>(serialized.name));
+    varPhysPreset->type = serialized.type;
+    varPhysPreset->mass = serialized.mass;
+    varPhysPreset->bounce = serialized.bounce;
+    varPhysPreset->friction = serialized.friction;
+    varPhysPreset->bulletForceScale = serialized.bulletForceScale;
+    varPhysPreset->explosiveForceScale = serialized.explosiveForceScale;
+    varPhysPreset->sndAliasPrefix = reinterpret_cast<const char *>(
+        static_cast<uintptr_t>(serialized.sndAliasPrefix));
+    varPhysPreset->piecesSpreadFraction = serialized.piecesSpreadFraction;
+    varPhysPreset->piecesUpwardVelocity = serialized.piecesUpwardVelocity;
+    varPhysPreset->tempDefaultToCylinder =
+        serialized.tempDefaultToCylinder != 0;
+
+    DB_PushStreamPos(4);
+    varXString = &varPhysPreset->name;
+    Load_XString(0);
+    varXString = &varPhysPreset->sndAliasPrefix;
+    Load_XString(0);
+    DB_PopStreamPos();
+#else
     Load_Stream(atStreamStart, (uint8_t *)varPhysPreset, 44);
     DB_PushStreamPos(4);
     varXString = &varPhysPreset->name;
@@ -7026,10 +7437,61 @@ void __cdecl Load_PhysPreset(bool atStreamStart)
     varXString = &varPhysPreset->sndAliasPrefix;
     Load_XString(0);
     DB_PopStreamPos();
+#endif
 }
 
 void __cdecl Load_PhysPresetPtr(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    uint32_t serialized = 0;
+    if (atStreamStart)
+    {
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+    }
+    else
+    {
+        std::memcpy(
+            &serialized,
+            reinterpret_cast<const uint8_t *>(varPhysPresetPtr),
+            sizeof(serialized));
+    }
+
+    *varPhysPresetPtr = reinterpret_cast<PhysPreset *>(
+        static_cast<uintptr_t>(serialized));
+    DB_PushStreamPos(0);
+    if (serialized)
+    {
+        if (serialized == UINT32_MAX ||
+            serialized == UINT32_MAX - 1u)
+        {
+            // Keep the four-byte serialized header aligned in stream 0, while
+            // storing the expanded ARM64 object in persistent Hunk memory.
+            DB_AllocStreamPos(3);
+            *varPhysPresetPtr = reinterpret_cast<PhysPreset *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(PhysPreset)),
+                    "SwitchPhysPreset",
+                    22));
+            varPhysPreset = *varPhysPresetPtr;
+            std::memset(varPhysPreset, 0, sizeof(*varPhysPreset));
+
+            const void **inserted = nullptr;
+            if (serialized == UINT32_MAX - 1u)
+                inserted = DB_InsertPointer();
+
+            Load_PhysPreset(true);
+            Load_PhysPresetAsset(
+                reinterpret_cast<XAssetHeader *>(varPhysPresetPtr));
+            if (inserted)
+                *inserted = *varPhysPresetPtr;
+        }
+        else
+        {
+            DB_ConvertOffsetToAlias(varPhysPresetPtr);
+        }
+    }
+    DB_PopStreamPos();
+#else
     const void **inserted; // [esp+0h] [ebp-Ch]
     uint32_t value; // [esp+4h] [ebp-8h]
 
@@ -7057,6 +7519,7 @@ void __cdecl Load_PhysPresetPtr(bool atStreamStart)
         }
     }
     DB_PopStreamPos();
+#endif
 }
 
 void __cdecl Mark_PhysPresetPtr()
@@ -7183,11 +7646,9 @@ void __cdecl Load_XModelCollTriArray(bool atStreamStart, int32_t count)
     Load_Stream(atStreamStart, (unsigned char*)varXModelCollTri, 48 * count);
 }
 
-void __cdecl Load_XModelCollSurf(bool atStreamStart)
-{
 #ifdef __SWITCH__
-    iassert(atStreamStart);
-
+static void Switch_Load_XModelCollSurfHeader(XModelCollSurf_s *surface)
+{
     struct SerializedXModelCollSurf
     {
         uint32_t collTris;
@@ -7203,24 +7664,50 @@ void __cdecl Load_XModelCollSurf(bool atStreamStart)
     SerializedXModelCollSurf serialized{};
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
-    std::memset(varXModelCollSurf, 0, sizeof(*varXModelCollSurf));
-    varXModelCollSurf->numCollTris = serialized.numCollTris;
-    std::memcpy(varXModelCollSurf->mins, serialized.mins,
-        sizeof(serialized.mins));
-    std::memcpy(varXModelCollSurf->maxs, serialized.maxs,
-        sizeof(serialized.maxs));
-    varXModelCollSurf->boneIdx = serialized.boneIdx;
-    varXModelCollSurf->contents = serialized.contents;
-    varXModelCollSurf->surfFlags = serialized.surfFlags;
+    std::memset(surface, 0, sizeof(*surface));
+    surface->collTris = reinterpret_cast<XModelCollTri_s *>(
+        static_cast<uintptr_t>(serialized.collTris));
+    surface->numCollTris = serialized.numCollTris;
+    std::memcpy(surface->mins, serialized.mins, sizeof(serialized.mins));
+    std::memcpy(surface->maxs, serialized.maxs, sizeof(serialized.maxs));
+    surface->boneIdx = serialized.boneIdx;
+    surface->contents = serialized.contents;
+    surface->surfFlags = serialized.surfFlags;
+}
 
-    if (serialized.collTris)
+static void Switch_Load_XModelCollSurfData(XModelCollSurf_s *surface)
+{
+    if (!surface->collTris)
+        return;
+
+    const int32_t serializedTriCount = surface->numCollTris;
+    surface->collTris = reinterpret_cast<XModelCollTri_s *>(
+        AllocLoad_FxElemVisStateSample());
+    varXModelCollTri = surface->collTris;
+    if (g_switchCurrentAssetIndex == 4083 &&
+        g_switchCurrentAssetRawType == 3u)
     {
-        varXModelCollSurf->collTris =
-            reinterpret_cast<XModelCollTri_s *>(
-                AllocLoad_FxElemVisStateSample());
-        varXModelCollTri = varXModelCollSurf->collTris;
-        Load_XModelCollTriArray(1, varXModelCollSurf->numCollTris);
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XMODEL COLL] tri data count=%d dst=%p stream=%u pos=%p\n",
+            serializedTriCount,
+            static_cast<void *>(surface->collTris),
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
     }
+    Load_XModelCollTriArray(1, surface->numCollTris);
+}
+#endif
+
+void __cdecl Load_XModelCollSurf(bool atStreamStart)
+{
+#ifdef __SWITCH__
+    if (atStreamStart)
+        Switch_Load_XModelCollSurfHeader(varXModelCollSurf);
+    Switch_Load_XModelCollSurfData(varXModelCollSurf);
 #else
     Load_Stream(atStreamStart, (uint8_t *)varXModelCollSurf, 44);
     if (varXModelCollSurf->collTris)
@@ -7237,10 +7724,51 @@ void __cdecl Load_XModelCollSurfArray(bool atStreamStart, int32_t count)
 #ifdef __SWITCH__
     iassert(atStreamStart);
     XModelCollSurf_s *var = varXModelCollSurf;
+    const bool traceXModel4083 =
+        g_switchCurrentAssetIndex == 4083 &&
+        g_switchCurrentAssetRawType == 3u;
+
+    if (traceXModel4083)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XMODEL COLL] headers begin count=%d stream=%u pos=%p\n",
+            count,
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+        g_switchDbStage = "xmodel/collSurfs/headers";
+    }
+
+    // Fastfiles serialize the complete collision-surface header array first,
+    // followed by each surface's inline triangle data. Read all headers before
+    // consuming nested arrays, matching the non-Switch loader's two phases.
     for (int32_t i = 0; i < count; ++i)
     {
         varXModelCollSurf = &var[i];
-        Load_XModelCollSurf(1);
+        Switch_Load_XModelCollSurfHeader(varXModelCollSurf);
+    }
+
+    if (traceXModel4083)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XMODEL COLL] headers done count=%d stream=%u pos=%p\n",
+            count,
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+        g_switchDbStage = "xmodel/collSurfs/data";
+    }
+
+    for (int32_t i = 0; i < count; ++i)
+    {
+        varXModelCollSurf = &var[i];
+        Switch_Load_XModelCollSurfData(varXModelCollSurf);
     }
 #else
     XModelCollSurf_s *var; // [esp+0h] [ebp-8h]
@@ -7372,11 +7900,9 @@ void __cdecl Load_BrushWrapper(bool atStreamStart)
 #endif
 }
 
-void __cdecl Load_PhysGeomInfo(bool atStreamStart)
-{
 #ifdef __SWITCH__
-    iassert(atStreamStart);
-
+static void Switch_Load_PhysGeomInfoHeader(PhysGeomInfo *geom)
+{
     struct SerializedPhysGeomInfo
     {
         uint32_t brush;
@@ -7391,35 +7917,49 @@ void __cdecl Load_PhysGeomInfo(bool atStreamStart)
     SerializedPhysGeomInfo serialized{};
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
-    std::memset(varPhysGeomInfo, 0, sizeof(*varPhysGeomInfo));
-    varPhysGeomInfo->type = serialized.type;
-    std::memcpy(varPhysGeomInfo->orientation, serialized.orientation,
+    std::memset(geom, 0, sizeof(*geom));
+    geom->brush = reinterpret_cast<BrushWrapper *>(
+        static_cast<uintptr_t>(serialized.brush));
+    geom->type = serialized.type;
+    std::memcpy(geom->orientation, serialized.orientation,
         sizeof(serialized.orientation));
-    std::memcpy(varPhysGeomInfo->offset, serialized.offset,
-        sizeof(serialized.offset));
-    std::memcpy(varPhysGeomInfo->halfLengths, serialized.halfLengths,
+    std::memcpy(geom->offset, serialized.offset, sizeof(serialized.offset));
+    std::memcpy(geom->halfLengths, serialized.halfLengths,
         sizeof(serialized.halfLengths));
+}
 
-    if (serialized.brush)
+static void Switch_Load_PhysGeomInfoData(PhysGeomInfo *geom)
+{
+    const uint32_t serializedBrush =
+        static_cast<uint32_t>(reinterpret_cast<uintptr_t>(geom->brush));
+    if (!serializedBrush)
+        return;
+
+    if (serializedBrush == UINT32_MAX)
     {
-        if (serialized.brush == UINT32_MAX)
-        {
-            varPhysGeomInfo->brush =
-                (BrushWrapper *)Hunk_Alloc(
-                    static_cast<uint32_t>(sizeof(BrushWrapper)),
-                    "SwitchBrushWrapper",
-                    22);
-            std::memset(varPhysGeomInfo->brush, 0, sizeof(BrushWrapper));
-            varBrushWrapper = varPhysGeomInfo->brush;
-            Load_BrushWrapper(1);
-        }
-        else
-        {
-            varPhysGeomInfo->brush =
-                reinterpret_cast<BrushWrapper *>(
-                    DB_ConvertOffsetToPointerValue(serialized.brush));
-        }
+        geom->brush = reinterpret_cast<BrushWrapper *>(
+            Hunk_Alloc(
+                static_cast<uint32_t>(sizeof(BrushWrapper)),
+                "SwitchBrushWrapper",
+                22));
+        std::memset(geom->brush, 0, sizeof(BrushWrapper));
+        varBrushWrapper = geom->brush;
+        Load_BrushWrapper(1);
     }
+    else
+    {
+        geom->brush = reinterpret_cast<BrushWrapper *>(
+            DB_ConvertOffsetToPointerValue(serializedBrush));
+    }
+}
+#endif
+
+void __cdecl Load_PhysGeomInfo(bool atStreamStart)
+{
+#ifdef __SWITCH__
+    if (atStreamStart)
+        Switch_Load_PhysGeomInfoHeader(varPhysGeomInfo);
+    Switch_Load_PhysGeomInfoData(varPhysGeomInfo);
 #else
     Load_Stream(atStreamStart, (uint8_t *)varPhysGeomInfo, 68);
     if (varPhysGeomInfo->brush)
@@ -7447,7 +7987,16 @@ void __cdecl Load_PhysGeomInfoArray(bool atStreamStart, int32_t count)
     for (int32_t i = 0; i < count; ++i)
     {
         varPhysGeomInfo = &var[i];
-        Load_PhysGeomInfo(1);
+        Switch_Load_PhysGeomInfoHeader(varPhysGeomInfo);
+    }
+
+    // Each serialized PhysGeomInfo record precedes the inline BrushWrapper
+    // bodies for the complete array. Resolve those bodies only after all
+    // headers have been consumed.
+    for (int32_t i = 0; i < count; ++i)
+    {
+        varPhysGeomInfo = &var[i];
+        Switch_Load_PhysGeomInfoData(varPhysGeomInfo);
     }
 #else
     PhysGeomInfo *var; // [esp+0h] [ebp-8h]
@@ -7593,7 +8142,8 @@ void __cdecl Load_XModel(bool atStreamStart)
 {
 #ifdef __SWITCH__
     const bool switchTraceXModel =
-        g_switchCurrentAssetIndex == 1520 &&
+        (g_switchCurrentAssetIndex == 1520 ||
+         g_switchCurrentAssetIndex == 4083) &&
         g_switchCurrentAssetRawType == 3u;
     iassert(atStreamStart);
     if (switchTraceXModel)
@@ -7604,9 +8154,10 @@ void __cdecl Load_XModel(bool atStreamStart)
         char trace[512];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH XMODEL1520] model=%p bones=%u roots=%u surfs=%u coll=%d"
+            "[SWITCH XMODEL] asset=%d model=%p bones=%u roots=%u surfs=%u coll=%d"
             " name=%p boneNames=%p parent=%p quats=%p trans=%p part=%p base=%p"
             " surfsPtr=%p mats=%p collPtr=%p boneInfo=%p physPreset=%p physGeoms=%p\n",
+            g_switchCurrentAssetIndex,
             static_cast<void *>(varXModel),
             static_cast<unsigned>(varXModel->numBones),
             static_cast<unsigned>(varXModel->numRootBones),
@@ -7888,7 +8439,8 @@ void __cdecl Load_XModelPtr(bool atStreamStart)
     uint32_t value; // [esp+4h] [ebp-8h]
 #ifdef __SWITCH__
     const bool switchTraceXModel =
-        g_switchCurrentAssetIndex == 1520 &&
+        (g_switchCurrentAssetIndex == 1520 ||
+         g_switchCurrentAssetIndex == 4083) &&
         g_switchCurrentAssetRawType == 3u;
     if (switchTraceXModel)
         g_switchDbStage = "xmodel/ptr_stream";
@@ -8501,6 +9053,25 @@ void __cdecl Load_FxEffectDefHandle(bool atStreamStart)
             else
                 inserted = 0;
             Load_FxEffectDef(1);
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex >= 4505 &&
+                g_switchCurrentAssetIndex <= 4510 &&
+                g_switchCurrentAssetRawType == 25u)
+            {
+                const FxEffectDef *loadedFx = *varFxEffectDefHandle;
+                char trace[256];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH FX TRACE] parsed asset=%d slot=%p fx=%p name=%p elems=%p\n",
+                    g_switchCurrentAssetIndex,
+                    static_cast<void *>(varFxEffectDefHandle),
+                    static_cast<const void *>(loadedFx),
+                    loadedFx ? static_cast<const void *>(loadedFx->name) : nullptr,
+                    loadedFx ? static_cast<const void *>(loadedFx->elemDefs) : nullptr);
+                Switch_LogWrite(trace);
+            }
+#endif
             Load_FxEffectDefAsset((XAssetHeader *)varFxEffectDefHandle);
             if (inserted)
                 *inserted = *varFxEffectDefHandle;
@@ -8537,13 +9108,68 @@ void __cdecl Load_FxEffectDefRef(bool atStreamStart)
 
 void __cdecl Load_FxElemMarkVisuals(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        uint32_t serialized[2]{};
+        DB_LoadSwitchSerialized(serialized, sizeof(serialized));
+        varFxElemMarkVisuals->materials[0] =
+            reinterpret_cast<Material *>(
+                static_cast<uintptr_t>(serialized[0]));
+        varFxElemMarkVisuals->materials[1] =
+            reinterpret_cast<Material *>(
+                static_cast<uintptr_t>(serialized[1]));
+    }
+
+    // The serialized mark record contains two 32-bit pointer tokens. The
+    // native Switch record has two 64-bit pointers, so process the widened
+    // slots individually instead of treating the record as an 8-byte array.
+    for (int32_t i = 0; i < 2; ++i)
+    {
+        varMaterialHandle = &varFxElemMarkVisuals->materials[i];
+        Load_MaterialHandle(0);
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varFxElemMarkVisuals, 8);
     varMaterialHandle = (Material **)varFxElemMarkVisuals;
     Load_MaterialHandleArray(0, 2);
+#endif
 }
 
 void __cdecl Load_FxElemMarkVisualsArray(bool atStreamStart, int32_t count)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        if (count <= 0)
+            return;
+
+        std::vector<uint32_t> serialized(
+            static_cast<size_t>(count) * 2u);
+        DB_LoadSwitchSerialized(
+            serialized.data(),
+            static_cast<uint32_t>(serialized.size() * sizeof(uint32_t)));
+
+        FxElemMarkVisuals *var = varFxElemMarkVisuals;
+        for (int32_t i = 0; i < count; ++i)
+        {
+            var[i].materials[0] = reinterpret_cast<Material *>(
+                static_cast<uintptr_t>(serialized[static_cast<size_t>(i) * 2u]));
+            var[i].materials[1] = reinterpret_cast<Material *>(
+                static_cast<uintptr_t>(serialized[static_cast<size_t>(i) * 2u + 1u]));
+        }
+
+        // All serialized pointer tokens precede the inline Material records.
+        // Resolve them only after copying the complete compact token array.
+        for (int32_t i = 0; i < count; ++i)
+        {
+            varFxElemMarkVisuals = &var[i];
+            Load_FxElemMarkVisuals(0);
+        }
+        return;
+    }
+#endif
+
     FxElemMarkVisuals *var; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
 
@@ -8585,6 +9211,36 @@ void __cdecl Load_FxElemVisuals(bool atStreamStart)
 
 void __cdecl Load_FxElemVisualsArray(bool atStreamStart, int32_t count)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        if (count <= 0)
+            return;
+
+        std::vector<uint32_t> serialized(static_cast<size_t>(count));
+        DB_LoadSwitchSerialized(
+            serialized.data(),
+            static_cast<uint32_t>(serialized.size() * sizeof(uint32_t)));
+
+        FxElemVisuals *var = varFxElemVisuals;
+        for (int32_t i = 0; i < count; ++i)
+        {
+            var[i].anonymous = reinterpret_cast<const void *>(
+                static_cast<uintptr_t>(serialized[static_cast<size_t>(i)]));
+        }
+
+        // The fastfile pointer array is packed at four bytes per element,
+        // while the native Switch union is eight bytes. Expand all tokens
+        // before following any inline visual assets.
+        for (int32_t i = 0; i < count; ++i)
+        {
+            varFxElemVisuals = &var[i];
+            Load_FxElemVisuals(0);
+        }
+        return;
+    }
+#endif
+
     FxElemVisuals *var; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
 
@@ -8614,7 +9270,27 @@ void __cdecl Load_FxElemDefVisuals(bool atStreamStart)
     {
         if (varFxElemDefVisuals->markArray)
         {
+#ifdef __SWITCH__
+            // The stream stores one compact 8-byte pair of 32-bit handles per
+            // mark visual. Keep its serialized alignment, but put the expanded
+            // 64-bit native records in hunk memory.
+            DB_AllocStreamPos(3);
+            varFxElemDefVisuals->markArray =
+                reinterpret_cast<FxElemMarkVisuals *>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(
+                            sizeof(FxElemMarkVisuals) *
+                            static_cast<size_t>(varFxElemDef->visualCount)),
+                        "SwitchFxElemMarkVisuals",
+                        22));
+            std::memset(
+                varFxElemDefVisuals->markArray,
+                0,
+                sizeof(FxElemMarkVisuals) *
+                    static_cast<size_t>(varFxElemDef->visualCount));
+#else
             varFxElemDefVisuals->markArray = (FxElemMarkVisuals *)AllocLoad_FxElemVisStateSample();
+#endif
             varFxElemMarkVisuals = varFxElemDefVisuals->markArray;
             Load_FxElemMarkVisualsArray(1, varFxElemDef->visualCount);
         }
@@ -8623,7 +9299,25 @@ void __cdecl Load_FxElemDefVisuals(bool atStreamStart)
     {
         if (varFxElemDefVisuals->markArray)
         {
+#ifdef __SWITCH__
+            // FxElemVisuals is eight bytes on ARM64, but the fastfile array is
+            // still a packed sequence of four-byte pointer tokens.
+            DB_AllocStreamPos(3);
+            varFxElemDefVisuals->array = reinterpret_cast<FxElemVisuals *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(
+                        sizeof(FxElemVisuals) *
+                        static_cast<size_t>(varFxElemDef->visualCount)),
+                    "SwitchFxElemVisuals",
+                    22));
+            std::memset(
+                varFxElemDefVisuals->array,
+                0,
+                sizeof(FxElemVisuals) *
+                    static_cast<size_t>(varFxElemDef->visualCount));
+#else
             varFxElemDefVisuals->markArray = (FxElemMarkVisuals *)AllocLoad_FxElemVisStateSample();
+#endif
             varFxElemVisuals = (FxElemVisuals *)varFxElemDefVisuals->markArray;
             Load_FxElemVisualsArray(1, varFxElemDef->visualCount);
         }
@@ -8642,6 +9336,92 @@ void __cdecl Load_FxTrailVertexArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_FxTrailDef(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        struct SerializedFxTrailDef
+        {
+            int32_t scrollTimeMsec;
+            int32_t repeatDist;
+            int32_t splitDist;
+            int32_t vertCount;
+            uint32_t verts;
+            int32_t indCount;
+            uint32_t inds;
+        };
+
+        static_assert(sizeof(SerializedFxTrailDef) == 28);
+        static_assert(sizeof(FxTrailDef) == 40);
+
+        SerializedFxTrailDef serialized{};
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+        std::memset(varFxTrailDef, 0, sizeof(*varFxTrailDef));
+        varFxTrailDef->scrollTimeMsec = serialized.scrollTimeMsec;
+        varFxTrailDef->repeatDist = serialized.repeatDist;
+        varFxTrailDef->splitDist = serialized.splitDist;
+        varFxTrailDef->vertCount = serialized.vertCount;
+        varFxTrailDef->indCount = serialized.indCount;
+
+        if (serialized.verts)
+        {
+            if (serialized.verts == UINT32_MAX)
+            {
+                DB_AllocStreamPos(3);
+                varFxTrailDef->verts =
+                    reinterpret_cast<FxTrailVertex *>(
+                        Hunk_Alloc(
+                            static_cast<uint32_t>(
+                                sizeof(FxTrailVertex) *
+                                static_cast<size_t>(serialized.vertCount)),
+                            "SwitchFxTrailVertex",
+                            22));
+                varFxTrailVertex = varFxTrailDef->verts;
+                DB_LoadSwitchSerialized(
+                    varFxTrailVertex,
+                    static_cast<uint32_t>(
+                        sizeof(FxTrailVertex) *
+                        static_cast<size_t>(serialized.vertCount)));
+            }
+            else
+            {
+                varFxTrailDef->verts =
+                    reinterpret_cast<FxTrailVertex *>(
+                        DB_ConvertOffsetToPointerValue(serialized.verts));
+            }
+        }
+
+        if (serialized.inds)
+        {
+            if (serialized.inds == UINT32_MAX)
+            {
+                DB_AllocStreamPos(1);
+                varFxTrailDef->inds =
+                    reinterpret_cast<uint16_t *>(
+                        Hunk_Alloc(
+                            static_cast<uint32_t>(
+                                sizeof(uint16_t) *
+                                static_cast<size_t>(serialized.indCount)),
+                            "SwitchFxTrailIndex",
+                            22));
+                varushort = varFxTrailDef->inds;
+                DB_LoadSwitchSerialized(
+                    varushort,
+                    static_cast<uint32_t>(
+                        sizeof(uint16_t) *
+                        static_cast<size_t>(serialized.indCount)));
+            }
+            else
+            {
+                varFxTrailDef->inds =
+                    reinterpret_cast<uint16_t *>(
+                        DB_ConvertOffsetToPointerValue(serialized.inds));
+            }
+        }
+        return;
+    }
+#endif
+
     Load_Stream(atStreamStart, (uint8_t *)varFxTrailDef, 28);
     if (varFxTrailDef->verts)
     {
@@ -8657,202 +9437,206 @@ void __cdecl Load_FxTrailDef(bool atStreamStart)
     }
 }
 
+#ifdef __SWITCH__
+struct SwitchSerializedFxElemDef
+{
+    int32_t flags;
+    FxSpawnDef spawn;
+    FxFloatRange spawnRange;
+    FxFloatRange fadeInRange;
+    FxFloatRange fadeOutRange;
+    float spawnFrustumCullRadius;
+    FxIntRange spawnDelayMsec;
+    FxIntRange lifeSpanMsec;
+    FxFloatRange spawnOrigin[3];
+    FxFloatRange spawnOffsetRadius;
+    FxFloatRange spawnOffsetHeight;
+    FxFloatRange spawnAngles[3];
+    FxFloatRange angularVelocity[3];
+    FxFloatRange initialRotation;
+    FxFloatRange gravity;
+    FxFloatRange reflectionFactor;
+    FxElemAtlas atlas;
+    uint8_t elemType;
+    uint8_t visualCount;
+    uint8_t velIntervalCount;
+    uint8_t visStateIntervalCount;
+    uint32_t velSamples;
+    uint32_t visSamples;
+    uint32_t visuals;
+    float collMins[3];
+    float collMaxs[3];
+    uint32_t effectOnImpact;
+    uint32_t effectOnDeath;
+    uint32_t effectEmitted;
+    FxFloatRange emitDist;
+    FxFloatRange emitDistVariance;
+    uint32_t trailDef;
+    uint8_t sortOrder;
+    uint8_t lightingFrac;
+    uint8_t useItemClip;
+    uint8_t unused[1];
+};
+
+static_assert(sizeof(SwitchSerializedFxElemDef) == 252);
+
+static void Load_FxElemDefFromSerializedSwitch(
+    const SwitchSerializedFxElemDef &serialized)
+{
+    static_assert(sizeof(FxElemDef) == 288);
+
+    std::memset(varFxElemDef, 0, sizeof(FxElemDef));
+
+    varFxElemDef->flags = serialized.flags;
+    varFxElemDef->spawn = serialized.spawn;
+    varFxElemDef->spawnRange = serialized.spawnRange;
+    varFxElemDef->fadeInRange = serialized.fadeInRange;
+    varFxElemDef->fadeOutRange = serialized.fadeOutRange;
+    varFxElemDef->spawnFrustumCullRadius = serialized.spawnFrustumCullRadius;
+    varFxElemDef->spawnDelayMsec = serialized.spawnDelayMsec;
+    varFxElemDef->lifeSpanMsec = serialized.lifeSpanMsec;
+    std::memcpy(
+        varFxElemDef->spawnOrigin,
+        serialized.spawnOrigin,
+        sizeof(serialized.spawnOrigin));
+    varFxElemDef->spawnOffsetRadius = serialized.spawnOffsetRadius;
+    varFxElemDef->spawnOffsetHeight = serialized.spawnOffsetHeight;
+    std::memcpy(
+        varFxElemDef->spawnAngles,
+        serialized.spawnAngles,
+        sizeof(serialized.spawnAngles));
+    std::memcpy(
+        varFxElemDef->angularVelocity,
+        serialized.angularVelocity,
+        sizeof(serialized.angularVelocity));
+    varFxElemDef->initialRotation = serialized.initialRotation;
+    varFxElemDef->gravity = serialized.gravity;
+    varFxElemDef->reflectionFactor = serialized.reflectionFactor;
+    varFxElemDef->atlas = serialized.atlas;
+    varFxElemDef->elemType = serialized.elemType;
+    varFxElemDef->visualCount = serialized.visualCount;
+    varFxElemDef->velIntervalCount = serialized.velIntervalCount;
+    varFxElemDef->visStateIntervalCount = serialized.visStateIntervalCount;
+
+    varFxElemDef->velSamples =
+        reinterpret_cast<FxElemVelStateSample *>(
+            static_cast<uintptr_t>(serialized.velSamples));
+    varFxElemDef->visSamples =
+        reinterpret_cast<FxElemVisStateSample *>(
+            static_cast<uintptr_t>(serialized.visSamples));
+    std::memcpy(
+        &varFxElemDef->visuals,
+        &serialized.visuals,
+        sizeof(serialized.visuals));
+
+    std::memcpy(
+        varFxElemDef->collMins,
+        serialized.collMins,
+        sizeof(serialized.collMins));
+    std::memcpy(
+        varFxElemDef->collMaxs,
+        serialized.collMaxs,
+        sizeof(serialized.collMaxs));
+    std::memcpy(
+        &varFxElemDef->effectOnImpact,
+        &serialized.effectOnImpact,
+        sizeof(serialized.effectOnImpact));
+    std::memcpy(
+        &varFxElemDef->effectOnDeath,
+        &serialized.effectOnDeath,
+        sizeof(serialized.effectOnDeath));
+    std::memcpy(
+        &varFxElemDef->effectEmitted,
+        &serialized.effectEmitted,
+        sizeof(serialized.effectEmitted));
+
+    varFxElemDef->emitDist = serialized.emitDist;
+    varFxElemDef->emitDistVariance = serialized.emitDistVariance;
+    varFxElemDef->trailDef = reinterpret_cast<FxTrailDef *>(
+        static_cast<uintptr_t>(serialized.trailDef));
+    varFxElemDef->sortOrder = serialized.sortOrder;
+    varFxElemDef->lightingFrac = serialized.lightingFrac;
+    varFxElemDef->useItemClip = serialized.useItemClip;
+    varFxElemDef->unused[0] = serialized.unused[0];
+
+    if (varFxElemDef->velSamples)
+    {
+        if (serialized.velSamples == UINT32_MAX)
+        {
+            varFxElemDef->velSamples =
+                (FxElemVelStateSample *)AllocLoad_FxElemVisStateSample();
+            varFxElemVelStateSample = varFxElemDef->velSamples;
+            Load_FxElemVelStateSampleArray(
+                1,
+                varFxElemDef->velIntervalCount + 1);
+        }
+        else
+        {
+            varFxElemDef->velSamples =
+                reinterpret_cast<FxElemVelStateSample *>(
+                    DB_ConvertOffsetToPointerValue(serialized.velSamples));
+        }
+    }
+
+    if (varFxElemDef->visSamples)
+    {
+        if (serialized.visSamples == UINT32_MAX)
+        {
+            varFxElemDef->visSamples =
+                (FxElemVisStateSample *)AllocLoad_FxElemVisStateSample();
+            varFxElemVisStateSample = varFxElemDef->visSamples;
+            Load_FxElemVisStateSampleArray(
+                1,
+                varFxElemDef->visStateIntervalCount + 1);
+        }
+        else
+        {
+            varFxElemDef->visSamples =
+                reinterpret_cast<FxElemVisStateSample *>(
+                    DB_ConvertOffsetToPointerValue(serialized.visSamples));
+        }
+    }
+
+    varFxElemDefVisuals = &varFxElemDef->visuals;
+    Load_FxElemDefVisuals(0);
+
+    varFxEffectDefRef = &varFxElemDef->effectOnImpact;
+    Load_FxEffectDefRef(0);
+    varFxEffectDefRef = &varFxElemDef->effectOnDeath;
+    Load_FxEffectDefRef(0);
+    varFxEffectDefRef = &varFxElemDef->effectEmitted;
+    Load_FxEffectDefRef(0);
+
+    if (varFxElemDef->trailDef)
+    {
+        if (serialized.trailDef == UINT32_MAX)
+        {
+            DB_AllocStreamPos(3);
+            varFxElemDef->trailDef = reinterpret_cast<FxTrailDef *>(
+                Hunk_Alloc(
+                    static_cast<uint32_t>(sizeof(FxTrailDef)),
+                    "SwitchFxTrailDef",
+                    22));
+            varFxTrailDef = varFxElemDef->trailDef;
+            Load_FxTrailDef(1);
+        }
+        else
+        {
+            varFxElemDef->trailDef = reinterpret_cast<FxTrailDef *>(
+                DB_ConvertOffsetToPointerValue(serialized.trailDef));
+        }
+    }
+}
+#endif
+
 void __cdecl Load_FxElemDef(bool atStreamStart)
 {
 #ifdef __SWITCH__
     if (atStreamStart)
     {
-        struct SerializedFxElemDef
-        {
-            int32_t flags;
-            FxSpawnDef spawn;
-            FxFloatRange spawnRange;
-            FxFloatRange fadeInRange;
-            FxFloatRange fadeOutRange;
-            float spawnFrustumCullRadius;
-            FxIntRange spawnDelayMsec;
-            FxIntRange lifeSpanMsec;
-            FxFloatRange spawnOrigin[3];
-            FxFloatRange spawnOffsetRadius;
-            FxFloatRange spawnOffsetHeight;
-            FxFloatRange spawnAngles[3];
-            FxFloatRange angularVelocity[3];
-            FxFloatRange initialRotation;
-            FxFloatRange gravity;
-            FxFloatRange reflectionFactor;
-            FxElemAtlas atlas;
-            uint8_t elemType;
-            uint8_t visualCount;
-            uint8_t velIntervalCount;
-            uint8_t visStateIntervalCount;
-            uint32_t velSamples;
-            uint32_t visSamples;
-            uint32_t visuals;
-            float collMins[3];
-            float collMaxs[3];
-            uint32_t effectOnImpact;
-            uint32_t effectOnDeath;
-            uint32_t effectEmitted;
-            FxFloatRange emitDist;
-            FxFloatRange emitDistVariance;
-            uint32_t trailDef;
-            uint8_t sortOrder;
-            uint8_t lightingFrac;
-            uint8_t useItemClip;
-            uint8_t unused[1];
-        };
-
-        static_assert(sizeof(SerializedFxElemDef) == 252);
-        static_assert(sizeof(FxElemDef) == 288);
-
-        SerializedFxElemDef serialized{};
+        SwitchSerializedFxElemDef serialized{};
         DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
-
-
-        std::memset(varFxElemDef, 0, sizeof(FxElemDef));
-
-        varFxElemDef->flags = serialized.flags;
-        varFxElemDef->spawn = serialized.spawn;
-        varFxElemDef->spawnRange = serialized.spawnRange;
-        varFxElemDef->fadeInRange = serialized.fadeInRange;
-        varFxElemDef->fadeOutRange = serialized.fadeOutRange;
-        varFxElemDef->spawnFrustumCullRadius = serialized.spawnFrustumCullRadius;
-        varFxElemDef->spawnDelayMsec = serialized.spawnDelayMsec;
-        varFxElemDef->lifeSpanMsec = serialized.lifeSpanMsec;
-        std::memcpy(
-            varFxElemDef->spawnOrigin,
-            serialized.spawnOrigin,
-            sizeof(serialized.spawnOrigin));
-        varFxElemDef->spawnOffsetRadius = serialized.spawnOffsetRadius;
-        varFxElemDef->spawnOffsetHeight = serialized.spawnOffsetHeight;
-        std::memcpy(
-            varFxElemDef->spawnAngles,
-            serialized.spawnAngles,
-            sizeof(serialized.spawnAngles));
-        std::memcpy(
-            varFxElemDef->angularVelocity,
-            serialized.angularVelocity,
-            sizeof(serialized.angularVelocity));
-        varFxElemDef->initialRotation = serialized.initialRotation;
-        varFxElemDef->gravity = serialized.gravity;
-        varFxElemDef->reflectionFactor = serialized.reflectionFactor;
-        varFxElemDef->atlas = serialized.atlas;
-        varFxElemDef->elemType = serialized.elemType;
-        varFxElemDef->visualCount = serialized.visualCount;
-        varFxElemDef->velIntervalCount = serialized.velIntervalCount;
-        varFxElemDef->visStateIntervalCount = serialized.visStateIntervalCount;
-
-        varFxElemDef->velSamples =
-            reinterpret_cast<FxElemVelStateSample *>(
-                static_cast<uintptr_t>(serialized.velSamples));
-        varFxElemDef->visSamples =
-            reinterpret_cast<FxElemVisStateSample *>(
-                static_cast<uintptr_t>(serialized.visSamples));
-
-        std::memcpy(
-            &varFxElemDef->visuals,
-            &serialized.visuals,
-            sizeof(serialized.visuals));
-
-        std::memcpy(
-            varFxElemDef->collMins,
-            serialized.collMins,
-            sizeof(serialized.collMins));
-        std::memcpy(
-            varFxElemDef->collMaxs,
-            serialized.collMaxs,
-            sizeof(serialized.collMaxs));
-
-        std::memcpy(
-            &varFxElemDef->effectOnImpact,
-            &serialized.effectOnImpact,
-            sizeof(serialized.effectOnImpact));
-        std::memcpy(
-            &varFxElemDef->effectOnDeath,
-            &serialized.effectOnDeath,
-            sizeof(serialized.effectOnDeath));
-        std::memcpy(
-            &varFxElemDef->effectEmitted,
-            &serialized.effectEmitted,
-            sizeof(serialized.effectEmitted));
-
-        varFxElemDef->emitDist = serialized.emitDist;
-        varFxElemDef->emitDistVariance = serialized.emitDistVariance;
-        varFxElemDef->trailDef =
-            reinterpret_cast<FxTrailDef *>(
-                static_cast<uintptr_t>(serialized.trailDef));
-        varFxElemDef->sortOrder = serialized.sortOrder;
-        varFxElemDef->lightingFrac = serialized.lightingFrac;
-        varFxElemDef->useItemClip = serialized.useItemClip;
-        varFxElemDef->unused[0] = serialized.unused[0];
-
-        if (varFxElemDef->velSamples)
-        {
-            if (serialized.velSamples == UINT32_MAX)
-            {
-                varFxElemDef->velSamples =
-                    (FxElemVelStateSample *)AllocLoad_FxElemVisStateSample();
-                varFxElemVelStateSample = varFxElemDef->velSamples;
-                Load_FxElemVelStateSampleArray(
-                    1,
-                    varFxElemDef->velIntervalCount + 1);
-            }
-            else
-            {
-                varFxElemDef->velSamples =
-                    reinterpret_cast<FxElemVelStateSample *>(
-                        DB_ConvertOffsetToPointerValue(
-                            serialized.velSamples));
-            }
-        }
-
-        if (varFxElemDef->visSamples)
-        {
-            if (serialized.visSamples == UINT32_MAX)
-            {
-                varFxElemDef->visSamples =
-                    (FxElemVisStateSample *)AllocLoad_FxElemVisStateSample();
-                varFxElemVisStateSample = varFxElemDef->visSamples;
-                Load_FxElemVisStateSampleArray(
-                    1,
-                    varFxElemDef->visStateIntervalCount + 1);
-            }
-            else
-            {
-                varFxElemDef->visSamples =
-                    reinterpret_cast<FxElemVisStateSample *>(
-                        DB_ConvertOffsetToPointerValue(
-                            serialized.visSamples));
-            }
-        }
-
-        varFxElemDefVisuals = &varFxElemDef->visuals;
-        Load_FxElemDefVisuals(0);
-
-        varFxEffectDefRef = &varFxElemDef->effectOnImpact;
-        Load_FxEffectDefRef(0);
-        varFxEffectDefRef = &varFxElemDef->effectOnDeath;
-        Load_FxEffectDefRef(0);
-        varFxEffectDefRef = &varFxElemDef->effectEmitted;
-        Load_FxEffectDefRef(0);
-
-        if (varFxElemDef->trailDef)
-        {
-            if (serialized.trailDef == UINT32_MAX)
-            {
-                varFxElemDef->trailDef =
-                    (FxTrailDef *)AllocLoad_FxElemVisStateSample();
-                varFxTrailDef = varFxElemDef->trailDef;
-                Load_FxTrailDef(1);
-            }
-            else
-            {
-                varFxElemDef->trailDef =
-                    reinterpret_cast<FxTrailDef *>(
-                        DB_ConvertOffsetToPointerValue(
-                            serialized.trailDef));
-            }
-        }
+        Load_FxElemDefFromSerializedSwitch(serialized);
         return;
     }
 #endif
@@ -8891,16 +9675,27 @@ void __cdecl Load_FxElemDefArray(bool atStreamStart, int32_t count)
 #ifdef __SWITCH__
     if (atStreamStart)
     {
-        // The fastfile stores each FxElemDef as a 252-byte 32-bit-pointer
-        // structure. Native ARM64 FxElemDef is larger because its pointer
-        // fields are 64-bit, so decode each element into a separately
-        // allocated native object instead of writing 252 bytes into the
-        // expanded runtime layout.
+        // The fastfile stores the complete 252-byte FxElemDef header array
+        // contiguously before any nested visuals, samples, effect references,
+        // or trail data. Read all serialized headers first, then expand and
+        // load each element's nested data in the original order.
+        if (count <= 0)
+            return;
+
+        std::vector<SwitchSerializedFxElemDef> serialized(
+            static_cast<size_t>(count));
+        DB_LoadSwitchSerialized(
+            serialized.data(),
+            static_cast<uint32_t>(
+                sizeof(SwitchSerializedFxElemDef) *
+                static_cast<size_t>(count)));
+
         FxElemDef *var = varFxElemDef;
         for (int32_t i = 0; i < count; ++i)
         {
             varFxElemDef = &var[i];
-            Load_FxElemDef(1);
+            Load_FxElemDefFromSerializedSwitch(
+                serialized[static_cast<size_t>(i)]);
         }
         return;
     }
@@ -8939,14 +9734,34 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
         static_assert(sizeof(SerializedFxEffectDef) == 32);
         static_assert(sizeof(FxEffectDef) == 40);
 
+        const bool traceSwitchFx =
+            g_switchCurrentAssetIndex >= 4505 &&
+            g_switchCurrentAssetIndex <= 4510 &&
+            g_switchCurrentAssetRawType == 25u;
+
         SerializedFxEffectDef serialized{};
         DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
-#ifdef __SWITCH__
-#endif
+
+        if (traceSwitchFx)
+        {
+            char trace[320];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH FX TRACE] header asset=%d name=%08x elems=%08x flags=%08x counts=%d/%d/%d stream=%u pos=%p\n",
+                g_switchCurrentAssetIndex,
+                serialized.name,
+                serialized.elemDefs,
+                static_cast<unsigned>(serialized.flags),
+                serialized.elemDefCountEmission,
+                serialized.elemDefCountOneShot,
+                serialized.elemDefCountLooping,
+                static_cast<unsigned>(g_streamPosIndex),
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
 
         std::memset(varFxEffectDef, 0, sizeof(FxEffectDef));
-#ifdef __SWITCH__
-#endif
 
         varFxEffectDef->name = reinterpret_cast<const char *>(
             static_cast<uintptr_t>(serialized.name));
@@ -8958,19 +9773,29 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
         varFxEffectDef->elemDefCountEmission = serialized.elemDefCountEmission;
         varFxEffectDef->elemDefs = reinterpret_cast<const FxElemDef *>(
             static_cast<uintptr_t>(serialized.elemDefs));
-#ifdef __SWITCH__
-#endif
 
         DB_PushStreamPos(4);
         varXString = &varFxEffectDef->name;
         Load_XString(0);
-#ifdef __SWITCH__
-#endif
-
+        if (traceSwitchFx)
+        {
+            char trace[192];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH FX TRACE] name resolved asset=%d ptr=%p stream=%u pos=%p\n",
+                g_switchCurrentAssetIndex,
+                static_cast<const void *>(varFxEffectDef->name),
+                static_cast<unsigned>(g_streamPosIndex),
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
         if (serialized.elemDefs)
         {
-#ifdef __SWITCH__
-#endif
+            // The 32-bit AllocLoad_FxElemVisStateSample() also aligns the
+            // serialized FxElemDef array. This Switch path allocates the
+            // widened native array from the hunk, so preserve that stream step.
+            DB_AllocStreamPos(3);
             varFxEffectDef->elemDefs =
                 (const FxElemDef *)Hunk_Alloc(
                     static_cast<uint32_t>(
@@ -8993,13 +9818,9 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
                 varFxEffectDef->elemDefCountEmission +
                     varFxEffectDef->elemDefCountOneShot +
                     varFxEffectDef->elemDefCountLooping);
-#ifdef __SWITCH__
-#endif
         }
 
         DB_PopStreamPos();
-#ifdef __SWITCH__
-#endif
         return;
     }
 #endif
@@ -10244,7 +11065,46 @@ void __cdecl Load_statement(bool atStreamStart)
 
 void __cdecl Load_listBoxDef_t(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        constexpr size_t serializedSize = 340;
+        uint8_t serialized[serializedSize];
+        DB_LoadSwitchSerialized(serialized, serializedSize);
+
+        std::memset(varlistBoxDef_t, 0, sizeof(*varlistBoxDef_t));
+
+        // The fastfile stores listBoxDef_s with 32-bit pointers. On ARM64,
+        // doubleClick and selectIcon are widened and selectIcon is aligned
+        // to an eight-byte boundary.
+        std::memcpy(varlistBoxDef_t, serialized, 288);
+
+        const uintptr_t doubleClick =
+            Switch_WidenSerializedPointer(serialized, 288);
+        std::memcpy(
+            reinterpret_cast<uint8_t *>(varlistBoxDef_t) + 288,
+            &doubleClick,
+            sizeof(doubleClick));
+
+        std::memcpy(
+            reinterpret_cast<uint8_t *>(varlistBoxDef_t) + 296,
+            serialized + 292,
+            44);
+
+        const uintptr_t selectIcon =
+            Switch_WidenSerializedPointer(serialized, 336);
+        std::memcpy(
+            reinterpret_cast<uint8_t *>(varlistBoxDef_t) + 344,
+            &selectIcon,
+            sizeof(selectIcon));
+
+        static_assert(offsetof(listBoxDef_s, doubleClick) == 288);
+        static_assert(offsetof(listBoxDef_s, selectIcon) == 344);
+        static_assert(sizeof(listBoxDef_s) == 352);
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varlistBoxDef_t, 340);
+#endif
     varXString = &varlistBoxDef_t->doubleClick;
     Load_XString(0);
     varMaterialHandle = &varlistBoxDef_t->selectIcon;
@@ -10253,6 +11113,30 @@ void __cdecl Load_listBoxDef_t(bool atStreamStart)
 
 void __cdecl Load_listBoxDef_ptr(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    uint32_t serialized = 0;
+    if (atStreamStart)
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+    else
+        serialized = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(*varlistBoxDef_ptr));
+
+    *varlistBoxDef_ptr = nullptr;
+    if (!serialized)
+        return;
+
+    // AllocLoad_FxElemVisStateSample() returns space in the serialized stream,
+    // which is too small for the native ARM64 structure. Keep the stream
+    // aligned, but store the translated structure in native-sized memory.
+    DB_AllocStreamPos(3);
+    *varlistBoxDef_ptr = reinterpret_cast<listBoxDef_s *>(
+        Hunk_Alloc(
+            static_cast<uint32_t>(sizeof(listBoxDef_s)),
+            "SwitchListBoxDef",
+            22));
+    varlistBoxDef_t = *varlistBoxDef_ptr;
+    Load_listBoxDef_t(1);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varlistBoxDef_ptr, 4);
     if (*varlistBoxDef_ptr)
     {
@@ -10260,6 +11144,7 @@ void __cdecl Load_listBoxDef_ptr(bool atStreamStart)
         varlistBoxDef_t = *varlistBoxDef_ptr;
         Load_listBoxDef_t(1);
     }
+#endif
 }
 
 void __cdecl Load_editFieldDef_t(bool atStreamStart)
@@ -10280,7 +11165,47 @@ void __cdecl Load_editFieldDef_ptr(bool atStreamStart)
 
 void __cdecl Load_multiDef_t(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    if (atStreamStart)
+    {
+        constexpr size_t serializedSize = 392;
+        uint8_t serialized[serializedSize];
+        DB_LoadSwitchSerialized(serialized, serializedSize);
+
+        std::memset(varmultiDef_t, 0, sizeof(*varmultiDef_t));
+
+        for (size_t i = 0; i < 32; ++i)
+        {
+            varmultiDef_t->dvarList[i] = reinterpret_cast<const char *>(
+                Switch_WidenSerializedPointer(serialized, i * sizeof(uint32_t)));
+            varmultiDef_t->dvarStr[i] = reinterpret_cast<const char *>(
+                Switch_WidenSerializedPointer(
+                    serialized,
+                    128 + i * sizeof(uint32_t)));
+        }
+
+        std::memcpy(
+            varmultiDef_t->dvarValue,
+            serialized + 256,
+            sizeof(varmultiDef_t->dvarValue));
+        std::memcpy(
+            &varmultiDef_t->count,
+            serialized + 384,
+            sizeof(varmultiDef_t->count));
+        std::memcpy(
+            &varmultiDef_t->strDef,
+            serialized + 388,
+            sizeof(varmultiDef_t->strDef));
+
+        static_assert(offsetof(multiDef_s, dvarList) == 0);
+        static_assert(offsetof(multiDef_s, dvarStr) == 256);
+        static_assert(offsetof(multiDef_s, dvarValue) == 512);
+        static_assert(offsetof(multiDef_s, count) == 640);
+        static_assert(sizeof(multiDef_s) == 648);
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varmultiDef_t, 392);
+#endif
     varXString = (const char **)varmultiDef_t;
     Load_XStringArray(0, 32);
     varXString = varmultiDef_t->dvarStr;
@@ -10289,6 +11214,29 @@ void __cdecl Load_multiDef_t(bool atStreamStart)
 
 void __cdecl Load_multiDef_ptr(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    uint32_t serialized = 0;
+    if (atStreamStart)
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+    else
+        serialized = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(*varmultiDef_ptr));
+
+    *varmultiDef_ptr = nullptr;
+    if (!serialized)
+        return;
+
+    // The in-stream serialized object is 392 bytes; its native ARM64 form is
+    // larger because both 32-entry string arrays now contain 64-bit pointers.
+    DB_AllocStreamPos(3);
+    *varmultiDef_ptr = reinterpret_cast<multiDef_s *>(
+        Hunk_Alloc(
+            static_cast<uint32_t>(sizeof(multiDef_s)),
+            "SwitchMultiDef",
+            22));
+    varmultiDef_t = *varmultiDef_ptr;
+    Load_multiDef_t(1);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varmultiDef_ptr, 4);
     if (*varmultiDef_ptr)
     {
@@ -10296,6 +11244,7 @@ void __cdecl Load_multiDef_ptr(bool atStreamStart)
         varmultiDef_t = *varmultiDef_ptr;
         Load_multiDef_t(1);
     }
+#endif
 }
 
 void __cdecl Load_windowDef_t(bool atStreamStart)
@@ -12983,6 +13932,104 @@ void __cdecl Mark_RawFilePtr()
 
 void __cdecl Load_StringTable(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedStringTable
+    {
+        uint32_t name;
+        int32_t columnCount;
+        int32_t rowCount;
+        uint32_t values;
+    };
+    static_assert(sizeof(SerializedStringTable) == 16);
+
+    uint32_t serializedValues = 0;
+    if (atStreamStart)
+    {
+        SerializedStringTable serialized{};
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+        varStringTable->name = reinterpret_cast<const char *>(
+            static_cast<uintptr_t>(serialized.name));
+        varStringTable->columnCount = serialized.columnCount;
+        varStringTable->rowCount = serialized.rowCount;
+        serializedValues = serialized.values;
+    }
+    else
+    {
+        serializedValues = static_cast<uint32_t>(
+            reinterpret_cast<uintptr_t>(varStringTable->values));
+    }
+
+    varXString = &varStringTable->name;
+    Load_XString(0);
+
+    if (!serializedValues)
+    {
+        varStringTable->values = nullptr;
+        return;
+    }
+
+    if (varStringTable->columnCount < 0 || varStringTable->rowCount < 0)
+    {
+        varStringTable->values = nullptr;
+        return;
+    }
+
+    const uint64_t valueCount =
+        static_cast<uint64_t>(varStringTable->columnCount) *
+        static_cast<uint64_t>(varStringTable->rowCount);
+    if (valueCount > UINT32_MAX / sizeof(const char *))
+    {
+        varStringTable->values = nullptr;
+        return;
+    }
+
+    const uint32_t count = static_cast<uint32_t>(valueCount);
+    const uint32_t serializedSize = count * sizeof(uint32_t);
+    DB_AllocStreamPos(3);
+    std::vector<uint32_t> serializedEntries(count);
+    if (serializedSize)
+    {
+        uint8_t *serializedStreamPos = DB_GetStreamPos();
+        DB_LoadXFileData(serializedStreamPos, serializedSize);
+        std::memcpy(
+            serializedEntries.data(),
+            serializedStreamPos,
+            serializedSize);
+        DB_IncStreamPos(static_cast<int32_t>(serializedSize));
+    }
+
+    const char **values = nullptr;
+    const uint32_t allocationCount = count ? count : 1;
+    values = reinterpret_cast<const char **>(Hunk_Alloc(
+        static_cast<uint32_t>(sizeof(const char *) *
+            static_cast<size_t>(allocationCount)),
+        "SwitchStringTableValues",
+        22));
+    std::memset(values, 0, sizeof(const char *) *
+        static_cast<size_t>(allocationCount));
+    varStringTable->values = values;
+
+    for (uint32_t i = 0; i < count; ++i)
+    {
+        const uint32_t token = serializedEntries[i];
+        if (!token)
+        {
+            values[i] = nullptr;
+        }
+        else if (token == UINT32_MAX)
+        {
+            char *string = reinterpret_cast<char *>(AllocLoad_raw_byte());
+            Load_XStringCustom(&string);
+            values[i] = string;
+        }
+        else
+        {
+            values[i] = reinterpret_cast<const char *>(
+                DB_ConvertOffsetToPointerValue(token));
+        }
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varStringTable, sizeof(StringTable));
     varXString = &varStringTable->name;
     Load_XString(0);
@@ -12992,10 +14039,69 @@ void __cdecl Load_StringTable(bool atStreamStart)
         varXString = varStringTable->values;
         Load_XStringArray(1, varStringTable->rowCount * varStringTable->columnCount);
     }
+#endif
 }
 
 void __cdecl Load_StringTablePtr(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    uint32_t serialized = 0;
+    if (atStreamStart)
+    {
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+    }
+    else
+    {
+        std::memcpy(
+            &serialized,
+            reinterpret_cast<const uint8_t *>(varStringTablePtr),
+            sizeof(serialized));
+    }
+
+    *varStringTablePtr = nullptr;
+    // Unlike several other asset-pointer loaders, StringTable's inline body
+    // is consumed from the current stream. The XAsset loader selects stream 4.
+    if (!serialized)
+        return;
+
+    if (serialized == UINT32_MAX)
+    {
+        DB_AllocStreamPos(3);
+        const uintptr_t serializedTable =
+            reinterpret_cast<uintptr_t>(DB_GetStreamPos());
+        StringTable *table = reinterpret_cast<StringTable *>(Hunk_Alloc(
+            static_cast<uint32_t>(sizeof(StringTable)),
+            "SwitchStringTable",
+            22));
+        std::memset(table, 0, sizeof(*table));
+
+        varStringTable = table;
+        Load_StringTable(true);
+        *varStringTablePtr = table;
+        DB_RegisterSwitchPointerAlias(
+            serializedTable,
+            reinterpret_cast<uintptr_t>(table));
+        Load_StringTableAsset(reinterpret_cast<XAssetHeader *>(varStringTablePtr));
+    }
+    else
+    {
+        const uintptr_t serializedTable =
+            DB_ConvertOffsetToPointerValue(serialized);
+        uintptr_t resolvedTable = 0;
+        if (serializedTable &&
+            DB_ResolveSwitchPointerAlias(serializedTable, &resolvedTable) &&
+            resolvedTable)
+        {
+            *varStringTablePtr = reinterpret_cast<StringTable *>(resolvedTable);
+        }
+        else
+        {
+            DB_AddSwitchPointerAliasFixup(
+                serializedTable,
+                reinterpret_cast<uintptr_t *>(varStringTablePtr));
+        }
+    }
+#else
     Load_Stream(atStreamStart, (uint8_t *)varStringTablePtr, 4);
     if (*varStringTablePtr)
     {
@@ -13011,6 +14117,7 @@ void __cdecl Load_StringTablePtr(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)varStringTablePtr);
         }
     }
+#endif
 }
 
 void __cdecl Mark_StringTablePtr()
@@ -14477,28 +15584,36 @@ void Load_XAssetListCustom()
     DB_PushStreamPos(4);
     if (serialized.stringList.strings)
     {
-        // The serialized string table contains 32-bit offsets packed at 4-byte
-        // intervals. The Switch runtime stores const char* as 64-bit pointers,
-        // so the native pointer array must not live in stream 4 itself.
+        // The serialized string table is a contiguous array of 32-bit tokens;
+        // inline strings follow the whole array. Read the tokens first, as
+        // Load_TempStringArray does, before consuming any inline string data.
+        const uint32_t count = serialized.stringList.count;
+        std::vector<uint32_t> serializedStrings(count);
+        if (count)
+        {
+            DB_AllocStreamPos(3);
+            DB_LoadSwitchSerialized(
+                serializedStrings.data(),
+                static_cast<uint32_t>(sizeof(uint32_t) *
+                    static_cast<size_t>(count)));
+        }
+
         varXAssetList->stringList.strings =
             reinterpret_cast<const char **>(
                 Hunk_Alloc(
                     static_cast<uint32_t>(
-                        sizeof(const char *) *
-                        static_cast<size_t>(serialized.stringList.count)),
+                        sizeof(const char *) * static_cast<size_t>(count)),
                     "SwitchXAssetStringList",
                     22));
         std::memset(
             const_cast<char **>(varXAssetList->stringList.strings),
             0,
             sizeof(const char *) *
-                static_cast<size_t>(serialized.stringList.count));
+                static_cast<size_t>(count));
 
-        for (uint32_t i = 0; i < serialized.stringList.count; ++i)
+        for (uint32_t i = 0; i < count; ++i)
         {
-            uint32_t stringOffset = 0;
-            DB_LoadSwitchSerialized(&stringOffset, sizeof(stringOffset));
-
+            const uint32_t stringOffset = serializedStrings[i];
             const char **dst = &varXAssetList->stringList.strings[i];
             if (!stringOffset)
             {

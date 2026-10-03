@@ -50,6 +50,7 @@ extern uint32_t g_switchCurrentAssetHeader;
 #include <universal/profile.h>
 
 #include <algorithm>
+#include <vector>
 #ifdef __SWITCH__
 static int Switch_IstricmpAssetName(const char *lhs, const char *rhs)
 {
@@ -447,6 +448,16 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
 static void __cdecl DB_FreeXAssetEntry(XAssetEntryPoolEntry *assetEntry);
 static void __cdecl DB_FreeXAssetHeader(XAssetType type, XAssetHeader header);
 static void __cdecl DB_CloneXAssetEntry(const XAssetEntry *from, XAssetEntry *to);
+#ifdef __SWITCH__
+struct SwitchFxReferenceFixup
+{
+    const char **destination;
+    const char *name;
+};
+
+static std::vector<SwitchFxReferenceFixup> g_switchFxReferenceFixups;
+static void DB_ResolveSwitchFxReferenceFixups();
+#endif
 static void(__cdecl *DB_DynamicCloneXAssetHandler[ASSET_TYPE_COUNT])(XAssetHeader, XAssetHeader, int) =
 {
     NULL,
@@ -1471,6 +1482,7 @@ void DB_TryLoadXFile()
         if (g_loadingAssets)
             MyAssertHandler(".\\database\\db_registry.cpp", 3773, 0, "%s", "!g_loadingAssets");
 #ifdef __SWITCH__
+        DB_ResolveSwitchFxReferenceFixups();
         Sys_DatabaseCompleted();
 #else
         Sys_LockWrite(&s_dbReorder.critSect);
@@ -1913,6 +1925,75 @@ XAssetHeader __cdecl DB_FindXAssetDefaultHeaderInternal(XAssetType type)
     return assetEntry->entry.asset.header;
 }
 
+#ifdef __SWITCH__
+static void DB_ResolveSwitchFxReferenceFixups()
+{
+    if (g_switchFxReferenceFixups.empty())
+        return;
+
+    g_switchDbStage = "fx/resolve_refs";
+    uint32_t resolvedCount = 0;
+    uint32_t defaultedCount = 0;
+    uint32_t unresolvedCount = 0;
+
+    for (const SwitchFxReferenceFixup &fixup : g_switchFxReferenceFixups)
+    {
+        if (!fixup.destination || !fixup.name || !*fixup.name)
+            continue;
+
+        InterlockedIncrement(&db_hashCritSect.readCount);
+        while (db_hashCritSect.writeCount)
+            std::this_thread::yield();
+
+        XAssetEntryPoolEntry *entry =
+            DB_FindXAssetEntry(ASSET_TYPE_FX, fixup.name);
+        XAssetHeader resolved{};
+        if (entry)
+        {
+            entry->entry.inuse = 1;
+            resolved = entry->entry.asset.header;
+        }
+        else
+        {
+            // FX references can point forward within a fastfile. Resolve them
+            // after the full batch is registered; if the target and default
+            // are both absent, leave the optional effect reference null.
+            resolved = DB_FindXAssetDefaultHeaderInternal(ASSET_TYPE_FX);
+        }
+
+        if (db_hashCritSect.readCount <= 0)
+            MyAssertHandler(
+                ".\\database\\db_registry.cpp",
+                0,
+                0,
+                "%s",
+                "db_hashCritSect.readCount > 0");
+        InterlockedDecrement(&db_hashCritSect.readCount);
+
+        *reinterpret_cast<XAssetHeader *>(fixup.destination) = resolved;
+        if (entry)
+            ++resolvedCount;
+        else if (resolved.data)
+            ++defaultedCount;
+        else
+            ++unresolvedCount;
+    }
+
+    g_switchFxReferenceFixups.clear();
+
+    char trace[192];
+    std::snprintf(
+        trace,
+        sizeof(trace),
+        "[SWITCH FX TRACE] reference resolution complete found=%u defaulted=%u unresolved=%u\n",
+        resolvedCount,
+        defaultedCount,
+        unresolvedCount);
+    Switch_LogWrite(trace);
+    g_switchDbStage = "asset/ready";
+}
+#endif
+
 
 
 void __cdecl DB_FreeXAssetEntry(XAssetEntryPoolEntry *assetEntry)
@@ -2226,8 +2307,9 @@ XAssetHeader(__cdecl *DB_AllocXAssetHeaderHandler[ASSET_TYPE_COUNT])(void *) =
   NULL,
   NULL,
   NULL,
-  &DB_AllocXAsset_StringTable_,
-  &DB_AllocXAsset_StringTable_
+  &DB_AllocXAsset_StringTable_, // ASSET_TYPE_XMODELALIAS
+  &DB_AllocXAsset_StringTable_, // ASSET_TYPE_RAWFILE
+  &DB_AllocXAsset_StringTable_  // ASSET_TYPE_STRINGTABLE
 };
 
 void __cdecl DB_FreeXAssetHeader_StringTable_(void *arg, XAssetHeader header)
@@ -2323,6 +2405,27 @@ static XAssetHeader __cdecl DB_AllocXAssetHeader(XAssetType type)
     else
 #endif
     {
+        if (static_cast<uint32_t>(type) >= ASSET_TYPE_COUNT ||
+            !DB_AllocXAssetHeaderHandler[type])
+        {
+#ifdef __SWITCH__
+            char trace[192];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH DB ALLOC] missing header allocator type=%u asset=%d rawType=%u rawHeader=%08x\n",
+                static_cast<unsigned>(type),
+                g_switchCurrentAssetIndex,
+                static_cast<unsigned>(g_switchCurrentAssetRawType),
+                static_cast<unsigned>(g_switchCurrentAssetHeader));
+            Switch_LogWrite(trace);
+#endif
+            Com_Error(
+                ERR_DROP,
+                "No XAsset header allocator for type %u",
+                static_cast<unsigned>(type));
+            return header;
+        }
         header.data = DB_AllocXAssetHeaderHandler[type](DB_XAssetPool[type]).data;
     }
     if (!header.data)
@@ -2846,6 +2949,24 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         name = newEntry->entry.asset.header.image->name;
     else
         name = DB_GetXAssetName(&newEntry->entry.asset);
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_FX &&
+        g_switchCurrentAssetIndex >= 4505 &&
+        g_switchCurrentAssetIndex <= 4510 &&
+        g_switchCurrentAssetRawType == 25u)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH FX TRACE] registry asset=%d type=%u header=%p name=%p\n",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(type),
+            newEntry->entry.asset.header.data,
+            static_cast<const void *>(name));
+        Switch_LogWrite(trace);
+    }
+#endif
 #ifdef __SWITCH__
     if (switchTraceWeapon1506)
     {
@@ -3383,6 +3504,41 @@ void __cdecl Load_MaterialTechniqueSetAsset(XAssetHeader *techniqueSet)
 #ifdef __SWITCH__
     MaterialTechniqueSet *techset = techniqueSet ? techniqueSet->techniqueSet : nullptr;
     const char *techsetName = techset ? techset->name : nullptr;
+    if (!techset)
+    {
+        char trace[224];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH FX TRACE] skip null techset asset=%d raw=%u\n",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType));
+        Switch_LogWrite(trace);
+        g_switchDbStage = "techset/unnamed_skip";
+        return;
+    }
+
+    if (!techsetName)
+    {
+        char trace[224];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH FX TRACE] keep unnamed techset asset=%d raw=%u techset=%p\n",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            static_cast<void *>(techset));
+        Switch_LogWrite(trace);
+
+        // There is no name from which to build the usual "sm2/<name>"
+        // remap. Keep this inline set self-remapped and usable by its parent
+        // material, while leaving it out of the name-based asset registry.
+        techset->remappedTechniqueSet = techset;
+        g_switchDbStage = "techset/unnamed_upload";
+        Material_UploadShaders(techset);
+        return;
+    }
+
     const bool traceTechset =
         techsetName &&
         (!I_stricmp(techsetName, "sm2/cinematic") ||
@@ -3781,8 +3937,49 @@ void __cdecl Mark_FxEffectDefAsset(FxEffectDef *fx)
 
 void __cdecl Load_FxEffectDefFromName(const char **name)
 {
-    if (*name)
-        *(XAssetHeader *)name = DB_FindXAssetHeader(ASSET_TYPE_FX, *name);
+    if (!name || !*name)
+        return;
+
+#ifdef __SWITCH__
+    // Some Switch fastfiles leave the inline-string sentinel in front of an
+    // FX reference name. Load_XString has already consumed the whole inline
+    // string, so skip the duplicated 0xffffffff marker for registry lookup.
+    const unsigned char *nameBytes =
+        reinterpret_cast<const unsigned char *>(*name);
+    if (nameBytes[0] == 0xFF &&
+        nameBytes[1] == 0xFF &&
+        nameBytes[2] == 0xFF &&
+        nameBytes[3] == 0xFF &&
+        nameBytes[4] >= 0x20 &&
+        nameBytes[4] <= 0x7E)
+    {
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH FX TRACE] stripped inline FX name marker asset=%d name=%s\n",
+            g_switchCurrentAssetIndex,
+            reinterpret_cast<const char *>(nameBytes + 4));
+        Switch_LogWrite(trace);
+        *name = reinterpret_cast<const char *>(nameBytes + 4);
+    }
+#endif
+
+    // Fastfiles may encode an absent FX reference as a pointer to an empty
+    // string. It is not a valid asset name; keep the union as a null handle
+    // instead of trying to register/look up an FX asset named "".
+    if (!**name)
+    {
+        *name = nullptr;
+        return;
+    }
+
+#ifdef __SWITCH__
+    g_switchFxReferenceFixups.push_back({name, *name});
+    *name = nullptr;
+#else
+    *(XAssetHeader *)name = DB_FindXAssetHeader(ASSET_TYPE_FX, *name);
+#endif
 }
 
 void __cdecl Load_FxImpactTableAsset(XAssetHeader *impactFx)

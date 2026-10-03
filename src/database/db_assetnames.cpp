@@ -395,7 +395,20 @@ void __cdecl DB_SetXAssetName(XAsset *asset, const char *name)
 
 int32_t __cdecl DB_GetXAssetTypeSize(int32_t type)
 {
-    if (!DB_GetXAssetSizeHandler[type])
+#ifdef __SWITCH__
+    // The legacy size table reuses handlers for structures that happened to
+    // have the same size in the 32-bit game. Those sizes can differ after
+    // pointer fields are widened for ARM64, so use the actual runtime types
+    // for the entries whose legacy handlers are only 32-bit aliases.
+    if (type == ASSET_TYPE_PHYSPRESET)
+        return sizeof(PhysPreset);
+
+    if (type == ASSET_TYPE_CLIPMAP || type == ASSET_TYPE_CLIPMAP_PVS)
+        return sizeof(clipMap_t);
+#endif
+
+    if (static_cast<uint32_t>(type) >= ASSET_TYPE_COUNT ||
+        !DB_GetXAssetSizeHandler[type])
         MyAssertHandler(".\\database\\db_assetnames.cpp", 615, 0, "%s", "DB_GetXAssetSizeHandler[type]");
     return DB_GetXAssetSizeHandler[type]();
 }
@@ -406,4 +419,3 @@ const char *__cdecl DB_GetXAssetTypeName(uint32_t type)
         MyAssertHandler(".\\database\\db_assetnames.cpp", 621, 0, "%s", "type >= 0 && type < ASSET_TYPE_COUNT");
     return g_assetNames[type];
 }
-

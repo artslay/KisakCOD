@@ -1,0 +1,11 @@
+prefix=/opt/devkitpro/portlibs/switch
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+Name: gl
+Description: Mesa OpenGL library
+Version: 26.2.1
+Requires: glapi
+Libs: -L${libdir} -lGL
+Libs.private: -lpthread -pthread -lm
+Cflags: -I${includedir}

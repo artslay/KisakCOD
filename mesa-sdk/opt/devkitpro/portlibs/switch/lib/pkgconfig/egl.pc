@@ -1,0 +1,12 @@
+prefix=/opt/devkitpro/portlibs/switch
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+Name: egl
+Description: Mesa EGL Library
+Version: 26.2.1
+Requires: glapi, zlib >=  1.2.3
+Requires.private: vulkan
+Libs: -L${libdir} -lEGL -pthread -lm
+Libs.private: -lpthread -lexpat -lstdc++ -lnx
+Cflags: -I${includedir} -pthread -DXXH_FORCE_ALIGN_CHECK=0 -DXXH_FORCE_MEMORY_ACCESS=0

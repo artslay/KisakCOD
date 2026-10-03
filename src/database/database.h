@@ -230,6 +230,18 @@ uint8_t *__cdecl DB_GetStreamPos();
 uint8_t *__cdecl DB_AllocStreamPos(int32_t alignment);
 void __cdecl DB_IncStreamPos(int32_t size);
 const void **__cdecl DB_InsertPointer();
+#ifdef __SWITCH__
+bool __cdecl DB_ResolveSwitchPointerAlias(
+    uintptr_t serializedSlot,
+    uintptr_t *resolvedPointer);
+void __cdecl DB_RegisterSwitchPointerAlias(
+    uintptr_t serializedSlot,
+    uintptr_t nativePointer);
+void __cdecl DB_AddSwitchPointerAliasFixup(
+    uintptr_t serializedSlot,
+    uintptr_t *destination);
+void __cdecl DB_FixupSwitchPointerAliases();
+#endif
 
 // db_stream_load
 void __cdecl Load_Stream(bool atStreamStart, uint8_t *ptr, int32_t size);
