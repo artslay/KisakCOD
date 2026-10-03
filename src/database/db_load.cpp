@@ -25,7 +25,6 @@
 #ifdef __SWITCH__
 extern void Switch_LogRaw(const char *msg);
 extern void __cdecl Sys_Error(const char *error, ...);
-extern uint32_t __cdecl DB_HashForName(const char *name, XAssetType type);
 
 static void Switch_LogRawDwords(
     const char *tag,
@@ -7751,12 +7750,11 @@ void __cdecl Load_PhysPreset(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH PHYSPRESET] resolved asset=%d raw=%u name=%p text=%s hash=%u default=%d\n",
+            "[SWITCH PHYSPRESET] resolved asset=%d raw=%u name=%p text=%s default=%d\n",
             g_switchCurrentAssetIndex,
             static_cast<unsigned>(g_switchCurrentAssetRawType),
             static_cast<const void *>(varPhysPreset->name),
             varPhysPreset->name ? varPhysPreset->name : "<null>",
-            varPhysPreset->name ? DB_HashForName(varPhysPreset->name, ASSET_TYPE_PHYSPRESET) : 0u,
             varPhysPreset->name && !I_stricmp(varPhysPreset->name, "default"));
         Switch_LogRaw(trace);
     }
