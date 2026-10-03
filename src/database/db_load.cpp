@@ -24,6 +24,7 @@
 
 #ifdef __SWITCH__
 extern void Switch_LogRaw(const char *msg);
+extern void __cdecl Sys_Error(const char *error, ...);
 
 static void Switch_LogRawDwords(
     const char *tag,
