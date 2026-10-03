@@ -7759,6 +7759,23 @@ void __cdecl Load_PhysPresetPtr(bool atStreamStart)
 
     *varPhysPresetPtr = reinterpret_cast<PhysPreset *>(
         static_cast<uintptr_t>(serialized));
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex == 4686 &&
+        g_switchCurrentAssetRawType == 3u)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH XMODEL4686] physPreset token=%08x stream=%u pos=%p b4=%08x\n",
+            serialized,
+            static_cast<unsigned>(g_streamPosIndex),
+            static_cast<void *>(DB_GetStreamPos()),
+            Switch_GetStreamCursorOffset(4));
+        Switch_LogRaw(trace);
+        g_switchDbStage = "xmodel4686/physPreset_ptr";
+    }
+#endif
     DB_PushStreamPos(0);
     if (serialized)
     {
@@ -7781,6 +7798,23 @@ void __cdecl Load_PhysPresetPtr(bool atStreamStart)
                 inserted = DB_InsertPointer();
 
             Load_PhysPreset(true);
+#ifdef __SWITCH__
+            if (g_switchCurrentAssetIndex == 4686 &&
+                g_switchCurrentAssetRawType == 3u)
+            {
+                char trace[256];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH XMODEL4686] inline PhysPreset name=%p text=%s size=%u b4=%08x\n",
+                    static_cast<const void *>(varPhysPreset->name),
+                    varPhysPreset->name ? varPhysPreset->name : "<null>",
+                    static_cast<unsigned>(sizeof(PhysPreset)),
+                    Switch_GetStreamCursorOffset(4));
+                Switch_LogRaw(trace);
+                g_switchDbStage = "xmodel4686/physPreset_asset";
+            }
+#endif
             Load_PhysPresetAsset(
                 reinterpret_cast<XAssetHeader *>(varPhysPresetPtr));
             if (inserted)
