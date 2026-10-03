@@ -5383,17 +5383,25 @@ void __cdecl Load_MaterialVertexShaderPtr(bool atStreamStart)
 #ifdef __SWITCH__
         const uint32_t value = static_cast<uint32_t>(
             reinterpret_cast<uintptr_t>(*varMaterialVertexShaderPtr));
-        if (value == UINT32_MAX)
+        if (value == UINT32_MAX || value == UINT32_MAX - 1u)
         {
-            // AllocLoad_FxElemVisStateSample() aligns the serialized shader
-            // record; Hunk_Alloc() only reserves the widened native object.
+            // -1 = inline object, -2 = inline object plus an insertion alias.
+            // Both sentinels use the same serialized 16-byte shader record.
             DB_AllocStreamPos(3);
+
+            const void **inserted = nullptr;
+            if (value == UINT32_MAX - 1u)
+                inserted = DB_InsertPointer();
+
             *varMaterialVertexShaderPtr =
                 reinterpret_cast<MaterialVertexShader *>(Hunk_Alloc(
                     static_cast<uint32_t>(sizeof(MaterialVertexShader)),
                     "SwitchMaterialVertexShader", 22));
             varMaterialVertexShader = *varMaterialVertexShaderPtr;
             Load_MaterialVertexShader(1);
+
+            if (inserted)
+                *inserted = *varMaterialVertexShaderPtr;
         }
         else
             *varMaterialVertexShaderPtr =
@@ -5556,17 +5564,25 @@ void __cdecl Load_MaterialPixelShaderPtr(bool atStreamStart)
 #ifdef __SWITCH__
         const uint32_t value = static_cast<uint32_t>(
             reinterpret_cast<uintptr_t>(*varMaterialPixelShaderPtr));
-        if (value == UINT32_MAX)
+        if (value == UINT32_MAX || value == UINT32_MAX - 1u)
         {
-            // Match the original stream alignment before loading the
-            // serialized shader record into a widened Switch object.
+            // -1 = inline object, -2 = inline object plus an insertion alias.
+            // Both sentinels use the same serialized 16-byte shader record.
             DB_AllocStreamPos(3);
+
+            const void **inserted = nullptr;
+            if (value == UINT32_MAX - 1u)
+                inserted = DB_InsertPointer();
+
             *varMaterialPixelShaderPtr =
                 reinterpret_cast<MaterialPixelShader *>(Hunk_Alloc(
                     static_cast<uint32_t>(sizeof(MaterialPixelShader)),
                     "SwitchMaterialPixelShader", 22));
             varMaterialPixelShader = *varMaterialPixelShaderPtr;
             Load_MaterialPixelShader(1);
+
+            if (inserted)
+                *inserted = *varMaterialPixelShaderPtr;
         }
         else
             *varMaterialPixelShaderPtr =
