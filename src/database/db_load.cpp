@@ -5927,46 +5927,67 @@ static void Switch_LoadMaterialPassSerialized(
     varMaterialPixelShaderPtr = &varMaterialPass->pixelShader;
     Load_MaterialPixelShaderPtr(0);
 
+    const uint32_t argsToken = serialized.args;
     varMaterialPass->args =
         reinterpret_cast<MaterialShaderArgument *>(
-            static_cast<uintptr_t>(serialized.args));
-    if (serialized.args)
+            static_cast<uintptr_t>(argsToken));
+
+    if (argsToken)
     {
         const uint32_t count =
             static_cast<uint32_t>(
                 varMaterialPass->stableArgCount +
                 varMaterialPass->perObjArgCount +
                 varMaterialPass->perPrimArgCount);
+
         if (count)
         {
-#ifdef __SWITCH__
-            g_switchDbStage = "material/technique/pass/args";
-            if (g_switchCurrentAssetIndex == 4728)
+            // args follows the same serialized 32-bit pointer convention as
+            // vertexShader/pixelShader: only FOLLOWING/INSERT pointers have
+            // an inline array after the pass headers. A normal zone offset
+            // already points at serialized data elsewhere and must be
+            // converted without consuming the current stream.
+            if (argsToken == UINT32_MAX)
             {
-                char trace[256];
-                std::snprintf(
-                    trace,
-                    sizeof(trace),
-                    "[SWITCH MATERIAL TRACE] shaderArgs asset=%d count=%u pos=%p stream=%u b4=%08x\n",
-                    g_switchCurrentAssetIndex,
-                    count,
-                    static_cast<void *>(DB_GetStreamPos()),
-                    static_cast<unsigned>(g_streamPosIndex),
-                    Switch_GetStreamCursorOffset(4));
-                Switch_LogWrite(trace);
+                varMaterialPass->args =
+                    reinterpret_cast<MaterialShaderArgument *>(
+                        Hunk_Alloc(
+                            static_cast<uint32_t>(
+                                sizeof(MaterialShaderArgument) * count),
+                            "SwitchMaterialShaderArguments", 22));
+                varMaterialShaderArgument = varMaterialPass->args;
+                Load_MaterialShaderArgumentArray(
+                    1,
+                    static_cast<int32_t>(count));
             }
-#endif
-            varMaterialPass->args =
-                reinterpret_cast<MaterialShaderArgument *>(Hunk_Alloc(
-                    static_cast<uint32_t>(
-                        sizeof(MaterialShaderArgument) * count),
-                    "SwitchMaterialShaderArguments", 22));
-            varMaterialShaderArgument = varMaterialPass->args;
-            Load_MaterialShaderArgumentArray(1, static_cast<int32_t>(count));
+            else if (argsToken == UINT32_MAX - 1u)
+            {
+                const void **inserted = DB_InsertPointer();
+                varMaterialPass->args =
+                    reinterpret_cast<MaterialShaderArgument *>(
+                        Hunk_Alloc(
+                            static_cast<uint32_t>(
+                                sizeof(MaterialShaderArgument) * count),
+                            "SwitchMaterialShaderArguments", 22));
+                varMaterialShaderArgument = varMaterialPass->args;
+                Load_MaterialShaderArgumentArray(
+                    1,
+                    static_cast<int32_t>(count));
+                *inserted = varMaterialPass->args;
+            }
+            else
+            {
+                varMaterialPass->args =
+                    reinterpret_cast<MaterialShaderArgument *>(
+                        DB_ConvertOffsetToPointerValue(argsToken));
+            }
         }
         else
+        {
             varMaterialPass->args = nullptr;
+        }
     }
+
 }
 #endif
 
