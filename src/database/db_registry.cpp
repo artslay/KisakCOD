@@ -1738,6 +1738,22 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
         Switch_LogWrite(trace);
     }
 #endif
+#ifdef __SWITCH__
+    if (type == ASSET_TYPE_PHYSPRESET)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH PHYSPRESET DEFAULT] asset=%d raw=%u requested=%s default=%s\n",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            name ? name : "<null>",
+            g_defaultAssetName[type] ? g_defaultAssetName[type] : "<null>");
+        Switch_LogRaw(trace);
+        g_switchDbStage = "asset/physPreset_default_lookup";
+    }
+#endif
     asset.header = DB_FindXAssetDefaultHeaderInternal(type);
 #ifdef __SWITCH__
     if (type == ASSET_TYPE_TECHNIQUE_SET)
@@ -3291,6 +3307,23 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         if (isStubAsset)
         {
 #ifdef __SWITCH__
+            if (type == ASSET_TYPE_PHYSPRESET)
+            {
+                char trace[320];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH PHYSPRESET LINK] asset=%d raw=%u name=%p text=%s allow=%d first=%02x existing=%u header=%p\n",
+                    g_switchCurrentAssetIndex,
+                    static_cast<unsigned>(g_switchCurrentAssetRawType),
+                    static_cast<const void *>(name),
+                    name ? name : "<null>",
+                    allowOverride,
+                    static_cast<unsigned>(static_cast<uint8_t>(v2)),
+                    static_cast<unsigned>(existingEntryIndex),
+                    static_cast<void *>(newEntry->entry.asset.header.data));
+                Switch_LogRaw(trace);
+            }
             if (type == ASSET_TYPE_LOADED_SOUND)
                 Switch_LogWrite("[SWITCH LOADEDSOUND PATH] entering default asset path\n");
 #endif
