@@ -683,6 +683,44 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             serializedSize);
         DB_IncStreamPos(static_cast<int32_t>(serializedSize));
 
+#ifdef __SWITCH__
+        uint32_t physPresetCount = 0;
+        int32_t firstPhysPreset[8] = {};
+        uint32_t firstPhysPresetCount = 0;
+        for (int32_t scan = 0; scan < count; ++scan)
+        {
+            if (serializedAssets[static_cast<size_t>(scan)].type == ASSET_TYPE_PHYSPRESET)
+            {
+                ++physPresetCount;
+                if (firstPhysPresetCount < ARRAY_COUNT(firstPhysPreset))
+                    firstPhysPreset[firstPhysPresetCount++] = scan;
+            }
+        }
+
+        char trace[384];
+        int written = std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH PHYSPRESET SCAN] zone=%s assetCount=%d rawType1=%u indices=",
+            g_load.filename ? g_load.filename : "<null>",
+            count,
+            physPresetCount);
+        for (uint32_t scan = 0; scan < firstPhysPresetCount; ++scan)
+        {
+            written += std::snprintf(
+                trace + written,
+                sizeof(trace) - static_cast<size_t>(written),
+                "%s%u",
+                scan ? "," : "",
+                static_cast<unsigned>(firstPhysPreset[scan]));
+        }
+        std::snprintf(
+            trace + written,
+            sizeof(trace) - static_cast<size_t>(written),
+            "\n");
+        Switch_LogWrite(trace);
+#endif
+
     }
 
     XAsset *var = varXAsset;
