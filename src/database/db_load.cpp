@@ -5486,9 +5486,8 @@ void __cdecl Load_MaterialVertexShaderPtr(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varMaterialVertexShaderPtr, 4);
 #ifdef __SWITCH__
-    // The pass header is in the current stream, but an inline shader object
-    // and its program payload are loaded from stream 0.
-    DB_PushStreamPos(0);
+    // The pass header and inline shader payload are serialized in the current
+    // virtual stream (block 4). Keep that cursor active.
     if (*varMaterialVertexShaderPtr)
     {
         const uint32_t value = static_cast<uint32_t>(
@@ -5517,7 +5516,6 @@ void __cdecl Load_MaterialVertexShaderPtr(bool atStreamStart)
                 reinterpret_cast<MaterialVertexShader *>(
                     DB_ConvertOffsetToPointerValue(value));
     }
-    DB_PopStreamPos();
 #else
     if (*varMaterialVertexShaderPtr)
     {
@@ -5672,8 +5670,8 @@ void __cdecl Load_MaterialPixelShaderPtr(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varMaterialPixelShaderPtr, 4);
 #ifdef __SWITCH__
-    // Mirror MaterialVertexShaderPtr: inline pixel shader data is on stream 0.
-    DB_PushStreamPos(0);
+    // The pass header and inline pixel shader payload stay in the current
+    // virtual stream (block 4), matching the original loader ordering.
     if (*varMaterialPixelShaderPtr)
     {
         const uint32_t value = static_cast<uint32_t>(
@@ -5702,7 +5700,6 @@ void __cdecl Load_MaterialPixelShaderPtr(bool atStreamStart)
                 reinterpret_cast<MaterialPixelShader *>(
                     DB_ConvertOffsetToPointerValue(value));
     }
-    DB_PopStreamPos();
 #else
     if (*varMaterialPixelShaderPtr)
     {
@@ -6385,9 +6382,8 @@ void __cdecl Load_MaterialTechniquePtr(bool atStreamStart)
 #endif
     Load_Stream(atStreamStart, (uint8_t *)varMaterialTechniquePtr, 4);
 #ifdef __SWITCH__
-    // The technique pointer itself lives in the virtual stream (4), but an
-    // inline technique object is loaded from stream 0 in the original loader.
-    DB_PushStreamPos(0);
+    // The pointer record and inline technique payload remain on the current
+    // virtual stream. Only the native destination object lives in Hunk memory.
 #endif
     if (*varMaterialTechniquePtr)
     {
@@ -6427,9 +6423,6 @@ void __cdecl Load_MaterialTechniquePtr(bool atStreamStart)
         }
 #endif
     }
-#ifdef __SWITCH__
-    DB_PopStreamPos();
-#endif
 }
 
 void __cdecl Load_MaterialTechniquePtrArray(bool atStreamStart, int32_t count)
