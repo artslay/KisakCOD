@@ -7711,6 +7711,23 @@ void __cdecl Load_PhysPreset(bool atStreamStart)
     std::memset(varPhysPreset, 0, sizeof(*varPhysPreset));
     varPhysPreset->name = reinterpret_cast<const char *>(
         static_cast<uintptr_t>(serialized.name));
+#ifdef __SWITCH__
+    {
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH PHYSPRESET] asset=%d raw=%u token=%08x nameToken=%08x name=%p stream=%u b4=%08x\n",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(g_switchCurrentAssetRawType),
+            static_cast<unsigned>(serialized.name),
+            static_cast<unsigned>(serialized.name),
+            static_cast<const void *>(varPhysPreset->name),
+            static_cast<unsigned>(g_streamPosIndex),
+            Switch_GetStreamCursorOffset(4));
+        Switch_LogRaw(trace);
+    }
+#endif
     varPhysPreset->type = serialized.type;
     varPhysPreset->mass = serialized.mass;
     varPhysPreset->bounce = serialized.bounce;
