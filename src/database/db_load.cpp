@@ -12108,6 +12108,15 @@ static void Switch_TranslateWindowDefSerialized(
     window->group = reinterpret_cast<const char *>(
         Switch_WidenSerializedPointer(serialized, 52));
 
+    // Native ARM64 windowDef_t keeps group immediately after rectClient.
+    // The scalar tail starts at native offset 64; writing group at 64 would
+    // overwrite it immediately below and could turn a scalar -1 into a
+    // bogus inline XString pointer, advancing the serialized stream.
+    static_assert(offsetof(windowDef_t, name) == 0);
+    static_assert(offsetof(windowDef_t, group) == 56);
+    static_assert(offsetof(windowDef_t, style) == 64);
+    static_assert(offsetof(windowDef_t, background) == 160);
+
     std::memcpy(
         reinterpret_cast<uint8_t *>(window) + 64,
         serialized + 56,
