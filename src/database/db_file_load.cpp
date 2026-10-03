@@ -889,6 +889,12 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             Switch_LogWrite(trace);
         }
 #endif
+#ifdef __SWITCH__
+        // The Switch loader dispatches XAssets directly through
+        // Load_XAssetHeader(), bypassing Load_XAsset(). Reset the diagnostic
+        // stage here so it cannot inherit the previous asset's loader stage.
+        g_switchDbStage = "xasset/header";
+#endif
         Load_XAssetHeader(0);
 
 #ifdef __SWITCH__
