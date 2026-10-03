@@ -14048,8 +14048,47 @@ void __cdecl Load_StringTable(bool atStreamStart)
             reinterpret_cast<uintptr_t>(varStringTable->values));
     }
 
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 32u &&
+        g_switchCurrentAssetIndex >= 1620)
+    {
+        char trace[320];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH STRINGTABLE] header name=%08x cols=%d rows=%d values=%08x stream=%u b4=%08x pos=%p
+",
+            static_cast<uint32_t>(
+                reinterpret_cast<uintptr_t>(varStringTable->name)),
+            varStringTable->columnCount,
+            varStringTable->rowCount,
+            serializedValues,
+            static_cast<unsigned>(g_streamPosIndex),
+            g_streamPosIndex == 4 ? Switch_GetStreamCursorOffset(4) : UINT32_MAX,
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+#endif
     varXString = &varStringTable->name;
     Load_XString(0);
+
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetRawType == 32u &&
+        g_switchCurrentAssetIndex >= 1620)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH STRINGTABLE] name done name=%p stream=%u b4=%08x pos=%p
+",
+            static_cast<const void *>(varStringTable->name),
+            static_cast<unsigned>(g_streamPosIndex),
+            g_streamPosIndex == 4 ? Switch_GetStreamCursorOffset(4) : UINT32_MAX,
+            static_cast<void *>(DB_GetStreamPos()));
+        Switch_LogWrite(trace);
+    }
+#endif
 
     if (!serializedValues)
     {
