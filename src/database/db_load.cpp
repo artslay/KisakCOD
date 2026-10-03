@@ -5217,7 +5217,14 @@ void __cdecl Load_DWORDArray(bool atStreamStart, int32_t count)
 
 void __cdecl Load_GfxVertexShaderLoadDef(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    // MaterialVertexShaderProgram consumed the complete serialized 12-byte
+    // record and populated the widened native loadDef. Only the program
+    // payload remains in stream 4; do not consume the native 8-byte prefix.
+    iassert(!atStreamStart);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varGfxVertexShaderLoadDef, 8);
+#endif
     if (varGfxVertexShaderLoadDef->program)
     {
 #ifdef __SWITCH__
@@ -5242,7 +5249,7 @@ void __cdecl Load_GfxVertexShaderLoadDef(bool atStreamStart)
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH SHADER TRACE] vertex asset=%d programToken=%08x programSize=%u bytes=%u stream=%u b4=%08x remaining=%u pos=%p\\n",
+                "[SWITCH SHADER TRACE] vertex asset=%d programToken=%08x programSize=%u bytes=%u stream=%u b4=%08x remaining=%u pos=%p\n",
                 g_switchCurrentAssetIndex,
                 static_cast<unsigned>(
                     reinterpret_cast<uintptr_t>(
@@ -5261,7 +5268,7 @@ void __cdecl Load_GfxVertexShaderLoadDef(bool atStreamStart)
                 std::snprintf(
                     trace,
                     sizeof(trace),
-                    "[SWITCH SHADER OOB] vertex asset=%d token=%08x programSize=%u bytes=%u cursor=%08x remaining=%u blockSize=%u pos=%p\\n",
+                    "[SWITCH SHADER OOB] vertex asset=%d token=%08x programSize=%u bytes=%u cursor=%08x remaining=%u blockSize=%u pos=%p\n",
                     g_switchCurrentAssetIndex,
                     static_cast<unsigned>(
                         reinterpret_cast<uintptr_t>(
@@ -5285,7 +5292,14 @@ void __cdecl Load_GfxVertexShaderLoadDef(bool atStreamStart)
 
 void __cdecl Load_GfxPixelShaderLoadDef(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    // MaterialPixelShaderProgram consumed the complete serialized 12-byte
+    // record and populated the widened native loadDef. Only the program
+    // payload remains in stream 4; do not consume the native 8-byte prefix.
+    iassert(!atStreamStart);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varGfxPixelShaderLoadDef, 8);
+#endif
     if (varGfxPixelShaderLoadDef->program)
     {
 #ifdef __SWITCH__
@@ -5298,7 +5312,7 @@ void __cdecl Load_GfxPixelShaderLoadDef(bool atStreamStart)
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH SHADER TRACE] pixel asset=%d programToken=%08x programSize=%u bytes=%u stream=%u b4=%08x pos=%p\\n",
+                "[SWITCH SHADER TRACE] pixel asset=%d programToken=%08x programSize=%u bytes=%u stream=%u b4=%08x pos=%p\n",
                 g_switchCurrentAssetIndex,
                 static_cast<unsigned>(
                     reinterpret_cast<uintptr_t>(
