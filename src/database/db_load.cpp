@@ -13945,8 +13945,7 @@ void __cdecl Load_RawFile(bool atStreamStart)
             char trace[320];
             std::snprintf(
                 trace, sizeof(trace),
-                "[SWITCH RAWFILE] payload len=%d buffer=%p stream=%u b0=%08x b4=%08x pos=%p
-",
+                "[SWITCH RAWFILE] payload len=%d buffer=%p stream=%u b0=%08x b4=%08x pos=%p\n",
                 varRawFile->len,
                 static_cast<const void *>(varRawFile->buffer),
                 static_cast<unsigned>(g_streamPosIndex),
