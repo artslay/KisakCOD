@@ -14056,7 +14056,7 @@ void __cdecl Load_StringTable(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH STRINGTABLE] header name=%08x cols=%d rows=%d values=%08x stream=%u b4=%08x pos=%p\\n",
+            "[SWITCH STRINGTABLE] header name=%08x cols=%d rows=%d values=%08x stream=%u b4=%08x pos=%p\n",
             static_cast<uint32_t>(
                 reinterpret_cast<uintptr_t>(varStringTable->name)),
             varStringTable->columnCount,
@@ -14079,7 +14079,7 @@ void __cdecl Load_StringTable(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH STRINGTABLE] name done name=%p stream=%u b4=%08x pos=%p\\n",
+            "[SWITCH STRINGTABLE] name done name=%p stream=%u b4=%08x pos=%p\n",
             static_cast<const void *>(varStringTable->name),
             static_cast<unsigned>(g_streamPosIndex),
             g_streamPosIndex == 4 ? Switch_GetStreamCursorOffset(4) : UINT32_MAX,
