@@ -13861,6 +13861,7 @@ void __cdecl Mark_WeaponDefPtr()
 void __cdecl Load_RawFile(bool atStreamStart)
 {
 #ifdef __SWITCH__
+    g_switchDbStage = "rawfile";
     const bool switchRawFileTrace =
         (g_switchCurrentAssetRawType == 31u &&
          g_switchCurrentAssetIndex >= 1199 &&
@@ -13940,6 +13941,20 @@ void __cdecl Load_RawFile(bool atStreamStart)
     if (varRawFile->buffer)
     {
 #ifdef __SWITCH__
+        {
+            char trace[320];
+            std::snprintf(
+                trace, sizeof(trace),
+                "[SWITCH RAWFILE] payload len=%d buffer=%p stream=%u b0=%08x b4=%08x pos=%p
+",
+                varRawFile->len,
+                static_cast<const void *>(varRawFile->buffer),
+                static_cast<unsigned>(g_streamPosIndex),
+                Switch_GetStreamCursorOffset(0),
+                Switch_GetStreamCursorOffset(4),
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
         if (switchRawFileTrace)
         {
             char trace[160];
