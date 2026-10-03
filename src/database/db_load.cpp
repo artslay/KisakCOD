@@ -25,6 +25,7 @@
 #ifdef __SWITCH__
 extern void Switch_LogRaw(const char *msg);
 extern void __cdecl Sys_Error(const char *error, ...);
+extern uint32_t __cdecl DB_HashForName(const char *name, XAssetType type);
 
 static void Switch_LogRawDwords(
     const char *tag,
