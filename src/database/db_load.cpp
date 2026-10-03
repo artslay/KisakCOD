@@ -15557,6 +15557,12 @@ void __cdecl Load_XAssetHeader(bool atStreamStart)
 
 void __cdecl Load_XAsset(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    // g_switchDbStage is loader-local diagnostic state. Reset it for every
+    // XAsset so an OOB in a non-Material asset cannot inherit the previous
+    // Material stage and misidentify the failing loader.
+    g_switchDbStage = "xasset/header";
+#endif
     Load_Stream(atStreamStart, (uint8_t *)varXAsset, 8);
     varXAssetHeader = &varXAsset->header;
     Load_XAssetHeader(0);
