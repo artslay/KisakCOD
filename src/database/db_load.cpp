@@ -5200,18 +5200,84 @@ void __cdecl Load_GfxPixelShaderLoadDef(bool atStreamStart)
 
 void __cdecl Load_MaterialVertexShaderProgram(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedMaterialVertexShaderProgram
+    {
+        uint32_t vs;
+        uint32_t program;
+        uint16_t programSize;
+        uint16_t loadForRenderer;
+    };
+    static_assert(sizeof(SerializedMaterialVertexShaderProgram) == 12);
+
+    if (atStreamStart)
+    {
+        // Never stream-load the widened ARM64 native program structure directly.
+        SerializedMaterialVertexShaderProgram serialized{};
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+        varMaterialVertexShaderProgram->vs = nullptr;
+        varMaterialVertexShaderProgram->loadDef.program =
+            reinterpret_cast<void *>(
+                static_cast<uintptr_t>(serialized.program));
+        varMaterialVertexShaderProgram->loadDef.programSize =
+            serialized.programSize;
+        varMaterialVertexShaderProgram->loadDef.loadForRenderer =
+            serialized.loadForRenderer;
+    }
+
+    varGfxVertexShaderLoadDef = &varMaterialVertexShaderProgram->loadDef;
+    Load_GfxVertexShaderLoadDef(0);
+    Load_CreateMaterialVertexShader(
+        &varMaterialVertexShaderProgram->loadDef,
+        varMaterialVertexShader);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varMaterialVertexShaderProgram, 12);
     varGfxVertexShaderLoadDef = &varMaterialVertexShaderProgram->loadDef;
     Load_GfxVertexShaderLoadDef(0);
     Load_CreateMaterialVertexShader(&varMaterialVertexShaderProgram->loadDef, varMaterialVertexShader);
+#endif
 }
 
 void __cdecl Load_MaterialPixelShaderProgram(bool atStreamStart)
 {
+#ifdef __SWITCH__
+    struct SerializedMaterialPixelShaderProgram
+    {
+        uint32_t ps;
+        uint32_t program;
+        uint16_t programSize;
+        uint16_t loadForRenderer;
+    };
+    static_assert(sizeof(SerializedMaterialPixelShaderProgram) == 12);
+
+    if (atStreamStart)
+    {
+        // Same serialized-vs-native split as the vertex shader program.
+        SerializedMaterialPixelShaderProgram serialized{};
+        DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
+
+        varMaterialPixelShaderProgram->ps = nullptr;
+        varMaterialPixelShaderProgram->loadDef.program =
+            reinterpret_cast<void *>(
+                static_cast<uintptr_t>(serialized.program));
+        varMaterialPixelShaderProgram->loadDef.programSize =
+            serialized.programSize;
+        varMaterialPixelShaderProgram->loadDef.loadForRenderer =
+            serialized.loadForRenderer;
+    }
+
+    varGfxPixelShaderLoadDef = &varMaterialPixelShaderProgram->loadDef;
+    Load_GfxPixelShaderLoadDef(0);
+    Load_CreateMaterialPixelShader(
+        &varMaterialPixelShaderProgram->loadDef,
+        varMaterialPixelShader);
+#else
     Load_Stream(atStreamStart, (uint8_t *)varMaterialPixelShaderProgram, 12);
     varGfxPixelShaderLoadDef = &varMaterialPixelShaderProgram->loadDef;
     Load_GfxPixelShaderLoadDef(0);
     Load_CreateMaterialPixelShader(&varMaterialPixelShaderProgram->loadDef, varMaterialPixelShader);
+#endif
 }
 
 void __cdecl Load_MaterialVertexShader(bool atStreamStart)
@@ -5290,14 +5356,25 @@ void __cdecl Load_MaterialVertexShaderPtr(bool atStreamStart)
 #ifdef __SWITCH__
         const uint32_t value = static_cast<uint32_t>(
             reinterpret_cast<uintptr_t>(*varMaterialVertexShaderPtr));
-        if (value == UINT32_MAX)
+        if (value == UINT32_MAX || value == UINT32_MAX - 1u)
         {
+            // -1 = inline object, -2 = inline object plus an insertion alias.
+            // Both sentinels use the same serialized 16-byte shader record.
+            DB_AllocStreamPos(3);
+
+            const void **inserted = nullptr;
+            if (value == UINT32_MAX - 1u)
+                inserted = DB_InsertPointer();
+
             *varMaterialVertexShaderPtr =
                 reinterpret_cast<MaterialVertexShader *>(Hunk_Alloc(
                     static_cast<uint32_t>(sizeof(MaterialVertexShader)),
                     "SwitchMaterialVertexShader", 22));
             varMaterialVertexShader = *varMaterialVertexShaderPtr;
             Load_MaterialVertexShader(1);
+
+            if (inserted)
+                *inserted = *varMaterialVertexShaderPtr;
         }
         else
             *varMaterialVertexShaderPtr =
@@ -5457,14 +5534,25 @@ void __cdecl Load_MaterialPixelShaderPtr(bool atStreamStart)
 #ifdef __SWITCH__
         const uint32_t value = static_cast<uint32_t>(
             reinterpret_cast<uintptr_t>(*varMaterialPixelShaderPtr));
-        if (value == UINT32_MAX)
+        if (value == UINT32_MAX || value == UINT32_MAX - 1u)
         {
+            // -1 = inline object, -2 = inline object plus an insertion alias.
+            // Both sentinels use the same serialized 16-byte shader record.
+            DB_AllocStreamPos(3);
+
+            const void **inserted = nullptr;
+            if (value == UINT32_MAX - 1u)
+                inserted = DB_InsertPointer();
+
             *varMaterialPixelShaderPtr =
                 reinterpret_cast<MaterialPixelShader *>(Hunk_Alloc(
                     static_cast<uint32_t>(sizeof(MaterialPixelShader)),
                     "SwitchMaterialPixelShader", 22));
             varMaterialPixelShader = *varMaterialPixelShaderPtr;
             Load_MaterialPixelShader(1);
+
+            if (inserted)
+                *inserted = *varMaterialPixelShaderPtr;
         }
         else
             *varMaterialPixelShaderPtr =
