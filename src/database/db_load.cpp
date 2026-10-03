@@ -25,6 +25,7 @@
 #ifdef __SWITCH__
 extern void Switch_LogRaw(const char *msg);
 extern void __cdecl Sys_Error(const char *error, ...);
+extern void __cdecl Sys_Print(const char *msg);
 
 static void Switch_LogRawDwords(
     const char *tag,
@@ -5434,11 +5435,12 @@ void __cdecl Load_MaterialVertexShader(bool atStreamStart)
     DB_LoadSwitchSerialized(&serialized, sizeof(serialized));
 
 #ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex == 4728)
     {
-        char trace[320];
+        char trace[384];
         std::snprintf(
             trace, sizeof(trace),
-            "[SWITCH VERTEXSHADER RAW] pos=%p name=%08x shader=%08x program=%08x size=%u renderer=%u after=%p b4=%08x\n",
+            "[KisakCOD][VERTEXSHADER4728] pos=%p name=%08x shader=%08x program=%08x size=%u renderer=%u after=%p b4=%08x\n",
             static_cast<const void *>(vertexShaderStart),
             serialized.name,
             serialized.shader,
@@ -5447,7 +5449,7 @@ void __cdecl Load_MaterialVertexShader(bool atStreamStart)
             static_cast<unsigned>(serialized.loadForRenderer),
             static_cast<void *>(DB_GetStreamPos()),
             Switch_GetStreamCursorOffset(4));
-        Switch_LogRaw(trace);
+        Sys_Print(trace);
     }
 #endif
 
@@ -5902,12 +5904,13 @@ static void Switch_LoadMaterialPassSerialized(
     varMaterialPass->stableArgCount = serialized.stableArgCount;
     varMaterialPass->customSamplerFlags = serialized.customSamplerFlags;
 
+    if (g_switchCurrentAssetIndex == 4728)
     {
-        char trace[320];
+        char trace[384];
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH PASS RAW] pos=%p decl=%08x vs=%08x ps=%08x args=%08x counts=%u/%u/%u flags=%u b4=%08x\n",
+            "[KisakCOD][PASS4728] pos=%p decl=%08x vs=%08x ps=%08x args=%08x counts=%u/%u/%u flags=%u b4=%08x\n",
             static_cast<const void *>(passStart),
             serialized.vertexDecl,
             serialized.vertexShader,
@@ -5918,7 +5921,7 @@ static void Switch_LoadMaterialPassSerialized(
             static_cast<unsigned>(serialized.stableArgCount),
             static_cast<unsigned>(serialized.customSamplerFlags),
             Switch_GetStreamCursorOffset(4));
-        Switch_LogRaw(trace);
+        Sys_Print(trace);
     }
 
     if (serialized.vertexDecl == UINT32_MAX)
@@ -6175,13 +6178,11 @@ void __cdecl Load_MaterialTechnique(bool atStreamStart)
         std::snprintf(
             trace,
             sizeof(trace),
-            "[SWITCH MATERIAL TRACE] technique asset=%d passCount=%u pos=%p stream=%u b4=%08x\n",
-            g_switchCurrentAssetIndex,
+            "[KisakCOD][TECH4728] passCount=%u pos=%p b4=%08x\n",
             static_cast<unsigned>(varMaterialTechnique->passCount),
             static_cast<void *>(DB_GetStreamPos()),
-            static_cast<unsigned>(g_streamPosIndex),
             Switch_GetStreamCursorOffset(4));
-        Switch_LogWrite(trace);
+        Sys_Print(trace);
     }
 #endif
     varMaterialPass = varMaterialTechnique->passArray;
