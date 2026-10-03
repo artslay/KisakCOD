@@ -5485,15 +5485,16 @@ void __cdecl Load_MaterialVertexShader(bool atStreamStart)
 void __cdecl Load_MaterialVertexShaderPtr(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varMaterialVertexShaderPtr, 4);
+#ifdef __SWITCH__
+    // The pass header is in the current stream, but an inline shader object
+    // and its program payload are loaded from stream 0.
+    DB_PushStreamPos(0);
     if (*varMaterialVertexShaderPtr)
     {
-#ifdef __SWITCH__
         const uint32_t value = static_cast<uint32_t>(
             reinterpret_cast<uintptr_t>(*varMaterialVertexShaderPtr));
         if (value == UINT32_MAX || value == UINT32_MAX - 1u)
         {
-            // -1 = inline object, -2 = inline object plus an insertion alias.
-            // Both sentinels use the same serialized 16-byte shader record.
             DB_AllocStreamPos(3);
 
             const void **inserted = nullptr;
@@ -5501,9 +5502,10 @@ void __cdecl Load_MaterialVertexShaderPtr(bool atStreamStart)
                 inserted = DB_InsertPointer();
 
             *varMaterialVertexShaderPtr =
-                reinterpret_cast<MaterialVertexShader *>(Hunk_Alloc(
-                    static_cast<uint32_t>(sizeof(MaterialVertexShader)),
-                    "SwitchMaterialVertexShader", 22));
+                reinterpret_cast<MaterialVertexShader *>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(sizeof(MaterialVertexShader)),
+                        "SwitchMaterialVertexShader", 22));
             varMaterialVertexShader = *varMaterialVertexShaderPtr;
             Load_MaterialVertexShader(1);
 
@@ -5514,18 +5516,24 @@ void __cdecl Load_MaterialVertexShaderPtr(bool atStreamStart)
             *varMaterialVertexShaderPtr =
                 reinterpret_cast<MaterialVertexShader *>(
                     DB_ConvertOffsetToPointerValue(value));
+    }
+    DB_PopStreamPos();
 #else
+    if (*varMaterialVertexShaderPtr)
+    {
         if (*varMaterialVertexShaderPtr == (MaterialVertexShader *)-1)
         {
-            *varMaterialVertexShaderPtr = (MaterialVertexShader *)AllocLoad_FxElemVisStateSample();
+            *varMaterialVertexShaderPtr =
+                (MaterialVertexShader *)AllocLoad_FxElemVisStateSample();
             varMaterialVertexShader = *varMaterialVertexShaderPtr;
             Load_MaterialVertexShader(1);
         }
         else
-            DB_ConvertOffsetToPointer((uint32_t*)varMaterialVertexShaderPtr);
-#endif
+            DB_ConvertOffsetToPointer((uint32_t *)varMaterialVertexShaderPtr);
     }
+#endif
 }
+
 void __cdecl Load_MaterialPixelShader(bool atStreamStart)
 {
 #ifdef __SWITCH__
@@ -5663,15 +5671,15 @@ static void Load_MaterialPixelShaderHandle(bool atStreamStart)
 void __cdecl Load_MaterialPixelShaderPtr(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varMaterialPixelShaderPtr, 4);
+#ifdef __SWITCH__
+    // Mirror MaterialVertexShaderPtr: inline pixel shader data is on stream 0.
+    DB_PushStreamPos(0);
     if (*varMaterialPixelShaderPtr)
     {
-#ifdef __SWITCH__
         const uint32_t value = static_cast<uint32_t>(
             reinterpret_cast<uintptr_t>(*varMaterialPixelShaderPtr));
         if (value == UINT32_MAX || value == UINT32_MAX - 1u)
         {
-            // -1 = inline object, -2 = inline object plus an insertion alias.
-            // Both sentinels use the same serialized 16-byte shader record.
             DB_AllocStreamPos(3);
 
             const void **inserted = nullptr;
@@ -5679,9 +5687,10 @@ void __cdecl Load_MaterialPixelShaderPtr(bool atStreamStart)
                 inserted = DB_InsertPointer();
 
             *varMaterialPixelShaderPtr =
-                reinterpret_cast<MaterialPixelShader *>(Hunk_Alloc(
-                    static_cast<uint32_t>(sizeof(MaterialPixelShader)),
-                    "SwitchMaterialPixelShader", 22));
+                reinterpret_cast<MaterialPixelShader *>(
+                    Hunk_Alloc(
+                        static_cast<uint32_t>(sizeof(MaterialPixelShader)),
+                        "SwitchMaterialPixelShader", 22));
             varMaterialPixelShader = *varMaterialPixelShaderPtr;
             Load_MaterialPixelShader(1);
 
@@ -5692,18 +5701,24 @@ void __cdecl Load_MaterialPixelShaderPtr(bool atStreamStart)
             *varMaterialPixelShaderPtr =
                 reinterpret_cast<MaterialPixelShader *>(
                     DB_ConvertOffsetToPointerValue(value));
+    }
+    DB_PopStreamPos();
 #else
+    if (*varMaterialPixelShaderPtr)
+    {
         if (*varMaterialPixelShaderPtr == (MaterialPixelShader *)-1)
         {
-            *varMaterialPixelShaderPtr = (MaterialPixelShader *)AllocLoad_FxElemVisStateSample();
+            *varMaterialPixelShaderPtr =
+                (MaterialPixelShader *)AllocLoad_FxElemVisStateSample();
             varMaterialPixelShader = *varMaterialPixelShaderPtr;
             Load_MaterialPixelShader(1);
         }
         else
-            DB_ConvertOffsetToPointer((uint32_t*)varMaterialPixelShaderPtr);
-#endif
+            DB_ConvertOffsetToPointer((uint32_t *)varMaterialPixelShaderPtr);
     }
+#endif
 }
+
 void __cdecl Load_MaterialVertexDeclaration(bool atStreamStart)
 {
 #ifdef __SWITCH__
@@ -6369,6 +6384,11 @@ void __cdecl Load_MaterialTechniquePtr(bool atStreamStart)
     const void **inserted = nullptr;
 #endif
     Load_Stream(atStreamStart, (uint8_t *)varMaterialTechniquePtr, 4);
+#ifdef __SWITCH__
+    // The technique pointer itself lives in the virtual stream (4), but an
+    // inline technique object is loaded from stream 0 in the original loader.
+    DB_PushStreamPos(0);
+#endif
     if (*varMaterialTechniquePtr)
     {
 #ifdef __SWITCH__
@@ -6377,12 +6397,12 @@ void __cdecl Load_MaterialTechniquePtr(bool atStreamStart)
                 reinterpret_cast<uintptr_t>(*varMaterialTechniquePtr));
         if (value == UINT32_MAX || value == UINT32_MAX - 1u)
         {
-            // Mirror the serialized-header alignment previously supplied by
-            // AllocLoad_FxElemVisStateSample() before the ARM64 object is made.
             DB_AllocStreamPos(3);
             if (value == UINT32_MAX - 1u)
                 inserted = DB_InsertPointer();
+
             Load_MaterialTechnique(1);
+
             if (inserted)
                 *inserted = *reinterpret_cast<void **>(
                     varMaterialTechniquePtr);
@@ -6396,7 +6416,8 @@ void __cdecl Load_MaterialTechniquePtr(bool atStreamStart)
 #else
         if (*varMaterialTechniquePtr == (MaterialTechnique *)-1)
         {
-            *varMaterialTechniquePtr = (MaterialTechnique *)AllocLoad_FxElemVisStateSample();
+            *varMaterialTechniquePtr =
+                (MaterialTechnique *)AllocLoad_FxElemVisStateSample();
             varMaterialTechnique = *varMaterialTechniquePtr;
             Load_MaterialTechnique(1);
         }
@@ -6406,6 +6427,9 @@ void __cdecl Load_MaterialTechniquePtr(bool atStreamStart)
         }
 #endif
     }
+#ifdef __SWITCH__
+    DB_PopStreamPos();
+#endif
 }
 
 void __cdecl Load_MaterialTechniquePtrArray(bool atStreamStart, int32_t count)
