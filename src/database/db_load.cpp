@@ -5855,6 +5855,23 @@ static void Switch_LoadMaterialPassSerialized(
                 varMaterialPass->perPrimArgCount);
         if (count)
         {
+#ifdef __SWITCH__
+            g_switchDbStage = "material/technique/pass/args";
+            if (g_switchCurrentAssetIndex == 4728)
+            {
+                char trace[256];
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH MATERIAL TRACE] shaderArgs asset=%d count=%u pos=%p stream=%u b4=%08x\n",
+                    g_switchCurrentAssetIndex,
+                    count,
+                    static_cast<void *>(DB_GetStreamPos()),
+                    static_cast<unsigned>(g_streamPosIndex),
+                    Switch_GetStreamCursorOffset(4));
+                Switch_LogWrite(trace);
+            }
+#endif
             varMaterialPass->args =
                 reinterpret_cast<MaterialShaderArgument *>(Hunk_Alloc(
                     static_cast<uint32_t>(
@@ -5915,6 +5932,23 @@ void __cdecl Load_MaterialPassArray(bool atStreamStart, int32_t count)
     iassert(atStreamStart);
     if (count <= 0)
         return;
+
+#ifdef __SWITCH__
+    if (g_switchCurrentAssetIndex == 4728)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH MATERIAL TRACE] passArray asset=%d count=%d pos=%p stream=%u b4=%08x\n",
+            g_switchCurrentAssetIndex,
+            count,
+            static_cast<void *>(DB_GetStreamPos()),
+            static_cast<unsigned>(g_streamPosIndex),
+            Switch_GetStreamCursorOffset(4));
+        Switch_LogWrite(trace);
+    }
+#endif
 
     MaterialPass *base = varMaterialPass;
     std::vector<SerializedMaterialPass> serialized(
@@ -6024,7 +6058,27 @@ void __cdecl Load_MaterialTechnique(bool atStreamStart)
                 static_cast<uintptr_t>(UINT32_MAX));
 
     // Fastfile order: header, all pass records/payloads, then the inline name.
+#ifdef __SWITCH__
+    g_switchDbStage = "material/techset/technique";
+    if (g_switchCurrentAssetIndex == 4728)
+    {
+        char trace[256];
+        std::snprintf(
+            trace,
+            sizeof(trace),
+            "[SWITCH MATERIAL TRACE] technique asset=%d passCount=%u pos=%p stream=%u b4=%08x\n",
+            g_switchCurrentAssetIndex,
+            static_cast<unsigned>(varMaterialTechnique->passCount),
+            static_cast<void *>(DB_GetStreamPos()),
+            static_cast<unsigned>(g_streamPosIndex),
+            Switch_GetStreamCursorOffset(4));
+        Switch_LogWrite(trace);
+    }
+#endif
     varMaterialPass = varMaterialTechnique->passArray;
+#ifdef __SWITCH__
+    g_switchDbStage = "material/techset/technique/passes";
+#endif
     Load_MaterialPassArray(1, varMaterialTechnique->passCount);
 
     if (serialized.name == UINT32_MAX)
