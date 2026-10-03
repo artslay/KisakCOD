@@ -1775,19 +1775,74 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
 #endif
     if (!asset.header.data)
     {
-        Sys_UnlockWrite(&db_hashCritSect);
-        if (type == ASSET_TYPE_CLIPMAP || type == ASSET_TYPE_CLIPMAP_PVS)
-            Com_Error(
-                ERR_DROP,
-                "Couldn't find the bsp for this map.  Please build the fast file associated with %s and try again.",
-                name);
+#ifdef __SWITCH__
+        // CoD4 XModels can reference the canonical "default" PhysPreset
+        // through a ",default" stub. The original 32-bit runtime expects
+        // that default asset to be available in the registry. Some Switch
+        // fastfile sets do not contain a standalone PHYSPRESET named
+        // "default", so provide the canonical SDK definition here.
+        //
+        // Keep the source object local: DB_CreateDefaultEntry() clones the
+        // complete native ARM64 PhysPreset into its persistent asset pool.
+        if (type == ASSET_TYPE_PHYSPRESET &&
+            name &&
+            g_defaultAssetName[type] &&
+            !I_stricmp(name, g_defaultAssetName[type]))
+        {
+            static const char kSwitchDefaultPhysPresetName[] = "default";
+            static const char kSwitchDefaultPhysPresetSndAliasPrefix[] = "";
+
+            PhysPreset switchDefaultPhysPreset{};
+            switchDefaultPhysPreset.name = kSwitchDefaultPhysPresetName;
+            switchDefaultPhysPreset.type = 0;
+            switchDefaultPhysPreset.mass = 10.0f;
+            switchDefaultPhysPreset.bounce = 0.5f;
+            switchDefaultPhysPreset.friction = 0.5f;
+            switchDefaultPhysPreset.bulletForceScale = 0.5f;
+            switchDefaultPhysPreset.explosiveForceScale = 0.3f;
+            switchDefaultPhysPreset.sndAliasPrefix =
+                kSwitchDefaultPhysPresetSndAliasPrefix;
+            switchDefaultPhysPreset.piecesSpreadFraction = 0.0f;
+            switchDefaultPhysPreset.piecesUpwardVelocity = 0.0f;
+            switchDefaultPhysPreset.tempDefaultToCylinder = false;
+
+            asset.type = type;
+            asset.header = XAssetHeader(
+                reinterpret_cast<void *>(&switchDefaultPhysPreset));
+
+            g_switchDbStage = "asset/physPreset_default_synthetic";
+
+            char trace[384];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH PHYSPRESET DEFAULT] synthesized native default name=%p mass=%.2f bounce=%.2f friction=%.2f bullet=%.2f explosive=%.2f source=%p\n",
+                static_cast<const void *>(switchDefaultPhysPreset.name),
+                switchDefaultPhysPreset.mass,
+                switchDefaultPhysPreset.bounce,
+                switchDefaultPhysPreset.friction,
+                switchDefaultPhysPreset.bulletForceScale,
+                switchDefaultPhysPreset.explosiveForceScale,
+                static_cast<void *>(&switchDefaultPhysPreset));
+            Switch_LogRaw(trace);
+        }
         else
-            Com_Error(
-                ERR_DROP,
-                "Could not load default asset '%s' for asset type '%s'.\nTried to load asset '%s'.",
-                g_defaultAssetName[type],
-                g_assetNames[type],
-                name);
+#endif
+        {
+            Sys_UnlockWrite(&db_hashCritSect);
+            if (type == ASSET_TYPE_CLIPMAP || type == ASSET_TYPE_CLIPMAP_PVS)
+                Com_Error(
+                    ERR_DROP,
+                    "Couldn't find the bsp for this map.  Please build the fast file associated with %s and try again.",
+                    name);
+            else
+                Com_Error(
+                    ERR_DROP,
+                    "Could not load default asset '%s' for asset type '%s'.\nTried to load asset '%s'.",
+                    g_defaultAssetName[type],
+                    g_assetNames[type],
+                    name);
+        }
     }
     asset.type = type;
     ++g_defaultAssetCount;
