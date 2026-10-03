@@ -1,8 +1,6 @@
-# Игнорировать папки
 mesa-sdk/
 build/
 
-# Игнорировать конкретные файлы сборки в любых директориях
 kisakcod.elf
 kisakcod.nro
 kisakcod.nacp
