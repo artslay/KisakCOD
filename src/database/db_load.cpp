@@ -5225,21 +5225,55 @@ void __cdecl Load_GfxVertexShaderLoadDef(bool atStreamStart)
         {
             const uint32_t programSize =
                 static_cast<uint32_t>(varGfxVertexShaderLoadDef->programSize);
-            char trace[320];
+            const uint32_t requestedBytes =
+                programSize * static_cast<uint32_t>(sizeof(uint32_t));
+            const uint32_t stream4Offset = Switch_GetStreamCursorOffset(4);
+            const uint32_t stream4Size =
+                g_streamBlocks && g_streamBlocks[4].data
+                    ? g_streamBlocks[4].size
+                    : 0u;
+            const uint32_t stream4Remaining =
+                stream4Offset <= stream4Size
+                    ? stream4Size - stream4Offset
+                    : 0u;
+
+            char trace[384];
             std::snprintf(
                 trace,
                 sizeof(trace),
-                "[SWITCH SHADER TRACE] vertex asset=%d programToken=%08x programSize=%u bytes=%u stream=%u b4=%08x pos=%p\\n",
+                "[SWITCH SHADER TRACE] vertex asset=%d programToken=%08x programSize=%u bytes=%u stream=%u b4=%08x remaining=%u pos=%p\\n",
                 g_switchCurrentAssetIndex,
                 static_cast<unsigned>(
                     reinterpret_cast<uintptr_t>(
                         varGfxVertexShaderLoadDef->program)),
                 programSize,
-                programSize * static_cast<uint32_t>(sizeof(uint32_t)),
+                requestedBytes,
                 static_cast<unsigned>(g_streamPosIndex),
-                Switch_GetStreamCursorOffset(4),
+                stream4Offset,
+                stream4Remaining,
                 static_cast<void *>(DB_GetStreamPos()));
-            Switch_LogWrite(trace);
+            Switch_LogRaw(trace);
+
+            if (g_streamPosIndex == 4 &&
+                requestedBytes > stream4Remaining)
+            {
+                std::snprintf(
+                    trace,
+                    sizeof(trace),
+                    "[SWITCH SHADER OOB] vertex asset=%d token=%08x programSize=%u bytes=%u cursor=%08x remaining=%u blockSize=%u pos=%p\\n",
+                    g_switchCurrentAssetIndex,
+                    static_cast<unsigned>(
+                        reinterpret_cast<uintptr_t>(
+                            varGfxVertexShaderLoadDef->program)),
+                    programSize,
+                    requestedBytes,
+                    stream4Offset,
+                    stream4Remaining,
+                    stream4Size,
+                    static_cast<void *>(DB_GetStreamPos()));
+                Sys_Error("%s", trace);
+                return;
+            }
         }
 #endif
         varGfxVertexShaderLoadDef->program = (uint32_t *)AllocLoad_FxElemVisStateSample();
