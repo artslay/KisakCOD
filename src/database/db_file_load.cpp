@@ -857,6 +857,40 @@ void __cdecl Load_XAssetArrayCustom(int32_t count)
             Switch_LogWrite(trace);
         }
 #endif
+#ifdef __SWITCH__
+        if (i >= count - 8)
+        {
+            char trace[384];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH ASSET TAIL] i=%d count=%d rawType=%u runtimeType=%u header=%08x stream=%u b4=%08x pos=%p
+",
+                i,
+                count,
+                static_cast<unsigned>(serialized.type),
+                static_cast<unsigned>(runtimeType),
+                serialized.header,
+                static_cast<unsigned>(g_streamPosIndex),
+                switchBlockOffset(4, g_streamPosIndex == 4 ? DB_GetStreamPos() : g_streamPosArray[4]),
+                static_cast<void *>(DB_GetStreamPos()));
+            Switch_LogWrite(trace);
+        }
+        if (serialized.type == 32u && i >= count - 16)
+        {
+            char trace[256];
+            std::snprintf(
+                trace,
+                sizeof(trace),
+                "[SWITCH STRINGTABLE ASSET] i=%d header=%08x stream=%u b4=%08x
+",
+                i,
+                serialized.header,
+                static_cast<unsigned>(g_streamPosIndex),
+                switchBlockOffset(4, g_streamPosIndex == 4 ? DB_GetStreamPos() : g_streamPosArray[4]));
+            Switch_LogWrite(trace);
+        }
+#endif
         Load_XAssetHeader(0);
 
 #ifdef __SWITCH__
