@@ -14184,48 +14184,51 @@ void __cdecl Load_StringTablePtr(bool atStreamStart)
     }
 
     *varStringTablePtr = nullptr;
-    // Unlike several other asset-pointer loaders, StringTable's inline body
-    // is consumed from the current stream. The XAsset loader selects stream 4.
-    if (!serialized)
-        return;
 
-    if (serialized == UINT32_MAX)
-    {
-        DB_AllocStreamPos(3);
-        const uintptr_t serializedTable =
-            reinterpret_cast<uintptr_t>(DB_GetStreamPos());
-        StringTable *table = reinterpret_cast<StringTable *>(Hunk_Alloc(
-            static_cast<uint32_t>(sizeof(StringTable)),
-            "SwitchStringTable",
-            22));
-        std::memset(table, 0, sizeof(*table));
+    // Match the 32-bit/reference loader's pointer-stream semantics:
+    // the pointer field lives in the current asset record, while the native
+    // StringTable object is allocated out of the TEMP block. Load_StringTable()
+    // itself switches to the VIRTUAL block for the serialized body.
+    DB_PushStreamPos(0);
 
-        varStringTable = table;
-        Load_StringTable(true);
-        *varStringTablePtr = table;
-        DB_RegisterSwitchPointerAlias(
-            serializedTable,
-            reinterpret_cast<uintptr_t>(table));
-        Load_StringTableAsset(reinterpret_cast<XAssetHeader *>(varStringTablePtr));
-    }
-    else
+    if (serialized)
     {
-        const uintptr_t serializedTable =
-            DB_ConvertOffsetToPointerValue(serialized);
-        uintptr_t resolvedTable = 0;
-        if (serializedTable &&
-            DB_ResolveSwitchPointerAlias(serializedTable, &resolvedTable) &&
-            resolvedTable)
+        if (serialized == UINT32_MAX)
         {
-            *varStringTablePtr = reinterpret_cast<StringTable *>(resolvedTable);
+            StringTable *table = reinterpret_cast<StringTable *>(Hunk_Alloc(
+                static_cast<uint32_t>(sizeof(StringTable)),
+                "SwitchStringTable",
+                22));
+            std::memset(table, 0, sizeof(*table));
+
+            varStringTable = table;
+            Load_StringTable(true);
+            *varStringTablePtr = table;
+            Load_StringTableAsset(
+                reinterpret_cast<XAssetHeader *>(varStringTablePtr));
         }
         else
         {
-            DB_AddSwitchPointerAliasFixup(
-                serializedTable,
-                reinterpret_cast<uintptr_t *>(varStringTablePtr));
+            const uintptr_t serializedTable =
+                DB_ConvertOffsetToPointerValue(serialized);
+            uintptr_t resolvedTable = 0;
+            if (serializedTable &&
+                DB_ResolveSwitchPointerAlias(serializedTable, &resolvedTable) &&
+                resolvedTable)
+            {
+                *varStringTablePtr =
+                    reinterpret_cast<StringTable *>(resolvedTable);
+            }
+            else
+            {
+                DB_AddSwitchPointerAliasFixup(
+                    serializedTable,
+                    reinterpret_cast<uintptr_t *>(varStringTablePtr));
+            }
         }
     }
+
+    DB_PopStreamPos();
 #else
     Load_Stream(atStreamStart, (uint8_t *)varStringTablePtr, 4);
     if (*varStringTablePtr)
