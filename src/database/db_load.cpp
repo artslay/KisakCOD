@@ -11328,10 +11328,10 @@ static void Switch_LoadExpressionEntryPtrArray(
     if (!dst || count <= 0)
         return;
 
-    // The pointer array is serialized as 32-bit values, even on ARM64.
-    // Keep the original stream-3 alignment before loading inline entries.
-    DB_AllocStreamPos(3);
-
+    // The pointer array itself is a packed DWORD array. Do not align the
+    // stream here: the generated loader reads it exactly at the current
+    // virtual cursor. Alignment applies only when allocating each inline
+    // expressionEntry object.
     const size_t serializedSize =
         sizeof(uint32_t) * static_cast<size_t>(count);
 
@@ -12016,8 +12016,9 @@ void __cdecl Load_itemDef_ptrArray(bool atStreamStart, int32_t count)
             g_switchCurrentAssetIndex == 11 &&
             g_switchCurrentAssetRawType == 20u;
 
-        DB_AllocStreamPos(3);
-
+        // itemDef pointer records are a packed serialized DWORD array.
+        // The generated loader does not align this stream position; only
+        // the native inline item allocation uses 4-byte alignment.
         std::vector<uint32_t> serialized(
             static_cast<size_t>(count));
         DB_LoadSwitchSerialized(
@@ -12562,7 +12563,9 @@ void __cdecl Load_menuDef_ptrArray(bool atStreamStart, int32_t count)
 
         if (count > 0)
         {
-            DB_AllocStreamPos(3);
+            // menuDef pointer records are a packed serialized DWORD array.
+            // Match the generated loader: no cursor alignment is inserted
+            // before consuming the array.
             DB_LoadSwitchSerialized(
                 serialized.data(),
                 static_cast<uint32_t>(
