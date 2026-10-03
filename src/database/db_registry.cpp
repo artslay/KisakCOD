@@ -23,6 +23,7 @@ extern FILE *FS_SwitchOpenRootFile(const char *path);
 #ifdef __SWITCH__
 extern void __cdecl NET_Sleep(int msec);
 extern void Switch_LogWrite(const char *msg);
+extern void Switch_LogRaw(const char *msg);
 extern uint32_t g_switchImageAdds;
 extern int32_t g_switchCurrentAssetIndex;
 extern uint32_t g_switchCurrentAssetRawType;
