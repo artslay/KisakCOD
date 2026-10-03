@@ -6741,6 +6741,15 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
                 &varMaterialTechniqueSet->techniques[i];
 
             const void **inserted = nullptr;
+
+            // Inline MaterialTechnique records are 4-byte aligned in the
+            // virtual stream. The pointer-array helper in the reference
+            // loader explicitly aligns before peeking/loading the dynamic
+            // technique header. Without this, a preceding inline XString can
+            // leave the cursor at e.g. ...157, making the following bytes
+            // decode as a bogus passCount and pass array.
+            DB_AllocStreamPos(3);
+
             if (value == UINT32_MAX - 1)
                 inserted = DB_InsertPointer();
 
